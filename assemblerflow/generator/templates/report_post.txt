@@ -1,0 +1,6 @@
+    if ( params.platformHTTP != null ) {
+        beforeScript "set_dotfiles.sh"
+        afterScript "report_POST.sh $params.projectId $params.pipelineId {{ process_id }} $params.sampleName $params.reportHTTP $params.currentUserName $params.currentUserId {{ template }} $params.species {{ overwrite|default("true") }}"
+    } else {
+        beforeScript "set_dotfiles.sh"
+        }

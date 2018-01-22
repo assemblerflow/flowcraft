@@ -1,0 +1,16 @@
+language: python
+
+python:
+  - "3.6"
+
+install:
+  - pip install pytest
+  - pip install coverage
+  - pip install pytest-cov
+  - python setup.py install
+
+script:
+  - py.test --cov=./
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
