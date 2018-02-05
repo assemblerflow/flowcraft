@@ -1,0 +1,27 @@
+assemblerflow\.templates package
+================================
+
+Submodules
+----------
+
+.. toctree::
+
+   assemblerflow.templates.assembly_report
+   assemblerflow.templates.fastqc
+   assemblerflow.templates.fastqc_report
+   assemblerflow.templates.integrity_coverage
+   assemblerflow.templates.pipeline_status
+   assemblerflow.templates.process_abricate
+   assemblerflow.templates.process_assembly_mapping
+   assemblerflow.templates.process_spades
+   assemblerflow.templates.spades
+   assemblerflow.templates.trimmomatic
+   assemblerflow.templates.trimmomatic_report
+
+Module contents
+---------------
+
+.. automodule:: assemblerflow.templates
+    :members:
+    :undoc-members:
+    :show-inheritance:
