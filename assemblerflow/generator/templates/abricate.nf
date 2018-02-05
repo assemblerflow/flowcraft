@@ -42,6 +42,9 @@ process process_abricate {
     input:
     file abricate_file from abricate_out_{{ pid }}.collect()
 
+    output:
+    file ".report.json"
+
     script:
     template "process_abricate.py"
 

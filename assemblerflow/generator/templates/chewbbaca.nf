@@ -35,7 +35,6 @@ process chewbbaca {
         echo $assembly >> input_file.txt
         chewBBACA.py AlleleCall -i input_file.txt -g ${params.schemaSelectedLoci} -o chew_results --json --cpu $task.cpus -t "${params.chewbbacaSpecies}"
         merge_json.py ${params.schemaCore} chew_results/*/results*
-        echo pass > .status
     } || {
         echo fail > .status
     }

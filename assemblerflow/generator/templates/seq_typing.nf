@@ -15,6 +15,7 @@ process seq_typing {
 
     output:
     file "seq_typing.report.txt"
+    set file(".report.json"), file(".status")
 
     script:
     """
@@ -24,7 +25,7 @@ process seq_typing {
         cp -r /NGStools/ReMatCh rematch_temp
         export PATH="\$(pwd)/rematch_temp/ReMatCh:\$PATH"
 
-        seq_typing.py -f ${fastq_pair[0]} ${fastq_pair[1]} -r \$(pwd)/$refO \$(pwd)/$refH -o ./ -j $task.cpus --extraSeq 0 --mapRefTogether --debug
+        seq_typing.py -f ${fastq_pair[0]} ${fastq_pair[1]} -r \$(pwd)/$refO \$(pwd)/$refH -o ./ -j $task.cpus --extraSeq 0 --mapRefTogether --minGeneCoverage 60
         json_str="{'typing':{'seqtyping':'\$(cat seq_typing.report.txt)'}}"
         echo \$json_str > .report.json
 

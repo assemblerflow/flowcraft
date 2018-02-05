@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+__version__ = "1.0.0"
+__build__ = "22012018"
 
 import os
 import shutil

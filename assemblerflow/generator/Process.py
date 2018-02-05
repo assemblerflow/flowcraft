@@ -773,13 +773,7 @@ class Mlst(Process):
                          **kwargs)
 
         self.input_type = "assembly"
-        self.output_type = None
-
-        self.ignore_type = True
-
-        self.link_start = None
-        self.link_end.append({"link": "MAIN_assembly",
-                              "alias": "MAIN_assembly"})
+        self.output_type = "assembly"
 
 
 class Abricate(Process):

@@ -15,20 +15,24 @@ def get_core_genes(core_file):
     return core_genes
 
 
-def filter_core_genes(info_array, core_genes):
+def filter_core_genes(locus_array, info_array, core_genes):
 
     core_array = []
 
-    for gene in info_array:
+    for gene, info in zip(*[info_array, locus_array]):
         if gene in core_genes:
-            core_array.append(gene)
+            core_array.append(info)
 
     return core_array
 
 
 def assess_quality(core_array, core_genes):
 
-    locus_not_found = core_array.count("LNF")
+    # Get the total number of missing loci. The sum/map approach aggretates
+    # the sum of all possible missing loci symbols.
+    missing_loci = ["LNF", "PLOT3", "PLOT5", "NIPH", "ALM", "ASM"]
+    locus_not_found = sum(map(core_array.count, missing_loci))
+
     perc = float(locus_not_found) / float(len(core_genes))
 
     # Fail sample with higher than 2% missing loci
@@ -42,7 +46,7 @@ def assess_quality(core_array, core_genes):
 
         fh.write(status)
 
-    return status
+    return status, perc
 
 
 def main():
@@ -53,10 +57,14 @@ def main():
         j1 = json.load(f1h)
         j2 = json.load(f2h)
 
-        current_result = j1["sample_polished.assembly.fasta"]
-        status = assess_quality(current_result, core_genes)
+        current_result = [v for k, v in j1.items()
+                          if "polished.assembly.fasta" in k][0]
+        current_array = j1["header"]
+        core_results = filter_core_genes(current_result, current_array,
+                                         core_genes)
+        status, perc = assess_quality(core_results, core_genes)
 
-        res = {"cagao": [j1, j2], "status": status}
+        res = {"cagao": [j1, j2], "status": status, 'lnfPercentage': perc}
 
         with open(".report.json", "w") as fh:
             fh.write(json.dumps(res))
