@@ -36,7 +36,7 @@ class Process:
         Templates are stored in ``generator/templates``.
     """
 
-    def __init__(self, ptype, template, process_id=None):
+    def __init__(self, ptype, template):
 
         accepted_types = [
             "init",
@@ -60,14 +60,6 @@ class Process:
         """
         int: Process ID number that represents the order and position in the
         generated pipeline
-        """
-
-        self.process_id = process_id
-        """
-        int or str: optional Process ID that has no effect on the setup of
-        the pipeline channels. It's used for the POST requests of each main
-        process and is mapped to the process IDs of the innuendo/oneida
-        platform
         """
 
         self.ptype = ptype
@@ -180,6 +172,9 @@ class Process:
         list: List of strings with the literal definition of the forks for
         the current process, ready to be added to the template string.
         """
+
+        self.secondary_inputs = []
+        self.secondary_input_str = ""
 
         self._context = None
         """
@@ -433,6 +428,14 @@ class Init(Process):
 
         self.status_channels = []
 
+        self.secondary_inputs = [
+            {
+                "params": "fastq",
+                "channel": "IN_fastq_raw = "
+                           "Channel.fromFilePairs(params.fastq)"
+            }
+        ]
+
     def set_secondary_channel(self, source, channel_list):
 
         logger.debug("Setting secondary channel for source '{}': {}".format(
@@ -449,6 +452,14 @@ class Init(Process):
         logger.debug("Setting forks attribute to: {}".format(self.forks))
         self._context = {**self._context, **{"forks": "\n".join(self.forks)}}
         logger.debug(self._context)
+
+    def set_secondary_inputs(self, channel_dict):
+
+        logger.debug("Setting secondary inputs: {}".format(channel_dict))
+
+        secondary_input_str = "\n".join(list(channel_dict.values()))
+        self._context = {**self._context,
+                         **{"secondary_inputs": secondary_input_str}}
 
 
 class IntegrityCoverage(Process):
@@ -475,6 +486,18 @@ class IntegrityCoverage(Process):
         self.output_type = "fastq"
 
         self._main_in_str = "MAIN_raw"
+
+        self.secondary_inputs = [
+            {
+                "params": "genomeSize",
+                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+            },
+            {
+                "params": "minCoverage",
+                "channel": "IN_min_coverage = "
+                           "Channel.value(params.minCoverage)"
+            }
+        ]
 
         self.link_start.extend(["SIDE_phred", "SIDE_max_len"])
 
@@ -521,6 +544,14 @@ class PathoTyping(Process):
 
         self.status_channels = []
 
+        self.secondary_inputs = [
+            {
+                "params": "pathoSpecies",
+                "channel": "IN_pathoSpecies = "
+                           "Channel.value(params.pathoSpecies)"
+            }
+        ]
+
         self.link_start = None
         self.link_end.append({"link": "MAIN_raw",
                               "alias": "SIDE_PathoType_raw"})
@@ -548,6 +579,18 @@ class CheckCoverage(Process):
 
         self.input_type = "fastq"
         self.output_type = "fastq"
+
+        self.secondary_inputs = [
+            {
+                "params": "genomeSize",
+                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+            },
+            {
+                "params": "minCoverage",
+                "channel": "IN_min_coverage = "
+                           "Channel.value(params.minCoverage)"
+            }
+        ]
 
         self.link_start.extend(["SIDE_max_len"])
 
@@ -581,6 +624,13 @@ class FastQC(Process):
         list: Setting status channels for FastQC execution and FastQC report
         """
 
+        self.secondary_inputs = [
+            {
+                "params": "adapters",
+                "channel": "IN_adapters = Channel.value(params.adapters)"
+            }
+        ]
+
 
 class Trimmomatic(Process):
     """Trimmomatic process template interface
@@ -605,6 +655,16 @@ class Trimmomatic(Process):
         self.output_type = "fastq"
 
         self.link_end.append({"link": "SIDE_phred", "alias": "SIDE_phred"})
+
+        self.secondary_inputs = [
+            {
+                "params": "trimOpts",
+                "channel": "IN_trimmomatic_opts = "
+                           "Channel.value([params.trimSlidingWindow,"
+                           "params.trimLeading,params.trimTrailing,"
+                           "params.trimMinLength])"
+            }
+        ]
 
 
 class FastqcTrimmomatic(Process):
@@ -643,6 +703,20 @@ class FastqcTrimmomatic(Process):
         self.status_channels = ["STATUS_fastqc", "STATUS_report",
                                 "STATUS_trim"]
 
+        self.secondary_inputs = [
+            {
+                "params": "adapters",
+                "channel": "IN_adapters = Channel.value(params.adapters)"
+            },
+            {
+                "params": "trimOpts",
+                "channel": "IN_trimmomatic_opts = "
+                           "Channel.value([params.trimSlidingWindow,"
+                           "params.trimLeading,params.trimTrailing,"
+                           "params.trimMinLength])"
+            }
+        ]
+
 
 class Spades(Process):
     """Spades process template interface
@@ -668,6 +742,20 @@ class Spades(Process):
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
 
+        self.secondary_inputs = [
+            {
+                "params": "spadesOpts",
+                "channel": "IN_spades_opts = Channel.value("
+                           "[params.spadesMinCoverage,"
+                           "params.spadesMinKmerCoverage])"
+            },
+            {
+                "params": "spadesKmers",
+                "channel": "IN_spades_kmers = "
+                           "Channel.value(params.spadesKmers)"
+            }
+        ]
+
 
 class ProcessSpades(Process):
     """Process spades process template interface
@@ -687,6 +775,16 @@ class ProcessSpades(Process):
 
         self.input_type = "assembly"
         self.output_type = "assembly"
+
+        self.secondary_inputs = [
+            {
+                "params": "processSpadesOpts",
+                "channel": "IN_process_spades_opts = "
+                           "Channel.value([params.spadesMinContigLen,"
+                           "params.spadesMinKmerCoverage,"
+                           "params.spadesMaxContigs])"
+            }
+        ]
 
 
 class AssemblyMapping(Process):
@@ -721,6 +819,15 @@ class AssemblyMapping(Process):
 
         self.link_start.append("SIDE_BpCoverage")
         self.link_end.append({"link": "MAIN_fq", "alias": "_MAIN_assembly"})
+
+        self.secondary_inputs = [
+            {
+                "params": "assemblyMappingOpts",
+                "channel": "IN_assembly_mapping_opts = "
+                           "Channel.value([params.minAssemblyCoverage,"
+                           "params.AMaxContigs])"
+            }
+        ]
 
 
 class Pilon(Process):
