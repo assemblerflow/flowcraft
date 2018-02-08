@@ -3,26 +3,25 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+AssemblerFlow
+=============
+
+A NextFlow pipeline assembler for genomics.
+
+.. _Contributing:
+
 .. toctree::
-   :maxdepth: 4
-   :caption: Guidelines
+   :maxdepth: 1
+   :caption: Contributing
 
    create_template
    create_process
 
-Welcome to Templates's documentation!
-=====================================
+.. _Source API:
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :maxdepth: 2
+   :caption: Source API
 
    assemblerflow
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
