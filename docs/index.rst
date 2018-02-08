@@ -3,8 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Creation guides
-===============
+.. toctree::
+   :maxdepth: 4
+   :caption: Guidelines
 
    create_template
    create_process
