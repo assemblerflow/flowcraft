@@ -53,6 +53,7 @@ class NextflowGenerator:
         "fastqc": pc.FastQC,
         "trimmomatic": pc.Trimmomatic,
         "fastqc_trimmomatic": pc.FastqcTrimmomatic,
+        "skesa": pc.Skesa,
         "spades": pc.Spades,
         "process_spades": pc.ProcessSpades,
         "assembly_mapping": pc.AssemblyMapping,

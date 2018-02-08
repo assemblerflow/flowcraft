@@ -718,6 +718,18 @@ class FastqcTrimmomatic(Process):
         ]
 
 
+class Skesa(Process):
+    """Skesa process template interface
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(ptype="assembly", **kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "assembly"
+
+
 class Spades(Process):
     """Spades process template interface
 
