@@ -46,7 +46,7 @@ Mandatory requirements
 ----------------------
 
 Since assemblerflow has a specific `logger`, a set of requirements are required
-so that the logger can properly work.::
+so that the logger can properly work::
 
     # standard python packages
     import os
@@ -62,7 +62,7 @@ so that the logger can properly work.::
     # import the logger it self
     from utils.assemblerflow_base import get_logger, _log_error
 
-Then, the logger must be called as: ::
+Then, the logger must be called as::
 
     logger = get_logger(__file__)
 
