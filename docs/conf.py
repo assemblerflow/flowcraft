@@ -64,7 +64,7 @@ author = 'Diogo N. Silva'
 # built documents.
 #
 # The short X.Y version.
-version = '1.0.0'
+version = '1.0.1'
 # The full version, including alpha/beta/rc tags.
 release = '1'
 
@@ -104,19 +104,6 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# This is required for the alabaster theme
-# refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
-html_sidebars = {
-    '**': [
-        'relations.html',  # needs 'show_related': True theme option to display
-        'searchbox.html',
-    ]
-}
-
 
 # -- Options for HTMLHelp output ------------------------------------------
 
