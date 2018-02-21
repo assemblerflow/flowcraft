@@ -46,7 +46,6 @@ class Process:
             "post_assembly",
             "annotation",
             "status",
-            "terminal"
         ]
         """
         list: Accepted process types
@@ -136,7 +135,7 @@ class Process:
         secondary channels in the final pipeline.
         """
 
-        self._set_main_channel_name(ptype)
+        self._set_main_channel_name()
 
         self.link_start = [self._main_out_str]
         """
@@ -203,7 +202,7 @@ class Process:
 
         self._template_path = join(tpl_dir, template + ".nf")
 
-    def _set_main_channel_name(self, ptype):
+    def _set_main_channel_name(self):
         """Sets the prefix for the main channel depending on the process type
 
         ``Pre-assembly`` types are set to ``MAIN_fq``, while ``post-assembly``
@@ -212,14 +211,14 @@ class Process:
         assembly files.
         """
 
-        if ptype == "init":
+        if self.ptype == "init":
             self._main_in_str = "MAIN_raw"
             self._main_out_str = "MAIN_raw"
-        elif ptype == "raw":
+        elif self.ptype == "raw":
             self._main_in_str = self._main_out_str = "MAIN_raw"
-        elif ptype == "pre_assembly":
+        elif self.ptype == "pre_assembly":
             self._main_in_str = self._main_out_str = "MAIN_fq"
-        elif ptype == "assembly":
+        elif self.ptype == "assembly":
             self._main_in_str = "MAIN_fq"
             self._main_out_str = "MAIN_assembly"
         else:
