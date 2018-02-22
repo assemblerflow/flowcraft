@@ -16,7 +16,10 @@ Preface header
 After the script shebang, a header with a brief description of the purpose and
 expected inputs and outputs should be provided:
 
-1. Purpose section contains a brief description of the script's objective. E.g.::
+Purpose
+^^^^^^^
+
+Purpose section contains a brief description of the script's objective. E.g.::
 
     Purpose
     -------
@@ -24,7 +27,10 @@ expected inputs and outputs should be provided:
     This module is intended parse the results of FastQC for paired end FastQ \
     samples.
 
-2. Expected input section contains a description of the variables that are
+Expected input
+^^^^^^^^^^^^^^
+
+Expected input section contains a description of the variables that are
 provided to the main function of the template script. These variables are
 defined in the input channels of the process in which the template is supposed
 to be executed. E.g.::
@@ -44,7 +50,10 @@ defined as::
     input:
     file(mash_output) from <channel>
 
-3. Generated output section contains a description of the output files that the
+Generated output
+^^^^^^^^^^^^^^^^
+
+Generated output section contains a description of the output files that the
 template script is intended to generated. E.g.::
 
     Generated output
