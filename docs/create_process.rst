@@ -129,8 +129,9 @@ class::
 This is the simplest working example of a process class, which basically needs
 to inherit the parent class attributes (the ``super`` part), with the process
 type specified (``ptype``). Then we only need to define the expected input
-and output types of the process. While the process type must be included in
-a list of supported types, there are no limitations to the input/output types.
+and output types of the process. While the process type (``ptype``) must be
+included in a list of supported types, there are no limitations to the
+input/output types ().
 However, a pipeline will only build successfully when all processes correctly
 link the output with the input type.
 
