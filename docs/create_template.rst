@@ -38,6 +38,12 @@ to be executed. E.g.::
     - ``mash_output`` : String with the name of the mash screen output file.
         - e.g.: ``'sortedMashScreenResults_SampleA.txt'``
 
+This means that the process that will execute this channel will have the input
+defined as::
+
+    input:
+    file(mash_output) from <channel>
+
 3. Generated output section contains a description of the output files that the
 template script is intended to generated. E.g.::
 
