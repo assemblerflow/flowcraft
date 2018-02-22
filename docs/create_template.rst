@@ -3,7 +3,7 @@ Template creation guidelines
 
 Though none of these guidelines are mandatory nor required, their usage is
 highly recommended for debugging purposes, versioning and for proper
-documentation of template scripts used by `assemblerflow`.
+documentation of template scripts used by ``assemblerflow``.
 
 Guideline 1: Preface header
 ---------------------------
@@ -49,7 +49,7 @@ template script is intended to generated. E.g.::
 Guideline 2: Versioning and logging
 -----------------------------------
 
-Since assemblerflow has a specific `logger` and version system, a
+Since assemblerflow has a specific ``logger`` and version system, a
 requirement should be imported from `templates.utils
 <https://github.com/ODiogoSilva/templates/tree/master/utils>`_::
 
@@ -64,7 +64,7 @@ Logger
 
 A `logger` function is also required to add logs to the script.
 
-First, the logger must be called, for example, after the `imports` as follows::
+First, the logger must be called, for example, after the **imports** as follows::
 
     logger = get_logger(__file__)
 
@@ -80,12 +80,12 @@ MainWrapper decorator
 This class decorator allows the program to fetch information on the script version,
 build and template name. For example::
 
-    # This can also be declared after the imports for example
+    # This can also be declared after the imports
     __version__ = "1.0.0"
     __build__ = "15012018"
     __template__ = "process_abricate-nf"
 
-The ` MainWrapper` decorator should be added to the main function of the script.
+The ``MainWrapper`` decorator should be added to the main function of the script.
 E.g.::
 
     @MainWrapper
@@ -95,7 +95,7 @@ E.g.::
 
 Besides searching for the script's version, build and template name this decorator
 will also search for a specific set of functions that start with the
-substring `__set_version`. For example::
+substring ``__set_version``. For example::
 
     def __set_version_fastqc():
 
@@ -124,7 +124,7 @@ Guideline 3: Nextflow `.command.sh`
 ----------------------------------
 
 When these templates are used with Nextflow `template <https://www.nextflow.io/docs/latest/process.html#template>`_
-a `.command.sh` file will be generated, allowing to pass arguments between nextflow
+a ``.command.sh`` file will be generated, allowing to pass arguments between nextflow
  pipeline and python scripts. In this case, it is recommended that
 an **if statement** is included to parse the arguments from nextflow to python template.
 For example, imagine we have a path to a file name to pass as argument between
@@ -150,6 +150,7 @@ This way, we can use this function with nextflow arguments or without them.
 Guideline 4: Use numpy docstrings
 ---------------------------------
 
-`Assemblerflow` uses numpy docstrings to document code.
-Use `this link <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html>`_
- for an example.
+``Assemblerflow`` uses numpy docstrings to document code.
+Use
+`this link <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html>`_
+for an example.
