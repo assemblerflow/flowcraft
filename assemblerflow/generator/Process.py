@@ -173,6 +173,17 @@ class Process:
         """
 
         self.secondary_inputs = []
+        """
+        list: List of dictionaries with secondary input channels from nextflow
+        parameters. This dictionary should contain two key:value pairs
+        with the ``params`` key, containing the parameter name, and the
+        ``channel`` key, containing the nextflow channel definition::
+        
+            {
+                "params": "pathoSpecies",
+                "channel": "IN_pathoSpecies = Channel.value(params.pathoSpecies)"
+            }
+        """
         self.secondary_input_str = ""
 
         self._context = None

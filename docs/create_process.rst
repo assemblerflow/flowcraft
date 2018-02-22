@@ -18,6 +18,8 @@ The addition of a new process to assemblerflow requires three main steps:
    dictionary of available process in
    :attr:`assemblerflow.assemblerflow.NextflowGenerator.process_map`.
 
+.. _create-process:
+
 Create process template
 :::::::::::::::::::::::
 
@@ -61,7 +63,7 @@ assemblerflow:
   and scripts for sending requests to REST APIs (only when certain pipeline
   parameters are used). We recommend the inclusion of this placeholder to
   to ensure that the reports of a the pipeline are correctly created for
-  latter visualization.
+  latter visualization (see :ref:`dotfiles` for more information).
 
 - ``input_channel`` (**Mandatory**): All process must include an input channel.
 
@@ -153,7 +155,8 @@ Note that the template string does not include the ``.nf`` extension.
 Process attributes
 ------------------
 
-This section describes the main attributes of the ``Process`` class: what they
+This section describes the main attributes of the
+:mod:`~assemblerflow.generator.Process` class: what they
 do and how do they impact the pipeline generation.
 
 Accepted process types
@@ -303,7 +306,8 @@ Status channels
 :::::::::::::::
 
 The ``STATUS`` channels are special channels dedicated to pass information
-regarding the status, warnings and fails from each process. By default,
+regarding the status, warnings and fails from each process
+(see :ref:`dotfiles` for more information). By default,
 every ``Process`` class contains a
 :attr:`~assemblerflow.generator.Process.Process.status_channels` list
 attribute with a single element, ``["STATUS"]``. They can be
@@ -344,6 +348,14 @@ In this case, the corresponding ``Process`` class would need to be changed
 to::
 
     self.status_channels = ["STATUS_A", "STATUS_B"]
+
+.. note::
+
+    Status channels will be collected and processed into CSV format by
+    the ``status_compiler``
+    process. If this process is placed at the end of the pipeline, the
+    status of each process will be compiled in the ``reports/status``
+    directory.
 
 Advanced use cases
 ------------------

@@ -16,6 +16,7 @@ A NextFlow pipeline assembler for genomics.
 
    create_template
    create_process
+   process_dotfiles
 
 .. _Source API:
 

@@ -5,7 +5,7 @@ Though none of these guidelines are mandatory nor required, their usage is
 highly recommended for several reasons:
 
 - Consistency in the outputs of the templates throughout the pipeline,
-  particularly the status and report dotfiles (see [dotfiles section]);
+  particularly the status and report dotfiles (see :ref:`dotfiles` section]);
 - Debugging purposes;
 - Versioning;
 - Proper documentation of the template scripts.
