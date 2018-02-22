@@ -21,9 +21,9 @@ The addition of a new process to assemblerflow requires three main steps:
 Create process template
 :::::::::::::::::::::::
 
-First, create the nextflow file that will be integrated into the pipeline
+First, create the nextflow template that will be integrated into the pipeline
 as a process. This file must be placed in ``assemblerflow.generator.templates``
-and have the ``.nf`` extension. In order to allow the process to be
+and have the ``.nf`` extension. In order to allow the template to be
 dynamically added to a pipeline file, we use the jinja2_ template language to
 substitute key variables in the process, such as input/output channels.
 
@@ -70,12 +70,11 @@ assemblerflow:
   process with subsequent ones, this placeholder must be used.
 
 - ``forks`` (**Conditional**): Inserts potential forks of the main output
-  channel. It is **mandatory** is the ``output_channel`` is set.
+  channel. It is **mandatory** if the ``output_channel`` is set.
 
 - ``pid`` (**Optional**): This placeholder is used for secondary output
-  channels, such as those that send run status information. By default,
-  these status channels are be prefixed with ``STATUS_``, although this
-  can be changed in the ``Process`` class.
+  channels, such as those that send run status information (see
+  `Status channels`_).
 
 As an example of a complete process, this is the template of ``spades.nf``::
 
@@ -113,8 +112,9 @@ Create Process class
 
 The process class will contain the information that assemblerflow
 will use to build the pipeline and assess potential conflicts/dependencies
-between process. This class should be created in
-``assemblerflow.generator.Process`` and inherit from the ``Process`` base
+between process. This class should be created in the
+:mod:`assemblerflow.generator.Process` module and inherit from the
+:class:`~assemblerflow.generator.Process.Process` base
 class::
 
     class MyProcess(Process):
