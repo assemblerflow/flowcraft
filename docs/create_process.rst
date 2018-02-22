@@ -9,12 +9,14 @@ The addition of a new process to assemblerflow requires three main steps:
 #. Create a jinja2 template in ``assemblerflow.generator.templates`` with the
    nextflow code.
 
-#. Create a ``Process`` class in ``assemblerflow.generator.Process`` with
+#. Create a :class:`~assemblerflow.generator.Process` class in
+   :class:`assemblerflow.generator.Process` with
    information about the process (e.g., expected input/output, secondary inputs,
    etc.).
 
-#. Add the ``Process`` class to the dictionary of available process in
-   ``assemblerflow.assembler.py``.
+#. Add the :class:`~assemblerflow.generator.Process` class to the
+   dictionary of available process in
+   :attr:`assemblerflow.assemblerflow.NextflowGenerator.process_map`.
 
 Create process template
 :::::::::::::::::::::::
@@ -48,9 +50,10 @@ A minimal example created as a ``my_process.nf`` file is as follows::
     {{ forks }}
 
 The fields surrounded by curly brackets are jinja placeholders that will be
-dynamically interpolated when building the pipeline, ensuring the the processes
-and potential forks correctly link with each other. This example contains all
-placeholder variables that are currently supported by assemblerflow:
+dynamically interpolated when building the pipeline, ensuring that the
+processes and potential forks correctly link with each other. This example
+contains all placeholder variables that are currently supported by
+assemblerflow:
 
 - ``include "post.txt" ignore missing`` (**Recommended**): Inserts
   ``beforeScript`` and ``afterScript`` statements to the process. These
