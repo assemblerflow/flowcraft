@@ -5,6 +5,27 @@ These are the currently supported assemblerflow processes with a short
 description of their tasks. For a more detailed information, follow the
 links of each process.
 
+Annotation
+----------
+
+- :mod:`~assemblerflow.templates.prokka`: Performs assembly annotation using
+  prokka.
+
+- :mod:`~assemblerflow.templates.abricate`: Performs anti-microbial gene
+  screening using abricate.
+
+Assembly
+--------
+
+- :mod:`~assemblerflow.templates.spades`: Assembles paired-end FastQ files
+  using SPAdes.
+
+- :mod:`~assemblerflow.templates.skesa`: Assembles paired-end FastQ files using
+  skesa.
+
+Distance estimation
+-------------------
+
 FastQ QC
 --------
 
@@ -26,14 +47,17 @@ FastQ QC
 - :mod:`~assemblerflow.templates.check_coverage`: Filters FastQ files based
   on the expected assembly coverage.
 
-Assembly
---------
+Mapping
+-------
 
-- :mod:`~assemblerflow.templates.spades`: Assembles paired-end FastQ files
-  using SPAdes.
+MLST
+----
 
-- :mod:`~assemblerflow.templates.skesa`: Assembles paired-end FastQ files using
-  skesa.
+- :mod:`~assemblerflow.templates.mlst`: Checks the ST of an assembly using
+  mlst.
+
+- :mod:`~assemblerflow.templates.chewbbaca`: Performs a cg/wgMLST analysis
+  using ChewBBACA.
 
 Post-assembly
 -------------
@@ -48,21 +72,3 @@ Post-assembly
 
 - :mod:`~assemblerflow.templates.pilon`: Corrects and filters assemblies
   using Pilon.
-
-Annotation
-----------
-
-- :mod:`~assemblerflow.templates.prokka`: Performs assembly annotation using
-  prokka.
-
-- :mod:`~assemblerflow.templates.abricate`: Performs anti-microbial gene
-  screening using abricate.
-
-MLST
-----
-
-- :mod:`~assemblerflow.templates.mlst`: Checks the ST of an assembly using
-  mlst.
-
-- :mod:`~assemblerflow.templates.chewbbaca`: Performs a cg/wgMLST analysis
-  using ChewBBACA.
