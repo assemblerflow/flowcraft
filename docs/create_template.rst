@@ -14,7 +14,8 @@ Preface header
 --------------
 
 After the script shebang, a header with a brief description of the purpose and
-expected inputs and outputs should be provided:
+expected inputs and outputs should be provided. A complete example of such
+description can be viewed in :mod:`assemblerflow.templates.integrity_coverage`.
 
 Purpose
 ^^^^^^^
