@@ -82,9 +82,10 @@ These can then be passed to the output channel(s) in the nextflow process::
 Versioning and logging
 ----------------------
 
-Since assemblerflow has a specific ``logger`` and version system, a
-requirement should be imported from `templates.utils
-<https://github.com/ODiogoSilva/templates/tree/master/utils>`_::
+Assemblerflow has a specific ``logger``
+(:func:`~assemblerflow.templates.utils.assemblerflow_base.get_logger`) and
+versioning system that can be imported from
+:mod:`assemblerflow.templates.utils`: ::
 
     # the module that imports the logger and the decorator class for versioning
     # of the script itself and other software used in the script
@@ -95,7 +96,8 @@ requirement should be imported from `templates.utils
 Logger
 ^^^^^^
 
-A `logger` function is also required to add logs to the script.
+A `logger` function is also required to add logs to the script. The logs
+are written to the ``.command.log`` file in the work directory of each process.
 
 First, the logger must be called, for example, after the **imports** as follows::
 
@@ -104,6 +106,9 @@ First, the logger must be called, for example, after the **imports** as follows:
 Then, it may be used at will, using the default `logging levels
 <https://docs.python.org/3.6/library/logging.html#levels>`_ . E.g.::
 
+    logger.debug("Information tha may be important for debugging")
+    logger.info("Information related to the normal execution steps")
+    logger.warning("Events that may require the attention of the developer")
     logger.error("Module exited unexpectedly with error:\\n{}".format(
                 traceback.format_exc()))
 

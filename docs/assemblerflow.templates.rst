@@ -1,6 +1,13 @@
 assemblerflow\.templates package
 ================================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    assemblerflow.templates.utils
+
 Submodules
 ----------
 
