@@ -10,8 +10,8 @@ highly recommended for several reasons:
 - Versioning;
 - Proper documentation of the template scripts.
 
-Guideline 1: Preface header
----------------------------
+Preface header
+--------------
 
 After the script shebang, a header with a brief description of the purpose and
 expected inputs and outputs should be provided:
@@ -51,8 +51,8 @@ template script is intended to generated. E.g.::
         the summary categories and their respective results
 
 
-Guideline 2: Versioning and logging
------------------------------------
+Versioning and logging
+----------------------
 
 Since assemblerflow has a specific ``logger`` and version system, a
 requirement should be imported from `templates.utils
@@ -125,8 +125,8 @@ substring ``__set_version``. For example::
         }
 
 
-Guideline 3: Nextflow `.command.sh`
-----------------------------------
+Nextflow `.command.sh`
+----------------------
 
 When these templates are used with Nextflow `template <https://www.nextflow.io/docs/latest/process.html#template>`_
 a ``.command.sh`` file will be generated, allowing to pass arguments between nextflow
@@ -152,8 +152,8 @@ Then, we could use this variable as the argument of a function, such as::
 
 This way, we can use this function with nextflow arguments or without them.
 
-Guideline 4: Use numpy docstrings
----------------------------------
+Use numpy docstrings
+--------------------
 
 ``Assemblerflow`` uses numpy docstrings to document code.
 Use
