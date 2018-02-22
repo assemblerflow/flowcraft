@@ -1,8 +1,12 @@
 Template creation guidelines
 ============================
 
-Preface header
---------------
+Though none of these guidelines are mandatory nor required, their usage is
+highly recommended for debugging purposes, versioning and for proper
+documentation of template scripts used by `assemblerflow`.
+
+Guideline 1: Preface header
+---------------------------
 
 After the script shebang, a header with a brief description of the purpose and
 expected inputs and outputs should be provided:
@@ -42,123 +46,110 @@ template script is intended to generated. E.g.::
         the summary categories and their respective results
 
 
-Mandatory requirements
-----------------------
+Guideline 2: Versioning and logging
+-----------------------------------
 
-Since assemblerflow has a specific `logger`, a set of requirements are required
-so that the logger can properly work::
+Since assemblerflow has a specific `logger` and version system, a
+requirement should be imported from `templates.utils
+<https://github.com/ODiogoSilva/templates/tree/master/utils>`_::
 
-    # standard python packages
-    import os
-    import sys
-    import traceback
+    # the module that imports the logger and the decorator class for versioning
+    # of the script itself and other software used in the script
+    from utils.assemblerflow_base import get_logger, MainWrapper
 
-    # try/except used to search for the utils.assemblerflow in path if used
-    # within a docker image
-    try:
-        sys.path.append(os.environ["ASSEMBLERFLOW_UTILS"])
-    except KeyError:
-        pass
-    # import the logger it self
-    from utils.assemblerflow_base import get_logger, _log_error
 
-Then, the logger must be called as::
+
+Logger
+^^^^^^
+
+A `logger` function is also required to add logs to the script.
+
+First, the logger must be called, for example, after the `imports` as follows::
 
     logger = get_logger(__file__)
 
-And finally you may use the logger as you want, using the default `logging levels
+Then, it may be used at will, using the default `logging levels
 <https://docs.python.org/3.6/library/logging.html#levels>`_ . E.g.::
 
     logger.error("Module exited unexpectedly with error:\\n{}".format(
                 traceback.format_exc()))
 
+MainWrapper decorator
+^^^^^^^^^^^^^^^^^^^^^
 
-Checks for versions (build_versions)
-------------------------------------
+This class decorator allows the program to fetch information on the script version,
+build and template name. For example::
 
-A `build_versions` function which has the versions of the script and programs
-used by the template script and that can be logged using the `logger` generated
-in `Mandatory requirements`_. E.g.::
+    # This can also be declared after the imports for example
+    __version__ = "1.0.0"
+    __build__ = "15012018"
+    __template__ = "process_abricate-nf"
 
-    def build_versions():
-        logger.debug("Checking module versions")
+The ` MainWrapper` decorator should be added to the main function of the script.
+E.g.::
 
-        ver = [{
-            "program": __template__,
-            "version": __version__,
-            "build": __build__
-        }]
-        logger.debug("Versions list set to: {}".format(ver))
+    @MainWrapper
+    def main():
+        #some awesome code
+        ...
 
-        with open(".versions", "w") as fh:
-            fh.write(json.dumps(ver, separators=(",", ":")))
+Besides searching for the script's version, build and template name this decorator
+will also search for a specific set of functions that start with the
+substring `__set_version`. For example::
 
-Other programs versions can also be added to the `ver` variable, by adding a
-function that obtains this information from shell using `subprocess`. E.g.::
-
-    def get_abricate_version():
+    def __set_version_fastqc():
 
         try:
 
-            # Get abricate version
-            cli = ["abricate", "--version"]
-            p = subprocess.Popen(cli, stdout=PIPE, stderr=PIPE)
-            stdout, _ = p.communicate()
+        cli = ["fastqc", "--version"]
+        p = subprocess.Popen(cli, stdout=PIPE, stderr=PIPE)
+        stdout, _ = p.communicate()
 
-            version = stdout.strip().split()[-1].decode("utf8")
+        version = stdout.strip().split()[1][1:].decode("utf8")
 
         except Exception as e:
             logger.debug(e)
             version = "undefined"
 
-        try:
-
-            # Get abricate database versions
-            cli = ["abricate", "--list"]
-            p = subprocess.Popen(cli, stdout=PIPE, stderr=PIPE)
-            dbout, _ = p.communicate()
-
-            databases = [[u.decode("utf8") for u in i.strip().split()]
-                         for i in dbout.splitlines()][1:]
-
-        except Exception as e:
-            logger.debug(e)
-            databases = "undefined"
-
+        # Note that it returns a dictionary that will then be written to the .versions
+        # dotfile
         return {
-            "program": "abricate",
+            "program": "FastQC",
             "version": version,
-            "databases": databases
+            # some programs may also contain build.
         }
 
-Try/except block in main execution
+
+Guideline 3: Nextflow `.command.sh`
 ----------------------------------
 
-A try except block in main execution is required so that an error can be raised
-if something goes really wrong with the template script execution. E.g.::
+When these templates are used with Nextflow `template <https://www.nextflow.io/docs/latest/process.html#template>`_
+a `.command.sh` file will be generated, allowing to pass arguments between nextflow
+ pipeline and python scripts. In this case, it is recommended that
+an **if statement** is included to parse the arguments from nextflow to python template.
+For example, imagine we have a path to a file name to pass as argument between
+nextflow and the required template::
 
-    try:
-        build_versions()
-        main(FASTQ_ID, RESULT_P1, RESULT_P2, OPTS)
-    except:
-        logger.error("Module exited unexpectedly with error:\\n{}".format(
-            traceback.format_exc()))
-        _log_error()
+    # code check for nextflow execution
+    if __file__.endswith(".command.sh"):
+        FILE_NAME = '$Nextflow_file_name'
+        # logger output can also be included here, for example:
+        logger.debug("Running {} with parameters:".format(
+            os.path.basename(__file__)))
+        logger.debug("FILE_NAME: {}".format(FILE_NAME))
 
-Dotfiles
---------
+Then, we could use this variable as the argument of a function, such as::
 
-.status
-^^^^^^^
+    def main(FILE_NAME):
+        #some awesome code
+        ...
 
-.warning
-^^^^^^^^
 
-.fail
-^^^^^
+This way, we can use this function with nextflow arguments or without them.
 
-.report.json
-^^^^^^^^^^^^
+Guideline 4: Use numpy docstrings
+---------------------------------
 
-.versions
-^^^^^^^^^
+`Assemblerflow` uses numpy docstrings to document code.
+Use `this link <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html>`_
+ for an example.
