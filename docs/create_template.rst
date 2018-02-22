@@ -115,7 +115,8 @@ Then, it may be used at will, using the default `logging levels
 MainWrapper decorator
 ^^^^^^^^^^^^^^^^^^^^^
 
-This class decorator allows the program to fetch information on the script version,
+This :class:`~assemblerflow.templates.utils.assemblerflow_base.MainWrapper`
+class decorator allows the program to fetch information on the script version,
 build and template name. For example::
 
     # This can also be declared after the imports
@@ -123,7 +124,8 @@ build and template name. For example::
     __build__ = "15012018"
     __template__ = "process_abricate-nf"
 
-The ``MainWrapper`` decorator should be added to the main function of the script.
+The :class:`~assemblerflow.templates.utils.assemblerflow_base.MainWrapper`
+should decorate the main function of the script.
 E.g.::
 
     @MainWrapper
@@ -157,16 +159,26 @@ substring ``__set_version``. For example::
             # some programs may also contain build.
         }
 
+These functions are used to fetch the version, name and other relevant
+information from third-party software and the only requirement is that they
+return a dictionary with **at least** two key:value pairs:
+
+- ``program``: String with the name of the program.
+- ``version``: String with the version of the program.
+
+For more information, refer to the
+:func:`~assemblerflow.templates.utils.assemblerflow_base.MainWrapper.build_versions`
+method.
 
 Nextflow `.command.sh`
 ----------------------
 
-When these templates are used with Nextflow `template <https://www.nextflow.io/docs/latest/process.html#template>`_
-a ``.command.sh`` file will be generated, allowing to pass arguments between nextflow
- pipeline and python scripts. In this case, it is recommended that
-an **if statement** is included to parse the arguments from nextflow to python template.
-For example, imagine we have a path to a file name to pass as argument between
-nextflow and the required template::
+When these templates are used as a  Nextflow `template <https://www.nextflow.io/docs/latest/process.html#template>`_
+they are executed as a ``.command.sh`` file in the work directory of each
+process. In this case, we recommended the inclusion of
+an **if statement** to parse the arguments sent from nextflow to the python
+template. For example, imagine we have a path to a file name to pass as
+argument between nextflow and the required template::
 
     # code check for nextflow execution
     if __file__.endswith(".command.sh"):
@@ -183,7 +195,8 @@ Then, we could use this variable as the argument of a function, such as::
         ...
 
 
-This way, we can use this function with nextflow arguments or without them.
+This way, we can use this function with nextflow arguments or without them,
+as is the case when the templates are used as standalone modules.
 
 Use numpy docstrings
 --------------------
@@ -191,4 +204,4 @@ Use numpy docstrings
 ``Assemblerflow`` uses numpy docstrings to document code.
 Use
 `this link <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html>`_
-for an example.
+for reference.
