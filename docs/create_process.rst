@@ -62,7 +62,7 @@ assemblerflow:
   include a bash script that created a series of *dotfiles* for the process
   and scripts for sending requests to REST APIs (only when certain pipeline
   parameters are used). We recommend the inclusion of this placeholder to
-  to ensure that the reports of a the pipeline are correctly created for
+  to ensure that the reports of a pipeline are correctly created for
   latter visualization (see :ref:`dotfiles` for more information).
 
 - ``input_channel`` (**Mandatory**): All process must include an input channel.
@@ -195,20 +195,21 @@ channel. These are particularly useful when the process needs to receive
 additional options from the ``parameters`` scope of nextflow.
 These additional inputs can be specified via the
 :attr:`~assemblerflow.generator.Process.Process.secondary_inputs` attribute,
-which should store a dictionary for each input. This dictionary should
-container two key:value pairs with the name of the paramenter and the
-definition of the nextflow channel. Consider the example below::
+which should store a list of dictionaries (a dictionary for each input). Each dictionary should
+contains a key:value pair with the name of the parameter (``params``) and the
+definition of the nextflow channel (``channel``). Consider the example below::
 
     self.secondary_inputs = [
-        {
-            "params": "genomeSize",
-            "channel": "IN_genome_size = Channel.value(params.genomeSize)"
-        },
-        {
-            "params": "minCoverage",
-            "channel": "IN_min_coverage = "
-                       "Channel.value(params.minCoverage)"
-        }
+            {
+                "params": "genomeSize",
+                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+            },
+            {
+                "params": "minCoverage",
+                "channel": "IN_min_coverage = "
+                           "Channel.value(params.minCoverage)"
+            }
+        ]
 
 This process will receive two secondary inputs that are given by the
 ``genomeSize`` and ``minCoverage`` parameters. These should be made available
