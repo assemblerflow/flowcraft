@@ -53,36 +53,38 @@ def insanity_check(pipeline_string):
     p_string = pipeline_string.replace(" ", "")
 
     # FIRST, CHECK if the number of brackets are equal, if not raise a warning
-    if p_string.count("(") != p_string.count(")"):
+    if p_string.count(FORK_TOKEN) != p_string.count(CLOSE_TOKEN):
         # get the number of each type of bracket and state the one that has a
         # higher value
-        dict_values = {"(": p_string.count("("), ")": p_string.count(")")}
+        dict_values = {FORK_TOKEN: p_string.count(FORK_TOKEN), CLOSE_TOKEN: p_string.count(CLOSE_TOKEN)}
         max_bracket = max(dict_values, key=dict_values.get)
 
         raise SanityError(
             "A different number of '(' and ')' was specified. There are {} "
             "extra '{}'. The number of '(' and ')'should be equal.".format(
-                str(abs(p_string.count("(") - p_string.count(")"))),
+                str(abs(p_string.count(FORK_TOKEN) - p_string.count(CLOSE_TOKEN))),
                 max_bracket))
 
     # SECOND, CHECK for improper use of special characters.
     # this is in fact composed by three if statements.
 
     # Check for duplicated '|' character.
-    if "||" in p_string:
+    if LANE_TOKEN + LANE_TOKEN in p_string:
         raise SanityError("Duplicated fork separator character '|'.")
 
     # Check for the absence of processes in one of the branches of the fork
     # ['|)' and '(|'] and for the existence of a process before starting a fork
     # (in an inner fork) ['|('].
-    if "(|" in p_string or "|(" in p_string or "|)" in p_string:
+    if FORK_TOKEN + LANE_TOKEN in p_string or \
+            LANE_TOKEN + CLOSE_TOKEN in p_string or \
+            LANE_TOKEN + FORK_TOKEN in p_string:
         raise SanityError("There must be a process between the fork start "
                           "character '(' or end ')' and the separator of "
                           "processes character '|'")
 
     # Check for duplicated '(' character, which indicate that no process was
     # specified before forking twice.
-    if "((" in p_string:
+    if FORK_TOKEN + FORK_TOKEN in p_string:
         raise SanityError("There must be a starting process after the fork "
                           "before adding a new fork. E.g: proc1 ( proc2.1 "
                           "(proc3.1 | proc3.2) | proc 2.2 )")
@@ -94,17 +96,17 @@ def insanity_check(pipeline_string):
 
     # iterate through the string looking for '(' and ')'.
     for pos, char in enumerate(p_string):
-        if char == "(":
+        if char == FORK_TOKEN:
             # saves pos to left_indexes list
             left_indexes.append(pos)
-        elif char == ")" and len(left_indexes) > 0:
+        elif char == CLOSE_TOKEN and len(left_indexes) > 0:
             # saves fork to list_of_forks
             list_of_forks.append(p_string[left_indexes[-1] + 1: pos])
             # removes last bracket from left_indexes list
             left_indexes = left_indexes[:-1]
 
     # sort list in descending order of number of forks
-    list_of_forks.sort(key=lambda x: x.count("("), reverse=True)
+    list_of_forks.sort(key=lambda x: x.count(FORK_TOKEN), reverse=True)
 
     # Now, we can iterate through list_of_forks and check for errors in each
     # fork
@@ -119,16 +121,18 @@ def insanity_check(pipeline_string):
             if subfork in list_of_forks and subfork != fork:
                 # removes inner forks. Note that string has no spaces
                 fork_simplified = fork.replace("({})".format(subfork), "")
+            else:
+                fork_simplified = fork
 
         # Checks if there is no fork separator character '|' within each fork
-        if not len(fork_simplified.split("|")) > 1:
+        if not len(fork_simplified.split(LANE_TOKEN)) > 1:
             raise SanityError("One of the forks doesn't have '|' separator "
                               "between the processes to fork. This is the"
                               " prime suspect: '({})'".format(fork))
 
         # Check if there is a repeated process within a fork - linked with the
         #  above
-        if len(fork_simplified.split("|")) != len(
+        if len(fork_simplified.split(LANE_TOKEN)) != len(
                 set(fork_simplified.split("|"))):
             raise SanityError("There are duplicated processes within a fork. "
                               "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2)."
