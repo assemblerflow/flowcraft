@@ -11,6 +11,128 @@ LANE_TOKEN = "|"
 CLOSE_TOKEN = ")"
 
 
+class SanityError(Exception):
+    """
+    Class to raise a custom error for sanity checks
+    """
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+def insanity_check(pipeline_string):
+    """
+    A function that performs sanity checks in the pipeline string.
+    It will check for:
+    - Different number of '(' and ')' characters, which indicates that some
+    forks are poorly constructed.
+    - Duplicated '|' character between two processes.
+    - The existence of processes between the fork starting and ending character
+    and the process separator character.
+    - The existence of a process between the fork starting character and the
+    process separator character.
+    - The presence of a process between two fork starting characters.
+    - The presence of process separator character '|' within each fork.
+    - Duplicated processes within a fork.
+
+    Checks are performed in sequential order, as indicated above and will raise
+    an exception `SanityError` each time a string violates any of these checks.
+    One can test this function by using the -c option.
+
+    Parameters
+    ----------
+    pipeline_string: str
+        String with the definition of the pipeline, e.g.::
+            'processA processB processC(ProcessD | ProcessE)'
+
+    """
+
+    # Gets rid of all spaces in string
+    string = pipeline_string.replace(" ", "")
+
+    # FIRST, CHECK if the number of brackets are equal, if not raise a warning
+    if string.count("(") != string.count(")"):
+        # get the number of each type of bracket and state the one that has a
+        # higher value
+        dict_values = {"(": string.count("("), ")": string.count(")")}
+        max_bracket = max(dict_values, key=dict_values.get)
+
+        raise SanityError("A different number of '(' and ')' was specified." 
+                          "There are {} extra '{}'. The number of '(' and ')'" 
+                          "should be equal.".format(
+                              str(abs(string.count("(") - string.count(")"))),
+                              max_bracket)
+                          )
+
+    # SECOND, CHECK for improper use of special characters.
+    # this is in fact composed by three if statements.
+
+    # Check for duplicated '|' character.
+    if "||" in string:
+        raise SanityError("Duplicated fork separator character '|'.")
+
+    # Check for the absence of processes in one of the branches of the fork
+    # ['|)' and '(|'] and for the existence of a process before starting a fork
+    # (in an inner fork) ['|('].
+    if "(|" in string or "|(" in string or "|)" in string:
+        raise SanityError("There must be a process between the fork start "
+                          "character '(' or end ')' and the separator of "
+                          "processes character '|'")
+
+    # Check for duplicated '(' character, which indicate that no process was
+    # specified before forking twice.
+    if "((" in string:
+        raise SanityError("There must be a starting process after the fork "
+                          "before adding a new fork. E.g: proc1 ( proc2.1 "
+                          "(proc3.1 | proc3.2) | proc 2.2 )")
+
+    # CHECKS INSIDE THE FORKS
+    # first lets get all forks to a list.
+    list_of_forks = []  # stores forks
+    left_indexes = []   # stores indexes of left brackets
+
+    # iterate through the string looking for '(' and ')'.
+    for pos, char in enumerate(string):
+        if char == "(":
+            # saves pos to left_indexes list
+            left_indexes.append(pos)
+        elif char == ")" and len(left_indexes) > 0:
+            # saves fork to list_of_forks
+            list_of_forks.append(string[left_indexes[-1] + 1: pos])
+            # removes last bracket from left_indexes list
+            left_indexes = left_indexes[:-1]
+
+    # sort list in descending order of number of forks
+    list_of_forks.sort(key=lambda x: x.count("("), reverse=True)
+
+    # Now, we can iterate through list_of_forks and check for errors in each fork
+    for fork in list_of_forks:
+        # remove inner forks for these checks since each fork has its own entry
+        # in list_of_forks. Note that each fork is now sorted in descending order
+        # which enables to remove sequentially the string for the fork potentially with
+        # more inner forks
+        for subfork in list_of_forks:
+            # checks if subfork is contained in fork and if they are different,
+            # avoiding to remove itself
+            if subfork in list_of_forks and subfork != fork:
+                # removes inner forks. Note that string has no spaces
+                fork_simplified = fork.replace("({})".format(subfork), "")
+
+        # Checks if there is no fork separator character '|' within each fork
+        if not len(fork_simplified.split("|")) > 1:
+            raise SanityError("One of the forks doesn't have '|' separator "
+                              "between the processes to fork. This is the prime"
+                              " suspect: '({})'".format(fork))
+
+        # Check if there is a repeated process within a fork - linked with the above
+        if len(fork_simplified.split("|")) != len(
+                set(fork_simplified.split("|"))):
+            raise SanityError("There are duplicated processes within a fork. "
+                              "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2)."
+                              "This is the prime suspect: '({})'".format(fork))
+
+
 def parse_pipeline(pipeline_str):
     """Parses a pipeline string into a dictionary with the connections between
     process
@@ -27,7 +149,8 @@ def parse_pipeline(pipeline_str):
 
     """
 
-    #TODO: Add string check here
+    # executes sanity checks in pipeline string before parsing it.
+    insanity_check(pipeline_str)
 
     pipeline_links = []
     lane = 1
