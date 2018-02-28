@@ -15,11 +15,12 @@ from os.path import join, dirname
 
 try:
     from generator import HeaderSkeleton as hs
-    from generator.pipeline_parser import parse_pipeline
+    from generator.pipeline_parser import parse_pipeline, SanityError
     import generator.Process as pc
 except ImportError:
     from assemblerflow.generator import HeaderSkeleton as hs
-    from assemblerflow.generator.pipeline_parser import parse_pipeline
+    from assemblerflow.generator.pipeline_parser import parse_pipeline, \
+        SanityError
     import assemblerflow.generator.Process as pc
 
 logger = logging.getLogger("main")
@@ -445,7 +446,11 @@ def run(args):
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
-    pipeline_list = parse_pipeline(args.tasks)
+    try:
+        pipeline_list = parse_pipeline(args.tasks)
+    except SanityError as e:
+        logger.error(e.value)
+        sys.exit(1)
     logger.debug("Pipeline successfully parsed: {}".format(pipeline_list))
 
     # Exit if only the pipeline parser needs to be checked
