@@ -58,8 +58,8 @@ def insanity_check(pipeline_string):
         dict_values = {"(": string.count("("), ")": string.count(")")}
         max_bracket = max(dict_values, key=dict_values.get)
 
-        raise SanityError("A different number of '(' and ')' was specified." 
-                          "There are {} extra '{}'. The number of '(' and ')'" 
+        raise SanityError("A different number of '(' and ')' was specified."
+                          "There are {} extra '{}'. The number of '(' and ')'"
                           "should be equal.".format(
                               str(abs(string.count("(") - string.count(")"))),
                               max_bracket)
