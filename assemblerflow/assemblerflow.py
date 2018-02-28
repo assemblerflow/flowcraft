@@ -4,6 +4,7 @@ __version__ = "1.0.0"
 __build__ = "22012018"
 
 import os
+import sys
 import shutil
 import logging
 import argparse
@@ -14,9 +15,11 @@ from os.path import join, dirname
 
 try:
     from generator import HeaderSkeleton as hs
+    from generator.pipeline_parser import parse_pipeline
     import generator.Process as pc
 except ImportError:
     from assemblerflow.generator import HeaderSkeleton as hs
+    from assemblerflow.generator.pipeline_parser import parse_pipeline
     import assemblerflow.generator.Process as pc
 
 logger = logging.getLogger("main")
@@ -372,7 +375,7 @@ def get_args():
     parser = argparse.ArgumentParser(
         description="Nextflow pipeline generator")
 
-    parser.add_argument("-t", "--tasks", nargs="+", dest="tasks",
+    parser.add_argument("-t", "--tasks", type=str, dest="tasks",
                         help="Space separated tasks of the pipeline")
     parser.add_argument("-o", dest="output_nf",
                         help="Name of the pipeline file")
@@ -381,6 +384,10 @@ def get_args():
                         help="This will copy the necessary templates and lib"
                              " files to the directory where the nextflow"
                              " pipeline will be generated")
+    parser.add_argument("-c", "--check-pipeline", dest="check_only",
+                        action="store_const", const=True,
+                        help="Check only the validity of the pipeline"
+                             "string and exit.")
     parser.add_argument("--debug", dest="debug", action="store_const",
                         const=True, help="Set log to debug mode")
 
@@ -438,10 +445,15 @@ def run(args):
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
-    # nfg = NextflowGenerator(args.tasks, args.output_nf)
+    pipeline_list = parse_pipeline(args.tasks)
+    logger.debug("Pipeline successfully parsed: {}".format(pipeline_list))
+
+    # Exit if only the pipeline parser needs to be checked
+    if args.check_only:
+        sys.exit()
+
     nfg = NextflowGenerator(process_list=args.tasks,
                             nextflow_file=args.output_nf)
-    # nfg = NextflowGenerator(pipeline, "/home/diogosilva/teste/teste.nf")
 
     nfg.build()
 
