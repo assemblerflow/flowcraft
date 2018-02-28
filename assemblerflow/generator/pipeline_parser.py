@@ -38,11 +38,14 @@ def parse_pipeline(pipeline_str):
 
     # If there are no forks, connect the pipeline as purely linear
     if not nforks:
+        logger.debug("Detected linear pipeline string : {}".format(
+            pipeline_str))
         pipeline_links.extend(linear_connection(pipeline_str.split(), lane))
         return pipeline_links
 
     for i in range(nforks):
 
+        logger.debug("Processing fork {}".format(i))
         # Split the pipeline at each fork start position. fields[-1] will
         # hold the process after the fork. fields[-2] will hold the processes
         # before the fork.
@@ -51,10 +54,13 @@ def parse_pipeline(pipeline_str):
         # Get the processes before the fork. This may be empty when the
         # fork is at the beginning of the pipeline.
         previous_process = fields[-2].split()
+        logger.debug("Previous processes: {}".format(fields[-2]))
         # Get lanes after the fork
         next_lanes = get_lanes(fields[-1])
+        logger.debug("Next lanes object: {}".format(next_lanes))
         # Get the immediate targets of the fork
         fork_sink = [x[0] for x in next_lanes]
+        logger.debug("The fork sinks into the processes: {}".format(fork_sink))
 
         # The first fork is a special case, where the processes before AND
         # after the fork (until the start of another fork) are added to
@@ -66,15 +72,19 @@ def parse_pipeline(pipeline_str):
             # "init" process.
             if not previous_process:
                 previous_process = ["init"]
+                lane = 0
 
             # Add the linear modules before the fork
             pipeline_links.extend(
                 linear_connection(previous_process, lane))
 
         fork_source = previous_process[-1]
+        logger.debug("Fork source is set to: {}".format(fork_source))
+        fork_lane = get_source_lane(fork_source, pipeline_links)
+        logger.debug("Fork lane is set to: {}".format(fork_lane))
         # Add the forking modules
         pipeline_links.extend(
-            fork_connection(fork_source, fork_sink, lane))
+            fork_connection(fork_source, fork_sink, fork_lane, lane))
         # Add the linear connections in the subsequent lanes
         pipeline_links.extend(
             linear_lane_connection(next_lanes, lane))
@@ -82,6 +92,30 @@ def parse_pipeline(pipeline_str):
         lane += len(fork_sink)
 
     return pipeline_links
+
+
+def get_source_lane(fork_process, pipeline_list):
+    """Returns the lane of the last process that matches fork_process
+
+    Parameters
+    ----------
+    fork_process : str
+        Process name.
+    pipeline_list : list
+        List with the pipeline connection dictionaries.
+
+    Returns
+    -------
+    int
+        Lane of the last process that matches fork_process
+    """
+
+    for p in pipeline_list[::-1]:
+        print(p)
+        if p["output"]["process"] == fork_process:
+            return p["output"]["lane"]
+
+    return 0
 
 
 def get_lanes(lanes_str):
@@ -104,6 +138,8 @@ def get_lanes(lanes_str):
         List of lists, with the list of processes for each lane
 
     """
+
+    logger.debug("Parsing lanes from raw string: {}".format(lanes_str))
 
     # Temporarily stores the lanes string after removal of nested forks
     parsed_lanes = ""
@@ -145,6 +181,9 @@ def linear_connection(plist, lane):
         List of dictionaries with the links between processes
     """
 
+    logger.debug(
+        "Establishing linear connection with processes: {}".format(plist))
+
     res = []
     previous = None
 
@@ -155,15 +194,21 @@ def linear_connection(plist, lane):
             continue
 
         res.append({
-            "input": previous,
-            "output": p,
-            "lane": lane
+            "input": {
+                "process": previous,
+                "lane": lane
+            },
+            "output": {
+                "process": p,
+                "lane": lane
+            }
         })
+        previous = p
 
     return res
 
 
-def fork_connection(source, sink, lane):
+def fork_connection(source, sink, fork_lane, lane):
     """Makes the connection between a process and the first processes in the
     lanes to wich it forks.
 
@@ -177,6 +222,8 @@ def fork_connection(source, sink, lane):
     sink : list
         List of the processes where the source will fork to. Each element
         corresponds to the start of a lane.
+    fork_lane : int
+        Lane of the forking process
     lane : int
         Lane of the source process
 
@@ -186,17 +233,26 @@ def fork_connection(source, sink, lane):
         List of dictionaries with the links between processes
     """
 
+    logger.debug("Establishing forking of source '{}' into processes"
+                 " '{}'. Fork lane set to '{}' and lane set to "
+                 "'{}'".format(source, sink, fork_lane, lane))
+
     res = []
     # Increase the lane counter for the first lane
-    lane += 1
+    lane_counter = lane + 1
 
     for p in sink:
         res.append({
-            "input": source,
-            "output": p,
-            "lane": lane
+            "input": {
+                "process": source,
+                "lane": fork_lane
+            },
+            "output": {
+                "process": p,
+                "lane": lane_counter
+            }
         })
-        lane += 1
+        lane_counter += 1
 
     return res
 
@@ -216,6 +272,9 @@ def linear_lane_connection(lane_list, lane):
     res : list
         List of dictionaries with the links between processes
     """
+
+    logger.debug(
+        "Establishing linear connections for lanes: {}".format(lane_list))
 
     res = []
     # Increase the lane counter for the first lane
