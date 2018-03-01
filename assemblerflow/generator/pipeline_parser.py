@@ -1,3 +1,4 @@
+import os
 import logging
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -154,6 +155,13 @@ def parse_pipeline(pipeline_str):
     pipeline_links : list
 
     """
+
+    if os.path.exists(pipeline_str):
+        logger.debug("Found pipeline file: {}".format(pipeline_str))
+        with open(pipeline_str) as fh:
+            pipeline_str = "".join([x.strip() for x in fh.readlines()])
+
+    logger.debug("Parsing pipeline string: {}".format(pipeline_str))
 
     # executes sanity checks in pipeline string before parsing it.
     insanity_check(pipeline_str)
