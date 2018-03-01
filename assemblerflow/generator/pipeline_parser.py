@@ -1,5 +1,6 @@
 import os
 import logging
+import re
 
 logger = logging.getLogger("main.{}".format(__name__))
 
@@ -93,6 +94,11 @@ def insanity_check(pipeline_string):
                           "before adding a new fork. E.g: proc1 ( proc2.1 "
                           "(proc3.1 | proc3.2) | proc 2.2 )")
 
+    # Checks if there are processes after CLOSE_TOKEN
+    if re.search("\{}[a-zA-Z0-9_]".format(CLOSE_TOKEN), p_string):
+        raise SanityError("After a fork it is not allowed to have any "
+                          "alphanumeric value.")
+
     # CHECKS INSIDE THE FORKS
     # first lets get all forks to a list.
     list_of_forks = []  # stores forks
@@ -134,12 +140,14 @@ def insanity_check(pipeline_string):
                               "between the processes to fork. This is the"
                               " prime suspect: '({})'".format(fork))
 
+
+        # removes white spaces and splits by LANE_TOKEN the processes within fork
+        list_fork_proc = list(filter(
+            None, fork_simplified.replace(LANE_TOKEN, " ").split(" ")))
+
         # Check if there is a repeated process within a fork - linked with the
         #  above
-        # if len(fork_simplified.split(LANE_TOKEN)) != len(
-        #        set(fork_simplified.split(LANE_TOKEN))):
-        if len(fork_simplified.replace(LANE_TOKEN, " ").split(" ")) != len(
-                set(fork_simplified.replace(LANE_TOKEN, " ").split(" "))):
+        if len(list_fork_proc) != len(set(list_fork_proc)):
             raise SanityError("There are duplicated processes within a fork. "
                               "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2)."
                               "This is the prime suspect: '({})'".format(fork))
