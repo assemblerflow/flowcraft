@@ -57,7 +57,10 @@ def insanity_check(pipeline_string):
     if p_string.count(FORK_TOKEN) != p_string.count(CLOSE_TOKEN):
         # get the number of each type of bracket and state the one that has a
         # higher value
-        dict_values = {FORK_TOKEN: p_string.count(FORK_TOKEN), CLOSE_TOKEN: p_string.count(CLOSE_TOKEN)}
+        dict_values = {
+            FORK_TOKEN: p_string.count(FORK_TOKEN),
+            CLOSE_TOKEN: p_string.count(CLOSE_TOKEN)
+        }
         max_bracket = max(dict_values, key=dict_values.get)
 
         raise SanityError(
@@ -133,7 +136,7 @@ def insanity_check(pipeline_string):
 
         # Check if there is a repeated process within a fork - linked with the
         #  above
-        #if len(fork_simplified.split(LANE_TOKEN)) != len(
+        # if len(fork_simplified.split(LANE_TOKEN)) != len(
         #        set(fork_simplified.split(LANE_TOKEN))):
         if len(fork_simplified.replace(LANE_TOKEN, " ").split(" ")) != len(
                 set(fork_simplified.replace(LANE_TOKEN, " ").split(" "))):
