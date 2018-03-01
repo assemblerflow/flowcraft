@@ -77,6 +77,11 @@ def insanity_check(pipeline_string):
     if LANE_TOKEN + LANE_TOKEN in p_string:
         raise SanityError("Duplicated fork separator character '|'.")
 
+    # Check if last character of string is a LANE_TOKEN
+    if p_string.endswith(LANE_TOKEN):
+        raise SanityError("Fork separator character '|' cannot be the last "
+                          "element of pipeline string")
+
     # Check for the absence of processes in one of the branches of the fork
     # ['|)' and '(|'] and for the existence of a process before starting a fork
     # (in an inner fork) ['|('].
@@ -95,7 +100,7 @@ def insanity_check(pipeline_string):
                           "(proc3.1 | proc3.2) | proc 2.2 )")
 
     # Checks if there are processes after CLOSE_TOKEN
-    if re.search("\{}[a-zA-Z0-9_]".format(CLOSE_TOKEN), p_string):
+    if re.search("\{}[^|)]".format(CLOSE_TOKEN), p_string):
         raise SanityError("After a fork it is not allowed to have any "
                           "alphanumeric value.")
 
