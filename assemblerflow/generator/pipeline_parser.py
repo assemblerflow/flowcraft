@@ -96,13 +96,13 @@ def insanity_check(pipeline_string):
     left_indexes = []   # stores indexes of left brackets
 
     # iterate through the string looking for '(' and ')'.
-    for pos, char in enumerate(p_string):
+    for pos, char in enumerate(pipeline_string):
         if char == FORK_TOKEN:
             # saves pos to left_indexes list
             left_indexes.append(pos)
         elif char == CLOSE_TOKEN and len(left_indexes) > 0:
             # saves fork to list_of_forks
-            list_of_forks.append(p_string[left_indexes[-1] + 1: pos])
+            list_of_forks.append(pipeline_string[left_indexes[-1] + 1: pos])
             # removes last bracket from left_indexes list
             left_indexes = left_indexes[:-1]
 
@@ -133,8 +133,10 @@ def insanity_check(pipeline_string):
 
         # Check if there is a repeated process within a fork - linked with the
         #  above
-        if len(fork_simplified.split(LANE_TOKEN)) != len(
-                set(fork_simplified.split("|"))):
+        #if len(fork_simplified.split(LANE_TOKEN)) != len(
+        #        set(fork_simplified.split(LANE_TOKEN))):
+        if len(fork_simplified.replace(LANE_TOKEN, " ").split(" ")) != len(
+                set(fork_simplified.replace(LANE_TOKEN, " ").split(" "))):
             raise SanityError("There are duplicated processes within a fork. "
                               "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2)."
                               "This is the prime suspect: '({})'".format(fork))
