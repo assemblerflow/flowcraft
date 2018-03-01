@@ -31,11 +31,13 @@ def insanity_check(pipeline_string):
     - Different number of '(' and ')' characters, which indicates that some
     forks are poorly constructed.
     - Duplicated '|' character between two processes.
+    - Check if last character of string is a '|'.
     - The existence of processes between the fork starting and ending character
     and the process separator character.
     - The existence of a process between the fork starting character and the
     process separator character.
     - The presence of a process between two fork starting characters.
+    - Checks if there are processes after ')'
     - The presence of process separator character '|' within each fork.
     - Duplicated processes within a fork.
 
@@ -99,7 +101,8 @@ def insanity_check(pipeline_string):
                           "before adding a new fork. E.g: proc1 ( proc2.1 "
                           "(proc3.1 | proc3.2) | proc 2.2 )")
 
-    # Checks if there are processes after CLOSE_TOKEN
+    # Checks if there are processes after CLOSE_TOKEN, searches for everything
+    # that isn't "|" or ")" after a ")" token.
     if re.search("\{}[^|)]".format(CLOSE_TOKEN), p_string):
         raise SanityError("After a fork it is not allowed to have any "
                           "alphanumeric value.")
