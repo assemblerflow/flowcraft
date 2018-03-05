@@ -24,39 +24,19 @@ class SanityError(Exception):
         return repr(self.value)
 
 
-def insanity_check(pipeline_string):
+def brackets_insanity_check(p_string):
     """
-    A function that performs sanity checks in the pipeline string.
-    It will check for:
-    - Different number of '(' and ')' characters, which indicates that some
-    forks are poorly constructed.
-    - Duplicated '|' character between two processes.
-    - Check if last character of string is a '|'.
-    - The existence of processes between the fork starting and ending character
-    and the process separator character.
-    - The existence of a process between the fork starting character and the
-    process separator character.
-    - The presence of a process between two fork starting characters.
-    - Checks if there are processes after ')'
-    - The presence of process separator character '|' within each fork.
-    - Duplicated processes within a fork.
-
-    Checks are performed in sequential order, as indicated above and will raise
-    an exception `SanityError` each time a string violates any of these checks.
-    One can test this function by using the -c option.
+    This function performs a check for different number of '(' and ')'
+    characters, which indicates that some forks are poorly constructed.
 
     Parameters
     ----------
-    pipeline_string: str
-        String with the definition of the pipeline, e.g.::
-            'processA processB processC(ProcessD | ProcessE)'
+    p_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
 
     """
 
-    # Gets rid of all spaces in string
-    p_string = pipeline_string.replace(" ", "")
-
-    # FIRST, CHECK if the number of brackets are equal, if not raise a warning
     if p_string.count(FORK_TOKEN) != p_string.count(CLOSE_TOKEN):
         # get the number of each type of bracket and state the one that has a
         # higher value
@@ -72,17 +52,58 @@ def insanity_check(pipeline_string):
                 str(abs(p_string.count(FORK_TOKEN) - p_string.count(CLOSE_TOKEN))),
                 max_bracket))
 
-    # SECOND, CHECK for improper use of special characters.
-    # this is in fact composed by three if statements.
 
-    # Check for duplicated '|' character.
+def lane_char_insanity_check(p_string):
+    """
+    This function performs a sanity check for multiple '|' character
+    between two processes.
+
+    Parameters
+    ----------
+    p_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
+
+    """
+
     if LANE_TOKEN + LANE_TOKEN in p_string:
         raise SanityError("Duplicated fork separator character '|'.")
+
+
+def final_char_insanity_check(p_string):
+    """
+    This function checks if lane token is the last element of the pipeline
+    string.
+
+    Parameters
+    ----------
+    p_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
+
+    """
 
     # Check if last character of string is a LANE_TOKEN
     if p_string.endswith(LANE_TOKEN):
         raise SanityError("Fork separator character '|' cannot be the last "
                           "element of pipeline string")
+
+
+def fork_procs_insanity_check(p_string):
+    """
+    This function checks if the pipeline string contains a process between
+    the fork start token or end token and the separator (lane) token. Checks for
+    the absence of processes in one of the branches of the fork ['|)' and '(|']
+    and for the existence of a process before starting a fork (in an inner fork)
+    ['|('].
+
+    Parameters
+    ----------
+    p_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
+
+    """
 
     # Check for the absence of processes in one of the branches of the fork
     # ['|)' and '(|'] and for the existence of a process before starting a fork
@@ -94,20 +115,58 @@ def insanity_check(pipeline_string):
                           "character '(' or end ')' and the separator of "
                           "processes character '|'")
 
-    # Check for duplicated '(' character, which indicate that no process was
-    # specified before forking twice.
+
+def start_proc_insanity_check(p_string):
+    """
+    This function checks if there is a starting process after the beginning of
+    each fork. It checks for duplicated start tokens ['(('].
+
+    Parameters
+    ----------
+    p_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
+
+    """
+
     if FORK_TOKEN + FORK_TOKEN in p_string:
         raise SanityError("There must be a starting process after the fork "
                           "before adding a new fork. E.g: proc1 ( proc2.1 "
                           "(proc3.1 | proc3.2) | proc 2.2 )")
 
-    # Checks if there are processes after CLOSE_TOKEN, searches for everything
-    # that isn't "|" or ")" after a ")" token.
+
+def late_proc_insanity_check(p_string):
+    """
+    This function checks if there are processes after the close token. It
+    searches for everything that isn't "|" or ")" after a ")" token.
+
+    Parameters
+    ----------
+    p_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
+
+    """
+
     if re.search("\{}[^|)]".format(CLOSE_TOKEN), p_string):
         raise SanityError("After a fork it is not allowed to have any "
                           "alphanumeric value.")
 
-    # CHECKS INSIDE THE FORKS
+
+def inner_fork_insanity_checks(pipeline_string):
+    """
+    This function performs two sanity checks in the pipeline string. The first
+    check, assures that each fork contains a lane token '|', while the second
+    check looks for duplicated processes within the same fork.
+
+    Parameters
+    ----------
+    pipeline_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
+
+    """
+
     # first lets get all forks to a list.
     list_of_forks = []  # stores forks
     left_indexes = []   # stores indexes of left brackets
@@ -184,8 +243,29 @@ def parse_pipeline(pipeline_str):
 
     logger.debug("Parsing pipeline string: {}".format(pipeline_str))
 
+    # Gets rid of all spaces in string
+    p_string = pipeline_str.replace(" ", "")
+
+    # some of the check functions use the pipeline_str as the user provided but
+    # the majority uses the parsed p_string.
+    checks = {
+        p_string: [
+            brackets_insanity_check,
+            lane_char_insanity_check,
+            final_char_insanity_check,
+            fork_procs_insanity_check,
+            start_proc_insanity_check,
+            late_proc_insanity_check
+        ],
+        pipeline_str : [
+            inner_fork_insanity_checks
+        ]
+    }
+
     # executes sanity checks in pipeline string before parsing it.
-    insanity_check(pipeline_str)
+    for param, func_list in checks.items():
+        for func in func_list:
+            func(param)
 
     pipeline_links = []
     lane = 1
