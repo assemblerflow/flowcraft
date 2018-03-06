@@ -16,15 +16,41 @@ from os.path import join, dirname
 try:
     from generator import HeaderSkeleton as hs
     from generator.pipeline_parser import parse_pipeline, SanityError
+    from generator.process_details import proc_collector, colored_print
     import generator.Process as pc
 except ImportError:
     from assemblerflow.generator import HeaderSkeleton as hs
     from assemblerflow.generator.pipeline_parser import parse_pipeline, \
         SanityError
+    from assemblerflow.generator.process_details import proc_collector, \
+        colored_print
     import assemblerflow.generator.Process as pc
 
 logger = logging.getLogger("main")
 
+process_map = {
+        "integrity_coverage": pc.IntegrityCoverage,
+        "seq_typing": pc.SeqTyping,
+        "patho_typing": pc.PathoTyping,
+        "check_coverage": pc.CheckCoverage,
+        "fastqc": pc.FastQC,
+        "trimmomatic": pc.Trimmomatic,
+        "fastqc_trimmomatic": pc.FastqcTrimmomatic,
+        "skesa": pc.Skesa,
+        "spades": pc.Spades,
+        "process_spades": pc.ProcessSpades,
+        "assembly_mapping": pc.AssemblyMapping,
+        "pilon": pc.Pilon,
+        "mlst": pc.Mlst,
+        "abricate": pc.Abricate,
+        "prokka": pc.Prokka,
+        "chewbbaca": pc.Chewbbaca,
+        "status_compiler": pc.StatusCompiler,
+        "trace_compiler": pc.TraceCompiler
+}
+"""
+dict: Maps the process ids to the corresponding template interface class
+"""
 
 class ProcessError(Exception):
     def __init__(self, value):
@@ -48,30 +74,6 @@ class ChannelError(Exception):
 
 
 class NextflowGenerator:
-
-    process_map = {
-        "integrity_coverage": pc.IntegrityCoverage,
-        "seq_typing": pc.SeqTyping,
-        "patho_typing": pc.PathoTyping,
-        "check_coverage": pc.CheckCoverage,
-        "fastqc": pc.FastQC,
-        "trimmomatic": pc.Trimmomatic,
-        "fastqc_trimmomatic": pc.FastqcTrimmomatic,
-        "skesa": pc.Skesa,
-        "spades": pc.Spades,
-        "process_spades": pc.ProcessSpades,
-        "assembly_mapping": pc.AssemblyMapping,
-        "pilon": pc.Pilon,
-        "mlst": pc.Mlst,
-        "abricate": pc.Abricate,
-        "prokka": pc.Prokka,
-        "chewbbaca": pc.Chewbbaca,
-        "status_compiler": pc.StatusCompiler,
-        "trace_compiler": pc.TraceCompiler
-    }
-    """
-    dict: Maps the process ids to the corresponding template interface class
-    """
 
     def __init__(self, process_list, nextflow_file):
 
@@ -389,6 +391,14 @@ def get_args():
                         action="store_const", const=True,
                         help="Check only the validity of the pipeline"
                              "string and exit.")
+    parser.add_argument("-L", "--detailed-list", action="store_const",
+                        dest="detailed_list", const=True,
+                        help="Print a detailed description for all the "
+                             "currently available processes")
+    parser.add_argument("-l", "--short-list", action="store_const",
+                        dest="short_list", const=True,
+                        help="Print a short list of the currently available "
+                             "processes")
     parser.add_argument("--debug", dest="debug", action="store_const",
                         const=True, help="Set log to debug mode")
 
@@ -446,6 +456,36 @@ def run(args):
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
+    welcome = [
+        "========= A S S E M B L E R F L O W =========\n",
+        "version: {}".format(__version__),
+        "build: {}\n".format(__build__)
+    ]
+
+    colored_print("1;32m", "\n".join(welcome))
+
+    # prints a detailed list of the process class arguments
+    if args.detailed_list:
+        # list of attributes to be passed to proc_collector
+        arguments_list = [
+            "input_type",
+            "output_type",
+            "description",
+            "dependencies",
+            "conflicts"
+        ]
+
+        proc_collector(process_map, arguments_list)
+        sys.exit(0)
+
+    # prints a short list with each process and the corresponding description
+    if args.short_list:
+        arguments_list = [
+            "description"
+        ]
+        proc_collector(process_map, arguments_list)
+        sys.exit(0)
+
     try:
         pipeline_list = parse_pipeline(args.tasks)
     except SanityError as e:
@@ -464,6 +504,11 @@ def run(args):
 
     if args.include_templates:
         copy_project(args.output_nf)
+
+
+
+    #if args.detailed_list:
+        # lele
 
 
 def main():
