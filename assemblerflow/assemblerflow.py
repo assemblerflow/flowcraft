@@ -489,6 +489,7 @@ def run(args):
         sys.exit(0)
 
     try:
+        colored_print("1;32m", "====== R U N N I N G   P I P E L I N E ======\n")
         pipeline_list = parse_pipeline(args.tasks)
     except SanityError as e:
         logger.error(e.value)
