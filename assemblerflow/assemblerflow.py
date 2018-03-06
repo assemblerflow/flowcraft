@@ -79,14 +79,14 @@ class NextflowGenerator:
 
         # Check if all specified processes are available
         for p in process_list:
-            if p not in self.process_map:
+            if p not in process_map:
                 raise ValueError(
                     "The process '{}' is not available".format(p))
 
         init_process = [pc.Init(template="init")]
 
         processes = [
-            self.process_map[p](template=p) for p in process_list
+            process_map[p](template=p) for p in process_list
         ]
         self.processes = init_process + processes
         """
@@ -378,6 +378,8 @@ def get_args():
     parser = argparse.ArgumentParser(
         description="Nextflow pipeline generator")
 
+    group_lists = parser.add_mutually_exclusive_group()
+
     parser.add_argument("-t", "--tasks", type=str, dest="tasks",
                         help="Space separated tasks of the pipeline")
     parser.add_argument("-o", dest="output_nf",
@@ -391,11 +393,11 @@ def get_args():
                         action="store_const", const=True,
                         help="Check only the validity of the pipeline"
                              "string and exit.")
-    parser.add_argument("-L", "--detailed-list", action="store_const",
+    group_lists.add_argument("-L", "--detailed-list", action="store_const",
                         dest="detailed_list", const=True,
                         help="Print a detailed description for all the "
                              "currently available processes")
-    parser.add_argument("-l", "--short-list", action="store_const",
+    group_lists.add_argument("-l", "--short-list", action="store_const",
                         dest="short_list", const=True,
                         help="Print a short list of the currently available "
                              "processes")

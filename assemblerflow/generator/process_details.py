@@ -1,8 +1,37 @@
 def colored_print(color_string, msg, end_char="\n"):
+    """
+    This function enables users to add a color to the print. It also enables
+    to pass end_char to print allowing to print several strings in the same line
+    in different prints.
+
+    Parameters
+    ----------
+    color_string: str
+        The color code to pass to the function, which enables color change as
+        well as background color change.
+    msg: str
+        The actual text to be printed
+    end_char: str
+        The character in which each print should finish. By default it will be
+        "\n".
+
+    """
     print("\x1b[{}{}\x1b[0m".format(color_string, msg), end=end_char)
 
 
 def procs_dict_parser(procs_dict):
+    """
+    This function handles the dictionary of attributes of each Process class
+    to print to stdout.
+
+    Parameters
+    ----------
+    procs_dict: dict
+        A dictionary with the class attributes used by the argument that prints
+        the lists of processes, both for short_list and for detailed_list.
+
+
+    """
     colored_print("1;32m", "===== L I S T   O F   P R O C E S S E S =====")
     for template, dict_proc_info in procs_dict.items():
         template_str = "\n=> {}".format(template)
@@ -21,6 +50,22 @@ def procs_dict_parser(procs_dict):
 
 
 def proc_collector(process_map, arguments_list):
+    """
+    Function that collects all processes available and stores a dictionary of
+    the required arguments of each process class to be passed to
+    procs_dict_parser
+
+    Parameters
+    ----------
+    process_map: dict
+        The dictionary with the Processes currently available in assemblerflow
+        and their corresponding classes as values
+    arguments_list: list
+        The arguments to fetch from the classes in process_map. This depends on
+        the argparser option -l or -L that has been used.
+
+
+    """
     # dict to store only the required entries
     procs_dict = {}
     # loops between all process_map Processes
