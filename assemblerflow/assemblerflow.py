@@ -116,7 +116,7 @@ def run(args):
         formatter = logging.Formatter('%(message)s')
 
     # create console handler and set level to debug
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
 
     # add formatter to ch
@@ -130,7 +130,7 @@ def run(args):
         "============================================="
     ]
 
-    logger.info(colored_print("1;32m", "\n".join(welcome)))
+    logger.info(colored_print("\n".join(welcome), "green_bold"))
 
     # prints a detailed list of the process class arguments
     if args.detailed_list:
@@ -155,12 +155,10 @@ def run(args):
         sys.exit(0)
 
     try:
-        logger.info(colored_print(
-            "1;38m", "Checking pipeline for errors..."
-        ))
+        logger.info(colored_print("Checking pipeline for errors..."))
         pipeline_list = parse_pipeline(args.tasks)
     except SanityError as e:
-        logger.error(colored_print("1;31m", e.value))
+        logger.error(colored_print(e.value, "red_bold"))
         sys.exit(1)
     logger.debug("Pipeline successfully parsed: {}".format(pipeline_list))
 

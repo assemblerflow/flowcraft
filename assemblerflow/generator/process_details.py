@@ -1,4 +1,17 @@
-def colored_print(color_string, msg, end_char="\n"):
+import logging
+
+logger = logging.getLogger("main.{}".format(__name__))
+
+COLORS = {
+    "green_bold": "1;32m",
+    "red_bold": "1;31m",
+    "white_bold": "1;38m",
+    "blue_bold": "1;36m",
+    "purple_bold": "1;34m"
+}
+
+
+def colored_print(msg, color_label="white_bold"):
     """
     This function enables users to add a color to the print. It also enables
     to pass end_char to print allowing to print several strings in the same line
@@ -17,7 +30,9 @@ def colored_print(color_string, msg, end_char="\n"):
 
     """
 
-    return "\x1b[{}{}\x1b[0m".format(color_string, msg)
+    col = COLORS[color_label]
+
+    return "\x1b[{}{}\x1b[0m".format(col, msg)
 
 
 def procs_dict_parser(procs_dict):
@@ -34,22 +49,27 @@ def procs_dict_parser(procs_dict):
 
     """
 
-    colored_print("1;32m", "===== L I S T   O F   P R O C E S S E S =====")
+    logger.info(colored_print(
+        "\n===== L I S T   O F   P R O C E S S E S =====\n", "green_bold"))
 
     for template, dict_proc_info in procs_dict.items():
-        template_str = "\n=> {}".format(template)
-        colored_print("1;36m", template_str)
+        template_str = "=> {}".format(template)
+        logger.info(colored_print(template_str, "blue_bold"))
 
         for info in dict_proc_info:
-            info_str = "\t{}: ".format(info)
+            info_str = "   {}: ".format(info)
 
             if isinstance(dict_proc_info[info], list):
-                if len(dict_proc_info[info]) != 0:
-                    colored_print("1;34m", info_str, end_char="")
-                    print(", ".join(dict_proc_info[info]))
+                if len(dict_proc_info[info]) == 0:
+                    arg_msg = "None"
+                else:
+                    arg_msg = ", ".join(dict_proc_info[info])
             else:
-                colored_print("1;34m", info_str, end_char="")
-                print(dict_proc_info[info])
+                arg_msg = dict_proc_info[info]
+
+            logger.info("{} {}".format(
+                colored_print(info_str, "purple_bold"), arg_msg
+            ))
 
 
 def proc_collector(process_map, arguments_list):
@@ -79,7 +99,7 @@ def proc_collector(process_map, arguments_list):
         # dictionary comprehension to store only the required keys provided by
         # argument_list
         d = {arg_key: vars(cls_inst)[arg_key] for arg_key in vars(cls_inst)
-              if arg_key in arguments_list}
+             if arg_key in arguments_list}
         procs_dict[name] = d
 
     procs_dict_parser(procs_dict)
