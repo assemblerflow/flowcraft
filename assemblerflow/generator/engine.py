@@ -6,13 +6,13 @@ from collections import defaultdict
 logger = logging.getLogger("engine")
 
 try:
-    import generator.Process as pc
+    import generator.process as pc
     import generator.error_handling as eh
-    from generator import HeaderSkeleton as hs
+    from generator import header_skeleton as hs
 except ImportError as e:
-    import assemblerflow.generator.Process as pc
+    import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
-    from assemblerflow.generator import HeaderSkeleton as hs
+    from assemblerflow.generator import header_skeleton as hs
 
 
 process_map = {
