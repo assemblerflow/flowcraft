@@ -180,6 +180,8 @@ def run(args):
     if args.include_templates:
         copy_project(args.output_nf)
 
+    logger.info(colored_print("\nDONE!", "green_bold"))
+
 
 def main():
 
