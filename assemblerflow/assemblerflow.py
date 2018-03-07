@@ -165,9 +165,7 @@ def run(args):
     nfg = NextflowGenerator(process_list=pipeline_list,
                             nextflow_file=args.output_nf)
 
-    logger.info(colored_print(
-        "1;38m", "\nBuilding your awesome pipeline..."
-    ))
+    logger.info(colored_print("\nBuilding your awesome pipeline..."))
 
     # building the actual pipeline nf file
     nfg.build()
