@@ -53,6 +53,7 @@ process_map = {
 dict: Maps the process ids to the corresponding template interface class
 """
 
+
 class ProcessError(Exception):
     def __init__(self, value):
         self.value = value
@@ -162,7 +163,7 @@ class NextflowGenerator:
             logger.debug("[{}] Output channel: {}".format(p, p_out_name))
 
             # Instance output process
-            out_process = self.process_map[p_out_name](template=p_out_name)
+            out_process = process_map[p_out_name](template=p_out_name)
             input_suf = "{}_{}".format(in_lane, p)
             output_suf = "{}_{}".format(out_lane, p)
             logger.debug("[{}] Setting main channels with input suffix '{}'"
@@ -173,7 +174,7 @@ class NextflowGenerator:
             # Instance input process, if it exists. In case of init, the
             # output process forks from the raw input user data
             if p_in_name != "__init__":
-                in_process = self.process_map[p_in_name](template=p_in_name)
+                in_process = process_map[p_in_name](template=p_in_name)
                 # Test if two processes can be connected by input/output types
                 logger.debug("[{}] Testing connection between input and "
                              "output processes".format(p))
