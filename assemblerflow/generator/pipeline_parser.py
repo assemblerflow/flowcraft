@@ -301,7 +301,8 @@ def parse_pipeline(pipeline_str):
     if not nforks:
         logger.debug("Detected linear pipeline string : {}".format(
             pipeline_str))
-        pipeline_links.extend(linear_connection(pipeline_str.split(), lane))
+        linear_pipeline = ["__init__"] + pipeline_str.split()
+        pipeline_links.extend(linear_connection(linear_pipeline, lane))
         return pipeline_links
 
     for i in range(nforks):
@@ -332,8 +333,10 @@ def parse_pipeline(pipeline_str):
             # of the pipeline string. In this case, inject the special
             # "init" process.
             if not previous_process:
-                previous_process = ["init"]
+                previous_process = ["__init__"]
                 lane = 0
+            else:
+                previous_process = ["__init__"] + previous_process
 
             # Add the linear modules before the fork
             pipeline_links.extend(
