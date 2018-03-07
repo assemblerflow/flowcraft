@@ -9,7 +9,7 @@ The addition of a new process to assemblerflow requires three main steps:
 #. Create a jinja2 template in ``assemblerflow.generator.templates`` with the
    nextflow code.
 
-#. Create a :class:`~assemblerflow.generator.Process` class in
+#. Create a :class:`~assemblerflow.generator.Process` subclass in
    :class:`assemblerflow.generator.Process` with
    information about the process (e.g., expected input/output, secondary inputs,
    etc.).
@@ -123,17 +123,16 @@ class::
 
         def __init__(self, **kwargs):
 
-            super().__init__(ptype="assembly", **kwargs)
+            super().__init__(**kwargs)
 
             self.input_type = "fastq"
-            self.output_type = "assembly"
+            self.output_type = "fasta"
 
 This is the simplest working example of a process class, which basically needs
-to inherit the parent class attributes (the ``super`` part), with the process
-type specified (``ptype``). Then we only need to define the expected input
-and output types of the process. While the process type (``ptype``) must be
-included in a list of supported types, there are no limitations to the
-input/output types ().
+to inherit the parent class attributes (the ``super`` part).
+Then we only need to define the expected input
+and output types of the process. There are no limitations to the
+input/output types.
 However, a pipeline will only build successfully when all processes correctly
 link the output with the input type.
 
@@ -141,13 +140,13 @@ Add to available processes
 ::::::::::::::::::::::::::
 
 The final step is to add your new process to the list of available processes.
-This list is defined in as an attribute of the
-``assemblerflow.assemblerflow.NextflowGenerator`` class, which is a dictionary
+This list is defined in as a variable in the :mod:`assemblerflow.enginge`
+module, which is a dictionary
 mapping the process template name to the corresponding template class::
 
     process_map = {
     <other_process>
-    my_process: Process.MyProcess
+    "my_process_template": Process.MyProcess
     }
 
 Note that the template string does not include the ``.nf`` extension.
@@ -159,33 +158,22 @@ This section describes the main attributes of the
 :mod:`~assemblerflow.generator.Process` class: what they
 do and how do they impact the pipeline generation.
 
-Accepted process types
-::::::::::::::::::::::
+Input/Output types
+::::::::::::::::::
 
-As mentioned in the `Create Process class`_ section, processes need a type
-in order to be instantiated. This process type informs about the role and
-positioning of the process in the pipeline. The currently supported process
-types are:
-
-- ``init`` (*Reserved special type*)
-- ``raw``
-- ``pre_assembly``
-- ``assembly``
-- ``post_assembly``
-- ``annotation``
-- ``status`` (*Reserved special type*)
-
-Currently, the only purpose of this attribute is to set the prefix name of the
-main input/output channels (See
-:func:`~assemblerflow.generator.Process.Process._set_main_channel_name`).
-For instance, a process of the ``pre_assembly`` type will set the main
-input/output channel prefix to ``MAIN_fq``, which those of the ``assembly``
-type will have the main input prefix to ``MAIN_fq`` and output prefix to
-``MAIN_assembly``.
+The :attr:`~assemblerflow.generator.Process.Process.input_type` and
+:attr:`~assemblerflow.generator.Process.Process.output_type` attributes
+set the expected type of input and output of the process. There are no
+limitations to the type of input/output that are provided. However, processes
+will only link when the output of one process matches the input of the
+subsequent process (unless the
+:attr:`~assemblerflow.generator.Process.Process.ignore_type` attribute is set
+to ``True``). Otherwise, assemblerflow will raise an exception stating that
+two processes could not be linked.
 
 .. note::
 
-    This attribute may change in future versions.
+    The input/ouput types that are currently used are ``fastq``, ``fasta``.
 
 Secondary inputs
 ::::::::::::::::
@@ -217,60 +205,9 @@ also stores how the channel should be defined at the beginning of the pipeline
 file. Note that this channel definition mentions the parameters (e.g.
 ``params.genomeSize``).
 
-Process ID
-::::::::::
-
-The process ID, set via the
-:attr:`~assemblerflow.generator.Process.Process.pid` attribute, is an
-arbitrarily and incremental number that is awarded to each process depending
-on its position in the pipeline. It is mainly used to ensure that there are
-no duplicated channels even when the same process is used multiple times
-in the same pipeline.
-
-Template
-::::::::
-
-The :attr:`~assemblerflow.generator.Process.Process.template` attribute
-is used to fetch the jinja2 template file that corresponds to the current
-process. The path to the template file is determined as follows::
-
-    join(<template directory>, template + ".nf")
-
-Input/Output types
-::::::::::::::::::
-
-The :attr:`~assemblerflow.generator.Process.Process.input_type` and
-:attr:`~assemblerflow.generator.Process.Process.output_type` attributes
-set the expected type of input and output of the process. There are no
-limitations to the type of input/output that are provided. However, processes
-will only link when the output of one process matches the input of the
-subsequent process (unless the
-:attr:`~assemblerflow.generator.Process.Process.ignore_type` attribute is set
-to ``True``). Otherwise, assemblerflow will raise an exception stating that
-two processes could not be linked.
-
 .. note::
-
-    The input/ouput types that are currently used are ``raw``, ``fastq``
-    and ``assembly``.
-
-Ignore type
-:::::::::::
-
-The :attr:`~assemblerflow.generator.Process.Process.ignore_type` attribute,
-controls whether a match between the input of the current process and the
-output of the previous one is enforced or not. When there are multiple
-terminal processes that fork from the main channel, there is no need to
-enforce the type match and in that case this attribute can be set to ``False``.
-
-Dependencies
-::::::::::::
-
-If a process depends on the presence of one or more processes upstream in the
-pipeline, these can be specific via the
-:attr:`~assemblerflow.generator.Process.Process.dependencies` attribute.
-When building the pipeline if at least one of the dependencies is absent,
-assemblerflow will raise an exception informing of a missing dependency.
+    In future versions, the parameters will be dynamically generated in the
+    nextflow.config file
 
 Link start
 ::::::::::
@@ -301,6 +238,44 @@ If another process exists in the pipeline with
 establish a secondary channel between the two processes. If there are multiple
 processes receiving from a single one, the channel from the later will
 for into any number of receiving processes.
+
+Dependencies
+::::::::::::
+
+If a process depends on the presence of one or more processes upstream in the
+pipeline, these can be specific via the
+:attr:`~assemblerflow.generator.Process.Process.dependencies` attribute.
+When building the pipeline if at least one of the dependencies is absent,
+assemblerflow will raise an exception informing of a missing dependency.
+
+Ignore type
+:::::::::::
+
+The :attr:`~assemblerflow.generator.Process.Process.ignore_type` attribute,
+controls whether a match between the input of the current process and the
+output of the previous one is enforced or not. When there are multiple
+terminal processes that fork from the main channel, there is no need to
+enforce the type match and in that case this attribute can be set to ``False``.
+
+Process ID
+::::::::::
+
+The process ID, set via the
+:attr:`~assemblerflow.generator.Process.Process.pid` attribute, is an
+arbitrarily and incremental number that is awarded to each process depending
+on its position in the pipeline. It is mainly used to ensure that there are
+no duplicated channels even when the same process is used multiple times
+in the same pipeline.
+
+Template
+::::::::
+
+The :attr:`~assemblerflow.generator.Process.Process.template` attribute
+is used to fetch the jinja2 template file that corresponds to the current
+process. The path to the template file is determined as follows::
+
+    join(<template directory>, template + ".nf")
+
 
 Status channels
 :::::::::::::::
