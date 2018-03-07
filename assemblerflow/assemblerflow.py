@@ -154,6 +154,12 @@ def run(args):
         proc_collector(process_map, arguments_list)
         sys.exit(0)
 
+    # Check if no args are passed
+    if len(sys.argv) == 1:
+        logger.info(colored_print("Please provide one of the supported "
+                                  "arguments!", "red_bold"))
+        return
+
     try:
         logger.info(colored_print("Checking pipeline for errors..."))
         pipeline_list = parse_pipeline(args.tasks)
