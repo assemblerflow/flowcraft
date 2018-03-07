@@ -1,6 +1,6 @@
 import pytest
 
-import assemblerflow.generator.Process as proc
+import assemblerflow.generator.process as proc
 
 
 def test_process_init():

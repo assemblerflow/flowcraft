@@ -216,12 +216,12 @@ class Process:
 
         Parameters
         ----------
-        input_lane : int
-            Lane of the previous process, so that it's output channel
-            matches with the input of this channel
-        output_lane : int
-            Lane of the current channel, so that the output matches with the
-            next lane.
+        input_suffix : str
+            Suffix added to the input channel. Should be based on the lane
+            and an arbitrary unique id
+        output_suffix : int
+            Suffix added to the output channel. Should be based on the lane
+            and an arbitrary unique id
         """
 
         self.input_channel = "{}_in_{}".format(self.template, input_suffix)
