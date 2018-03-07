@@ -135,7 +135,7 @@ class Process:
          determined by the :attr:`~Process.input_type` attribute, and will
         fetch the information that is mapped in the :attr:`RAW_MAPPING`
          variable. It will only be used by the first process(es) defined in
-         a pipeline. 
+         a pipeline.
         """
 
         self.link_start = []

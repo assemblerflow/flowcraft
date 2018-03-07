@@ -80,7 +80,7 @@ class NextflowGenerator:
         self.main_raw_inputs = {}
         """
         list: Stores the main raw inputs from the user parameters into the
-        first process(es). 
+        first process(es).
         """
 
         self.secondary_inputs = {}

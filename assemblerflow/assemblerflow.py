@@ -15,19 +15,15 @@ from distutils.dir_util import copy_tree
 from os.path import join, dirname
 
 try:
-    from generator import header_skeleton as hs
     from generator.engine import NextflowGenerator, process_map
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
-    import generator.process as pc
 except ImportError:
-    from assemblerflow.generator import header_skeleton as hs
     from assemblerflow.generator.engine import NextflowGenerator, process_map
     from assemblerflow.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from assemblerflow.generator.process_details import proc_collector, \
         colored_print
-    import assemblerflow.generator.process as pc
 
 logger = logging.getLogger("main")
 
@@ -175,9 +171,7 @@ def run(args):
     nfg = NextflowGenerator(process_list=pipeline_list,
                             nextflow_file=args.output_nf)
 
-    logger.info(colored_print(
-        "1;38m", "\nBuilding your awesome pipeline..."
-    ))
+    logger.info(colored_print("\nBuilding your awesome pipeline..."))
 
     # building the actual pipeline nf file
     nfg.build()
