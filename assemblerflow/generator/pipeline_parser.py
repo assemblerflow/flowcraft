@@ -2,6 +2,11 @@ import os
 import logging
 import re
 
+try:
+    from generator.error_handling import SanityError
+except ImportError:
+    from assemblerflow.generator.error_handling import SanityError
+
 logger = logging.getLogger("main.{}".format(__name__))
 
 # Set the tokens used for the main syntax
@@ -11,17 +16,6 @@ FORK_TOKEN = "("
 LANE_TOKEN = "|"
 # Token that closes a fork
 CLOSE_TOKEN = ")"
-
-
-class SanityError(Exception):
-    """
-    Class to raise a custom error for sanity checks
-    """
-    def __init__(self, value):
-        self.value = "inSANITY ERROR: " + value
-
-    # def __str__(self):
-    #     return repr(self.value)
 
 
 def brackets_but_no_lanes(p_string):
@@ -164,7 +158,7 @@ def late_proc_insanity_check(p_string):
 
     """
 
-    if re.search("\{}[^|)]".format(CLOSE_TOKEN), p_string):
+    if re.search('\{}[^|)]'.format(CLOSE_TOKEN), p_string):
         raise SanityError("After a fork it is not allowed to have any "
                           "alphanumeric value.")
 
