@@ -5,6 +5,6 @@ import assemblerflow.generator.Process as proc
 
 def test_process_init():
 
-    p = proc.Process("init", "init")
+    p = proc.Process("init")
 
-    assert [p.ptype, p.template] == ["init", "init"]
+    assert [p.template] == ["init"]
