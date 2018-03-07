@@ -17,7 +17,7 @@ def colored_print(color_string, msg, end_char="\n"):
 
     """
 
-    print("\x1b[{}{}\x1b[0m".format(color_string, msg), end=end_char)
+    return "\x1b[{}{}\x1b[0m".format(color_string, msg)
 
 
 def procs_dict_parser(procs_dict):

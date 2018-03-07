@@ -18,11 +18,27 @@ class SanityError(Exception):
     Class to raise a custom error for sanity checks
     """
     def __init__(self, value):
-        self.value = value
+        self.value = "inSANITY ERROR: " + value
 
-    def __str__(self):
-        return repr(self.value)
+    # def __str__(self):
+    #     return repr(self.value)
 
+
+def brackets_but_no_lanes(p_string):
+    """
+    Function to check if a LANE_TOKEN is provided but no fork is initiated.
+    Parameters
+    ----------
+    p_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
+
+    """
+
+    if "|" in p_string and "(" not in p_string:
+        raise SanityError("No fork initiation character '(' was "
+                          "provided but there is a fork lane separator "
+                          "character '|'")
 
 def brackets_insanity_check(p_string):
     """
@@ -47,8 +63,8 @@ def brackets_insanity_check(p_string):
         max_bracket = max(dict_values, key=dict_values.get)
 
         raise SanityError(
-            "A different number of '(' and ')' was specified. There are {} "
-            "extra '{}'. The number of '(' and ')'should be equal.".format(
+            "A different number of '(' and ')' was specified. There are "
+            "{} extra '{}'. The number of '(' and ')'should be equal.".format(
                 str(abs(p_string.count(FORK_TOKEN) - p_string.count(CLOSE_TOKEN))),
                 max_bracket))
 
@@ -85,8 +101,8 @@ def final_char_insanity_check(p_string):
 
     # Check if last character of string is a LANE_TOKEN
     if p_string.endswith(LANE_TOKEN):
-        raise SanityError("Fork separator character '|' cannot be the last "
-                          "element of pipeline string")
+        raise SanityError("Fork separator character '|' cannot be the "
+                          "last element of pipeline string")
 
 
 def fork_procs_insanity_check(p_string):
@@ -111,8 +127,8 @@ def fork_procs_insanity_check(p_string):
     if FORK_TOKEN + LANE_TOKEN in p_string or \
             LANE_TOKEN + CLOSE_TOKEN in p_string or \
             LANE_TOKEN + FORK_TOKEN in p_string:
-        raise SanityError("There must be a process between the fork start "
-                          "character '(' or end ')' and the separator of "
+        raise SanityError("There must be a process between the fork "
+                          "start character '(' or end ')' and the separator of "
                           "processes character '|'")
 
 
@@ -130,8 +146,8 @@ def start_proc_insanity_check(p_string):
     """
 
     if FORK_TOKEN + FORK_TOKEN in p_string:
-        raise SanityError("There must be a starting process after the fork "
-                          "before adding a new fork. E.g: proc1 ( proc2.1 "
+        raise SanityError("There must be a starting process after the "
+                          "fork before adding a new fork. E.g: proc1 ( proc2.1 "
                           "(proc3.1 | proc3.2) | proc 2.2 )")
 
 
@@ -203,21 +219,27 @@ def inner_fork_insanity_checks(pipeline_string):
 
         # Checks if there is no fork separator character '|' within each fork
         if not len(fork_simplified.split(LANE_TOKEN)) > 1:
-            raise SanityError("One of the forks doesn't have '|' separator "
-                              "between the processes to fork. This is the"
-                              " prime suspect: '({})'".format(fork))
+            raise SanityError("One of the forks doesn't have '|' "
+                              "separator between the processes to fork. This is"
+                              " the prime suspect: '({})'".format(fork))
 
-
-        # removes white spaces and splits by LANE_TOKEN the processes within fork
-        list_fork_proc = list(filter(
-            None, fork_simplified.replace(LANE_TOKEN, " ").split(" ")))
+        # splits by LANE_TOKEN
+        list_fork_lanes = fork_simplified.split(LANE_TOKEN)
 
         # Check if there is a repeated process within a fork - linked with the
-        #  above
-        if len(list_fork_proc) != len(set(list_fork_proc)):
-            raise SanityError("There are duplicated processes within a fork. "
-                              "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2)."
-                              "This is the prime suspect: '({})'".format(fork))
+        # above
+        first_elements_list = []
+        for each_lane in list_fork_lanes:
+            # only if the first element of each lane is repeated between them,
+            # the warning is raised
+            first_element = each_lane.strip().split(" ")[0]
+            if first_element not in first_elements_list:
+                first_elements_list.append(first_element)
+            else:
+                raise SanityError(
+                    "There are duplicated processes within a fork. "
+                    "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2). "
+                    "This is the prime suspect: '({})'".format(fork))
 
 
 def parse_pipeline(pipeline_str):
@@ -250,6 +272,7 @@ def parse_pipeline(pipeline_str):
     # the majority uses the parsed p_string.
     checks = {
         p_string: [
+            brackets_but_no_lanes,
             brackets_insanity_check,
             lane_char_insanity_check,
             final_char_insanity_check,

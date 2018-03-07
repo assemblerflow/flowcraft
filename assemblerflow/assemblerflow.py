@@ -446,25 +446,32 @@ def run(args):
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-        # create console handler and set level to debug
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-
         # create formatter
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-        # add formatter to ch
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
+    else:
+        logger.setLevel(logging.INFO)
+
+        # create special formatter for info logs
+        formatter = logging.Formatter('%(message)s')
+
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    # add formatter to ch
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
     welcome = [
         "========= A S S E M B L E R F L O W =========\n",
         "version: {}".format(__version__),
-        "build: {}\n".format(__build__)
+        "build: {}\n".format(__build__),
+        "============================================="
     ]
 
-    colored_print("1;32m", "\n".join(welcome))
+    logger.info(colored_print("1;32m", "\n".join(welcome)))
 
     # prints a detailed list of the process class arguments
     if args.detailed_list:
@@ -489,10 +496,12 @@ def run(args):
         sys.exit(0)
 
     try:
-        colored_print("1;32m", "====== R U N N I N G   P I P E L I N E ======\n")
+        logger.info(colored_print(
+            "1;38m", "Checking pipeline for errors..."
+        ))
         pipeline_list = parse_pipeline(args.tasks)
     except SanityError as e:
-        logger.error(e.value)
+        logger.error(colored_print("1;31m", e.value))
         sys.exit(1)
     logger.debug("Pipeline successfully parsed: {}".format(pipeline_list))
 
@@ -503,15 +512,16 @@ def run(args):
     nfg = NextflowGenerator(process_list=args.tasks,
                             nextflow_file=args.output_nf)
 
+    logger.info(colored_print(
+        "1;38m", "\nBuilding your awesome pipeline..."
+    ))
+
+    # building the actual pipeline nf file
     nfg.build()
 
+    # copy template to cwd, to allow for immediate execution
     if args.include_templates:
         copy_project(args.output_nf)
-
-
-
-    #if args.detailed_list:
-        # lele
 
 
 def main():
