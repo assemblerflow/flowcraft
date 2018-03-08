@@ -9,7 +9,7 @@ process seq_typing {
     errorStrategy "ignore"
 
     input:
-    set fastq_id, file(fastq_pair) from SIDE_SeqType_raw_{{ pid }}
+    set fastq_id, file(fastq_pair) from {{ input_channel }}
     file refO from Channel.fromPath(params.referenceFileO)
     file refH from Channel.fromPath(params.referenceFileH)
 

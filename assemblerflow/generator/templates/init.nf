@@ -1,4 +1,7 @@
 
+// Placeholder for main input channels
+{{ main_inputs }}
+
 // Placeholder for secondary input channels
 {{ secondary_inputs }}
 

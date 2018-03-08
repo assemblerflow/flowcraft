@@ -7,7 +7,7 @@ process assembly_mapping {
     tag { fastq_id + " getStats" }
 
     input:
-    set fastq_id, file(assembly), file(fastq) from {{ input_channel }}.join(_{{ input_channel }})
+    set fastq_id, file(assembly), file(fastq) from {{ input_channel }}.join(_LAST_fastq_{{ pid }})
 
     output:
     set fastq_id, file(assembly), 'coverages.tsv', 'coverage_per_bp.tsv', 'sorted.bam', 'sorted.bam.bai' optional true into MAIN_am_out_{{ pid }}
