@@ -36,35 +36,36 @@ class Process:
         Templates are stored in ``generator/templates``.
     """
 
-    def __init__(self, ptype, template):
+    RAW_MAPPING = {
+        "fastq": {
+            "params": "fastq",
+            "channel": "IN_fastq_raw",
+            "channel_str": "IN_fastq_raw = Channel.fromFilePairs(params.fastq)"
+        },
+        "fasta": {
+            "params": "fasta",
+            "channel": "IN_fasta_raw",
+            "channel_str": "IN_fasta_raw = Channel.fromPath(params.fasta)"
+                           ".map{ it -> [it.toString().tokenize('/').last()"
+                           ".tokenize('.').first(), it] }"
+        }
+    }
+    """
+    dict: Contains the mapping between the :attr:`Process.input_type` attribute
+    and the corresponding nextflow parameter and main channel definition, e.g.::
 
-        accepted_types = [
-            "init",
-            "raw",
-            "pre_assembly",
-            "assembly",
-            "post_assembly",
-            "annotation",
-            "status",
-            "terminal"
-        ]
-        """
-        list: Accepted process types
-        """
+        "fastq" : {
+            "params": "fastq",
+            "channel: "<channel>
+        }
+    """
 
-        if ptype not in accepted_types:
-            raise ValueError(
-                "{} is not an accepted process type".format(ptype))
+    def __init__(self, template):
 
         self.pid = None
         """
         int: Process ID number that represents the order and position in the
         generated pipeline
-        """
-
-        self.ptype = ptype
-        """
-        str: Process type. See :py:attr:`accepted_types`.
         """
 
         self.template = template
@@ -112,33 +113,34 @@ class Process:
         of the :py:attr:`Process.template` attribute (e.g., [``fastqc``])
         """
 
-        self._main_in_str = None
-        """
-        str: String used to specify the prefix of main input channel.
-        """
+        self.lane = None
+        self.parent_lane = None
 
-        self._main_out_str = None
-        """
-        str: String used to specify the prefix of main output channel.
-        """
-
-        self._input_channel = None
+        self.input_channel = None
         """
         str: Place holder of the main input channel for the current process.
         This attribute can change dynamically depending on the forks and
         secondary channels in the final pipeline.
         """
 
-        self._output_channel = None
+        self.output_channel = None
         """
         str: Place holder of the main output channel for the current process.
         This attribute can change dynamically depending on the forks and
         secondary channels in the final pipeline.
         """
 
-        self._set_main_channel_name(ptype)
+        self.input_user_channel = None
+        """
+        dict: Stores a dictionary of two key:value pairs containing
+        the raw input channel for the process. This is automatically
+         determined by the :attr:`~Process.input_type` attribute, and will
+        fetch the information that is mapped in the :attr:`RAW_MAPPING`
+         variable. It will only be used by the first process(es) defined in
+         a pipeline.
+        """
 
-        self.link_start = [self._main_out_str]
+        self.link_start = []
         """
         list: List of strings with the starting points for secondary channels.
         When building the pipeline, these strings will be matched with equal
@@ -172,6 +174,13 @@ class Process:
         list: List of strings with the literal definition of the forks for
         the current process, ready to be added to the template string.
         """
+        self.main_forks = []
+        """
+        list: List of the channels onto which the main output should be
+        forked into. They will be automatically added to the
+        :attr:`~Process.main_forks` attribute when setting the secondary
+        channels
+        """
 
         self.secondary_inputs = []
         self.secondary_input_str = ""
@@ -203,27 +212,43 @@ class Process:
 
         self._template_path = join(tpl_dir, template + ".nf")
 
-    def _set_main_channel_name(self, ptype):
-        """Sets the prefix for the main channel depending on the process type
+    def set_main_channel_names(self, input_suffix, output_suffix, lane):
+        """Sets the main channel names based on the provide input and
+        output channel suffixes. This is performed when connecting processes.
 
-        ``Pre-assembly`` types are set to ``MAIN_fq``, while ``post-assembly``
-        are set to ``MAIN_assembly``. This distinction is important to allow
-        the forking of the last main channel with FastQ files or with
-        assembly files.
+        Parameters
+        ----------
+        input_suffix : str
+            Suffix added to the input channel. Should be based on the lane
+            and an arbitrary unique id
+        output_suffix : int
+            Suffix added to the output channel. Should be based on the lane
+            and an arbitrary unique id
         """
 
-        if ptype == "init":
-            self._main_in_str = "MAIN_raw"
-            self._main_out_str = "MAIN_raw"
-        elif ptype == "raw":
-            self._main_in_str = self._main_out_str = "MAIN_raw"
-        elif ptype == "pre_assembly":
-            self._main_in_str = self._main_out_str = "MAIN_fq"
-        elif ptype == "assembly":
-            self._main_in_str = "MAIN_fq"
-            self._main_out_str = "MAIN_assembly"
+        self.input_channel = "{}_in_{}".format(self.template, input_suffix)
+        self.output_channel = "{}_out_{}".format(self.template, output_suffix)
+        self.lane = lane
+
+    def get_user_channel(self, input_channel, input_type=None):
+        """Sets the main raw channels for the process
+
+        This will set the :attr:`~Process._input_user_channel` attribute
+        based on the :attr:`~Process.input_type` of the process. It retrieves
+        the information from the :attr:`~Process.RAW_MAPPINGS` dictionary.
+        If the input type is not present in the dictionary, it will set the
+        attribute to None
+        """
+
+        res = {"input_channel": input_channel}
+
+        if input_type:
+            channel_info = self.RAW_MAPPING[input_type]
         else:
-            self._main_in_str = self._main_out_str = "MAIN_assembly"
+            channel_info = self.RAW_MAPPING[self.input_type]
+
+        if self.input_type in self.RAW_MAPPING:
+            return {**res, **channel_info}
 
     @staticmethod
     def render(template, context):
@@ -293,18 +318,45 @@ class Process:
 
         self.pid = kwargs.get("pid")
 
-        self._input_channel = "{}_{}".format(self._main_in_str, self.pid)
-
         for i in self.status_channels:
             self.status_strs.append("{}_{}".format(i, self.pid))
 
-        if self.output_type:
-            self._output_channel = "{}_{}".format(self._main_out_str,
-                                                  self.pid + 1)
+        if self.main_forks:
+            logger.debug("Setting main fork channels: {}".format(
+                self.main_forks))
+            operator = "set" if len(self.main_forks) == 1 else "into"
+            self.forks.append("\n{}.{}{{ {} }}\n".format(
+                self.output_channel, operator, ";".join(self.main_forks)))
 
-        self._context = {**kwargs, **{"input_channel": self._input_channel,
-                                      "output_channel": self._output_channel,
-                                      "template": self.template}}
+        self._context = {**kwargs, **{"input_channel": self.input_channel,
+                                      "output_channel": self.output_channel,
+                                      "template": self.template,
+                                      "forks": "\n".join(self.forks)}}
+
+    def update_main_forks(self, sink):
+        """Updates the forks attribute with the sink channel destination
+
+        Parameters
+        ----------
+        sink : str
+            Channel onto which the main input will be forked to
+
+        """
+
+        if not self.main_forks:
+            self.main_forks = [self.output_channel]
+            self.output_channel = "_{}".format(self.output_channel)
+        self.main_forks.append(sink)
+
+        fork_lst = self.forks + self.main_forks
+        operator = "set" if len(fork_lst) == 1 else "into"
+        self.forks.append("\n{}.{}{{ {} }}\n".format(
+            self.output_channel, operator, ";".join(fork_lst))
+        )
+
+        self._context = {**self._context,
+                         **{"forks": "\n".join(self.forks),
+                            "output_channel": self.output_channel}}
 
     def set_secondary_channel(self, source, channel_list):
         """ General purpose method for setting a secondary channel
@@ -421,37 +473,47 @@ class Init(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="init", **kwargs)
+        super().__init__(**kwargs)
 
         self.input_type = None
         self.output_type = "raw"
 
         self.status_channels = []
 
-        self.secondary_inputs = [
-            {
-                "params": "fastq",
-                "channel": "IN_fastq_raw = "
-                           "Channel.fromFilePairs(params.fastq)"
-            }
-        ]
+    def set_raw_inputs(self, raw_input):
+        """
 
-    def set_secondary_channel(self, source, channel_list):
+        Parameters
+        ----------
+        raw_input_list
 
-        logger.debug("Setting secondary channel for source '{}': {}".format(
-            source, channel_list))
+        Returns
+        -------
 
-        if len(channel_list) == 1:
-            self.forks.append("\nIN_fastq_raw.set{{ {} }}\n".format(
-                channel_list[0]))
-        else:
-            self.forks.append("\nIN_fastq_raw.into{{ {} }}\n".format(
-                ";".join(channel_list)
-            ))
+        """
 
+        logger.debug("Setting raw inputs using raw input list: {}".format(
+            raw_input))
+
+        primary_inputs = []
+
+        for el in raw_input.values():
+            primary_inputs.append(el["channel_str"])
+            if len(el["raw_forks"]) == 1:
+                self.forks.append("\n{}.set{{ {} }}\n".format(
+                    el["channel"], el["raw_forks"][0]
+                ))
+            else:
+                self.forks.append("\n{}.into{{ {} }}\n".format(
+                    el["channel"], ";".join(el["raw_forks"])
+                ))
+
+        logger.debug("Setting raw inputs: {}".format(primary_inputs))
         logger.debug("Setting forks attribute to: {}".format(self.forks))
-        self._context = {**self._context, **{"forks": "\n".join(self.forks)}}
-        logger.debug(self._context)
+        self._context = {**self._context,
+                         **{"forks": "\n".join(self.forks),
+                            "main_inputs": "\n".join(primary_inputs)}}
+
 
     def set_secondary_inputs(self, channel_dict):
 
@@ -479,10 +541,9 @@ class IntegrityCoverage(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="pre_assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "raw"
+        self.input_type = "fastq"
         self.output_type = "fastq"
 
         self._main_in_str = "MAIN_raw"
@@ -501,9 +562,6 @@ class IntegrityCoverage(Process):
 
         self.link_start.extend(["SIDE_phred", "SIDE_max_len"])
 
-        self.link_end.append({"link": "MAIN_raw",
-                              "alias": "MAIN_raw"})
-
 
 class SeqTyping(Process):
     """
@@ -512,9 +570,9 @@ class SeqTyping(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="raw", **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "raw"
+        self.input_type = "fastq"
         self.output_type = None
 
         self.ignore_type = True
@@ -534,9 +592,9 @@ class PathoTyping(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="raw", **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "raw"
+        self.input_type = "fastq"
         self.output_type = None
 
         self.ignore_type = True
@@ -574,8 +632,7 @@ class CheckCoverage(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="pre_assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
         self.input_type = "fastq"
         self.output_type = "fastq"
@@ -613,8 +670,7 @@ class FastQC(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="pre_assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
         self.input_type = "fastq"
         self.output_type = "fastq"
@@ -648,8 +704,7 @@ class Trimmomatic(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="pre_assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
         self.input_type = "fastq"
         self.output_type = "fastq"
@@ -692,8 +747,7 @@ class FastqcTrimmomatic(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="pre_assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
         self.input_type = "fastq"
         self.output_type = "fastq"
@@ -724,10 +778,10 @@ class Skesa(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="assembly", **kwargs)
+        super().__init__(**kwargs)
 
         self.input_type = "fastq"
-        self.output_type = "assembly"
+        self.output_type = "fasta"
 
 
 class Spades(Process):
@@ -746,11 +800,10 @@ class Spades(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
         self.input_type = "fastq"
-        self.output_type = "assembly"
+        self.output_type = "fasta"
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
 
@@ -782,11 +835,10 @@ class ProcessSpades(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="post_assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "assembly"
-        self.output_type = "assembly"
+        self.input_type = "fasta"
+        self.output_type = "fasta"
 
         self.secondary_inputs = [
             {
@@ -821,16 +873,15 @@ class AssemblyMapping(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="post_assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "assembly"
-        self.output_type = "assembly"
+        self.input_type = "fasta"
+        self.output_type = "fasta"
 
         self.status_channels = ["STATUS_am", "STATUS_amp"]
 
         self.link_start.append("SIDE_BpCoverage")
-        self.link_end.append({"link": "MAIN_fq", "alias": "_MAIN_assembly"})
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
 
         self.secondary_inputs = [
             {
@@ -838,6 +889,10 @@ class AssemblyMapping(Process):
                 "channel": "IN_assembly_mapping_opts = "
                            "Channel.value([params.minAssemblyCoverage,"
                            "params.AMaxContigs])"
+            },
+            {
+                "params": "genomeSize",
+                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
             }
         ]
 
@@ -859,11 +914,10 @@ class Pilon(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="post_assembly",
-                         **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "assembly"
-        self.output_type = "assembly"
+        self.input_type = "fasta"
+        self.output_type = "fasta"
 
         self.dependencies = ["assembly_mapping"]
 
@@ -888,11 +942,10 @@ class Mlst(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="annotation",
-                         **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "assembly"
-        self.output_type = "assembly"
+        self.input_type = "fasta"
+        self.output_type = "fasta"
 
 
 class Abricate(Process):
@@ -912,10 +965,9 @@ class Abricate(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="annotation",
-                         **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "assembly"
+        self.input_type = "fasta"
         self.output_type = None
 
         self.ignore_type = True
@@ -942,10 +994,9 @@ class Prokka(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="annotation",
-                         **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "assembly"
+        self.input_type = "fasta"
         self.output_type = None
 
         self.ignore_type = True
@@ -972,10 +1023,9 @@ class Chewbbaca(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="annotation",
-                         **kwargs)
+        super().__init__(**kwargs)
 
-        self.input_type = "assembly"
+        self.input_type = "fasta"
         self.output_type = None
 
         self.ignore_type = True
@@ -989,7 +1039,7 @@ class TraceCompiler(Process):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="terminal", **kwargs)
+        super().__init__(**kwargs)
 
         self.link_start = None
 
@@ -1006,8 +1056,7 @@ class StatusCompiler(Status):
 
     def __init__(self, **kwargs):
 
-        super().__init__(ptype="status",
-                         **kwargs)
+        super().__init__(**kwargs)
 
         self.ignore_type = True
 

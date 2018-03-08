@@ -8,7 +8,7 @@ process patho_typing {
     errorStrategy "ignore"
 
     input:
-    set fastq_id, file(fastq_pair) from SIDE_PathoType_raw_{{ pid }}
+    set fastq_id, file(fastq_pair) from {{ input_channel }}
     val species from IN_pathoSpecies
 
     output:
