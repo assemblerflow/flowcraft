@@ -28,8 +28,8 @@ process integrity_coverage {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-	script:
-	template "integrity_coverage.py"
+    script:
+    template "integrity_coverage.py"
 
 }
 

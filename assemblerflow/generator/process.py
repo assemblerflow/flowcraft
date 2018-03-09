@@ -174,15 +174,19 @@ class Process:
         list: List of strings with the literal definition of the forks for
         the current process, ready to be added to the template string.
         """
-        self.main_forks = []
-        """
-        list: List of the channels onto which the main output should be
-        forked into. They will be automatically added to the
-        :attr:`~Process.main_forks` attribute when setting the secondary
-        channels
-        """
 
         self.secondary_inputs = []
+        """
+        list: List of dictionaries with secondary input channels from nextflow
+        parameters. This dictionary should contain two key:value pairs
+        with the ``params`` key, containing the parameter name, and the
+        ``channel`` key, containing the nextflow channel definition::
+        
+            {
+                "params": "pathoSpecies",
+                "channel": "IN_pathoSpecies = Channel.value(params.pathoSpecies)"
+            }
+        """
         self.secondary_input_str = ""
 
         self._context = None

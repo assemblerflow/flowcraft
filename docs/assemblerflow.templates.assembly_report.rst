@@ -5,3 +5,4 @@ assemblerflow\.templates\.assembly\_report module
     :members:
     :undoc-members:
     :show-inheritance:
+    :private-members:

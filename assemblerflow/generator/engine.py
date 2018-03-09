@@ -83,8 +83,6 @@ class NextflowGenerator:
         # list.
         self._build_connections(process_connections)
 
-        # self._insert_terminal_processes()
-
         self.nf_file = nextflow_file
         """
         str: Path to file where the pipeline will be generated
