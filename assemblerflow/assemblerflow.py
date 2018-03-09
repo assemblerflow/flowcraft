@@ -175,6 +175,9 @@ def run(args):
         proc_collector(process_map, arguments_list)
         sys.exit(0)
 
+    if args.tasks:
+        pipeline_string = args.tasks
+
     if args.recipe:
         if args.recipe not in available_recipes:
             logger.error(
@@ -190,10 +193,8 @@ def run(args):
         if not validated:
             sys.exit()
         pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
-        print(pipeline_string)
 
-    if args.tasks:
-        pipeline_string = args.tasks
+    print(pipeline_string)
 
     # Validate arguments
     passed = check_arguments(args)

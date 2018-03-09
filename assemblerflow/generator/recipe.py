@@ -276,6 +276,16 @@ class Recipe:
         tasks_array = tasks.split(" ")
 
         for task in tasks_array:
+            if task not in process_descriptions.keys():
+                logger.error(
+                    colored_print(
+                        "{} not in the possible processes".format(task),
+                        "red_bold"
+                    )
+                )
+
+                sys.exit()
+
             # Only uses the process if it is not already in the possible forks
             if not bool([x for x in forks if task in x]):
                 task_pipeline = []
@@ -404,14 +414,24 @@ class Recipe:
                     continue
                 final_forks.append(forks[i])
 
+        if len(final_forks) == 1:
+            final_forks = str(final_forks[0])
+
+        print(final_forks)
+
         # parses the string array to the assemblerflow nomenclature
         pipeline_string = str(final_forks)\
             .replace("[[", "( ")\
             .replace("]]", " )")\
+            .replace(")]", ")")\
             .replace("]", " |")\
             .replace(", [", " ")\
             .replace("'", "")\
-            .replace(",", "")
+            .replace(",", "")\
+            .replace("[", "")
+
+        if pipeline_string[-1] == "|":
+            pipeline_string = pipeline_string[:-1]
 
         return pipeline_string
 
@@ -477,5 +497,5 @@ class Innuendo(Recipe):
 
 
 available_recipes = {
-    "innuendo" : Innuendo
+    "innuendo": Innuendo
 }
