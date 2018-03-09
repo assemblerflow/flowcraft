@@ -6,8 +6,12 @@ Submodules
 
 .. toctree::
 
-   assemblerflow.generator.HeaderSkeleton
-   assemblerflow.generator.Process
+   assemblerflow.generator.engine
+   assemblerflow.generator.error_handling
+   assemblerflow.generator.header_skeleton
+   assemblerflow.generator.pipeline_parser
+   assemblerflow.generator.process
+   assemblerflow.generator.process_details
 
 Module contents
 ---------------
@@ -16,4 +20,3 @@ Module contents
     :members:
     :undoc-members:
     :show-inheritance:
-    :private-members:

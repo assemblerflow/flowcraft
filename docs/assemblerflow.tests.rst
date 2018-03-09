@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    assemblerflow.tests.test_processes
+   assemblerflow.tests.test_sanity
 
 Module contents
 ---------------

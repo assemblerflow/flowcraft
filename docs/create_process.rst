@@ -41,7 +41,9 @@ A minimal example created as a ``my_process.nf`` file is as follows::
     // The output is optional
     output:
     <output variables> into {{ output_channel }}
-    <status variables> into STATUS_{{ pid }}
+    {% with task_name="abricate" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     """
     <process code/commands>
@@ -57,7 +59,7 @@ processes and potential forks correctly link with each other. This example
 contains all placeholder variables that are currently supported by
 assemblerflow:
 
-- ``include "post.txt" ignore missing`` (**Recommended**): Inserts
+- ``include "post.txt"`` (**Recommended**): Inserts
   ``beforeScript`` and ``afterScript`` statements to the process. These
   include a bash script that created a series of *dotfiles* for the process
   and scripts for sending requests to REST APIs (only when certain pipeline
@@ -70,6 +72,10 @@ assemblerflow:
 - ``output_channel`` (**Optional**): Terminal processes may skip the output
   channel entirely. However, if you want to link the main output of this
   process with subsequent ones, this placeholder must be used.
+
+- ``include "compiler_channels.txt"`` (**Recommended**): This will include the
+  special channels that will compile the status/logging of the processes
+  throughout the pipeline (see `Status channels`_).
 
 - ``forks`` (**Conditional**): Inserts potential forks of the main output
   channel. It is **mandatory** if the ``output_channel`` is set.
@@ -281,57 +287,53 @@ process. The path to the template file is determined as follows::
 Status channels
 :::::::::::::::
 
-The ``STATUS`` channels are special channels dedicated to pass information
-regarding the status, warnings and fails from each process
-(see :ref:`dotfiles` for more information). By default,
-every ``Process`` class contains a
-:attr:`~assemblerflow.generator.Process.Process.status_channels` list
-attribute with a single element, ``["STATUS"]``. They can be
-defined in the template file as::
+The status channels are special channels dedicated to passing information
+regarding the status, warnings, fails and logging from each process
+(see :ref:`dotfiles` for more information). They are used only when the
+nextflow template file contains the appropriate jinja2 placeholder::
 
     output:
-    <main output> into {{ output_channel }}
-    set fastq_id, val("<process name>"), file(".status") \
-        file(".warning"), file(".fail") into STATUS_{{ pid }}
+    {% with task_name="<nextflow_template_name>" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
-Notice that the channel prefix must match between the class attribute and
-the channel name.
+By default,
+every ``Process`` class contains a
+:attr:`~assemblerflow.generator.process.Process.status_channels` list
+attribute that contains the
+:attr:`~assemblerflow.generator.process.Process.template` string::
 
-These channel will then feed a special
-:class:`~assemblerflow.generator.Process.Status` process that can can be
-placed at the end of the pipeline. This process will collect the status from
-all processes with these channels and write a report at the end of the
-pipeline in the `reports/status` directory.
+    self.status_channels = ["STATUS_{}".format(template)]
 
-If the process template file contains more than one nextflow process
-definition, each nextflow process will need a different status channel name::
+If there is only one nextflow process in the template and the ``task_name``
+variable in the template matches the
+:attr:`~assemblerflow.generator.process.Process.template` attribute, then
+it's all automatically set up.
+
+If the template file contains **more than one nextflow process**
+definition, multiple placeholders can be provided in the template::
 
     process A {
         (...)
         output:
-        <status variables> into STATUS_A_{{ pid }}
-        (...)
+        {% with task_name="A" %}
+        {%- include "compiler_channels.txt" ignore missing -%}
+        {% endwith %}
     }
 
     process B {
         (...)
         output:
-        <status variables> into STATUS_B_{{ pid }}
-        (...)
+        {% with task_name="B" %}
+        {%- include "compiler_channels.txt" ignore missing -%}
+        {% endwith %}
     }
 
-In this case, the corresponding ``Process`` class would need to be changed
-to::
+In this case, the
+:attr:`~assemblerflow.generator.process.Process.status_channels` attribute
+would need to be changed to::
 
-    self.status_channels = ["STATUS_A", "STATUS_B"]
-
-.. note::
-
-    Status channels will be collected and processed into CSV format by
-    the ``status_compiler``
-    process. If this process is placed at the end of the pipeline, the
-    status of each process will be compiled in the ``reports/status``
-    directory.
+    self.status_channels = ["A", "B"]
 
 Advanced use cases
 ------------------
