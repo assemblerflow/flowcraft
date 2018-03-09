@@ -12,8 +12,9 @@ process fastqc {
 
     output:
     set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') optional true into MAIN_fastqc_out_{{ pid }}
-    set fastq_id, val("fastqc_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_fastqc_{{ pid }}
-    file ".report.json"
+    {% with task_name="fastqc" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.stopAt != "fastqc"
@@ -45,10 +46,11 @@ process fastqc_report {
     output:
     set fastq_id, file(fastq_pair), 'optimal_trim', ".status" into MAIN_fastqc_trim
     file '*_trim_report' into LOG_trim_{{ pid }}
-    set fastq_id, val("fastqc_report_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_report_{{ pid }}
     file "*_status_report" into LOG_fastqc_report_{{ pid }}
     file "${fastq_id}_*_summary.txt" optional true
-    file ".report.json"
+    {% with task_name="fastqc_report" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     template "fastqc_report.py"
@@ -120,9 +122,10 @@ process trimmomatic {
 
     output:
     set fastq_id, "${fastq_id}_*P*" optional true into {{ output_channel }}
-    set fastq_id, val("trimmomatic_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_trim_{{ pid }}
     file 'trimmomatic_report.csv'
-    file ".report.json"
+    {% with task_name="trimmomatic" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.stopAt != "trimmomatic"

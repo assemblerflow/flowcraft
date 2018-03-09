@@ -13,7 +13,9 @@ process abricate {
 
     output:
     file '*.tsv' into abricate_out_{{ pid }}
-    set fastq_id, val("abricate_${db}"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
+    {% with task_name="abricate" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.abricateRun == true && params.annotationRun
@@ -43,7 +45,9 @@ process process_abricate {
     file abricate_file from abricate_out_{{ pid }}.collect()
 
     output:
-    file ".report.json"
+    {% with task_name="process_abricate" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     template "process_abricate.py"

@@ -15,7 +15,9 @@ process seq_typing {
 
     output:
     file "seq_typing.report.txt"
-    set file(".report.json"), file(".status")
+    {% with task_name="seq_typing" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     """

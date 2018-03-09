@@ -155,7 +155,7 @@ class Process:
         ``{"link": <link string>, "alias":<string for template>}``
         """
 
-        self.status_channels = ["STATUS"]
+        self.status_channels = ["STATUS_{}".format(template)]
         """
         list: Name of the status channels produced by the process. By default,
         it sets a single status channel. If more than one status channels
@@ -675,7 +675,7 @@ class FastQC(Process):
         self.input_type = "fastq"
         self.output_type = "fastq"
 
-        self.status_channels = ["STATUS_fastqc", "STATUS_report"]
+        self.status_channels = ["STATUS_fastqc2", "STATUS_fastqc2_report"]
         """
         list: Setting status channels for FastQC execution and FastQC report
         """
@@ -754,8 +754,8 @@ class FastqcTrimmomatic(Process):
 
         self.link_end.append({"link": "SIDE_phred", "alias": "SIDE_phred"})
 
-        self.status_channels = ["STATUS_fastqc", "STATUS_report",
-                                "STATUS_trim"]
+        self.status_channels = ["STATUS_fastqc", "STATUS_fastqc_report",
+                                "STATUS_trimmomatic"]
 
         self.secondary_inputs = [
             {
@@ -878,7 +878,8 @@ class AssemblyMapping(Process):
         self.input_type = "fasta"
         self.output_type = "fasta"
 
-        self.status_channels = ["STATUS_am", "STATUS_amp"]
+        self.status_channels = ["STATUS_assembly_mapping",
+                                "STATUS_process_am"]
 
         self.link_start.append("SIDE_BpCoverage")
         self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
@@ -920,6 +921,7 @@ class Pilon(Process):
         self.output_type = "fasta"
 
         self.dependencies = ["assembly_mapping"]
+        self.status_channels = ["STATUS_pilon", "STATUS_pilon_report"]
 
         self.link_end.append({"link": "SIDE_BpCoverage",
                               "alias": "SIDE_BpCoverage"})
@@ -971,6 +973,8 @@ class Abricate(Process):
         self.output_type = None
 
         self.ignore_type = True
+
+        self.status_channels = ["STATUS_abricate", "STATUS_process_abricate"]
 
         self.link_start = None
         self.link_end.append({"link": "MAIN_assembly",
@@ -1059,6 +1063,5 @@ class StatusCompiler(Status):
         super().__init__(**kwargs)
 
         self.ignore_type = True
-
         self.link_start = None
 

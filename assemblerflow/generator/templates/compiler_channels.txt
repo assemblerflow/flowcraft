@@ -1,0 +1,2 @@
+set fastq_id, val("{{ task_name }}_{{ pid }}"), file(".status"), file(".warning"), file(".fail"), file(".command.log") into STATUS_{{task_name}}_{{ pid }}
+file ".report.json"

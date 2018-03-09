@@ -12,8 +12,9 @@ process fastqc2 {
 
     output:
     set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') optional true into MAIN_fastqc_out_{{ pid }}
-    set fastq_id, val("fastqc2_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_fastqc_{{ pid }}
-    file ".report.json"
+    {% with task_name="fastqc2" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.stopAt != "fastqc2"
@@ -42,9 +43,10 @@ process fastqc2_report {
     output:
     set fastq_id, file(fastq_pair), '.status' into MAIN_fastqc_report_{{ pid }}
     file "*_status_report" into LOG_fastqc_report_{{ pid }}
-    set fastq_id, val("fastqc2_report_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_report_{{ pid }}
     file "${fastq_id}_*_summary.txt" optional true
-    file ".report.json"
+    {% with task_name="fastqc2_report" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     template "fastqc_report.py"

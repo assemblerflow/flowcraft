@@ -37,8 +37,8 @@ process_map = {
         "abricate": pc.Abricate,
         "prokka": pc.Prokka,
         "chewbbaca": pc.Chewbbaca,
-        "status_compiler": pc.StatusCompiler,
-        "trace_compiler": pc.TraceCompiler
+        # "status_compiler": pc.StatusCompiler,
+        # "trace_compiler": pc.TraceCompiler
 }
 """
 dict: Maps the process ids to the corresponding template interface class
@@ -83,6 +83,8 @@ class NextflowGenerator:
         # list.
         self._build_connections(process_connections)
 
+        # self._insert_terminal_processes()
+
         self.nf_file = nextflow_file
         """
         str: Path to file where the pipeline will be generated
@@ -117,6 +119,12 @@ class NextflowGenerator:
         self.status_channels = []
         """
         list: Stores the status channels from each process
+        """
+
+        self.skip_class = [pc.Status]
+        """
+        list: Stores the Process classes that should be skipped when iterating
+        over the :attr:`~NextflowGenerator.processes` list.
         """
 
         # self._check_pipeline_requirements()
@@ -209,6 +217,15 @@ class NextflowGenerator:
                     out_process.input_channel = parent_process.output_channel
 
             self.processes.append(out_process)
+
+    def _insert_terminal_processes(self):
+        """Automatically inserts terminal processes at the end of the pipeline
+
+        This method is used to insert compiling processes, such as those
+        that compile status, reports etc, at the end of the pipeline.
+        """
+
+        self.processes.append(pc.StatusCompiler(template="status_compiler"))
 
     @staticmethod
     def _test_connection(parent_process, child_process):
@@ -500,6 +517,12 @@ class NextflowGenerator:
 
         for i, p in enumerate(self.processes):
 
+            # Skip special process classes
+            if any([isinstance(p, x) for x in self.skip_class]):
+                logger.debug("Skipping special process class: {}".format(
+                    p))
+                continue
+
             # Set main channels for the process
             logger.debug("[{}] Setting main channels with pid: {}".format(
                 p.template, i))
@@ -569,14 +592,21 @@ class NextflowGenerator:
 
                 vals["p"].set_secondary_channel(source, vals["end"])
 
+    def _set_compiler_channels(self):
+
+        self._set_status_channels()
+
     def _set_status_channels(self):
         """Compiles all status channels for the status compiler process
         """
 
+        status_inst = pc.StatusCompiler(template="status_compiler")
+
         # Compile status channels from pipeline process
         status_channels = []
-        for p in [p for p in self.processes if p.ptype != "status"]:
-            status_channels.extend(p.status_strs)
+        for p in [p for p in self.processes]:
+            if not any([isinstance(p, x) for x in self.skip_class]):
+                status_channels.extend(p.status_strs)
 
         logger.debug("Setting status channels: {}".format(status_channels))
 
@@ -589,9 +619,8 @@ class NextflowGenerator:
                     ", ".join(status_channels)
                 ))
 
-        for p in self.processes:
-            if p.ptype == "status":
-                p.set_status_channels(status_channels)
+        status_inst.set_status_channels(status_channels)
+        self.processes.append(status_inst)
 
     def build(self):
         """Main pipeline builder
@@ -616,7 +645,7 @@ class NextflowGenerator:
 
         self._set_secondary_channels()
 
-        # self._set_status_channels()
+        self._set_compiler_channels()
 
         for p in self.processes:
             self.template += p.template_str

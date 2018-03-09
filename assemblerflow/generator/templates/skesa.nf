@@ -12,7 +12,9 @@ process skesa {
 
     output:
     set fastq_id, file('*_skesa.assembly.fasta') optional true into {{ output_channel }}
-    set fastq_id, val("skesa"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
+    {% with task_name="skesa" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     """

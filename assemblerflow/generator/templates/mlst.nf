@@ -15,8 +15,9 @@ process mlst {
     output:
     file '*.mlst.txt' into LOG_mlst_{{ pid }}
     set fastq_id, file(assembly), file(".status") into MAIN_mlst_out_{{ pid }}
-    set fastq_id, val("mlst"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
-    file ".report.json"
+    {% with task_name="mlst" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.mlstRun  == true && params.annotationRun

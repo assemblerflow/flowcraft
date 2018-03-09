@@ -7,24 +7,25 @@ process integrity_coverage_2 {
     tag { fastq_id + " getStats" }
     cpus 1
 
-	input:
-	set fastq_id, file(fastq_pair) from {{ input_channel }}
-	val gsize from IN_genome_size
-	val cov from IN_min_coverage
-	// Use -e option for skipping encoding guess
-	val opts from Channel.value('-e')
+    input:
+    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    val gsize from IN_genome_size
+    val cov from IN_min_coverage
+    // Use -e option for skipping encoding guess
+    val opts from Channel.value('-e')
 
-	output:
-	set fastq_id,
-	    file(fastq_pair),
-	    file('*_coverage'),
-	    file('*_max_len') optional true into MAIN_integrity_{{ pid }}
-	file('*_report') into LOG_report_coverage_{{ pid }}
-	set fastq_id, val("integrity_coverage2_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
-	file ".report.json"
+    output:
+    set fastq_id,
+        file(fastq_pair),
+        file('*_coverage'),
+        file('*_max_len') optional true into MAIN_integrity_{{ pid }}
+    file('*_report') into LOG_report_coverage_{{ pid }}
+    {% with task_name="check_coverage" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
-	script:
-	template "integrity_coverage.py"
+    script:
+    template "integrity_coverage.py"
 }
 
 {{ output_channel }} = Channel.create()

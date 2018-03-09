@@ -8,24 +8,25 @@ process integrity_coverage {
     // This process can only use a single CPU
     cpus 1
 
-	input:
-	set fastq_id, file(fastq_pair) from {{ input_channel }}
-	val gsize from IN_genome_size
-	val cov from IN_min_coverage
-	// This channel is for the custom options of the integrity_coverage.py
-	// script. See the script's documentation for more information.
-	val opts from Channel.value('')
+    input:
+    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    val gsize from IN_genome_size
+    val cov from IN_min_coverage
+    // This channel is for the custom options of the integrity_coverage.py
+    // script. See the script's documentation for more information.
+    val opts from Channel.value('')
 
-	output:
-	set fastq_id,
-	    file(fastq_pair),
-	    file('*_encoding'),
-	    file('*_phred'),
-	    file('*_coverage'),
-	    file('*_max_len') optional true into MAIN_integrity
-	file('*_report') optional true into LOG_report_coverage1
-	set fastq_id, val("integrity_coverage_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
-	file ".report.json"
+    output:
+    set fastq_id,
+        file(fastq_pair),
+        file('*_encoding'),
+        file('*_phred'),
+        file('*_coverage'),
+        file('*_max_len') optional true into MAIN_integrity
+    file('*_report') optional true into LOG_report_coverage1
+    {% with task_name="integrity_coverage" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
 	script:
 	template "integrity_coverage.py"

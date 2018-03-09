@@ -13,7 +13,9 @@ process patho_typing {
 
     output:
     file "patho_typing.report.txt"
-    set file(".report.json"), file(".status")
+    {% with task_name="patho_typing" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     """

@@ -12,7 +12,9 @@ process assembly_mapping {
     output:
     set fastq_id, file(assembly), 'coverages.tsv', 'coverage_per_bp.tsv', 'sorted.bam', 'sorted.bam.bai' optional true into MAIN_am_out_{{ pid }}
     set fastq_id, file("coverage_per_bp.tsv") optional true into SIDE_BpCoverage_{{ pid }}
-    set fastq_id, val("assembly_mapping"), file(".status"), file(".warning"), file(".fail") into STATUS_am_{{ pid }}
+    {% with task_name="assembly_mapping" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.stopAt != "assembly_mapping"
@@ -74,8 +76,9 @@ process process_assembly_mapping {
 
     output:
     set fastq_id, '*_filtered.assembly.fasta', 'filtered.bam', 'filtered.bam.bai' optional true into {{ output_channel }}
-    set fastq_id, val("process_am"), file(".status"), file(".warning"), file(".fail") into STATUS_amp_{{ pid }}
-    file ".report.json"
+    {% with task_name="process_am" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     template "process_assembly_mapping.py"
