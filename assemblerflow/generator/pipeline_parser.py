@@ -34,6 +34,7 @@ def brackets_but_no_lanes(p_string):
                           "provided but there is a fork lane separator "
                           "character '|'")
 
+
 def brackets_insanity_check(p_string):
     """
     This function performs a check for different number of '(' and ')'
@@ -236,6 +237,41 @@ def inner_fork_insanity_checks(pipeline_string):
                     "This is the prime suspect: '({})'".format(fork))
 
 
+def insanity_checks(pipeline_str):
+    """Wrapper that performs all sanity checks on the pipeline string
+
+    Parameters
+    ----------
+    pipeline_str : str
+        String with the pipeline definition
+    """
+
+    # Gets rid of all spaces in string
+    p_string = pipeline_str.replace(" ", "")
+
+    # some of the check functions use the pipeline_str as the user provided but
+    # the majority uses the parsed p_string.
+    checks = {
+        p_string: [
+            brackets_but_no_lanes,
+            brackets_insanity_check,
+            lane_char_insanity_check,
+            final_char_insanity_check,
+            fork_procs_insanity_check,
+            start_proc_insanity_check,
+            late_proc_insanity_check
+        ],
+        pipeline_str: [
+            inner_fork_insanity_checks
+        ]
+    }
+
+    # executes sanity checks in pipeline string before parsing it.
+    for param, func_list in checks.items():
+        for func in func_list:
+            func(param)
+
+
 def parse_pipeline(pipeline_str):
     """Parses a pipeline string into a dictionary with the connections between
     process
@@ -257,32 +293,10 @@ def parse_pipeline(pipeline_str):
         with open(pipeline_str) as fh:
             pipeline_str = "".join([x.strip() for x in fh.readlines()])
 
+    # Perform pipeline insanity checks
+    insanity_checks(pipeline_str)
+
     logger.debug("Parsing pipeline string: {}".format(pipeline_str))
-
-    # Gets rid of all spaces in string
-    p_string = pipeline_str.replace(" ", "")
-
-    # some of the check functions use the pipeline_str as the user provided but
-    # the majority uses the parsed p_string.
-    checks = {
-        p_string: [
-            brackets_but_no_lanes,
-            brackets_insanity_check,
-            lane_char_insanity_check,
-            final_char_insanity_check,
-            fork_procs_insanity_check,
-            start_proc_insanity_check,
-            late_proc_insanity_check
-        ],
-        pipeline_str : [
-            inner_fork_insanity_checks
-        ]
-    }
-
-    # executes sanity checks in pipeline string before parsing it.
-    for param, func_list in checks.items():
-        for func in func_list:
-            func(param)
 
     pipeline_links = []
     lane = 1
