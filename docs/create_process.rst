@@ -6,17 +6,17 @@ Basic process creation
 
 The addition of a new process to assemblerflow requires three main steps:
 
-#. Create a jinja2 template in ``assemblerflow.generator.templates`` with the
+#. `Create process template`_: Create a jinja2 template in ``assemblerflow.generator.templates`` with the
    nextflow code.
 
-#. Create a :class:`~assemblerflow.generator.Process` subclass in
-   :class:`assemblerflow.generator.Process` with
+#. `Create Process class`_: Create a :class:`~assemblerflow.generator.process.Process` subclass in
+   :class:`assemblerflow.generator.process` with
    information about the process (e.g., expected input/output, secondary inputs,
    etc.).
 
-#. Add the :class:`~assemblerflow.generator.Process` class to the
+#. `Add to available processes`_: Add the :class:`~assemblerflow.generator.process` class to the
    dictionary of available process in
-   :attr:`assemblerflow.assemblerflow.NextflowGenerator.process_map`.
+   :attr:`assemblerflow.generator.engine.process_map`.
 
 .. _create-process:
 
@@ -121,8 +121,8 @@ Create Process class
 The process class will contain the information that assemblerflow
 will use to build the pipeline and assess potential conflicts/dependencies
 between process. This class should be created in the
-:mod:`assemblerflow.generator.Process` module and inherit from the
-:class:`~assemblerflow.generator.Process.Process` base
+:mod:`assemblerflow.generator.process` module and inherit from the
+:class:`~assemblerflow.generator.process.Process` base
 class::
 
     class MyProcess(Process):
@@ -146,13 +146,13 @@ Add to available processes
 ::::::::::::::::::::::::::
 
 The final step is to add your new process to the list of available processes.
-This list is defined in as a variable in the :mod:`assemblerflow.enginge`
+This list is defined in :attr:`assemblerflow.generator.engine.process_map`
 module, which is a dictionary
 mapping the process template name to the corresponding template class::
 
     process_map = {
     <other_process>
-    "my_process_template": Process.MyProcess
+    "my_process_template": process.MyProcess
     }
 
 Note that the template string does not include the ``.nf`` extension.
@@ -161,19 +161,19 @@ Process attributes
 ------------------
 
 This section describes the main attributes of the
-:mod:`~assemblerflow.generator.Process` class: what they
+:mod:`~assemblerflow.generator.process.Process` class: what they
 do and how do they impact the pipeline generation.
 
 Input/Output types
 ::::::::::::::::::
 
-The :attr:`~assemblerflow.generator.Process.Process.input_type` and
-:attr:`~assemblerflow.generator.Process.Process.output_type` attributes
+The :attr:`~assemblerflow.generator.process.Process.input_type` and
+:attr:`~assemblerflow.generator.process.Process.output_type` attributes
 set the expected type of input and output of the process. There are no
 limitations to the type of input/output that are provided. However, processes
 will only link when the output of one process matches the input of the
 subsequent process (unless the
-:attr:`~assemblerflow.generator.Process.Process.ignore_type` attribute is set
+:attr:`~assemblerflow.generator.process.Process.ignore_type` attribute is set
 to ``True``). Otherwise, assemblerflow will raise an exception stating that
 two processes could not be linked.
 
@@ -188,7 +188,7 @@ Any process can receive one or more input channels in addition to the main
 channel. These are particularly useful when the process needs to receive
 additional options from the ``parameters`` scope of nextflow.
 These additional inputs can be specified via the
-:attr:`~assemblerflow.generator.Process.Process.secondary_inputs` attribute,
+:attr:`~assemblerflow.generator.process.Process.secondary_inputs` attribute,
 which should store a list of dictionaries (a dictionary for each input). Each dictionary should
 contains a key:value pair with the name of the parameter (``params``) and the
 definition of the nextflow channel (``channel``). Consider the example below::
@@ -219,7 +219,7 @@ file. Note that this channel definition mentions the parameters (e.g.
 Link start
 ::::::::::
 
-The :attr:`~assemblerflow.generator.Process.Process.link_start` attribute
+The :attr:`~assemblerflow.generator.process.Process.link_start` attribute
 stores a list of strings of channel names that can be used as secondary
 channels in the pipeline (See the `Secondary links between process`_ section).
 By default, this attribute contains the main output channel, which means
@@ -229,7 +229,7 @@ processes.
 Link end
 ::::::::
 
-The :attr:`~assemblerflow.generator.Process.Process.link_end` attribute
+The :attr:`~assemblerflow.generator.process.Process.link_end` attribute
 stores a list of dictionaries with channel names that are meant to be
 received by the process as secondary channel **if** the corresponding
 `Link start`_ exists in the pipeline. Each dictionary in this list will define
@@ -251,14 +251,14 @@ Dependencies
 
 If a process depends on the presence of one or more processes upstream in the
 pipeline, these can be specific via the
-:attr:`~assemblerflow.generator.Process.Process.dependencies` attribute.
+:attr:`~assemblerflow.generator.process.Process.dependencies` attribute.
 When building the pipeline if at least one of the dependencies is absent,
 assemblerflow will raise an exception informing of a missing dependency.
 
 Ignore type
 :::::::::::
 
-The :attr:`~assemblerflow.generator.Process.Process.ignore_type` attribute,
+The :attr:`~assemblerflow.generator.process.Process.ignore_type` attribute,
 controls whether a match between the input of the current process and the
 output of the previous one is enforced or not. When there are multiple
 terminal processes that fork from the main channel, there is no need to
@@ -268,7 +268,7 @@ Process ID
 ::::::::::
 
 The process ID, set via the
-:attr:`~assemblerflow.generator.Process.Process.pid` attribute, is an
+:attr:`~assemblerflow.generator.process.Process.pid` attribute, is an
 arbitrarily and incremental number that is awarded to each process depending
 on its position in the pipeline. It is mainly used to ensure that there are
 no duplicated channels even when the same process is used multiple times
@@ -277,7 +277,7 @@ in the same pipeline.
 Template
 ::::::::
 
-The :attr:`~assemblerflow.generator.Process.Process.template` attribute
+The :attr:`~assemblerflow.generator.process.Process.template` attribute
 is used to fetch the jinja2 template file that corresponds to the current
 process. The path to the template file is determined as follows::
 
@@ -366,7 +366,7 @@ must be declared in the nextflow process that sends it::
 
 Then, we add the information that this process has a secondary channel start
 via the ``link_start`` list attribute in the corresponding
-``assemblerflow.generator.Process`` class::
+``assemblerflow.generator.process.Process`` class::
 
     class MyProcess(Process):
 

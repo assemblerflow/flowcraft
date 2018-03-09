@@ -41,7 +41,12 @@ process_map = {
         # "trace_compiler": pc.TraceCompiler
 }
 """
-dict: Maps the process ids to the corresponding template interface class
+dict: Maps the process ids to the corresponding template interface class wit
+the format::
+    
+    {
+        "<template_string>": pc.TemplateClass
+    }
 """
 
 
