@@ -5,3 +5,4 @@ assemblerflow\.generator\.engine module
     :members:
     :undoc-members:
     :show-inheritance:
+    :private-members:
