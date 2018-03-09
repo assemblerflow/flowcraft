@@ -175,6 +175,14 @@ class Process:
         the current process, ready to be added to the template string.
         """
 
+        self.main_forks = []
+        """                                                                                                                                                                                                          
+        list: List of the channels onto which the main output should be              
+        forked into. They will be automatically added to the                         
+        :attr:`~Process.main_forks` attribute when setting the secondary             
+        channels                                                                     
+        """
+
         self.secondary_inputs = []
         """
         list: List of dictionaries with secondary input channels from nextflow
