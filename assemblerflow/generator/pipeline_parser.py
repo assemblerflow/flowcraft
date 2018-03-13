@@ -383,7 +383,6 @@ def get_source_lane(fork_process, pipeline_list):
     """
 
     for p in pipeline_list[::-1]:
-        print(p)
         if p["output"]["process"] == fork_process:
             return p["output"]["lane"]
 
@@ -427,6 +426,9 @@ def get_lanes(lanes_str):
         # Nested fork stopped
         if i == CLOSE_TOKEN:
             infork -= 1
+
+        if infork < 0:
+            break
 
         # Save only when in the right fork
         if infork == 0:
@@ -480,7 +482,7 @@ def linear_connection(plist, lane):
     return res
 
 
-def fork_connection(source, sink, fork_lane, lane):
+def fork_connection(source, sink, source_lane, lane):
     """Makes the connection between a process and the first processes in the
     lanes to wich it forks.
 
@@ -494,7 +496,7 @@ def fork_connection(source, sink, fork_lane, lane):
     sink : list
         List of the processes where the source will fork to. Each element
         corresponds to the start of a lane.
-    fork_lane : int
+    source_lane : int
         Lane of the forking process
     lane : int
         Lane of the source process
@@ -506,8 +508,8 @@ def fork_connection(source, sink, fork_lane, lane):
     """
 
     logger.debug("Establishing forking of source '{}' into processes"
-                 " '{}'. Fork lane set to '{}' and lane set to "
-                 "'{}'".format(source, sink, fork_lane, lane))
+                 " '{}'. Source lane set to '{}' and lane set to '{}'".format(
+                    source, sink, source_lane, lane))
 
     res = []
     # Increase the lane counter for the first lane
@@ -517,7 +519,7 @@ def fork_connection(source, sink, fork_lane, lane):
         res.append({
             "input": {
                 "process": source,
-                "lane": fork_lane
+                "lane": source_lane
             },
             "output": {
                 "process": p,
