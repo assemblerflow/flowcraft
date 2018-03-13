@@ -3,10 +3,6 @@ import logging
 
 from collections import defaultdict
 
-try:
-    from generator.process_details import colored_print
-except ImportError:
-    from assemblerflow.generator.process_details import colored_print
 
 logger = logging.getLogger("main.{}".format(__name__))
 
@@ -14,10 +10,12 @@ try:
     import generator.process as pc
     import generator.error_handling as eh
     from generator import header_skeleton as hs
+    from generator.process_details import colored_print
 except ImportError as e:
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
     from assemblerflow.generator import header_skeleton as hs
+    from assemblerflow.generator.process_details import colored_print
 
 
 process_map = {

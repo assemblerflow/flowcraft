@@ -4,6 +4,11 @@ import logging
 
 from os.path import dirname, join, abspath
 
+try:
+    import generator.error_handling as eh
+except ImportError:
+    import assemblerflow.generator.error_handling as eh
+
 logger = logging.getLogger("main.{}".format(__name__))
 
 
@@ -220,7 +225,8 @@ class Process:
         tpl_path = join(tpl_dir, template + ".nf")
 
         if not os.path.exists(tpl_path):
-            raise Exception("Template {} does not exist".format(tpl_path))
+            raise eh.ProcessError(
+                "Template {} does not exist".format(tpl_path))
 
         self._template_path = join(tpl_dir, template + ".nf")
 
@@ -243,23 +249,42 @@ class Process:
         self.lane = lane
 
     def get_user_channel(self, input_channel, input_type=None):
-        """Sets the main raw channels for the process
+        """Returns the main raw channel for the process
 
-        This will set the :attr:`~Process._input_user_channel` attribute
-        based on the :attr:`~Process.input_type` of the process. It retrieves
-        the information from the :attr:`~Process.RAW_MAPPINGS` dictionary.
-        If the input type is not present in the dictionary, it will set the
-        attribute to None
+        Provided with at least a channel name, this method returns the raw
+        channel name and specification (the nextflow string definition)
+        for the process. By default, it will fork from the raw input of
+        the process' :attr:`~Process.input_type` attribute. However, this
+        behaviour can be overridden by providing the ``input_type`` argument.
+
+        If the specified or inferred input type exists in the
+        :attr:`~Process.RAW_MAPPING` dictionary, the channel info dictionary
+        will be retrieved along with the specified input channel. Otherwise,
+        it will return None.
+
+        An example of the returned dictionary is::
+
+             {"input_channel": "myChannel",
+             "params": "fastq",
+             "channel": "IN_fastq_raw",
+             "channel_str":"IN_fastq_raw = Channel.fromFilePairs(params.fastq)"
+            }
+
+        Returns
+        -------
+        dict or None
+            Dictionary with the complete raw channel info. None if no
+            channel is found.
         """
 
         res = {"input_channel": input_channel}
 
-        if input_type:
-            channel_info = self.RAW_MAPPING[input_type]
-        else:
-            channel_info = self.RAW_MAPPING[self.input_type]
+        itype = input_type if input_type else self.input_type
 
-        if self.input_type in self.RAW_MAPPING:
+        if itype in self.RAW_MAPPING:
+
+            channel_info = self.RAW_MAPPING[itype]
+
             return {**res, **channel_info}
 
     @staticmethod
@@ -407,32 +432,16 @@ class Process:
         logger.debug("Setting secondary channel for source '{}': {}".format(
             source, channel_list))
 
-        # Handle the case where the main channel is forked
-        if source.startswith("MAIN"):
-            # Update previous output_channel to prevent overlap with
-            # subsequent main channels. This is done by adding a "_" at the
-            # beginning of the channel name
-            self._context["output_channel"] = "_{}".format(
-                self._output_channel)
-            # Set source to modified output channel
-            source = self._context["output_channel"]
-            # Add the next first main channel to the channel_list
-            channel_list.append(self._output_channel)
-        # Handle forks from non main channels
-        else:
-            source = "{}_{}".format(source, self.pid)
+        source = "{}_{}".format(source, self.pid)
 
         # Removes possible duplicate channels, when the fork is terminal
-        channel_list = list(set(channel_list))
+        channel_list = sorted(list(set(channel_list)))
 
         # When there is only one channel to fork into, use the 'set' operator
         # instead of 'into'
-        if len(channel_list) == 1:
-            self.forks.append("\n{}.set{{ {} }}\n".format(source,
-                                                           channel_list[0]))
-        else:
-            self.forks.append("\n{}.into{{ {} }}\n".format(
-                source, ";".join(channel_list)))
+        op = "set" if len(channel_list) == 1 else "into"
+        self.forks.append("\n{}.{}{{ {} }}\n".format(
+            source, op, ";".join(channel_list)))
 
         logger.debug("Setting forks attribute to: {}".format(self.forks))
         self._context = {**self._context, **{"forks": "\n".join(self.forks)}}
