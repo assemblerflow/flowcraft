@@ -27,7 +27,7 @@ def process_wchannels():
 @pytest.fixture
 def mock_status():
 
-    return pc.Status(template="status_compiler")
+    return pc.StatusCompiler(template="status_compiler")
 
 
 @pytest.fixture
@@ -56,6 +56,12 @@ def test_set_wrong_template(mock_process):
 
     with pytest.raises(eh.ProcessError):
         mock_process._set_template("wrong_template")
+
+
+def test_template_render_empty(mock_process):
+
+    with pytest.raises(eh.ProcessError):
+        mock_process.template_str
 
 
 def test_template_render(process_wchannels):

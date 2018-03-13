@@ -320,8 +320,8 @@ class Process:
         """
 
         if not self._context:
-            raise Exception("Channels must be setup first using the "
-                            "set_channels method")
+            raise eh.ProcessError("Channels must be setup first using the "
+                                  "set_channels method")
 
         logger.debug("Setting context for template {}: {}".format(
             self.template, self._context
@@ -1060,18 +1060,6 @@ class Chewbbaca(Process):
         self.link_start = None
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
-
-
-class TraceCompiler(Process):
-
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.link_start = None
-
-        self.ignore_type = True
-
 
 class StatusCompiler(Status):
     """Status compiler process template interface
