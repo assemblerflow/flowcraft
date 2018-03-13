@@ -129,3 +129,18 @@ def test_string_pass_all():
             ps.start_proc_insanity_check(p)
             ps.late_proc_insanity_check(p)
             ps.inner_fork_insanity_checks(p)
+
+
+def test_string_pass_all_wrapper():
+
+    pipeline_strs = [
+        "A B",
+        "(A | B)",
+        "A B ( C | D)",
+        "A B (D | E (F | G))",
+        "A B ( C | B)"
+    ]
+
+    for p in pipeline_strs:
+        with not_raises(SanityError, "pipeline: {}".format(p)):
+            ps.insanity_checks(p)
