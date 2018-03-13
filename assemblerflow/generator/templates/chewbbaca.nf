@@ -1,4 +1,10 @@
 
+if (params.chewbbacaToPhyloviz == true){
+    jsonOpt = ""
+} else {
+    jsonOpt = "--json"
+}
+
 process chewbbaca {
 
     // Send POST request to platform
@@ -7,7 +13,6 @@ process chewbbaca {
     maxForks 1
     tag { fastq_id + " getStats" }
     scratch true
-    publishDir "results/chewbbaca/${fastq_id}"
     if (params.chewbbacaQueue != null) {
         queue '${params.chewbbacaQueue}'
     }
@@ -18,6 +23,7 @@ process chewbbaca {
 
     output:
     file 'chew_results'
+    file '*_cgMLST.tsv' optional true into chewbbacaProfile
     {% with task_name="chewbbaca" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -34,8 +40,12 @@ process chewbbaca {
         fi
 
         echo $assembly >> input_file.txt
-        chewBBACA.py AlleleCall -i input_file.txt -g ${params.schemaSelectedLoci} -o chew_results --json --cpu $task.cpus -t "${params.chewbbacaSpecies}"
-        merge_json.py ${params.schemaCore} chew_results/*/results*
+        chewBBACA.py AlleleCall -i input_file.txt -g ${params.schemaSelectedLoci} -o chew_results $jsonOpt --cpu $task.cpus -t "${params.chewbbacaSpecies}"
+        if [ ! $jsonOpt = ""]; then
+            merge_json.py ${params.schemaCore} chew_results/*/results*
+        else
+            mv chew_results/*/results_alleles.tsv ${fastq_id}_cgMLST.tsv
+        fi
     } || {
         echo fail > .status
     }
@@ -43,3 +53,21 @@ process chewbbaca {
 
 }
 
+
+process chewbbacaExtractMLST {
+
+    publishDir "results/chewbbaca/", mode: "copy", overwrite: true
+
+    input:
+    file profiles from chewbbacaProfile.collect()
+
+    output:
+    file "results/cgMLST.tsv"
+
+    """
+    head -n1 ${profiles[0]} > chewbbaca_profiles.tsv
+    awk 'FNR == 2' $profiles >> chewbbaca_profiles.tsv
+    chewBBACA.py ExtractCgMLST -i chewbbaca_profiles.tsv -o results -p $params.chewbbacaProfilePercentage
+    """
+
+}
