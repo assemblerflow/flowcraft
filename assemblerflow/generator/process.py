@@ -474,6 +474,11 @@ class Status(Process):
             List of strings with the final name of the status channels
         """
 
+        if not channel_list:
+            raise eh.ProcessError("At least one status channel must be "
+                                  "provided to include this process in the "
+                                  "pipeline")
+
         if len(channel_list) == 1:
             logger.debug("Setting only one status channel: {}".format(
                 channel_list[0]))

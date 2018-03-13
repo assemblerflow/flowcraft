@@ -46,6 +46,14 @@ def test_set_wrong_template(mock_process):
         mock_process._set_template("wrong_template")
 
 
+def test_template_render(process_wchannels):
+
+    process_wchannels.set_channels(pid=1)
+    t = process_wchannels.template_str
+
+    assert 1
+
+
 def test_main_channel_setup(mock_process):
 
     mock_process.set_main_channel_names("input_suf", "output_suf", 1)
@@ -191,3 +199,40 @@ def test_secondary_channels_duplicatesink(process_wchannels):
 
     assert process_wchannels.forks == ["\nA_1.set{ B }\n"]
 
+
+@pytest.fixture
+def mock_status():
+
+    return pc.Status(template="status_compiler")
+
+
+def test_status_init(mock_status):
+
+    assert mock_status.template == "status_compiler"
+
+
+def test_status_channel_setup_empty(mock_status):
+
+    with pytest.raises(eh.ProcessError):
+        mock_status.set_status_channels([])
+
+
+def test_status_channel_single(mock_status):
+
+    mock_status.set_status_channels(["A"])
+
+    assert mock_status._context == {"status_channels": "A"}
+
+
+def test_status_channel_two(mock_status):
+
+    mock_status.set_status_channels(["A", "B"])
+
+    assert mock_status._context == {"status_channels": "A.mix(B)"}
+
+
+def test_status_channel_two(mock_status):
+
+    mock_status.set_status_channels(["A", "B", "C"])
+
+    assert mock_status._context == {"status_channels": "A.mix(B,C)"}
