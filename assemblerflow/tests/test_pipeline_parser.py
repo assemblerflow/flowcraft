@@ -1,3 +1,4 @@
+import os
 import pytest
 
 import assemblerflow.generator.pipeline_parser as ps
@@ -224,3 +225,14 @@ def test_parse_pipeline():
         res = ps.parse_pipeline(p)
         assert res == expected
 
+
+def test_parse_pipeline_file():
+
+    for i in range(1, 9):
+
+        p_path = os.path.join("assemblerflow", "tests", "pipeline_tests",
+                              "pipe{}.txt".format(i))
+        expected = pipes[i - 1][1]
+        print(p_path)
+        res = ps.parse_pipeline(p_path)
+        assert res == expected

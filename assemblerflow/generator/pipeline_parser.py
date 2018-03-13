@@ -293,6 +293,8 @@ def parse_pipeline(pipeline_str):
         with open(pipeline_str) as fh:
             pipeline_str = "".join([x.strip() for x in fh.readlines()])
 
+    print(pipeline_str)
+
     # Perform pipeline insanity checks
     insanity_checks(pipeline_str)
 
@@ -323,7 +325,7 @@ def parse_pipeline(pipeline_str):
 
         # Get the processes before the fork. This may be empty when the
         # fork is at the beginning of the pipeline.
-        previous_process = fields[-2].split()
+        previous_process = fields[-2].split(LANE_TOKEN)[-1].split()
         logger.debug("Previous processes: {}".format(fields[-2]))
         # Get lanes after the fork
         next_lanes = get_lanes(fields[-1])
