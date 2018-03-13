@@ -202,7 +202,7 @@ class Process:
         """
         self.secondary_input_str = ""
 
-        self._context = None
+        self._context = {}
         """
         dict: Dictionary with the keyword placeholders for the string template
         of the current process.
@@ -525,21 +525,18 @@ class Init(Process):
 
         for el in raw_input.values():
             primary_inputs.append(el["channel_str"])
-            if len(el["raw_forks"]) == 1:
-                self.forks.append("\n{}.set{{ {} }}\n".format(
-                    el["channel"], el["raw_forks"][0]
-                ))
-            else:
-                self.forks.append("\n{}.into{{ {} }}\n".format(
-                    el["channel"], ";".join(el["raw_forks"])
-                ))
+
+            op = "set" if len(el["raw_forks"]) == 1 else "into"
+
+            self.forks.append("\n{}.{}{{ {} }}\n".format(
+                el["channel"], op, ";".join(el["raw_forks"])
+            ))
 
         logger.debug("Setting raw inputs: {}".format(primary_inputs))
         logger.debug("Setting forks attribute to: {}".format(self.forks))
         self._context = {**self._context,
                          **{"forks": "\n".join(self.forks),
                             "main_inputs": "\n".join(primary_inputs)}}
-
 
     def set_secondary_inputs(self, channel_dict):
 

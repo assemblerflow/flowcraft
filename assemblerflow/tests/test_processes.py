@@ -24,6 +24,18 @@ def process_wchannels():
     return p
 
 
+@pytest.fixture
+def mock_status():
+
+    return pc.Status(template="status_compiler")
+
+
+@pytest.fixture
+def mock_init():
+
+    return pc.Init(template="init")
+
+
 def test_process_init():
 
     for template, proc in process_map.items():
@@ -200,12 +212,6 @@ def test_secondary_channels_duplicatesink(process_wchannels):
     assert process_wchannels.forks == ["\nA_1.set{ B }\n"]
 
 
-@pytest.fixture
-def mock_status():
-
-    return pc.Status(template="status_compiler")
-
-
 def test_status_init(mock_status):
 
     assert mock_status.template == "status_compiler"
@@ -231,8 +237,67 @@ def test_status_channel_two(mock_status):
     assert mock_status._context == {"status_channels": "A.mix(B)"}
 
 
-def test_status_channel_two(mock_status):
+def test_status_channel_multiple(mock_status):
 
     mock_status.set_status_channels(["A", "B", "C"])
 
     assert mock_status._context == {"status_channels": "A.mix(B,C)"}
+
+
+def test_init_process(mock_init):
+
+    assert mock_init.template == "init"
+
+
+def test_init_raw_inputs_single(mock_init):
+
+    mock_init.set_raw_inputs({"A": {"channel": "rawChannel",
+                                    "raw_forks": ["A"],
+                                    "channel_str": "rawChannel.Channel"}})
+
+    assert [mock_init.forks, mock_init._context["main_inputs"]] == \
+        [["\nrawChannel.set{ A }\n"], "rawChannel.Channel"]
+
+
+def test_init_raw_inputs_multi_forks(mock_init):
+
+    mock_init.set_raw_inputs({"A": {"channel": "rawChannel",
+                                    "raw_forks": ["A", "B"],
+                                    "channel_str": "rawChannel.Channel"}})
+
+    assert [mock_init.forks, mock_init._context["main_inputs"]] == \
+        [["\nrawChannel.into{ A;B }\n"], "rawChannel.Channel"]
+
+
+def test_init_multi_raw_inputs(mock_init):
+
+    mock_init.set_raw_inputs({"A": {"channel": "rawChannel",
+                                    "raw_forks": ["A", "B"],
+                                    "channel_str": "rawChannel.Channel"},
+                              "B": {"channel": "otherChannel",
+                                    "raw_forks": ["C"],
+                                    "channel_str": "otherChannel.Channel"}})
+
+    assert [mock_init.forks, mock_init._context["main_inputs"]] == \
+        [["\nrawChannel.into{ A;B }\n",
+          "\notherChannel.set{ C }\n"],
+         "rawChannel.Channel\notherChannel.Channel"]
+
+
+def test_init_secondary_inputs(mock_init):
+
+    mock_init.set_secondary_inputs(
+        {"genomeSize": "IN_genome_size = Channel.value(params.genomeSize)"})
+
+    assert mock_init._context["secondary_inputs"] == \
+        "IN_genome_size = Channel.value(params.genomeSize)"
+
+
+def test_init_multi_secondary_inputs(mock_init):
+
+    mock_init.set_secondary_inputs(
+        {"genomeSize": "IN_genome_size = Channel.value(params.genomeSize)",
+         "other": "Other"})
+
+    assert mock_init._context["secondary_inputs"] == \
+        "IN_genome_size = Channel.value(params.genomeSize)\nOther"
