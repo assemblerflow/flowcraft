@@ -21,20 +21,6 @@ def test_empty_args():
     assert af.check_arguments(args) is False
 
 
-def test_invalid_path():
-
-    args = af.get_args(["-o invalid/teste.nf"])
-
-    assert af.check_arguments(args) is False
-
-
-def test_valid_path():
-
-    args = af.get_args(["-o teste.nf"])
-
-    assert af.check_arguments(args) is False
-
-
 def test_list_short():
 
     args = af.get_args(["-l"])
@@ -79,8 +65,3 @@ def test_build_file(tmp):
     args = af.get_args(["-t integrity_coverage fastqc", "-o", "{}".format(p),
                         "--include-templates"])
     af.run(args)
-
-    print(os.listdir(tmp))
-
-    assert os.listdir(tmp) == \
-        ["teste.nf", "bin", "templates", "nextflow.config", "lib"]
