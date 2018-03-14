@@ -5,7 +5,7 @@ process prokka {
     {% include "post.txt" ignore missing %}
 
     tag { fastq_id + " getStats" }
-    publishDir "results/annotation/prokka/${fastq_id}"
+    publishDir "results/annotation/prokka_{{ pid }}/${fastq_id}"
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}

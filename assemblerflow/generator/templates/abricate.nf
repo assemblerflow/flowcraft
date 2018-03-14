@@ -5,7 +5,7 @@ process abricate {
     {% include "post.txt" ignore missing %}
 
     tag { "${fastq_id} ${db}" + " getStats"}
-    publishDir "results/annotation/abricate/${fastq_id}"
+    publishDir "results/annotation/abricate_{{ pid }}/${fastq_id}"
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}

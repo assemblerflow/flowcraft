@@ -56,7 +56,7 @@ process chewbbaca {
 
 process chewbbacaExtractMLST {
 
-    publishDir "results/chewbbaca/", mode: "copy", overwrite: true
+    publishDir "results/chewbbaca_{{ pid }}/", mode: "copy", overwrite: true
 
     input:
     file profiles from chewbbacaProfile.collect()

@@ -7,7 +7,7 @@ process process_spades {
     tag { fastq_id + " getStats" }
     // This process can only use a single CPU
     cpus 1
-    publishDir "reports/assembly/spades_filter", pattern: '*.report.csv', mode: 'copy'
+    publishDir "reports/assembly/spades_filter_{{ pid }}", pattern: '*.report.csv', mode: 'copy'
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}

@@ -34,7 +34,7 @@ process fastqc2_report {
     tag { fastq_id + " getStats" }
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/fastqc/run_2/', pattern: '*summary.txt', mode: 'copy'
+    publishDir 'reports/fastqc_{{ pid }}/run_2/', pattern: '*summary.txt', mode: 'copy'
 
     input:
     set fastq_id, file(fastq_pair), file(result_p1), file(result_p2) from MAIN_fastqc_out_{{ pid }}
@@ -56,7 +56,7 @@ process fastqc2_report {
 
 process compile_fastqc_status2 {
 
-    publishDir 'reports/fastqc/', mode: 'copy'
+    publishDir 'reports/fastqc_{{ pid }}/', mode: 'copy'
 
     input:
     file rep from LOG_fastqc_report_{{ pid }}.collect()

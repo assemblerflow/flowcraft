@@ -45,7 +45,7 @@ process mlst {
 
 process compile_mlst {
 
-    publishDir "results/annotation/mlst/"
+    publishDir "results/annotation/mlst_{{ pid }}/"
 
     input:
     file res from LOG_mlst_{{ pid }}.collect()

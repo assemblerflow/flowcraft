@@ -63,7 +63,7 @@ process report_coverage {
 
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/coverage/'
+    publishDir 'reports/coverage_{{ pid }}/'
 
     input:
     file(report) from LOG_report_coverage1.filter{ it.text != "corrupt" }.collect()
@@ -85,7 +85,7 @@ process report_corrupt {
 
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/corrupted/'
+    publishDir 'reports/corrupted_{{ pid }}/'
 
     input:
     val fastq_id from LOG_corrupted.collect{it[0]}

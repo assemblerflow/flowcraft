@@ -5,7 +5,7 @@ process skesa {
     {% include "post.txt" ignore missing %}
 
     tag { fastq_id }
-    publishDir 'results/assembly/skesa', pattern: '*_skesa.assembly.fasta', mode: 'copy'
+    publishDir 'results/assembly/skesa_{{ pid }}', pattern: '*_skesa.assembly.fasta', mode: 'copy'
 
     input:
     set fastq_id, file(fastq_pair) from {{ input_channel }}

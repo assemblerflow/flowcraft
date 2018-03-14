@@ -6,7 +6,7 @@ process pilon {
 
     tag { fastq_id + " getStats" }
     echo false
-    publishDir 'results/assembly/pilon/', mode: 'copy'
+    publishDir 'results/assembly/pilon_{{ pid }}/', mode: 'copy'
 
     input:
     set fastq_id, file(assembly), file(bam_file), file(bam_index) from {{ input_channel }}
@@ -55,7 +55,7 @@ process pilon_report {
 
 process compile_pilon_report {
 
-    publishDir "reports/assembly/pilon/", mode: 'copy'
+    publishDir "reports/assembly/pilon_{{ pid }}/", mode: 'copy'
 
     input:
     file(report) from pilon_report_out_{{ pid }}.collect()

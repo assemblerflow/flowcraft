@@ -37,7 +37,7 @@ process fastqc_report {
     tag { fastq_id + " getStats" }
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/fastqc/run_1/', pattern: '*summary.txt', mode: 'copy'
+    publishDir 'reports/fastqc_{{ pid }}/run_1/', pattern: '*summary.txt', mode: 'copy'
 
     input:
     set fastq_id, file(fastq_pair), file(result_p1), file(result_p2) from MAIN_fastqc_out_{{ pid }}
@@ -70,7 +70,7 @@ process and write the results of all samples in a single csv file
 */
 process trim_report {
 
-    publishDir 'reports/fastqc/', mode: 'copy'
+    publishDir 'reports/fastqc_{{ pid }}/', mode: 'copy'
 
     input:
     file trim from LOG_trim_{{ pid }}.collect()
@@ -87,7 +87,7 @@ process trim_report {
 
 process compile_fastqc_status {
 
-    publishDir 'reports/fastqc/', mode: 'copy'
+    publishDir 'reports/fastqc_{{ pid }}/', mode: 'copy'
 
     input:
     file rep from LOG_fastqc_report_{{ pid }}.collect()
