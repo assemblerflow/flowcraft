@@ -14,13 +14,6 @@ def tmp():
     shutil.rmtree("temp")
 
 
-def test_empty_args():
-
-    args = af.get_args("")
-
-    assert af.check_arguments(args) is False
-
-
 def test_list_short():
 
     args = af.get_args(["-l"])
