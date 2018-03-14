@@ -171,8 +171,8 @@ class NextflowGenerator:
             input_suf = "{}_{}".format(in_lane, p)
             output_suf = "{}_{}".format(out_lane, p)
             logger.debug("[{}] Setting main channels with input suffix '{}'"
-                         " and output suffix '{}'".format(p, input_suf,
-                                                          output_suf))
+                         " and output suffix '{}'".format(
+                            p, input_suf, output_suf))
             out_process.set_main_channel_names(input_suf, output_suf, out_lane)
 
             # Instance input process, if it exists. In case of init, the
