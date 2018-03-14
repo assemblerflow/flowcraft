@@ -28,7 +28,7 @@ except ImportError:
 logger = logging.getLogger("main")
 
 
-def get_args():
+def get_args(args):
 
     parser = argparse.ArgumentParser(
         description="Nextflow pipeline generator")
@@ -49,19 +49,17 @@ def get_args():
                         help="Check only the validity of the pipeline"
                              "string and exit.")
     group_lists.add_argument("-L", "--detailed-list", action="store_const",
-                        dest="detailed_list", const=True,
-                        help="Print a detailed description for all the "
-                             "currently available processes")
+                             dest="detailed_list", const=True,
+                             help="Print a detailed description for all the "
+                                  "currently available processes")
     group_lists.add_argument("-l", "--short-list", action="store_const",
-                        dest="short_list", const=True,
-                        help="Print a short list of the currently available "
-                             "processes")
+                             dest="short_list", const=True,
+                             help="Print a short list of the currently"
+                                  " available processes")
     parser.add_argument("--debug", dest="debug", action="store_const",
                         const=True, help="Set log to debug mode")
 
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args(args)
 
 
 def check_arguments(args):
@@ -71,16 +69,6 @@ def check_arguments(args):
         logger.info(colored_print("Please provide one of the supported "
                                   "arguments!", "red_bold"))
         return False
-
-    # Check if output argument is valid
-    if not args.check_only:
-        if not args.output_nf or os.path.isdir(args.output_nf) or \
-                (not os.path.isdir(os.path.dirname(args.output_nf)) and
-                 len(args.output_nf.split(os.path.sep)) > 1):
-            logger.info(colored_print("Please provide a valid output file and "
-                                      "location!",
-                                      "red_bold"))
-            return False
 
     return True
 
