@@ -207,7 +207,17 @@ class NextflowGenerator:
                 except IndexError:
                     pass
             else:
+
+                # Get parent process, naive version
                 parent_process = self.processes[-1]
+
+                # Check if the last process' lane matches the lane of the
+                # current output process. If not, get the last process
+                # in the same lane
+                if parent_process.lane and parent_process.lane != out_lane:
+                    parent_process = [x for x in self.processes[::-1]
+                                      if x.lane == out_lane][0]
+
                 if parent_process.output_channel:
                     logger.debug(
                         "[{}] Updating input channel of output process"

@@ -85,7 +85,11 @@ def single_fork():
            {"input": {"process": "integrity_coverage", "lane": 1},
             "output": {"process": "spades", "lane": 2}},
            {"input": {"process": "integrity_coverage", "lane": 1},
-            "output": {"process": "skesa", "lane": 3}}]
+            "output": {"process": "skesa", "lane": 3}},
+           {'input': {'process': 'spades', 'lane': 2},
+            'output': {'process': 'abricate', 'lane': 2}},
+           {'input': {'process': 'skesa', 'lane': 3},
+            'output': {'process': 'abricate', 'lane': 3}}]
 
     return eg.NextflowGenerator(con, "teste.nf")
 
@@ -241,6 +245,23 @@ def test_connections_channel_update_wfork(single_fork):
 
     assert [p1.main_forks[1], p1.main_forks[2]] == \
            [p2.input_channel, p3.input_channel]
+
+
+def test_connections_channel_update_wfork_2(single_fork):
+
+    p1 = single_fork.processes[3]
+    p2 = single_fork.processes[5]
+
+    assert p1.output_channel == p2.input_channel
+
+
+def test_connections_channel_update_wfork_3(single_fork):
+
+    p1 = single_fork.processes[2]
+    p2 = single_fork.processes[4]
+
+    assert p1.output_channel == p2.input_channel
+
 
 
 def test_set_channels_single_con_raw_fastq(single_con):
