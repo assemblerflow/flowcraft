@@ -11,7 +11,7 @@ process skesa {
     set fastq_id, file(fastq_pair) from {{ input_channel }}
 
     output:
-    set fastq_id, file('*_skesa.assembly.fasta') optional true into {{ output_channel }}
+    set fastq_id, file('*_skesa.assembly.fasta') into {{ output_channel }}
     {% with task_name="skesa" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
