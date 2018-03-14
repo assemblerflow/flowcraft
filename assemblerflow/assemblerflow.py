@@ -28,7 +28,7 @@ except ImportError:
 logger = logging.getLogger("main")
 
 
-def get_args(args):
+def get_args(args=None):
 
     parser = argparse.ArgumentParser(
         description="Nextflow pipeline generator")
