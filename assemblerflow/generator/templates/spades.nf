@@ -5,7 +5,7 @@ process spades {
     {% include "post.txt" ignore missing %}
 
     tag { fastq_id + " getStats" }
-    publishDir 'results/assembly/spades/_{{ pid }}', pattern: '*_spades.assembly.fasta', mode: 'copy'
+    publishDir 'results/assembly/spades_{{ pid }}/', pattern: '*_spades.assembly.fasta', mode: 'copy'
 
     input:
     set fastq_id, file(fastq_pair), max_len from {{ input_channel }}.join(SIDE_max_len_{{ pid }})

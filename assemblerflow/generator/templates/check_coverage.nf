@@ -42,7 +42,7 @@ process report_coverage_2 {
 
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/coverage/'
+    publishDir 'reports/coverage_{{ pid }}/'
 
     input:
     file(report) from LOG_report_coverage_{{ pid }}.filter{ it.text != "corrupt" }.collect()

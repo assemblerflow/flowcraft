@@ -10,7 +10,6 @@ process mlst {
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
-    val expectedSpecies from Channel.value(params.mlstSpecies)
 
     output:
     file '*.mlst.txt' into LOG_mlst_{{ pid }}
@@ -25,6 +24,7 @@ process mlst {
     script:
     """
     {
+        expectedSpecies=${params.mlstSpecies}
         mlst $assembly >> ${fastq_id}.mlst.txt
         mlstSpecies=\$(cat *.mlst.txt | cut -f2)
         json_str="{'expectedSpecies':\'$expectedSpecies\','species':'\$mlstSpecies','st':'\$(cat *.mlst.txt | cut -f3)'}"
