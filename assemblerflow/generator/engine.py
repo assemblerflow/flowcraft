@@ -128,8 +128,6 @@ class NextflowGenerator:
         over the :attr:`~NextflowGenerator.processes` list.
         """
 
-        # self._check_pipeline_requirements()
-
     def _build_connections(self, process_list):
         """Parses the process connections dictionaries into a process list
 
@@ -219,15 +217,6 @@ class NextflowGenerator:
 
             self.processes.append(out_process)
 
-    def _insert_terminal_processes(self):
-        """Automatically inserts terminal processes at the end of the pipeline
-
-        This method is used to insert compiling processes, such as those
-        that compile status, reports etc, at the end of the pipeline.
-        """
-
-        self.processes.append(pc.StatusCompiler(template="status_compiler"))
-
     @staticmethod
     def _test_connection(parent_process, child_process):
         """Tests if two processes can be connected by input/output type
@@ -255,39 +244,6 @@ class NextflowGenerator:
                                        child_process.template,
                                        child_process.input_type))
             sys.exit(1)
-
-    def _check_pipeline_requirements(self):
-        """ Checks for some pipeline requirements before building
-
-        Currently, the only hard requirement is that the pipeline must start
-        with the integrity_coverage process, in order to evaluate if the
-        input FastQ are corrupt or not.
-
-        Besides this requirements, it checks for the existence the dependencies
-        for all processes.
-        """
-
-        pipeline_names = [x.template for x in self.processes]
-
-        logger.debug("Checking pipeline requirements for template "
-                     "list: {}".format(pipeline_names))
-
-        # Check if the pipeline contains at least one process with raw input
-        # type
-        raw_processes = [p for p in self.processes if p.input_type == "raw"]
-        if not raw_processes:
-            raise eh.ProcessError("At least one process with 'raw' input type "
-                                 "must be specified. Check if the "
-                                 "pipeline starts with an appropriate starting"
-                                 " process.")
-
-        logger.debug("Checking for dependencies of templates")
-
-        for p in [i for i in self.processes if i.dependencies]:
-            if not set(p.dependencies).issubset(set(pipeline_names)):
-                raise eh.ProcessError(
-                    "Missing dependencies for process {}: {}".format(
-                        p.template, p.dependencies))
 
     def _build_header(self):
         """Adds the header template to the master template string
@@ -521,12 +477,6 @@ class NextflowGenerator:
 
         for i, p in enumerate(self.processes):
 
-            # Skip special process classes
-            if any([isinstance(p, x) for x in self.skip_class]):
-                logger.debug("Skipping special process class: {}".format(
-                    p))
-                continue
-
             # Set main channels for the process
             logger.debug("[{}] Setting main channels with pid: {}".format(
                 p.template, i))
@@ -611,6 +561,11 @@ class NextflowGenerator:
         for p in [p for p in self.processes]:
             if not any([isinstance(p, x) for x in self.skip_class]):
                 status_channels.extend(p.status_strs)
+
+        if not status_channels:
+            logger.debug("No status channels found. Skipping status compiler"
+                         "process")
+            return
 
         logger.debug("Setting status channels: {}".format(status_channels))
 

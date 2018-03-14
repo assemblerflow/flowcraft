@@ -1,6 +1,8 @@
+import os
 import pytest
 
 import assemblerflow.generator.engine as eg
+import assemblerflow.generator.process as pc
 
 from assemblerflow.generator.engine import process_map
 
@@ -13,6 +15,15 @@ def single_con():
            {"input": {"process": "integrity_coverage", "lane": 1},
             "output": {"process": "fastqc", "lane": 1}}
            ]
+
+    return eg.NextflowGenerator(con, "teste.nf")
+
+
+@pytest.fixture
+def single_status():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "spades", "lane": 1}}]
 
     return eg.NextflowGenerator(con, "teste.nf")
 
@@ -33,6 +44,34 @@ def single_con_multi_raw():
             "output": {"process": "assembly_mapping", "lane": 1}},
            {"input": {"process": "assembly_mapping", "lane": 1},
             "output": {"process": "pilon", "lane": 1}}]
+
+    return eg.NextflowGenerator(con, "teste.nf")
+
+
+@pytest.fixture
+def implicit_link():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "fastqc", "lane": 1}},
+           {"input": {"process": "fastqc", "lane": 1},
+            "output": {"process": "spades", "lane": 1}},
+           {"input": {"process": "spades", "lane": 1},
+            "output": {"process": "assembly_mapping", "lane": 1}}]
+
+    return eg.NextflowGenerator(con, "teste.nf")
+
+
+@pytest.fixture
+def implicit_link_2():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "spades", "lane": 1}},
+           {"input": {"process": "spades", "lane": 1},
+            "output": {"process": "assembly_mapping", "lane": 1}}]
 
     return eg.NextflowGenerator(con, "teste.nf")
 
@@ -96,10 +135,19 @@ def test_simple_init():
     for p in process_map:
 
         con[0]["output"]["process"] = p
-        nf = eg.NextflowGenerator(con, "teste.nf")
+        nf = eg.NextflowGenerator(con, "teste/teste.nf")
 
         assert [len(nf.processes), nf.processes[1].template] == \
             [2, p]
+
+
+def test_invalid_process():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "invalid", "lane": 1}}]
+
+    with pytest.raises(SystemExit):
+        eg.NextflowGenerator(con, "teste.nf")
 
 
 def test_connections_single_process_channels(single_con):
@@ -122,6 +170,24 @@ def test_connections_invalid():
 
     with pytest.raises(SystemExit):
         eg.NextflowGenerator(con, "teste.nf")
+
+
+def test_connections_ignore_type():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "spades", "lane": 1}},
+           {"input": {"process": "spades", "lane": 1},
+            "output": {"process": "patho_typing", "lane": 1}}
+           ]
+
+    eg.NextflowGenerator(con, "teste.nf")
+
+
+def test_build_header(single_con):
+
+    single_con._build_header()
+
+    assert single_con.template != ""
 
 
 def test_connections_nofork(single_con):
@@ -307,3 +373,79 @@ def test_set_secondary_channels_2(multi_forks):
     assert [p._context["output_channel"], p.main_forks] == \
            ["_check_coverage_out_3_3",
             ["check_coverage_out_3_3", "spades_in_3_6", "skesa_in_3_7"]]
+
+
+def test_set_implicit_link(implicit_link):
+
+    implicit_link._set_channels()
+    implicit_link._set_secondary_channels()
+
+    p = implicit_link.processes[2]
+
+    assert p.main_forks == ["fastqc_out_1_1", "_LAST_fastq_4"]
+
+
+def test_set_implicit_link(implicit_link_2):
+
+    implicit_link_2._set_channels()
+    implicit_link_2._set_secondary_channels()
+
+    p = implicit_link_2.processes[1]
+
+    assert p.main_forks == ["integrity_coverage_out_1_0", "_LAST_fastq_3"]
+
+
+def test_set_status_channels_multi(single_con):
+
+    single_con._set_channels()
+    single_con._set_status_channels()
+
+    p = [x for x in single_con.processes[::-1]
+         if isinstance(x, pc.StatusCompiler)][0]
+
+    assert p._context["status_channels"] == \
+               "STATUS_integrity_coverage_1.mix(STATUS_fastqc2_2," \
+               "STATUS_fastqc2_report_2)"
+
+
+def test_set_status_channels_single(single_status):
+
+    single_status._set_channels()
+    single_status._set_status_channels()
+
+    p = [x for x in single_status.processes[::-1]
+         if isinstance(x, pc.StatusCompiler)][0]
+
+    assert p._context["status_channels"] == "STATUS_spades_1"
+
+
+def test_set_compiler_channels(single_status):
+
+    single_status._set_channels()
+    single_status._set_compiler_channels()
+
+    p = [x for x in single_status.processes[::-1]
+         if isinstance(x, pc.StatusCompiler)][0]
+
+    assert p._context["status_channels"] == "STATUS_spades_1"
+
+
+def test_set_status_channels_no_status(single_status):
+
+    single_status.processes[1].status_channels = []
+
+    single_status._set_channels()
+    single_status._set_status_channels()
+
+    with pytest.raises(IndexError):
+        p = [x for x in single_status.processes[::-1]
+             if isinstance(x, pc.StatusCompiler)][0]
+
+
+def test_build(multi_forks):
+
+    multi_forks.build()
+    os.remove("teste.nf")
+
+    assert multi_forks.template != ""
+
