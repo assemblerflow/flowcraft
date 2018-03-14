@@ -17,10 +17,10 @@ process status {
     file '*.log'
 
     """
-    echo $fastq_id, $task_name, \$(cat $status) > ${fastq_id}.status
-    echo $fastq_id, $task_name, \$(cat $warning) > ${fastq_id}.warning
-    echo $fastq_id, $task_name, \$(cat $fail) > ${fastq_id}.fail
-    echo "\$(cat .command.log)" > ${fastq_id}.log
+    echo $fastq_id, $task_name, \$(cat $status) > ${fastq_id}_${task_name}.status
+    echo $fastq_id, $task_name, \$(cat $warning) > ${fastq_id}_${task_name}.warning
+    echo $fastq_id, $task_name, \$(cat $fail) > ${fastq_id}_${task_name}.fail
+    echo "\$(cat .command.log)" > ${fastq_id}_${task_name}.log
     """
 }
 
