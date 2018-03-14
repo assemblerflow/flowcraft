@@ -449,7 +449,10 @@ class NextflowGenerator:
             for l in p.link_start:
                 # If there are multiple link starts in the same lane, the
                 # last one is the only one saved.
-                self.secondary_channels[l] = {p.lane: {"p": p, "end": []}}
+                if l in self.secondary_channels:
+                    self.secondary_channels[l][p.lane] = {"p": p, "end": []}
+                else:
+                    self.secondary_channels[l] = {p.lane: {"p": p, "end": []}}
 
         # check if the current process receives a secondary side channel.
         # If so, add to the links list of that side channel

@@ -18,6 +18,26 @@ def single_con():
 
 
 @pytest.fixture
+def single_con_fasta():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "abricate", "lane": 1}}]
+
+    return eg.NextflowGenerator(con, "teste.nf")
+
+
+@pytest.fixture
+def single_con_multi_raw():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "assembly_mapping", "lane": 1}},
+           {"input": {"process": "assembly_mapping", "lane": 1},
+            "output": {"process": "pilon", "lane": 1}}]
+
+    return eg.NextflowGenerator(con, "teste.nf")
+
+
+@pytest.fixture
 def single_fork():
 
     con = [{"input": {"process": "__init__", "lane": 1},
@@ -25,8 +45,7 @@ def single_fork():
            {"input": {"process": "integrity_coverage", "lane": 1},
             "output": {"process": "spades", "lane": 2}},
            {"input": {"process": "integrity_coverage", "lane": 1},
-            "output": {"process": "skesa", "lane": 3}},
-           ]
+            "output": {"process": "skesa", "lane": 3}}]
 
     return eg.NextflowGenerator(con, "teste.nf")
 
@@ -155,3 +174,136 @@ def test_connections_channel_update_wfork(single_fork):
 
     assert [p1.main_forks[1], p1.main_forks[2]] == \
            [p2.input_channel, p3.input_channel]
+
+
+def test_set_channels_single_con_raw_fastq(single_con):
+
+    single_con._set_channels()
+
+    assert [list(single_con.main_raw_inputs.keys())[0],
+            len(single_con.main_raw_inputs),
+            list(single_con.main_raw_inputs.values())[0]["raw_forks"]] == \
+           ["fastq", 1, ["integrity_coverage_in_1_0"]]
+
+
+def test_set_channels_single_con_raw_fasta(single_con_fasta):
+
+    single_con_fasta._set_channels()
+
+    assert [list(single_con_fasta.main_raw_inputs.keys())[0],
+            len(single_con_fasta.main_raw_inputs),
+            list(single_con_fasta.main_raw_inputs.values())[0][
+                "raw_forks"]] == \
+           ["fasta", 1, ["abricate_in_1_0"]]
+
+
+def test_set_channels_multi_raw_input(single_con_multi_raw):
+
+    single_con_multi_raw._set_channels()
+
+    print(single_con_multi_raw.main_raw_inputs)
+
+    assert [list(single_con_multi_raw.main_raw_inputs.keys()),
+            len(single_con_multi_raw.main_raw_inputs)] == \
+           [["fasta", "fastq"], 2]
+
+
+def test_set_channels_secondary_inputs(single_con):
+
+    single_con._set_channels()
+
+    assert list(single_con.secondary_inputs.keys()) == \
+        ["genomeSize", "minCoverage", "adapters"]
+
+
+def test_set_channels_secondary_channels_nolink(single_con):
+
+    single_con._set_channels()
+
+    assert single_con.secondary_channels["SIDE_phred"][1]["end"] == []
+
+
+def test_set_channels_secondary_chanels_link(multi_forks):
+
+    multi_forks._set_channels()
+
+    assert [multi_forks.secondary_channels["SIDE_phred"][1]["end"],
+            multi_forks.secondary_channels["SIDE_max_len"][1]["end"],
+            multi_forks.secondary_channels["SIDE_max_len"][3]["end"]] == \
+           [[], ["SIDE_max_len_5"], ["SIDE_max_len_7"]]
+
+
+def test_set_secondary_inputs_single(single_con):
+
+    single_con._set_channels()
+    single_con._set_secondary_inputs()
+
+    p = single_con.processes[0]
+
+    assert [p._context["forks"], p._context["secondary_inputs"]] == \
+           ["\nIN_fastq_raw.set{ integrity_coverage_in_1_0 }\n",
+            "IN_genome_size = Channel.value(params.genomeSize)\n"
+            "IN_min_coverage = Channel.value(params.minCoverage)\n"
+            "IN_adapters = Channel.value(params.adapters)"]
+
+
+def test_set_secondary_inputs_raw_forks(raw_forks):
+
+    raw_forks._set_channels()
+    raw_forks._set_secondary_inputs()
+
+    p = raw_forks.processes[0]
+
+    assert [p._context["forks"], p._context["secondary_inputs"]] == \
+           ["\nIN_fastq_raw.into{ integrity_coverage_in_0_0;"
+            "patho_typing_in_0_2;seq_typing_in_0_3 }\n",
+            "IN_genome_size = Channel.value(params.genomeSize)\n"
+            "IN_min_coverage = Channel.value(params.minCoverage)\n"
+            "IN_adapters = Channel.value(params.adapters)\n"
+            "IN_pathoSpecies = Channel.value(params.pathoSpecies)"]
+
+
+def test_set_secondary_inputs_multi_raw(single_con_multi_raw):
+
+    single_con_multi_raw._set_channels()
+    single_con_multi_raw._set_secondary_inputs()
+
+    p = single_con_multi_raw.processes[0]
+
+    assert [p._context["main_inputs"], p._context["secondary_inputs"]] == \
+           ["IN_fasta_raw = Channel.fromPath(params.fasta).map{ it -> ["
+            "it.toString().tokenize('/').last().tokenize('.').first(), it] }"
+            "\nIN_fastq_raw = Channel.fromFilePairs(params.fastq)",
+            "IN_assembly_mapping_opts = Channel.value(["
+            "params.minAssemblyCoverage,params.AMaxContigs])\nIN_genome_size"
+            " = Channel.value(params.genomeSize)"]
+
+
+def test_set_secondary_channels(multi_forks):
+
+    multi_forks._set_channels()
+    multi_forks._set_secondary_channels()
+
+    p = multi_forks.processes[1]
+
+    print(multi_forks.main_raw_inputs)
+
+    print(p._context)
+
+    assert [p._context["output_channel"], p._context["forks"]] == \
+        ["_integrity_coverage_out_1_0",
+         "\n_integrity_coverage_out_1_0.into{ integrity_coverage_out_1_0;"
+         "spades_in_1_4;skesa_in_1_5 }\n\n\nSIDE_max_len_1.set{"
+         " SIDE_max_len_5 }\n"]
+
+
+def test_set_secondary_channels_2(multi_forks):
+
+    multi_forks._set_channels()
+    multi_forks._set_secondary_channels()
+
+    p = multi_forks.processes[4]
+
+    assert [p._context["output_channel"], p.main_forks] == \
+           ["_check_coverage_out_3_3",
+            ["check_coverage_out_3_3", "spades_in_3_6", "skesa_in_3_7"]]

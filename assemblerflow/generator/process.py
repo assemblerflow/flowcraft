@@ -362,8 +362,8 @@ class Process:
             logger.debug("Setting main fork channels: {}".format(
                 self.main_forks))
             operator = "set" if len(self.main_forks) == 1 else "into"
-            self.forks.append("\n{}.{}{{ {} }}\n".format(
-                self.output_channel, operator, ";".join(self.main_forks)))
+            self.forks = ["\n{}.{}{{ {} }}\n".format(
+                self.output_channel, operator, ";".join(self.main_forks))]
 
         self._context = {**kwargs, **{"input_channel": self.input_channel,
                                       "output_channel": self.output_channel,
@@ -385,14 +385,13 @@ class Process:
             self.output_channel = "_{}".format(self.output_channel)
         self.main_forks.append(sink)
 
-        fork_lst = self.forks + self.main_forks
-        operator = "set" if len(fork_lst) == 1 else "into"
-        self.forks.append("\n{}.{}{{ {} }}\n".format(
-            self.output_channel, operator, ";".join(fork_lst))
-        )
+        # fork_lst = self.forks + self.main_forks
+        operator = "set" if len(self.main_forks) == 1 else "into"
+        self.forks = ["\n{}.{}{{ {} }}\n".format(
+            self.output_channel, operator, ";".join(self.main_forks))]
 
         self._context = {**self._context,
-                         **{"forks": "\n".join(self.forks),
+                         **{"forks": self.forks,
                             "output_channel": self.output_channel}}
 
     def set_secondary_channel(self, source, channel_list):
