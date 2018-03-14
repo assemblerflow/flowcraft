@@ -3,6 +3,7 @@ import pytest
 
 import assemblerflow.generator.engine as eg
 import assemblerflow.generator.process as pc
+import assemblerflow.generator.error_handling as eh
 
 from assemblerflow.generator.engine import process_map
 
@@ -440,6 +441,16 @@ def test_set_status_channels_no_status(single_status):
     with pytest.raises(IndexError):
         p = [x for x in single_status.processes[::-1]
              if isinstance(x, pc.StatusCompiler)][0]
+
+
+def test_set_status_channels_duplicate_status(single_status):
+
+    single_status.processes[1].status_channels = ["A", "A"]
+
+    single_status._set_channels()
+
+    with pytest.raises(eh.ProcessError):
+        single_status._set_status_channels()
 
 
 def test_build(multi_forks):
