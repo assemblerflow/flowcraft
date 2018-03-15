@@ -23,7 +23,7 @@ process chewbbaca {
 
     output:
     file 'chew_results'
-    file '*_cgMLST.tsv' optional true into chewbbacaProfile
+    file '*_cgMLST.tsv' optional true into chewbbacaProfile_{{ pid }}
     {% with task_name="chewbbaca" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -59,7 +59,7 @@ process chewbbacaExtractMLST {
     publishDir "results/chewbbaca_{{ pid }}/", mode: "copy", overwrite: true
 
     input:
-    file profiles from chewbbacaProfile.collect()
+    file profiles from chewbbacaProfile_{{ pid }}.collect()
 
     output:
     file "results/cgMLST.tsv"
