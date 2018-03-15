@@ -7,7 +7,7 @@ class Help {
 
         println ""
         println "============================================================"
-        println " I N N U c a ~ INNUca NextFlow version $ver"
+        println "                A S S E M B L E R F L O W"
         println "============================================================"
         println ""
         println " Input FastQ                 : $fastq"
@@ -39,7 +39,7 @@ class Help {
 
         println ""
         println "============================================================"
-        println " I N N U c a ~ INNUca NextFlow version $ver"
+        println "                A S S E M B L E R F L O W"
         println "============================================================"
         println "A nextflow implementation of INNUENDO quality control of"
         println "reads, de novo assembly and contigs quality assessment,"

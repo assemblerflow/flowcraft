@@ -12,11 +12,13 @@ try:
     import generator.process as pc
     import generator.error_handling as eh
     from generator import header_skeleton as hs
+    from generator import footer_skeleton as fs
     from generator.process_details import colored_print
 except ImportError as e:
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
     from assemblerflow.generator import header_skeleton as hs
+    from assemblerflow.generator import footer_skeleton as fs
     from assemblerflow.generator.process_details import colored_print
 
 
@@ -275,6 +277,14 @@ class NextflowGenerator:
         logger.debug("Building header")
         logger.debug("===============")
         self.template += hs.header
+
+    def _build_footer(self):
+        """Adds the footer template to the master template string"""
+
+        logger.debug("===============")
+        logger.debug("Building header")
+        logger.debug("===============")
+        self.template += fs.footer
 
     def _update_raw_input(self, p, sink_channel=None, input_type=None):
         """Given a process, this method updates the
@@ -751,6 +761,8 @@ class NextflowGenerator:
 
         for p in self.processes:
             self.template += p.template_str
+
+        self._build_footer()
 
         project_root = dirname(self.nf_file)
 
