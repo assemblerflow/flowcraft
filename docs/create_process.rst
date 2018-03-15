@@ -31,7 +31,7 @@ substitute key variables in the process, such as input/output channels.
 
 A minimal example created as a ``my_process.nf`` file is as follows::
 
-    process myProcess {
+    process myProcess_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
@@ -59,6 +59,12 @@ processes and potential forks correctly link with each other. This example
 contains all placeholder variables that are currently supported by
 assemblerflow:
 
+
+- ``pid`` (**Mandatory**): This placeholder is used as a unique process
+  identifier that prevent issues from process duplication in the pipeline.
+  It is also important for for unique secondary output channels, such as
+  those that send run status information (see `Status channels`_).
+
 - ``include "post.txt"`` (**Recommended**): Inserts
   ``beforeScript`` and ``afterScript`` statements to the process. These
   include a bash script that created a series of *dotfiles* for the process
@@ -80,13 +86,9 @@ assemblerflow:
 - ``forks`` (**Conditional**): Inserts potential forks of the main output
   channel. It is **mandatory** if the ``output_channel`` is set.
 
-- ``pid`` (**Optional**): This placeholder is used for secondary output
-  channels, such as those that send run status information (see
-  `Status channels`_).
-
 As an example of a complete process, this is the template of ``spades.nf``::
 
-    process spades {
+    process spades_{{ pid }} {
 
         // Send POST request to platform
         {% include "post.txt" ignore missing %}
@@ -254,6 +256,49 @@ pipeline, these can be specific via the
 :attr:`~assemblerflow.generator.process.Process.dependencies` attribute.
 When building the pipeline if at least one of the dependencies is absent,
 assemblerflow will raise an exception informing of a missing dependency.
+
+Directives
+::::::::::
+
+The :attr:`~assemblerflow.generator.process.Process.directives` attribute
+allows for information about cpu/RAM usage and container to be specified
+for each nextflow process in the template file. For instance, considering
+the case where a ``Process`` has a template with two nextflow processes::
+
+    process proc_A_{{ pid }} {
+        // stuff
+    }
+
+    process proc_B_{{ pid }} {
+        // stuff
+    }
+
+Then, information about each process can be specified individually in the
+:attr:`~assemblerflow.generator.process.Process.directives` attribute::
+
+
+    class myProcess(Process):
+        (...)
+        self.directives = {
+            "proc_A": {
+                "cpus": 1
+                "memory": "4GB"
+            },
+            "proc_B": {
+                "cpus": 4
+                "container": "my/container"
+                "version": "1.0.0"
+            }
+        }
+
+The information in this attribute will then be used to build the
+``resources.config`` (containing the information about cpu/RAM) and
+``containers.config`` (containing the container images) files. Whenever a
+directive is missing, such as the ``container`` and ``version`` from ``proc_A``
+and ``memory`` from ``proc_B``, nothing about them will be written into the
+config files and they will use the default pipeline values. In the case
+cpus, the default is ``1``, for RAM is ``1GB`` and if no container is
+specified, the process will run locally.
 
 Ignore type
 :::::::::::
