@@ -744,7 +744,7 @@ class FastQC(Process):
             "cpus": 2,
             "memory": "4GB",
             "container": "ummidock/fastqc",
-            "version": "1.0.0-2"
+            "version": "0.11.7-1"
         }}
 
 
@@ -843,7 +843,7 @@ class FastqcTrimmomatic(Process):
                 "cpus": 2,
                 "memory": "4GB",
                 "container": "ummidock/fastqc",
-                "version": "1.0.0-2"
+                "version": "0.11.7-1"
             },
             "trimmomatic": {
                 "cpus": 2,
