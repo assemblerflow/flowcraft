@@ -481,3 +481,56 @@ def test_build(multi_forks):
 
     assert multi_forks.template != ""
 
+
+def test_resources_string(single_con):
+
+    res_dict = {"procA": {"cpus": 1, "memory": "4GB", "container": "img",
+                          "version": "1"}}
+
+    res = single_con._get_resources_string(res_dict, 1)
+
+    assert res == '\n$procA_1.cpus = "1"\n$procA_1.memory = "4GB"'
+
+
+def test_resources_string_2(single_con):
+
+    res_dict = {"procA": {"cpus": 1, "container": "img",
+                          "version": "1"}}
+
+    res = single_con._get_resources_string(res_dict, 1)
+
+    assert res == '\n$procA_1.cpus = "1"'
+
+
+def test_resources_string_3(single_con):
+
+    res_dict = {"procA": {"cpus": 1, "memory": "4GB", "container": "img",
+                          "version": "1"},
+                "procB": {"memory": "{ 4.GB * task.attempt }"}}
+
+    res = single_con._get_resources_string(res_dict, 1)
+
+    assert res == '\n$procA_1.cpus = "1"\n$procA_1.memory = "4GB"' \
+                  '\n$procB_1.memory = { 4.GB * task.attempt }'
+
+
+def test_container_string(single_con):
+
+    res_dict = {"procA": {"cpus": 1, "memory": "4GB", "container": "img",
+                          "version": "1"}}
+
+    res = single_con._get_container_string(res_dict, 2)
+
+    assert res == '\n$procA_2.container = "img:1"'
+
+
+def test_container_string_2(single_con):
+
+    res_dict = {"procA": {"cpus": 1, "memory": "4GB", "container": "img",
+                          "version": "1"},
+                "procB": {"container": "img"}}
+
+    res = single_con._get_container_string(res_dict, 2)
+
+    assert res == '\n$procA_2.container = "img:1"\n' \
+                  '$procB_2.container = "img:latest"'
