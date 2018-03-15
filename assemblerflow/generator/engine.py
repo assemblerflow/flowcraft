@@ -648,7 +648,7 @@ class NextflowGenerator:
                 if d not in resource_directives:
                     continue
 
-                config_str += "\n${}_{}.{} = {}".format(p, pid, d, val)
+                config_str += '\n${}_{}.{} = "{}"'.format(p, pid, d, val)
 
         return config_str
 
