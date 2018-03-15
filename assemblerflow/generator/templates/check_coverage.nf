@@ -1,5 +1,5 @@
 
-process integrity_coverage_2 {
+process integrity_coverage_2_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -38,7 +38,7 @@ MAIN_integrity_{{ pid }}
     }
 
 
-process report_coverage_2 {
+process report_coverage_2_{{ pid }} {
 
     // This process can only use a single CPU
     cpus 1

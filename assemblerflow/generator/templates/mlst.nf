@@ -1,5 +1,5 @@
 
-process mlst {
+process mlst_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -43,7 +43,7 @@ process mlst {
     """
 }
 
-process compile_mlst {
+process compile_mlst_{{ pid }} {
 
     publishDir "results/annotation/mlst_{{ pid }}/"
 

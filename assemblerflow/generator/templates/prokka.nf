@@ -1,5 +1,5 @@
 
-process prokka {
+process prokka_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}

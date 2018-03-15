@@ -1,5 +1,5 @@
 
-process pilon {
+process pilon_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -30,7 +30,7 @@ process pilon {
 
 }
 
-process pilon_report {
+process pilon_report_{{ pid }} {
 
     {% with overwrite="false" %}
     {% include "report_post.txt" ignore missing %}
@@ -53,7 +53,7 @@ process pilon_report {
 }
 
 
-process compile_pilon_report {
+process compile_pilon_report_{{ pid }} {
 
     publishDir "reports/assembly/pilon_{{ pid }}/", mode: 'copy'
 

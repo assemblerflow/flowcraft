@@ -1,5 +1,5 @@
 
-process abricate {
+process abricate_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -34,7 +34,7 @@ process abricate {
 }
 
 
-process process_abricate {
+process process_abricate_{{ pid }} {
 
     // Send POST request to platform
     {% with overwrite="false" %}

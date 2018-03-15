@@ -1,7 +1,9 @@
 import sys
+import jinja2
 import logging
 
 from collections import defaultdict
+from os.path import dirname, join, abspath, split
 
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -126,6 +128,16 @@ class NextflowGenerator:
         """
         list: Stores the Process classes that should be skipped when iterating
         over the :attr:`~NextflowGenerator.processes` list.
+        """
+
+        self.resources = ""
+        """
+        str: Stores the resource directives string for each nextflow process. 
+        """
+
+        self.containers = ""
+        """
+        str: Stores the container directives string for each nextflow process.
         """
 
     def _build_connections(self, process_list):
@@ -591,6 +603,125 @@ class NextflowGenerator:
         status_inst.set_status_channels(status_channels)
         self.processes.append(status_inst)
 
+    @staticmethod
+    def _get_resources_string(res_dict, pid):
+        """ Returns the nextflow resources string from a dictionary object
+
+        If the dictionary has at least on of the resource directives, these
+        will be compiled for each process in the dictionary and returned
+        as a string read for injection in the nextflow config file template.
+
+        This dictionary should be::
+
+            dict = {"processA": {"cpus": 1, "memory": "4GB"},
+                    "processB": {"cpus": 2}}
+
+        Parameters
+        ----------
+        res_dict : dict
+            Dictionary with the resources for processes.
+        pid : int
+            Unique identified of the process
+
+        Returns
+        -------
+        str : nextflow config string
+        """
+
+        resource_directives = ["cpus", "memory"]
+        config_str = ""
+
+        for p, directives in res_dict.items():
+
+            for d, val in directives.items():
+
+                if d not in resource_directives:
+                    continue
+
+                config_str += "\n${}_{}.{} = {}".format(p, pid, d, val)
+
+        return config_str
+
+    @staticmethod
+    def _get_container_string(cont_dict, pid):
+        """ Returns the nextflow containers string from a dictionary object
+
+        If the dictionary has at least on of the container directives, these
+        will be compiled for each process in the dictionary and returned
+        as a string read for injection in the nextflow config file template.
+
+        This dictionary should be::
+
+            dict = {"processA": {"container": "asd", "version": "1.0.0"},
+                    "processB": {"container": "dsd"}}
+
+        Parameters
+        ----------
+        cont_dict : dict
+            Dictionary with the containers for processes.
+        pid : int
+            Unique identified of the process
+
+        Returns
+        -------
+        str : nextflow config string
+        """
+
+        config_str = ""
+
+        for p, directives in cont_dict.items():
+
+            container = ""
+
+            if "container" in directives:
+                container += directives["container"]
+
+                if "version" in directives:
+                    container += ":{}".format(directives["version"])
+                else:
+                    container += ":latest"
+
+            config_str += '\n${}_{}.container = "{}"'.format(p, pid, container)
+
+        return config_str
+
+    @staticmethod
+    def _render_config(template, context):
+
+        tpl_dir = join(dirname(abspath(__file__)), "templates")
+        tpl_path = join(tpl_dir, template + ".config")
+
+        path, filename = split(tpl_path)
+
+        return jinja2.Environment(
+            loader=jinja2.FileSystemLoader(path or "./")
+        ).get_template(filename).render(context)
+
+    def _set_configurations(self):
+        """This method will iterate over all process in the pipeline and
+        populate the nextflow configuration files with the directives
+        of each process in the pipeline.
+        """
+
+        resources = ""
+        containers = ""
+
+        for p in self.processes:
+
+            # Skip processes with the directives attribute populated
+            if not p.directives:
+                continue
+
+            resources += self._get_resources_string(p.directives, p.pid)
+            containers += self._get_container_string(p.directives, p.pid)
+
+        self.resources = self._render_config("resources", {
+            "process_info": resources
+        })
+        self.containers = self._render_config("containers", {
+            "container_info": containers
+        })
+
     def build(self):
         """Main pipeline builder
 
@@ -616,8 +747,21 @@ class NextflowGenerator:
 
         self._set_compiler_channels()
 
+        self._set_configurations()
+
         for p in self.processes:
             self.template += p.template_str
 
+        project_root = dirname(self.nf_file)
+
+        # Write pipeline file
         with open(self.nf_file, "w") as fh:
             fh.write(self.template)
+
+        # Write resources config
+        with open(join(project_root, "resources.config"), "w") as fh:
+            fh.write(self.resources)
+
+        # Write containers config
+        with open(join(project_root, "containers.config"), "w") as fh:
+            fh.write(self.containers)

@@ -1,5 +1,5 @@
 
-process spades {
+process spades_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}

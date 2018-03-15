@@ -1,5 +1,5 @@
 
-process fastqc {
+process fastqc_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -27,7 +27,7 @@ process fastqc {
 This process will parse the result files from a FastQC analyses and output
 the optimal_trim information for Trimmomatic
 */
-process fastqc_report {
+process fastqc_report_{{ pid }} {
 
     // Send POST request to platform
     {% with overwrite="false" %}
@@ -68,7 +68,7 @@ MAIN_fastqc_trim
 This will collect the optimal trim points assessed by the fastqc_report
 process and write the results of all samples in a single csv file
 */
-process trim_report {
+process trim_report_{{ pid }} {
 
     publishDir 'reports/fastqc_{{ pid }}/', mode: 'copy'
 
@@ -85,7 +85,7 @@ process trim_report {
 }
 
 
-process compile_fastqc_status {
+process compile_fastqc_status_{{ pid }} {
 
     publishDir 'reports/fastqc_{{ pid }}/', mode: 'copy'
 
@@ -107,7 +107,7 @@ process compile_fastqc_status {
 This process will execute trimmomatic. Currently, the main channel requires
 information on the trim_range and phred score.
 */
-process trimmomatic {
+process trimmomatic_{{ pid }} {
 
     // Send POST request to platform
     {% with overwrite="false" %}

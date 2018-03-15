@@ -5,7 +5,7 @@ if (params.chewbbacaToPhyloviz == true){
     jsonOpt = "--json"
 }
 
-process chewbbaca {
+process chewbbaca_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -54,7 +54,7 @@ process chewbbaca {
 }
 
 
-process chewbbacaExtractMLST {
+process chewbbacaExtractMLST_{{ pid }} {
 
     publishDir "results/chewbbaca_{{ pid }}/", mode: "copy", overwrite: true
 

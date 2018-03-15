@@ -1,5 +1,5 @@
 
-process integrity_coverage {
+process integrity_coverage_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -59,7 +59,7 @@ MAIN_PreCoverageCheck
 This process will report the expected coverage for each non-corrupted sample
 and write the results to 'reports/coverage/estimated_coverage_initial.csv'
 */
-process report_coverage {
+process report_coverage_{{ pid }} {
 
     // This process can only use a single CPU
     cpus 1
@@ -81,7 +81,7 @@ process report_coverage {
 This process will report the corrupted samples and write the results to
 'reports/corrupted/corrupted_samples.txt'
 */
-process report_corrupt {
+process report_corrupt_{{ pid }} {
 
     // This process can only use a single CPU
     cpus 1

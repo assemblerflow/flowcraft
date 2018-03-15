@@ -1,5 +1,5 @@
 
-process patho_typing {
+process patho_typing_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}

@@ -1,5 +1,5 @@
 
-process trimmomatic {
+process trimmomatic_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}

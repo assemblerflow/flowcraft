@@ -1,5 +1,5 @@
 
-process fastqc2 {
+process fastqc2_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -24,7 +24,7 @@ process fastqc2 {
 }
 
 
-process fastqc2_report {
+process fastqc2_report_{{ pid }} {
 
     // Send POST request to platform
     {% with overwrite="false" %}
@@ -54,7 +54,7 @@ process fastqc2_report {
 }
 
 
-process compile_fastqc_status2 {
+process compile_fastqc_status2_{{ pid }} {
 
     publishDir 'reports/fastqc_{{ pid }}/', mode: 'copy'
 

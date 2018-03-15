@@ -1,5 +1,5 @@
 
-process assembly_mapping {
+process assembly_mapping_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -58,7 +58,7 @@ process assembly_mapping {
 Processes the results from the assembly_mapping process and filters the
 assembly contigs based on coverage and length thresholds.
 */
-process process_assembly_mapping {
+process process_assembly_mapping_{{ pid }} {
 
     // Send POST request to platform
     {% with overwrite="false" %}

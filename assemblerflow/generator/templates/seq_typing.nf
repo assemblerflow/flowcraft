@@ -1,6 +1,6 @@
 
 
-process seq_typing {
+process seq_typing_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}

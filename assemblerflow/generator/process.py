@@ -208,6 +208,29 @@ class Process:
         of the current process.
         """
 
+        self.directives = {}
+        """
+        dict: Specifies the directives (cpus, memory, container) for each
+        nextflow process in the template. If specified, this directives
+        will be added to the nextflow configuration file. Otherwise, 
+        the default values for cpus and memory will be used. In the case
+        of containers, they will not run inside any container. 
+        
+        The current supported directives are:
+            - cpus
+            - memory
+            - container
+            - container tag/version
+        
+        An example of directives for two process is as follows::
+        
+            self.directives = {
+                "processA": {"cpus": 1, "memory": "1GB"},
+                "processB": {"memory": "5GB", "container": "my/image",
+                             "version": "0.5.0"}
+            }
+        """
+
     def _set_template(self, template):
         """Sets the path to the appropriate jinja template file
 
@@ -568,8 +591,6 @@ class IntegrityCoverage(Process):
         self.input_type = "fastq"
         self.output_type = "fastq"
 
-        self._main_in_str = "MAIN_raw"
-
         self.secondary_inputs = [
             {
                 "params": "genomeSize",
@@ -597,14 +618,18 @@ class SeqTyping(Process):
         self.input_type = "fastq"
         self.output_type = None
 
-        self.ignore_type = True
-        self.ignore_pid = True
-
         self.status_channels = []
 
         self.link_start = None
         self.link_end.append({"link": "MAIN_raw",
                               "alias": "SIDE_SeqType_raw"})
+
+        self.directives = {"seq_typing": {
+            "cpus": 4,
+            "memory": "4GB",
+            "container": "ummidock/seq_typing",
+            "version": "1.0.0-1"
+        }}
 
 
 class PathoTyping(Process):
@@ -620,7 +645,6 @@ class PathoTyping(Process):
         self.output_type = None
 
         self.ignore_type = True
-        self.ignore_pid = True
 
         self.status_channels = []
 
@@ -635,6 +659,13 @@ class PathoTyping(Process):
         self.link_start = None
         self.link_end.append({"link": "MAIN_raw",
                               "alias": "SIDE_PathoType_raw"})
+
+        self.directives = {"patho_typing": {
+            "cpus": 4,
+            "memory": "4GB",
+            "container": "ummidock/patho_typing",
+            "version": "1.0.0-2"
+        }}
 
 
 class CheckCoverage(Process):
@@ -709,6 +740,13 @@ class FastQC(Process):
             }
         ]
 
+        self.directives = {"fastqc2": {
+            "cpus": 2,
+            "memory": "4GB",
+            "container": "ummidock/fastqc",
+            "version": "1.0.0-2"
+        }}
+
 
 class Trimmomatic(Process):
     """Trimmomatic process template interface
@@ -742,6 +780,13 @@ class Trimmomatic(Process):
                            "params.trimMinLength])"
             }
         ]
+
+        self.directives = {"trimmomatic": {
+            "cpus": 2,
+            "memory": "{ 4.GB * task.attempt }",
+            "container": "ummidock/trimmomatic",
+            "version": "0.36-2"
+        }}
 
 
 class FastqcTrimmomatic(Process):
@@ -793,6 +838,21 @@ class FastqcTrimmomatic(Process):
             }
         ]
 
+        self.directives = {
+            "fastqc": {
+                "cpus": 2,
+                "memory": "4GB",
+                "container": "ummidock/fastqc",
+                "version": "1.0.0-2"
+            },
+            "trimmomatic": {
+                "cpus": 2,
+                "memory": "{ 4.GB * task.attempt }",
+                "container": "ummidock/trimmomatic",
+                "version": "0.36-2"
+            }
+        }
+
 
 class Skesa(Process):
     """Skesa process template interface
@@ -804,6 +864,13 @@ class Skesa(Process):
 
         self.input_type = "fastq"
         self.output_type = "fasta"
+
+        self.directives = {"skesa": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "ummidock/skesa",
+            "version": "0.2.0-2"
+        }}
 
 
 class Spades(Process):
@@ -843,6 +910,13 @@ class Spades(Process):
             }
         ]
 
+        self.directives = {"spades": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "ummidock/spades",
+            "version": "3.11.1-1"
+        }}
+
 
 class ProcessSpades(Process):
     """Process spades process template interface
@@ -871,6 +945,11 @@ class ProcessSpades(Process):
                            "params.spadesMaxContigs])"
             }
         ]
+
+        self.directives = {"process_spades": {
+            "container": "ummidock/spades",
+            "version": "3.11.1-1"
+        }}
 
 
 class AssemblyMapping(Process):
@@ -919,6 +998,21 @@ class AssemblyMapping(Process):
             }
         ]
 
+        self.directives = {
+            "assembly_mapping": {
+                "cpus": 4,
+                "memory": "{ 5.GB * task.attempt }",
+                "container": "ummidock/bowtie2_samtools",
+                "version": "1.0.0-2"
+            },
+            "process_assembly_mapping": {
+                "cpus": 4,
+                "memory": "{ 5.GB * task.attempt }",
+                "container": "ummidock/bowtie2_samtools",
+                "version": "1.0.0-2"
+            }
+        }
+
 
 class Pilon(Process):
     """Pilon mapping process template interface
@@ -948,6 +1042,21 @@ class Pilon(Process):
         self.link_end.append({"link": "SIDE_BpCoverage",
                               "alias": "SIDE_BpCoverage"})
 
+        self.directives = {
+            "pilon": {
+                "cpus": 4,
+                "memory": "{ 7.GB * task.attempt }",
+                "container": "ummidock/pilon",
+                "version": "1.22.0-2"
+            },
+            "pilon_report": {
+                "cpus": 4,
+                "memory": "{ 7.GB * task.attempt }",
+                "container": "ummidock/pilon",
+                "version": "1.22.0-2"
+            }
+        }
+
 
 class Mlst(Process):
     """Mlst mapping process template interface
@@ -970,6 +1079,10 @@ class Mlst(Process):
 
         self.input_type = "fasta"
         self.output_type = "fasta"
+
+        self.directives = {"mlst": {
+            "container": "ummidock/mlst",
+        }}
 
 
 class Abricate(Process):
@@ -1002,6 +1115,17 @@ class Abricate(Process):
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
 
+        self.directives = {
+            "abricate": {
+                "container": "ummidock/abricate",
+                "version": "0.7.0-2"
+            },
+            "process_abricate": {
+                "container": "ummidock/abricate",
+                "version": "0.7.0-2"
+            }
+        }
+
 
 class Prokka(Process):
     """Prokka mapping process template interface
@@ -1031,6 +1155,14 @@ class Prokka(Process):
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
 
+        self.directives = {
+            "prokka": {
+                "cpus": 2,
+                "container": "ummidock/prokka-nf",
+                "version": "1.12.0-2"
+            }
+        }
+
 
 class Chewbbaca(Process):
     """Prokka mapping process template interface
@@ -1059,6 +1191,19 @@ class Chewbbaca(Process):
         self.link_start = None
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
+
+        self.directives = {
+            "chewbbaca": {
+                "cpus": 5,
+                "container": "ummidock/chewbbaca",
+                "version": "py3"
+            },
+            "chewbbacaExtractMLST": {
+                "container": "ummidock/chewbbaca",
+                "version": "py3"
+            }
+        }
+
 
 class StatusCompiler(Status):
     """Status compiler process template interface
