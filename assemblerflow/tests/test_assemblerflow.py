@@ -47,8 +47,8 @@ def test_build_file(tmp):
     args = af.get_args(["-t integrity_coverage fastqc", "-o", "{}".format(p)])
     af.run(args)
 
-    assert os.listdir(tmp) == ["containers.config", "teste.nf",
-                               "resources.config"]
+    assert sorted(os.listdir(tmp)) == ["containers.config", "resources.config",
+                                       "teste.nf"]
 
 
 def test_build_file_2(tmp):
