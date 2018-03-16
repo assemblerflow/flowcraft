@@ -47,10 +47,11 @@ def test_build_file(tmp):
     args = af.get_args(["-t integrity_coverage fastqc", "-o", "{}".format(p)])
     af.run(args)
 
-    assert os.listdir(tmp) == ["teste.nf"]
+    assert os.listdir(tmp) == ["containers.config", "teste.nf",
+                               "resources.config"]
 
 
-def test_build_file(tmp):
+def test_build_file_2(tmp):
 
     p = os.path.join(os.path.abspath(tmp), "teste.nf")
     sys.argv.append(1)
