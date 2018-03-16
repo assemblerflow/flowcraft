@@ -155,7 +155,10 @@ class NextflowGenerator:
 
         Returns
         -------
-
+        str
+            Process name
+        dict or None
+            Process directives
         """
 
         directives = None
