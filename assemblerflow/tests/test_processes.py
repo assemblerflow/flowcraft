@@ -117,12 +117,13 @@ def test_main_raw_channel_invalid(mock_process):
 
 def test_channels_setup(process_wchannels):
 
+    process_wchannels.lane = 1
     process_wchannels.set_channels(pid=1)
 
     expected = {"input_channel": "in_channel",
                 "output_channel": "out_channel",
                 "template": process_wchannels.template,
-                "pid": 1,
+                "pid": "1_1",
                 "forks": ""}
 
     assert process_wchannels._context == expected
@@ -132,12 +133,13 @@ def test_channels_setup_withforks(process_wchannels):
 
     process_wchannels.forks = ["A", "B"]
 
+    process_wchannels.lane = 3
     process_wchannels.set_channels(pid=1)
 
     expected = {"input_channel": "in_channel",
                 "output_channel": "out_channel",
                 "template": process_wchannels.template,
-                "pid": 1,
+                "pid": "3_1",
                 "forks": "A\nB"}
 
     assert process_wchannels._context == expected
@@ -146,12 +148,13 @@ def test_channels_setup_withforks(process_wchannels):
 def test_setup_one_raw_fork(process_wchannels):
 
     process_wchannels.main_forks = ["A"]
+    process_wchannels.lane = 1
     process_wchannels.set_channels(pid=1)
 
     expected = {"input_channel": "in_channel",
                 "output_channel": "out_channel",
                 "template": process_wchannels.template,
-                "pid": 1,
+                "pid": "1_1",
                 "forks": "\nout_channel.set{ A }\n"}
 
     assert process_wchannels._context == expected
@@ -160,12 +163,13 @@ def test_setup_one_raw_fork(process_wchannels):
 def test_setup_multiple_raw_forks(process_wchannels):
 
     process_wchannels.main_forks = ["A", "B"]
+    process_wchannels.lane = 3
     process_wchannels.set_channels(pid=1)
 
     expected = {"input_channel": "in_channel",
                 "output_channel": "out_channel",
                 "template": process_wchannels.template,
-                "pid": 1,
+                "pid": "3_1",
                 "forks": "\nout_channel.into{ A;B }\n"}
 
     assert process_wchannels._context == expected

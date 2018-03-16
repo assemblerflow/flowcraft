@@ -391,7 +391,8 @@ class Process:
         self._context = {**kwargs, **{"input_channel": self.input_channel,
                                       "output_channel": self.output_channel,
                                       "template": self.template,
-                                      "forks": "\n".join(self.forks)}}
+                                      "forks": "\n".join(self.forks),
+                                      "pid": self.pid}}
 
     def update_main_forks(self, sink):
         """Updates the forks attribute with the sink channel destination
