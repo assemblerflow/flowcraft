@@ -1139,7 +1139,7 @@ class Abricate(Process):
 
         self.ignore_type = True
 
-        self.status_channels = ["STATUS_abricate", "STATUS_process_abricate"]
+        self.status_channels = ["STATUS_abricate"]
 
         self.link_start = None
         self.link_end.append({"link": "MAIN_assembly",
