@@ -175,9 +175,10 @@ def test_channels_setup_status(process_wchannels):
 
     process_wchannels.status_channels = ["A", "B"]
 
+    process_wchannels.lane = 3
     process_wchannels.set_channels(pid=1)
 
-    assert process_wchannels.status_strs == ["A_1", "B_1"]
+    assert process_wchannels.status_strs == ["A_3_1", "B_3_1"]
 
 
 def test_update_main_fork_noprevious(process_wchannels):
@@ -196,26 +197,29 @@ def test_update_main_fork_noprevious(process_wchannels):
 
 def test_secondary_channels_multisink(process_wchannels):
 
+    process_wchannels.lane = 2
     process_wchannels.set_channels(pid=1)
     process_wchannels.set_secondary_channel("A", ["B", "C"])
 
-    assert process_wchannels.forks == ["\nA_1.into{ B;C }\n"]
+    assert process_wchannels.forks == ["\nA_2_1.into{ B;C }\n"]
 
 
 def test_secondary_channels_singlesink(process_wchannels):
 
+    process_wchannels.lane = 2
     process_wchannels.set_channels(pid=1)
     process_wchannels.set_secondary_channel("A", ["B"])
 
-    assert process_wchannels.forks == ["\nA_1.set{ B }\n"]
+    assert process_wchannels.forks == ["\nA_2_1.set{ B }\n"]
 
 
 def test_secondary_channels_duplicatesink(process_wchannels):
 
+    process_wchannels.lane = 1
     process_wchannels.set_channels(pid=1)
     process_wchannels.set_secondary_channel("A", ["B", "B"])
 
-    assert process_wchannels.forks == ["\nA_1.set{ B }\n"]
+    assert process_wchannels.forks == ["\nA_1_1.set{ B }\n"]
 
 
 def test_status_init(mock_status):

@@ -318,7 +318,7 @@ def test_set_channels_secondary_chanels_link(multi_forks):
     assert [multi_forks.secondary_channels["SIDE_phred"][1]["end"],
             multi_forks.secondary_channels["SIDE_max_len"][1]["end"],
             multi_forks.secondary_channels["SIDE_max_len"][3]["end"]] == \
-           [[], ["SIDE_max_len_5"], ["SIDE_max_len_7"]]
+           [[], ["SIDE_max_len_4_5"], ["SIDE_max_len_6_7"]]
 
 
 def test_set_secondary_inputs_single(single_con):
@@ -376,13 +376,11 @@ def test_set_secondary_channels(multi_forks):
 
     print(multi_forks.main_raw_inputs)
 
-    print(p._context)
-
     assert [p._context["output_channel"], p._context["forks"]] == \
         ["_integrity_coverage_out_1_0",
          "\n_integrity_coverage_out_1_0.into{ integrity_coverage_out_1_0;"
-         "spades_in_1_4;skesa_in_1_5 }\n\n\nSIDE_max_len_1.set{"
-         " SIDE_max_len_5 }\n"]
+         "spades_in_1_4;skesa_in_1_5 }\n\n\nSIDE_max_len_1_1.set{"
+         " SIDE_max_len_4_5 }\n"]
 
 
 def test_set_secondary_channels_2(multi_forks):
@@ -414,7 +412,7 @@ def test_set_implicit_link(implicit_link_2):
 
     p = implicit_link_2.processes[1]
 
-    assert p.main_forks == ["integrity_coverage_out_1_0", "_LAST_fastq_3"]
+    assert p.main_forks == ["integrity_coverage_out_1_0", "_LAST_fastq_1_3"]
 
 
 def test_set_status_channels_multi(single_con):
@@ -426,8 +424,8 @@ def test_set_status_channels_multi(single_con):
          if isinstance(x, pc.StatusCompiler)][0]
 
     assert p._context["status_channels"] == \
-               "STATUS_integrity_coverage_1.mix(STATUS_fastqc2_2," \
-               "STATUS_fastqc2_report_2)"
+        "STATUS_integrity_coverage_1_1.mix(STATUS_fastqc2_1_2," \
+        "STATUS_fastqc2_report_1_2)"
 
 
 def test_set_status_channels_single(single_status):
@@ -438,18 +436,19 @@ def test_set_status_channels_single(single_status):
     p = [x for x in single_status.processes[::-1]
          if isinstance(x, pc.StatusCompiler)][0]
 
-    assert p._context["status_channels"] == "STATUS_spades_1"
+    assert p._context["status_channels"] == "STATUS_spades_1_1"
 
 
 def test_set_compiler_channels(single_status):
 
+    single_status.lane = 1
     single_status._set_channels()
     single_status._set_compiler_channels()
 
     p = [x for x in single_status.processes[::-1]
          if isinstance(x, pc.StatusCompiler)][0]
 
-    assert p._context["status_channels"] == "STATUS_spades_1"
+    assert p._context["status_channels"] == "STATUS_spades_1_1"
 
 
 def test_set_status_channels_no_status(single_status):
