@@ -1,4 +1,5 @@
 import sys
+import json
 import jinja2
 import logging
 
@@ -55,15 +56,6 @@ the format::
 class NextflowGenerator:
 
     def __init__(self, process_connections, nextflow_file):
-
-        # Check if all specified processes are available
-        for p in process_connections:
-            pname = p["output"]["process"]
-            if pname not in process_map and pname != "__init__":
-                logger.error(colored_print(
-                    "\nThe process '{}' is not available".format(pname),
-                    "red_bold"))
-                sys.exit(1)
 
         self.processes = []
 
@@ -142,6 +134,52 @@ class NextflowGenerator:
         str: Stores the container directives string for each nextflow process.
         """
 
+    @staticmethod
+    def _parse_process_name(name_str):
+        """Parses the process string and returns the process name and its
+        directives
+
+        Process strings my contain directive information with the following
+        syntax::
+
+            proc_name={'directive':'val'}
+
+        This method parses this string and returns the process name as a
+        string and the directives information as a dictionary.
+
+        Parameters
+        ----------
+        name_str : str
+            Raw string with process name and, potentially, directive
+            information
+
+        Returns
+        -------
+
+        """
+
+        directives = None
+
+        fields = name_str.split("=")
+        process_name = fields[0]
+
+        if len(fields) == 2:
+            _directives = fields[1].replace("'", '"')
+            try:
+                directives = json.loads(_directives)
+            except json.decoder.JSONDecodeError:
+                raise eh.ProcessError(
+                    "Could not parse directives for process '{}'. The raw"
+                    " string is: {}\n"
+                    "Possible causes include:\n"
+                    "\t1. Spaces inside directives\n"
+                    "\t2. Missing '=' symbol before directives\n"
+                    "\t3. Missing quotes (' or \") around directives\n"
+                    "A valid example: process_name={{'cpus':'2'}}".format(
+                        process_name, name_str))
+
+        return process_name, directives
+
     def _build_connections(self, process_list):
         """Parses the process connections dictionaries into a process list
 
@@ -172,13 +210,33 @@ class NextflowGenerator:
             logger.debug("[{}] Output lane: {}".format(p, out_lane))
 
             # Get process names
-            p_in_name = con["input"]["process"]
-            logger.debug("[{}] Input channel: {}".format(p, p_in_name))
-            p_out_name = con["output"]["process"]
-            logger.debug("[{}] Output channel: {}".format(p, p_out_name))
+            try:
+                _p_in_name = con["input"]["process"]
+                p_in_name, _ = self._parse_process_name(_p_in_name)
+                logger.debug("[{}] Input channel: {}".format(p, p_in_name))
+                _p_out_name = con["output"]["process"]
+                p_out_name, out_directives = self._parse_process_name(
+                    _p_out_name)
+                logger.debug("[{}] Output channel: {}".format(p, p_out_name))
+            # Exception is triggered when the process name/directives cannot
+            # be processes.
+            except eh.ProcessError as ex:
+                logger.error(colored_print(ex.value, "red_bold"))
+                sys.exit(1)
 
             # Instance output process
+            if p_out_name not in process_map:
+                logger.error(colored_print(
+                    "\nThe process '{}' is not available".format(p_out_name),
+                    "red_bold"))
+                sys.exit(1)
+
             out_process = process_map[p_out_name](template=p_out_name)
+
+            # Update directives, if provided
+            if out_directives:
+                out_process.update_directives(out_directives)
+
             # Set suffix strings for main input/output channels
             input_suf = "{}_{}".format(in_lane, p)
             output_suf = "{}_{}".format(out_lane, p)

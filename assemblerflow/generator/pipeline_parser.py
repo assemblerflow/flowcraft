@@ -293,8 +293,6 @@ def parse_pipeline(pipeline_str):
         with open(pipeline_str) as fh:
             pipeline_str = "".join([x.strip() for x in fh.readlines()])
 
-    print(pipeline_str)
-
     # Perform pipeline insanity checks
     insanity_checks(pipeline_str)
 

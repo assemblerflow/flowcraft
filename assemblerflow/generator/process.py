@@ -468,6 +468,35 @@ class Process:
         logger.debug("Setting forks attribute to: {}".format(self.forks))
         self._context = {**self._context, **{"forks": "\n".join(self.forks)}}
 
+    def update_directives(self, directives_dict):
+        """Updates the directives attribute from a dictionary object.
+
+        This will only update the directives for processes that have been
+        defined in the subclass.
+
+        Parameters
+        ----------
+        directives_dict : dict
+            Dictionary containing the directives that will be used to update
+            all nextflow processes.
+
+        """
+
+        valid_directives = ["cpus", "memory", "container", "version"]
+
+        for p, directives in self.directives.items():
+
+            for d, val in directives_dict.items():
+
+                # Prevent update when an invalid directive is provided
+                if d not in valid_directives:
+                    raise eh.ProcessError(
+                        "Invalid directive '{}'. The currently supported "
+                        "directives are: {}".format(
+                            d, " ".join(valid_directives)))
+
+                self.directives[p][d] = val
+
 
 class Status(Process):
     """Extends the Process methods to status-type processes
