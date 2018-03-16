@@ -376,7 +376,7 @@ class Process:
             context
         """
 
-        self.pid = kwargs.get("pid")
+        self.pid = "{}_{}".format(self.lane, kwargs.get("pid"))
 
         for i in self.status_channels:
             self.status_strs.append("{}_{}".format(i, self.pid))
