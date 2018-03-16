@@ -39,6 +39,15 @@ def test_check():
         af.run(args)
 
 
+def test_check_invalid():
+
+    args = af.get_args(["-t 'A B C()'", "-c", "-o teste.nf"])
+    sys.argv.append(1)
+
+    with pytest.raises(SystemExit):
+        af.run(args)
+
+
 def test_build_file(tmp):
 
     p = os.path.join(os.path.abspath(tmp), "teste.nf")
