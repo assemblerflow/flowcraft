@@ -307,3 +307,62 @@ def test_init_multi_secondary_inputs(mock_init):
 
     assert mock_init._context["secondary_inputs"] == \
         "IN_genome_size = Channel.value(params.genomeSize)\nOther"
+
+
+def test_directive_update():
+
+    p = pc.Spades(template="spades")
+
+    p.update_directives({"version": "3.9.0"})
+
+    assert p.directives["spades"]["version"] == "3.9.0"
+
+
+def test_directive_update2():
+
+    p = pc.FastQC(template="fastqc")
+
+    p.update_directives({"cpus": "3", "memory": "4GB"})
+
+    assert [p.directives["fastqc2"]["cpus"],
+            p.directives["fastqc2"]["memory"]] ==\
+           ["3", "4GB"]
+
+
+def test_directive_update3():
+
+    p = pc.Pilon(template="pilon")
+
+    p.update_directives({"cpus": "3", "memory": "4GB",
+                         "container": "another", "version": "1.0"})
+
+    assert [p.directives["pilon"]["cpus"],
+            p.directives["pilon"]["memory"],
+            p.directives["pilon"]["container"],
+            p.directives["pilon"]["version"]] == \
+           ["3", "4GB", "another", "1.0"]
+
+
+def test_directive_update4():
+
+    p = pc.Trimmomatic(template="trimmomatic")
+
+    p.update_directives({"cpus": "3", "memory": "{4.GB*task.attempt}",
+                         "container": "another", "version": "1.0"})
+
+    assert [p.directives["trimmomatic"]["cpus"],
+            p.directives["trimmomatic"]["memory"],
+            p.directives["trimmomatic"]["container"],
+            p.directives["trimmomatic"]["version"]] == \
+           ["3", "{4.GB*task.attempt}", "another", "1.0"]
+
+
+def test_directive_update_invalid():
+
+    p = pc.Trimmomatic(template="trimmomatic")
+
+    with pytest.raises(eh.ProcessError):
+        p.update_directives({"cpu": "3", "memory": "{4.GB*task.attempt}",
+                             "container": "another", "version": "1.0"})
+
+

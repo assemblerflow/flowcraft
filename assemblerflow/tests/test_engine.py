@@ -534,3 +534,55 @@ def test_container_string_2(single_con):
 
     assert res == '\n$procA_2.container = "img:1"\n' \
                   '$procB_2.container = "img:latest"'
+
+
+def test_run_time_directives():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "fastqc={'cpus':'3'}", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert nf.processes[2].directives["fastqc2"]["cpus"] == "3"
+
+
+def test_run_time_directives_full():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "fastqc={'cpus':'3','memory':'4GB',"
+                                  "'container':'img','version':'1'}",
+                       "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert [nf.processes[2].directives["fastqc2"]["cpus"],
+            nf.processes[2].directives["fastqc2"]["memory"],
+            nf.processes[2].directives["fastqc2"]["container"],
+            nf.processes[2].directives["fastqc2"]["version"]] == \
+           ["3", "4GB", "img", "1"]
+
+
+def test_run_time_directives_invalid():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "fastqc={'cpus'", "lane": 1}}]
+
+    with pytest.raises(SystemExit):
+        eg.NextflowGenerator(con, "teste.nf")
+
+
+def test_run_time_directives_invalid2():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "fastqc={'cpu':'2'}", "lane": 1}}]
+
+    with pytest.raises(eh.ProcessError):
+        eg.NextflowGenerator(con, "teste.nf")
