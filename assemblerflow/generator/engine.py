@@ -28,6 +28,7 @@ process_map = {
         "seq_typing": pc.SeqTyping,
         "patho_typing": pc.PathoTyping,
         "check_coverage": pc.CheckCoverage,
+        "true_coverage": pc.TrueCoverage,
         "fastqc": pc.FastQC,
         "trimmomatic": pc.Trimmomatic,
         "fastqc_trimmomatic": pc.FastqcTrimmomatic,
