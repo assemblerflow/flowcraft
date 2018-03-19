@@ -17,7 +17,7 @@ process true_coverage_{{ pid }} {
 
     """
     {
-        trueCoverage_rematch.py -f $fastq_pair --species $params.trueCoverageSpecies \
+        trueCoverage_rematch.py -f $fastq_pair --species $params.species \
         -i /NGStools/true_coverage/data --json
         if ls failing* 1> /dev/null 2>&1;
         then
