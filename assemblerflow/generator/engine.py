@@ -202,6 +202,8 @@ class NextflowGenerator:
         logger.debug("Building pipeline connections")
         logger.debug("=============================")
 
+        logger.debug("Processing connections: {}".format(process_list))
+
         for p, con in enumerate(process_list):
 
             logger.debug("Processing connection '{}': {}".format(p, con))
@@ -301,6 +303,9 @@ class NextflowGenerator:
                     out_process.input_channel = parent_process.output_channel
 
             self.processes.append(out_process)
+
+        logger.debug("Completed connections: {}".format(self.processes))
+        logger.debug("Fork tree: {}".format(self._fork_tree))
 
     @staticmethod
     def _test_connection(parent_process, child_process):
