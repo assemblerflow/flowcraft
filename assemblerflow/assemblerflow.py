@@ -180,7 +180,7 @@ def run(args):
     nfg = NextflowGenerator(process_connections=pipeline_list,
                             nextflow_file=args.output_nf)
 
-    logger.info(colored_print("\nBuilding your awesome pipeline..."))
+    logger.info(colored_print("Building your awesome pipeline..."))
 
     # building the actual pipeline nf file
     nfg.build()
@@ -189,7 +189,7 @@ def run(args):
     if args.include_templates:
         copy_project(args.output_nf)
 
-    logger.info(colored_print("\nDONE!", "green_bold"))
+    logger.info(colored_print("DONE!", "green_bold"))
 
 
 def main():

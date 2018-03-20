@@ -28,6 +28,7 @@ process_map = {
         "seq_typing": pc.SeqTyping,
         "patho_typing": pc.PathoTyping,
         "check_coverage": pc.CheckCoverage,
+        "true_coverage": pc.TrueCoverage,
         "fastqc": pc.FastQC,
         "trimmomatic": pc.Trimmomatic,
         "fastqc_trimmomatic": pc.FastqcTrimmomatic,
@@ -75,6 +76,11 @@ class NextflowGenerator:
         sequentially: {1:[2,3], 2:[3,4,5]}. This allows the path upstream
         of a process in a given lane to be traversed until the start of the
         pipeline. 
+        """
+
+        self.lanes = 0
+        """
+        int: Stores the number of lanes in the pipelines
         """
 
         # Builds the connections in the processes, which parses the
@@ -202,6 +208,8 @@ class NextflowGenerator:
         logger.debug("Building pipeline connections")
         logger.debug("=============================")
 
+        logger.debug("Processing connections: {}".format(process_list))
+
         for p, con in enumerate(process_list):
 
             logger.debug("Processing connection '{}': {}".format(p, con))
@@ -211,6 +219,9 @@ class NextflowGenerator:
             out_lane = con["output"]["lane"]
             logger.debug("[{}] Input lane: {}".format(p, in_lane))
             logger.debug("[{}] Output lane: {}".format(p, out_lane))
+
+            if out_lane > self.lanes:
+                self.lanes = out_lane
 
             # Get process names
             try:
@@ -301,6 +312,9 @@ class NextflowGenerator:
                     out_process.input_channel = parent_process.output_channel
 
             self.processes.append(out_process)
+
+        logger.debug("Completed connections: {}".format(self.processes))
+        logger.debug("Fork tree: {}".format(self._fork_tree))
 
     @staticmethod
     def _test_connection(parent_process, child_process):
@@ -582,6 +596,9 @@ class NextflowGenerator:
             self._update_secondary_inputs(p)
 
             self._update_secondary_channels(p)
+
+            logger.info(colored_print(
+                "\tChannels set for {} \u2713".format(p.template)))
 
     def _set_secondary_inputs(self):
         """Sets the main raw inputs and secondary inputs on the init process
@@ -870,6 +887,11 @@ class NextflowGenerator:
         to a nextflow file.
         """
 
+        logger.info(colored_print(
+            "\tSuccessfully connected {} process(es) with {} "
+            "fork(s) across {} lane(s) \u2713".format(
+                len(self.processes[1:]), len(self._fork_tree), self.lanes)))
+
         # Generate regular nextflow header that sets up the shebang, imports
         # and all possible initial channels
         self._build_header()
@@ -880,11 +902,23 @@ class NextflowGenerator:
 
         self._set_secondary_inputs()
 
+        logger.info(colored_print(
+            "\tSuccessfully set {} secondary input(s) \u2713".format(
+                len(self.secondary_inputs))))
+
         self._set_secondary_channels()
+
+        logger.info(colored_print(
+            "\tSuccessfully set {} secondary channel(s) \u2713".format(
+                len(self.secondary_channels))))
 
         self._set_compiler_channels()
 
         self._set_configurations()
+
+        logger.info(colored_print(
+            "\tFinished configurations \u2713".format(
+                len(self.secondary_channels))))
 
         for p in self.processes:
             self.template += p.template_str
@@ -908,3 +942,6 @@ class NextflowGenerator:
         # Write containers config
         with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
            fh.write(pipeline_to_json)
+            
+        logger.info(colored_print(
+            "\tPipeline written into {} \u2713".format(self.nf_file)))

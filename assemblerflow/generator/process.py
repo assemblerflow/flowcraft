@@ -735,6 +735,27 @@ class CheckCoverage(Process):
         self.link_start.extend(["SIDE_max_len"])
 
 
+class TrueCoverage(Process):
+    """TrueCoverage process template interface
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fastq"
+
+        self.directives = {
+            "true_coverage": {
+                "cpus": 4,
+                "memory": "1GB",
+                "container": "odiogosilva/true_coverage",
+                "version": "3.2"
+            }
+        }
+
+
 class FastQC(Process):
     """FastQC process template interface
 
