@@ -57,7 +57,7 @@ def test_build_file(tmp):
     af.run(args)
 
     assert sorted(os.listdir(tmp)) == ["containers.config", "resources.config",
-                                       "teste.nf"]
+                                       "teste.html", "teste.nf"]
 
 
 def test_build_file_2(tmp):

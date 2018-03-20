@@ -4,7 +4,7 @@ import jinja2
 import logging
 
 from collections import defaultdict
-from os.path import dirname, join, abspath, split
+from os.path import dirname, join, abspath, split, splitext
 
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -283,13 +283,13 @@ class NextflowGenerator:
                 self._fork_tree[in_lane].append(out_lane)
                 # Update main output fork of parent process
                 try:
-                    parent_fork = [x for x in self.processes
+                    parent_process = [x for x in self.processes
                                    if x.lane == in_lane and
                                    x.template == p_in_name][0]
                     logger.debug("[{}] Updating main forks of parent fork "
                                  "'{}' with '{}'".format(
-                                    p, parent_fork, out_process.input_channel))
-                    parent_fork.update_main_forks(out_process.input_channel)
+                                    p, parent_process, out_process.input_channel))
+                    parent_process.update_main_forks(out_process.input_channel)
                 except IndexError:
                     pass
             else:
@@ -780,7 +780,7 @@ class NextflowGenerator:
     def _render_config(template, context):
 
         tpl_dir = join(dirname(abspath(__file__)), "templates")
-        tpl_path = join(tpl_dir, template + ".config")
+        tpl_path = join(tpl_dir, template)
 
         path, filename = split(tpl_path)
 
@@ -806,12 +806,73 @@ class NextflowGenerator:
             resources += self._get_resources_string(p.directives, p.pid)
             containers += self._get_container_string(p.directives, p.pid)
 
-        self.resources = self._render_config("resources", {
+        self.resources = self._render_config("resources.config", {
             "process_info": resources
         })
-        self.containers = self._render_config("containers", {
+        self.containers = self._render_config("containers.config", {
             "container_info": containers
         })
+
+    def render_pipeline(self):
+        """Write pipeline attributes to json
+
+        This function writes the pipeline and their attributes to a json file,
+        that is intended to be read by resources/pipeline_graph.html to render
+        a graphical output showing the DAG.
+
+        """
+
+        dict_viz = {
+            "name": "root",
+            "children": []
+        }
+        last_of_us = {}
+
+        for x, (k, v) in enumerate(self._fork_tree.items()):
+            for p in self.processes[1:]:
+
+                if x == 0 and p.lane not in [k] + v :
+                    continue
+
+                if x > 0 and p.lane not in v:
+                    continue
+
+                if not p.parent_lane:
+                    lst = dict_viz["children"]
+                else:
+                    lst = last_of_us[p.parent_lane]
+
+                tooltip = {
+                    "name": "{}_{}".format(p.template, p.pid),
+                    "process": {
+                        "pid": p.pid,
+                        "input": p.input_type,
+                        "output": p.output_type,
+                        "lane": p.lane,
+                    },
+                    "children": []
+                }
+
+                dir_var = ""
+                for k2, v2 in p.directives.items():
+                    dir_var += "<b>&emsp;{}:</b><br>".format(k2)
+                    for d in v2:
+                        try:
+                            dir_var += "&emsp;&emsp;{}: {}</span><br>".format(d, v2[d])
+                        except KeyError:
+                            pass
+
+                if dir_var:
+                    tooltip["process"]["directives"] = dir_var
+                else:
+                    tooltip["process"]["directives"] = "N/A"
+
+                lst.append(tooltip)
+
+                last_of_us[p.lane] = lst[-1]["children"]
+
+        # send with jinja to html resource
+        return self._render_config("pipeline_graph.html", {"data": dict_viz})
 
     def build(self):
         """Main pipeline builder
@@ -836,6 +897,8 @@ class NextflowGenerator:
         self._build_header()
 
         self._set_channels()
+
+        pipeline_to_json = self.render_pipeline()
 
         self._set_secondary_inputs()
 
@@ -876,5 +939,9 @@ class NextflowGenerator:
         with open(join(project_root, "containers.config"), "w") as fh:
             fh.write(self.containers)
 
+        # Write containers config
+        with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
+           fh.write(pipeline_to_json)
+            
         logger.info(colored_print(
             "\tPipeline written into {} \u2713".format(self.nf_file)))
