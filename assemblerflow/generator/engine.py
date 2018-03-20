@@ -78,6 +78,11 @@ class NextflowGenerator:
         pipeline. 
         """
 
+        self.lanes = 0
+        """
+        int: Stores the number of lanes in the pipelines
+        """
+
         # Builds the connections in the processes, which parses the
         # process_connections dictionary into the self.processes attribute
         # list.
@@ -214,6 +219,9 @@ class NextflowGenerator:
             out_lane = con["output"]["lane"]
             logger.debug("[{}] Input lane: {}".format(p, in_lane))
             logger.debug("[{}] Output lane: {}".format(p, out_lane))
+
+            if out_lane > self.lanes:
+                self.lanes = out_lane
 
             # Get process names
             try:
@@ -589,6 +597,9 @@ class NextflowGenerator:
 
             self._update_secondary_channels(p)
 
+            logger.info(colored_print(
+                "\tChannels set for {} \u2713".format(p.template)))
+
     def _set_secondary_inputs(self):
         """Sets the main raw inputs and secondary inputs on the init process
 
@@ -815,6 +826,11 @@ class NextflowGenerator:
         to a nextflow file.
         """
 
+        logger.info(colored_print(
+            "\tSuccessfully connected {} process(es) with {} "
+            "fork(s) across {} lane(s) \u2713".format(
+                len(self.processes[1:]), len(self._fork_tree), self.lanes)))
+
         # Generate regular nextflow header that sets up the shebang, imports
         # and all possible initial channels
         self._build_header()
@@ -823,11 +839,23 @@ class NextflowGenerator:
 
         self._set_secondary_inputs()
 
+        logger.info(colored_print(
+            "\tSuccessfully set {} secondary input(s) \u2713".format(
+                len(self.secondary_inputs))))
+
         self._set_secondary_channels()
+
+        logger.info(colored_print(
+            "\tSuccessfully set {} secondary channel(s) \u2713".format(
+                len(self.secondary_channels))))
 
         self._set_compiler_channels()
 
         self._set_configurations()
+
+        logger.info(colored_print(
+            "\tFinished configurations \u2713".format(
+                len(self.secondary_channels))))
 
         for p in self.processes:
             self.template += p.template_str
@@ -847,3 +875,6 @@ class NextflowGenerator:
         # Write containers config
         with open(join(project_root, "containers.config"), "w") as fh:
             fh.write(self.containers)
+
+        logger.info(colored_print(
+            "\tPipeline written into {} \u2713".format(self.nf_file)))
