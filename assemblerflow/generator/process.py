@@ -486,13 +486,17 @@ class Process:
 
         # Update directives
         valid_directives = ["cpus", "memory", "container", "version"]
+
         for attribute, val in attr_dict.items():
 
+            # If the attribute has a valid directive key, update that
+            # directive
             if attribute in valid_directives:
 
                 for p in self.directives:
                     self.directives[p][attribute] = val
 
+            # If attribute is present in the class, update that attribute
             elif hasattr(self, attribute):
                 setattr(self, attribute, val)
 
