@@ -4,7 +4,7 @@ import jinja2
 import logging
 
 from collections import defaultdict
-from os.path import dirname, join, abspath, split
+from os.path import dirname, join, abspath, split, splitext
 
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -763,7 +763,7 @@ class NextflowGenerator:
     def _render_config(template, context):
 
         tpl_dir = join(dirname(abspath(__file__)), "templates")
-        tpl_path = join(tpl_dir, template + ".config")
+        tpl_path = join(tpl_dir, template)
 
         path, filename = split(tpl_path)
 
@@ -789,14 +789,14 @@ class NextflowGenerator:
             resources += self._get_resources_string(p.directives, p.pid)
             containers += self._get_container_string(p.directives, p.pid)
 
-        self.resources = self._render_config("resources", {
+        self.resources = self._render_config("resources.config", {
             "process_info": resources
         })
-        self.containers = self._render_config("containers", {
+        self.containers = self._render_config("containers.config", {
             "container_info": containers
         })
 
-    def pipeline_to_json(self):
+    def render_pipeline(self):
         """Write pipeline attributes to json
 
         This function writes the pipeline and their attributes to a json file,
@@ -810,7 +810,6 @@ class NextflowGenerator:
             "children": []
         }
         last_of_us = {}
-        print(self.secondary_channels)
 
         for x, (k, v) in enumerate(self._fork_tree.items()):
             for p in self.processes[1:]:
@@ -839,7 +838,6 @@ class NextflowGenerator:
 
                 dir_var = ""
                 for k2, v2 in p.directives.items():
-                    print(k2, v2)
                     dir_var += "<b>&emsp;{}:</b><br>".format(k2)
                     for d in v2:
                         try:
@@ -856,11 +854,8 @@ class NextflowGenerator:
 
                 last_of_us[p.lane] = lst[-1]["children"]
 
-        # save to file
-        pipeline_json = open("bicho.json", "w")
-        pipeline_json.write(json.dumps(dict_viz))
-        pipeline_json.close()
-
+        # send with jinja to html resource
+        return self._render_config("pipeline_graph.html", {"data": dict_viz})
 
     def build(self):
         """Main pipeline builder
@@ -881,7 +876,7 @@ class NextflowGenerator:
 
         self._set_channels()
 
-        self.pipeline_to_json()
+        pipeline_to_json = self.render_pipeline()
 
         self._set_secondary_inputs()
 
@@ -909,3 +904,7 @@ class NextflowGenerator:
         # Write containers config
         with open(join(project_root, "containers.config"), "w") as fh:
             fh.write(self.containers)
+
+        # Write containers config
+        with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
+           fh.write(pipeline_to_json)
