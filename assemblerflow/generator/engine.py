@@ -249,7 +249,7 @@ class NextflowGenerator:
 
             # Update directives, if provided
             if out_directives:
-                out_process.update_directives(out_directives)
+                out_process.update_attributes(out_directives)
 
             # Set suffix strings for main input/output channels
             input_suf = "{}_{}".format(in_lane, p)

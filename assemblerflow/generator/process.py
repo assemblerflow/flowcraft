@@ -376,7 +376,8 @@ class Process:
             context
         """
 
-        self.pid = "{}_{}".format(self.lane, kwargs.get("pid"))
+        if not self.pid:
+            self.pid = "{}_{}".format(self.lane, kwargs.get("pid"))
 
         for i in self.status_channels:
             self.status_strs.append("{}_{}".format(i, self.pid))
@@ -469,7 +470,7 @@ class Process:
         logger.debug("Setting forks attribute to: {}".format(self.forks))
         self._context = {**self._context, **{"forks": "\n".join(self.forks)}}
 
-    def update_directives(self, directives_dict):
+    def update_attributes(self, attr_dict):
         """Updates the directives attribute from a dictionary object.
 
         This will only update the directives for processes that have been
@@ -477,26 +478,27 @@ class Process:
 
         Parameters
         ----------
-        directives_dict : dict
-            Dictionary containing the directives that will be used to update
-            all nextflow processes.
+        attr_dict : dict
+            Dictionary containing the attributes that will be used to update
+            the process attributes and/or directives.
 
         """
 
+        # Update directives
         valid_directives = ["cpus", "memory", "container", "version"]
+        for attribute, val in attr_dict.items():
 
-        for p, directives in self.directives.items():
+            if attribute in valid_directives:
 
-            for d, val in directives_dict.items():
+                for p in self.directives:
+                    self.directives[p][attribute] = val
 
-                # Prevent update when an invalid directive is provided
-                if d not in valid_directives:
-                    raise eh.ProcessError(
-                        "Invalid directive '{}'. The currently supported "
-                        "directives are: {}".format(
-                            d, " ".join(valid_directives)))
+            elif hasattr(self, attribute):
+                setattr(self, attribute, val)
 
-                self.directives[p][d] = val
+            else:
+                raise eh.ProcessError(
+                    "Invalid attribute '{}'".format(attribute))
 
 
 class Status(Process):
