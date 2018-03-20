@@ -119,7 +119,7 @@ class NextflowGenerator:
         list: Stores the status channels from each process
         """
 
-        self.skip_class = [pc.Status]
+        self.skip_class = [pc.Compiler]
         """
         list: Stores the Process classes that should be skipped when iterating
         over the :attr:`~NextflowGenerator.processes` list.
@@ -654,6 +654,7 @@ class NextflowGenerator:
         """
 
         status_inst = pc.StatusCompiler(template="status_compiler")
+        report_inst = pc.ReportCompiler(template="report_compiler")
 
         # Compile status channels from pipeline process
         status_channels = []
@@ -677,8 +678,14 @@ class NextflowGenerator:
                     ", ".join(status_channels)
                 ))
 
-        status_inst.set_status_channels(status_channels)
-        self.processes.append(status_inst)
+        status_inst.set_compiler_channels(status_channels)
+
+        report_channels = ["REPORT_{}".format(x.lstrip("STATUS_")) for x in
+                           status_channels]
+
+        report_inst.set_compiler_channels(report_channels)
+
+        self.processes.extend([status_inst, report_inst])
 
     @staticmethod
     def _get_resources_string(res_dict, pid):

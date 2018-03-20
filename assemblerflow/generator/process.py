@@ -499,7 +499,7 @@ class Process:
                 self.directives[p][d] = val
 
 
-class Status(Process):
+class Compiler(Process):
     """Extends the Process methods to status-type processes
     """
 
@@ -507,7 +507,7 @@ class Status(Process):
 
         super().__init__(**kwargs)
 
-    def set_status_channels(self, channel_list):
+    def set_compiler_channels(self, channel_list):
         """General method for setting the input channels for the status process
 
         Given a list of status channels that are gathered during the pipeline
@@ -534,7 +534,7 @@ class Status(Process):
         if len(channel_list) == 1:
             logger.debug("Setting only one status channel: {}".format(
                 channel_list[0]))
-            self._context = {"status_channels": channel_list[0]}
+            self._context = {"compile_channels": channel_list[0]}
 
         else:
             first_status = channel_list[0]
@@ -544,7 +544,7 @@ class Status(Process):
 
             logger.debug("Status channel string: {}".format(s))
 
-            self._context = {"status_channels": s}
+            self._context = {"compile_channels": s}
 
 
 class Init(Process):
@@ -1256,7 +1256,7 @@ class Chewbbaca(Process):
         }
 
 
-class StatusCompiler(Status):
+class StatusCompiler(Compiler):
     """Status compiler process template interface
 
     This special process receives the status channels from all processes
@@ -1271,3 +1271,12 @@ class StatusCompiler(Status):
         self.ignore_type = True
         self.link_start = None
 
+
+class ReportCompiler(Compiler):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.ignore_type = True
+        self.link_start = None

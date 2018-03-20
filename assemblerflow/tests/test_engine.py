@@ -423,7 +423,7 @@ def test_set_status_channels_multi(single_con):
     p = [x for x in single_con.processes[::-1]
          if isinstance(x, pc.StatusCompiler)][0]
 
-    assert p._context["status_channels"] == \
+    assert p._context["compile_channels"] == \
         "STATUS_integrity_coverage_1_1.mix(STATUS_fastqc2_1_2," \
         "STATUS_fastqc2_report_1_2)"
 
@@ -436,7 +436,7 @@ def test_set_status_channels_single(single_status):
     p = [x for x in single_status.processes[::-1]
          if isinstance(x, pc.StatusCompiler)][0]
 
-    assert p._context["status_channels"] == "STATUS_spades_1_1"
+    assert p._context["compile_channels"] == "STATUS_spades_1_1"
 
 
 def test_set_compiler_channels(single_status):
@@ -448,7 +448,7 @@ def test_set_compiler_channels(single_status):
     p = [x for x in single_status.processes[::-1]
          if isinstance(x, pc.StatusCompiler)][0]
 
-    assert p._context["status_channels"] == "STATUS_spades_1_1"
+    assert p._context["compile_channels"] == "STATUS_spades_1_1"
 
 
 def test_set_status_channels_no_status(single_status):

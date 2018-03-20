@@ -234,28 +234,28 @@ def test_status_init(mock_status):
 def test_status_channel_setup_empty(mock_status):
 
     with pytest.raises(eh.ProcessError):
-        mock_status.set_status_channels([])
+        mock_status.set_compiler_channels([])
 
 
 def test_status_channel_single(mock_status):
 
-    mock_status.set_status_channels(["A"])
+    mock_status.set_compiler_channels(["A"])
 
-    assert mock_status._context == {"status_channels": "A"}
+    assert mock_status._context == {"compile_channels": "A"}
 
 
 def test_status_channel_two(mock_status):
 
-    mock_status.set_status_channels(["A", "B"])
+    mock_status.set_compiler_channels(["A", "B"])
 
-    assert mock_status._context == {"status_channels": "A.mix(B)"}
+    assert mock_status._context == {"compile_channels": "A.mix(B)"}
 
 
 def test_status_channel_multiple(mock_status):
 
-    mock_status.set_status_channels(["A", "B", "C"])
+    mock_status.set_compiler_channels(["A", "B", "C"])
 
-    assert mock_status._context == {"status_channels": "A.mix(B,C)"}
+    assert mock_status._context == {"compile_channels": "A.mix(B,C)"}
 
 
 def test_init_process(mock_init):
