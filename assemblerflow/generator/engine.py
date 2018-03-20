@@ -272,13 +272,13 @@ class NextflowGenerator:
                 self._fork_tree[in_lane].append(out_lane)
                 # Update main output fork of parent process
                 try:
-                    parent_fork = [x for x in self.processes
+                    parent_process = [x for x in self.processes
                                    if x.lane == in_lane and
                                    x.template == p_in_name][0]
                     logger.debug("[{}] Updating main forks of parent fork "
                                  "'{}' with '{}'".format(
-                                    p, parent_fork, out_process.input_channel))
-                    parent_fork.update_main_forks(out_process.input_channel)
+                                    p, parent_process, out_process.input_channel))
+                    parent_process.update_main_forks(out_process.input_channel)
                 except IndexError:
                     pass
             else:
@@ -796,6 +796,72 @@ class NextflowGenerator:
             "container_info": containers
         })
 
+    def pipeline_to_json(self):
+        """Write pipeline attributes to json
+
+        This function writes the pipeline and their attributes to a json file,
+        that is intended to be read by resources/pipeline_graph.html to render
+        a graphical output showing the DAG.
+
+        """
+
+        dict_viz = {
+            "name": "root",
+            "children": []
+        }
+        last_of_us = {}
+        print(self.secondary_channels)
+
+        for x, (k, v) in enumerate(self._fork_tree.items()):
+            for p in self.processes[1:]:
+
+                if x == 0 and p.lane not in [k] + v :
+                    continue
+
+                if x > 0 and p.lane not in v:
+                    continue
+
+                if not p.parent_lane:
+                    lst = dict_viz["children"]
+                else:
+                    lst = last_of_us[p.parent_lane]
+
+                tooltip = {
+                    "name": "{}_{}".format(p.template, p.pid),
+                    "process": {
+                        "pid": p.pid,
+                        "input": p.input_type,
+                        "output": p.output_type,
+                        "lane": p.lane,
+                    },
+                    "children": []
+                }
+
+                dir_var = ""
+                for k2, v2 in p.directives.items():
+                    print(k2, v2)
+                    dir_var += "<b>&emsp;{}:</b><br>".format(k2)
+                    for d in v2:
+                        try:
+                            dir_var += "&emsp;&emsp;{}: {}</span><br>".format(d, v2[d])
+                        except KeyError:
+                            pass
+
+                if dir_var:
+                    tooltip["process"]["directives"] = dir_var
+                else:
+                    tooltip["process"]["directives"] = "N/A"
+
+                lst.append(tooltip)
+
+                last_of_us[p.lane] = lst[-1]["children"]
+
+        # save to file
+        pipeline_json = open("bicho.json", "w")
+        pipeline_json.write(json.dumps(dict_viz))
+        pipeline_json.close()
+
+
     def build(self):
         """Main pipeline builder
 
@@ -814,6 +880,8 @@ class NextflowGenerator:
         self._build_header()
 
         self._set_channels()
+
+        self.pipeline_to_json()
 
         self._set_secondary_inputs()
 
