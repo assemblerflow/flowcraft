@@ -39,6 +39,13 @@ class Recipe:
         str : the generated pipeline string
         """
 
+        self.process_to_id = {}
+        """
+        dict: key value between the process name and its identifier
+        """
+
+        self.process_descriptions = {}
+
     def get_forks(self):
         """Gets the instance forks
 
@@ -80,7 +87,6 @@ class Recipe:
             return False
 
         return True
-
 
     def build_upstream(self, process_descriptions, task, all_tasks,
                        task_pipeline,
@@ -275,7 +281,9 @@ class Recipe:
 
         tasks_array = tasks.split(" ")
 
-        for task in tasks_array:
+        for task_unsplit in tasks_array:
+            task = task_unsplit.split(":")[0]
+
             if task not in process_descriptions.keys():
                 logger.error(
                     colored_print(
@@ -285,6 +293,11 @@ class Recipe:
                 )
 
                 sys.exit()
+            else:
+                process_split = task_unsplit.split(":")
+
+                if len(process_split) > 1:
+                    self.process_to_id[process_split[0]] = process_split[1]
 
             # Only uses the process if it is not already in the possible forks
             if not bool([x for x in forks if task in x]):
@@ -336,8 +349,7 @@ class Recipe:
 
         return forks
 
-    @staticmethod
-    def build_pipeline_string(forks):
+    def build_pipeline_string(self, forks):
         """Parses, filters and merge all possible pipeline forks into the
         final pipeline string
 
@@ -417,13 +429,10 @@ class Recipe:
         if len(final_forks) == 1:
             final_forks = str(final_forks[0])
 
-        print(final_forks)
-
         # parses the string array to the assemblerflow nomenclature
         pipeline_string = str(final_forks)\
             .replace("[[", "( ")\
             .replace("]]", " )")\
-            .replace(")]", ")")\
             .replace("]", " |")\
             .replace(", [", " ")\
             .replace("'", "")\
@@ -432,6 +441,11 @@ class Recipe:
 
         if pipeline_string[-1] == "|":
             pipeline_string = pipeline_string[:-1]
+
+        # Replace only names by names + process ids
+        for key, val in self.process_to_id.items():
+            pipeline_string = pipeline_string\
+                .replace(key+" ", "{}={{'pid':'{}'}} ".format(key, val))
 
         return pipeline_string
 
@@ -467,33 +481,40 @@ class Recipe:
 
         return self.pipeline_string
 
+    def get_process_info(self):
+        return self.process_descriptions.keys()
+
 
 class Innuendo(Recipe):
-
-    # The description of the processes
-    # [forkable, input_process, output_process]
-    process_descriptions = {
-        "patho_typing": [True, None, None],
-        "seq_typing": [True, None, None],
-        "integrity_coverage": [True, None, "check_coverage"],
-        "check_coverage": [False, "integrity_coverage", "fastqc"],
-        "fastqc": [False, "check_coverage", "trimmomatic"],
-        "trimmomatic": [False, "fastqc", "fastqc_trimmomatic"],
-        "fastqc_trimmomatic": [False, "trimmomatic", "skesa|spades"],
-        "skesa": [False, "fastqc_trimmomatic", "assembly_mapping"],
-        "spades": [False, "fastqc_trimmomatic", "process_spades"],
-        "process_spades": [False, "spades", "assembly_mapping"],
-        "assembly_mapping": [False, "skesa|process_spades", "pilon"],
-        "pilon": [False, "assembly_mapping", "mlst"],
-        "mlst": [False, "pilon", "abricate|prokka|chewbbaca"],
-        "abricate": [True, "mlst", None],
-        "prokka": [True, "mlst", None],
-        "chewbbaca": [True, "mlst", None]
-    }
+    """
+    Recipe class for the INNUENDO Project. It has all the available in the
+    platform for quick use of the processes in the scope of the project.
+    """
 
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
+
+        # The description of the processes
+        # [forkable, input_process, output_process]
+        self.process_descriptions = {
+            "patho_typing": [True, None, None],
+            "seq_typing": [True, None, None],
+            "integrity_coverage": [True, None, "check_coverage"],
+            "check_coverage": [False, "integrity_coverage", "fastqc"],
+            "fastqc": [False, "check_coverage", "trimmomatic"],
+            "trimmomatic": [False, "fastqc", "fastqc_trimmomatic"],
+            "fastqc_trimmomatic": [False, "trimmomatic", "skesa|spades"],
+            "skesa": [False, "fastqc_trimmomatic", "assembly_mapping"],
+            "spades": [False, "fastqc_trimmomatic", "process_spades"],
+            "process_spades": [False, "spades", "assembly_mapping"],
+            "assembly_mapping": [False, "skesa|process_spades", "pilon"],
+            "pilon": [False, "assembly_mapping", "mlst"],
+            "mlst": [False, "pilon", "abricate|prokka|chewbbaca"],
+            "abricate": [True, "mlst", None],
+            "prokka": [True, "mlst", None],
+            "chewbbaca": [True, "mlst", None]
+        }
 
 
 available_recipes = {

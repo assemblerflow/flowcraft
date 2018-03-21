@@ -153,6 +153,9 @@ def run(args):
 
     logger.info(colored_print("\n".join(welcome), "green_bold"))
 
+    if args.recipe:
+        automatic_pipeline = available_recipes[args.recipe]()
+
     # prints a detailed list of the process class arguments
     if args.detailed_list:
         # list of attributes to be passed to proc_collector
@@ -164,7 +167,14 @@ def run(args):
             "conflicts"
         ]
 
-        proc_collector(process_map, arguments_list)
+        list_processes = []
+
+        if args.recipe:
+            list_processes = automatic_pipeline.get_process_info()
+
+        # shows only the processes from the recipe or all in case no recipe
+        # is passed
+        proc_collector(process_map, arguments_list, list_processes)
         sys.exit(0)
 
     # prints a short list with each process and the corresponding description
@@ -172,7 +182,15 @@ def run(args):
         arguments_list = [
             "description"
         ]
-        proc_collector(process_map, arguments_list)
+
+        list_processes = []
+
+        if args.recipe:
+            list_processes = automatic_pipeline.get_process_info()
+
+        # shows only the processes from the recipe or all in case no recipe
+        # is passed
+        proc_collector(process_map, arguments_list, list_processes)
         sys.exit(0)
 
     if args.tasks:
@@ -187,14 +205,16 @@ def run(args):
             )
             sys.exit()
 
-        automatic_pipeline = available_recipes[args.recipe]()
         validated = automatic_pipeline.validate_pipeline(args.tasks)
+
+        automatic_pipeline.get_process_info()
 
         if not validated:
             sys.exit()
         pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
 
-    print(pipeline_string)
+    logger.info(colored_print("Resulting pipeline string:\n"))
+    logger.info(colored_print(pipeline_string + "\n"))
 
     # Validate arguments
     passed = check_arguments(args)
