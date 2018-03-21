@@ -16,10 +16,12 @@ from os.path import join, dirname
 
 try:
     from generator.engine import NextflowGenerator, process_map
+    from generator.recipe import available_recipes
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
 except ImportError:
     from assemblerflow.generator.engine import NextflowGenerator, process_map
+    from assemblerflow.generator.recipe import available_recipes
     from assemblerflow.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from assemblerflow.generator.process_details import proc_collector, \
@@ -37,6 +39,8 @@ def get_args(args=None):
 
     parser.add_argument("-t", "--tasks", type=str, dest="tasks",
                         help="Space separated tasks of the pipeline")
+    parser.add_argument("-r", "--recipe", dest="recipe",
+                        help="Use one of the available recipes")
     parser.add_argument("-o", dest="output_nf",
                         help="Name of the pipeline file")
     parser.add_argument("--include-templates", dest="include_templates",
@@ -71,6 +75,30 @@ def check_arguments(args):
         return False
 
     return True
+
+
+def check_arguments(args):
+
+    passed = True
+
+    # Check if no args are passed
+    if len(sys.argv) == 1:
+        logger.info(colored_print("Please provide one of the supported "
+                                  "arguments!", "red_bold"))
+        passed = False
+
+    # Check if output argument is valid
+    # Check if output file was provided, if it is not a directory, and if
+    # the directory exists
+    if not args.output_nf \
+            or os.path.isdir(args.output_nf) \
+            or (os.path.dirname(args.output_nf) and
+                not os.path.isdir(os.path.dirname(args.output_nf))):
+        logger.info(colored_print("Please provide a valid output file and "
+                                  "location!", "red_bold"))
+        passed = False
+
+    return passed
 
 
 def copy_project(path):
@@ -137,6 +165,9 @@ def run(args):
 
     logger.info(colored_print("\n".join(welcome), "green_bold"))
 
+    if args.recipe:
+        automatic_pipeline = available_recipes[args.recipe]()
+
     # prints a detailed list of the process class arguments
     if args.detailed_list:
         # list of attributes to be passed to proc_collector
@@ -148,7 +179,14 @@ def run(args):
             "conflicts"
         ]
 
-        proc_collector(process_map, arguments_list)
+        list_processes = []
+
+        if args.recipe:
+            list_processes = automatic_pipeline.get_process_info()
+
+        # shows only the processes from the recipe or all in case no recipe
+        # is passed
+        proc_collector(process_map, arguments_list, list_processes)
         sys.exit(0)
 
     # prints a short list with each process and the corresponding description
@@ -156,8 +194,39 @@ def run(args):
         arguments_list = [
             "description"
         ]
-        proc_collector(process_map, arguments_list)
+
+        list_processes = []
+
+        if args.recipe:
+            list_processes = automatic_pipeline.get_process_info()
+
+        # shows only the processes from the recipe or all in case no recipe
+        # is passed
+        proc_collector(process_map, arguments_list, list_processes)
         sys.exit(0)
+
+    if args.tasks:
+        pipeline_string = args.tasks
+
+    if args.recipe:
+        if args.recipe not in available_recipes:
+            logger.error(
+                colored_print("Please provide a recipe to use in automatic "
+                              "mode.", "red_bold"
+                              )
+            )
+            sys.exit(1)
+
+        validated = automatic_pipeline.validate_pipeline(args.tasks)
+
+        automatic_pipeline.get_process_info()
+
+        if not validated:
+            sys.exit(1)
+        pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
+
+    logger.info(colored_print("Resulting pipeline string:\n"))
+    logger.info(colored_print(pipeline_string + "\n"))
 
     # Validate arguments
     passed = check_arguments(args)
@@ -167,7 +236,7 @@ def run(args):
 
     try:
         logger.info(colored_print("Checking pipeline for errors..."))
-        pipeline_list = parse_pipeline(args.tasks)
+        pipeline_list = parse_pipeline(pipeline_string)
     except SanityError as e:
         logger.error(colored_print(e.value, "red_bold"))
         sys.exit(1)

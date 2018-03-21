@@ -942,6 +942,6 @@ class NextflowGenerator:
         # Write containers config
         with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
            fh.write(pipeline_to_json)
-            
+
         logger.info(colored_print(
             "\tPipeline written into {} \u2713".format(self.nf_file)))
