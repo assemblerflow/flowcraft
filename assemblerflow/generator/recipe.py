@@ -279,7 +279,7 @@ class Recipe:
         list : List with all the possible pipeline forks
         """
 
-        tasks_array = tasks.split(" ")
+        tasks_array = tasks.split()
 
         for task_unsplit in tasks_array:
             task = task_unsplit.split(":")[0]
@@ -445,7 +445,8 @@ class Recipe:
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
             pipeline_string = pipeline_string\
-                .replace(key+" ", "{}={{'pid':'{}'}} ".format(key, val))
+                .replace(" {} ".format(key),
+                         " {}={{'pid':'{}'}} ".format(key, val))
 
         return pipeline_string
 
@@ -482,7 +483,7 @@ class Recipe:
         return self.pipeline_string
 
     def get_process_info(self):
-        return self.process_descriptions.keys()
+        return list(self.process_descriptions.keys())
 
 
 class Innuendo(Recipe):

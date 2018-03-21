@@ -416,7 +416,7 @@ class Process:
             self.output_channel, operator, ";".join(self.main_forks))]
 
         self._context = {**self._context,
-                         **{"forks": self.forks,
+                         **{"forks": "".join(self.forks),
                             "output_channel": self.output_channel}}
 
     def set_secondary_channel(self, source, channel_list):

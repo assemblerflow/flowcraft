@@ -34,12 +34,12 @@ fi
 # If a .versions file was populated, set the version_str variable
 if [ -s .versions ];
 then
-    version_str=$(cat $(pwd)/.versions | sed 's/ /_/g' | sed s/\"/\'/g)
+    version_str=$(< $(pwd)/.versions sed 's/ /_/g' | sed s/\"/\'/g)
 fi
 
 if [ -s .command.trace ];
 then
-    trace_str="$(cat $(pwd)/.command.trace | tr "\n" ";")"
+    trace_str="$(< $(pwd)/.command.trace tr "\n" ";")"
 fi
 
 # If a .versions OR .report.json file was populated send the request

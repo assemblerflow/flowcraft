@@ -72,7 +72,7 @@ def procs_dict_parser(procs_dict):
             ))
 
 
-def proc_collector(process_map, arguments_list, processes_list):
+def proc_collector(process_map, arguments_list, processes_list=None):
     """
     Function that collects all processes available and stores a dictionary of
     the required arguments of each process class to be passed to
@@ -92,19 +92,24 @@ def proc_collector(process_map, arguments_list, processes_list):
 
     """
 
-
     # dict to store only the required entries
     procs_dict = {}
     # loops between all process_map Processes
     for name, cls in process_map.items():
-        if name in processes_list or len(processes_list) == 0:
-            # instantiates each Process class
-            cls_inst = cls(template=name)
-            # dictionary comprehension to store only the required keys provided
-            #  by argument_list
-            d = {arg_key: vars(cls_inst)[arg_key] for arg_key in vars(cls_inst)
-                 if arg_key in arguments_list}
-            procs_dict[name] = d
+        if processes_list:
+
+            # Skip process if process_list is provided and name not in
+            # processes list
+            if name not in processes_list:
+                continue
+
+        # instantiates each Process class
+        cls_inst = cls(template=name)
+        # dictionary comprehension to store only the required keys provided
+        #  by argument_list
+        d = {arg_key: vars(cls_inst)[arg_key] for arg_key in vars(cls_inst)
+             if arg_key in arguments_list}
+        procs_dict[name] = d
 
     procs_dict_parser(procs_dict)
 

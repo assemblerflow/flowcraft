@@ -88,11 +88,14 @@ def check_arguments(args):
         passed = False
 
     # Check if output argument is valid
-    if not args.output_nf or os.path.isdir(args.output_nf) or not \
-            os.path.isdir(os.path.dirname(args.output_nf)):
+    # Check if output file was provided, if it is not a directory, and if
+    # the directory exists
+    if not args.output_nf \
+            or os.path.isdir(args.output_nf) \
+            or (os.path.dirname(args.output_nf) and
+                not os.path.isdir(os.path.dirname(args.output_nf))):
         logger.info(colored_print("Please provide a valid output file and "
-                                  "location!",
-                                  "red_bold"))
+                                  "location!", "red_bold"))
         passed = False
 
     return passed
@@ -212,14 +215,14 @@ def run(args):
                               "mode.", "red_bold"
                               )
             )
-            sys.exit()
+            sys.exit(1)
 
         validated = automatic_pipeline.validate_pipeline(args.tasks)
 
         automatic_pipeline.get_process_info()
 
         if not validated:
-            sys.exit()
+            sys.exit(1)
         pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
 
     logger.info(colored_print("Resulting pipeline string:\n"))
@@ -243,7 +246,7 @@ def run(args):
     if args.check_only:
         sys.exit()
 
-    nfg = NextflowGenerator(process_list=pipeline_list,
+    nfg = NextflowGenerator(process_connections=pipeline_list,
                             nextflow_file=args.output_nf)
 
     logger.info(colored_print("Building your awesome pipeline..."))
