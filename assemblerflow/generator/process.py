@@ -1251,13 +1251,13 @@ class Chewbbaca(Process):
 
         self.directives = {
             "chewbbaca": {
-                "cpus": 5,
-                "container": "ummidock/chewbbaca",
-                "version": "py3"
+                "cpus": 4,
+                "container": "mickaelsilva/chewbbaca_py3",
+                "version": "latest"
             },
             "chewbbacaExtractMLST": {
-                "container": "ummidock/chewbbaca",
-                "version": "py3"
+                "container": "mickaelsilva/chewbbaca_py3",
+                "version": "latest"
             }
         }
 
