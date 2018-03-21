@@ -1,5 +1,5 @@
 
-process trimmomatic {
+process trimmomatic_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -13,9 +13,10 @@ process trimmomatic {
 
     output:
     set fastq_id, "${fastq_id}_*P*" optional true into {{ output_channel }}
-    set fastq_id, val("trimmomatic_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
     file 'trimmomatic_report.csv'
-    file ".report.json"
+    {% with task_name="trimmomatic" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.stopAt != "trimmomatic"

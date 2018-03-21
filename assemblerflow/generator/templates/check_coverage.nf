@@ -1,5 +1,5 @@
 
-process integrity_coverage_2 {
+process integrity_coverage_2_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -7,24 +7,25 @@ process integrity_coverage_2 {
     tag { fastq_id + " getStats" }
     cpus 1
 
-	input:
-	set fastq_id, file(fastq_pair) from {{ input_channel }}
-	val gsize from IN_genome_size
-	val cov from IN_min_coverage
-	// Use -e option for skipping encoding guess
-	val opts from Channel.value('-e')
+    input:
+    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    val gsize from IN_genome_size
+    val cov from IN_min_coverage
+    // Use -e option for skipping encoding guess
+    val opts from Channel.value('-e')
 
-	output:
-	set fastq_id,
-	    file(fastq_pair),
-	    file('*_coverage'),
-	    file('*_max_len') optional true into MAIN_integrity_{{ pid }}
-	file('*_report') into LOG_report_coverage_{{ pid }}
-	set fastq_id, val("integrity_coverage2_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
-	file ".report.json"
+    output:
+    set fastq_id,
+        file(fastq_pair),
+        file('*_coverage'),
+        file('*_max_len') optional true into MAIN_integrity_{{ pid }}
+    file('*_report') into LOG_report_coverage_{{ pid }}
+    {% with task_name="check_coverage" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
-	script:
-	template "integrity_coverage.py"
+    script:
+    template "integrity_coverage.py"
 }
 
 {{ output_channel }} = Channel.create()
@@ -37,11 +38,11 @@ MAIN_integrity_{{ pid }}
     }
 
 
-process report_coverage_2 {
+process report_coverage_2_{{ pid }} {
 
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/coverage/'
+    publishDir 'reports/coverage_{{ pid }}/'
 
     input:
     file(report) from LOG_report_coverage_{{ pid }}.filter{ it.text != "corrupt" }.collect()

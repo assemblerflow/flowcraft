@@ -4,6 +4,11 @@ import logging
 
 from os.path import dirname, join, abspath
 
+try:
+    import generator.error_handling as eh
+except ImportError:
+    import assemblerflow.generator.error_handling as eh
+
 logger = logging.getLogger("main.{}".format(__name__))
 
 
@@ -42,10 +47,12 @@ class Process:
             "channel": "IN_fastq_raw",
             "channel_str": "IN_fastq_raw = Channel.fromFilePairs(params.fastq)"
         },
-        "assembly": {
+        "fasta": {
             "params": "fasta",
             "channel": "IN_fasta_raw",
-            "channel_str": "IN_fasta_raw = Channel.fromFilePairs(params.fasta)"
+            "channel_str": "IN_fasta_raw = Channel.fromPath(params.fasta)"
+                           ".map{ it -> [it.toString().tokenize('/').last()"
+                           ".tokenize('.').first(), it] }"
         }
     }
     """
@@ -153,7 +160,7 @@ class Process:
         ``{"link": <link string>, "alias":<string for template>}``
         """
 
-        self.status_channels = ["STATUS"]
+        self.status_channels = ["STATUS_{}".format(template)]
         """
         list: Name of the status channels produced by the process. By default,
         it sets a single status channel. If more than one status channels
@@ -172,21 +179,56 @@ class Process:
         list: List of strings with the literal definition of the forks for
         the current process, ready to be added to the template string.
         """
+
         self.main_forks = []
-        """
-        list: List of the channels onto which the main output should be
-        forked into. They will be automatically added to the
-        :attr:`~Process.main_forks` attribute when setting the secondary
-        channels
+        """                                                                                                                                                                                                          
+        list: List of the channels onto which the main output should be              
+        forked into. They will be automatically added to the                         
+        :attr:`~Process.main_forks` attribute when setting the secondary             
+        channels                                                                     
         """
 
         self.secondary_inputs = []
+        """
+        list: List of dictionaries with secondary input channels from nextflow
+        parameters. This dictionary should contain two key:value pairs
+        with the ``params`` key, containing the parameter name, and the
+        ``channel`` key, containing the nextflow channel definition::
+        
+            {
+                "params": "pathoSpecies",
+                "channel": "IN_pathoSpecies = Channel.value(params.pathoSpecies)"
+            }
+        """
         self.secondary_input_str = ""
 
-        self._context = None
+        self._context = {}
         """
         dict: Dictionary with the keyword placeholders for the string template
         of the current process.
+        """
+
+        self.directives = {}
+        """
+        dict: Specifies the directives (cpus, memory, container) for each
+        nextflow process in the template. If specified, this directives
+        will be added to the nextflow configuration file. Otherwise, 
+        the default values for cpus and memory will be used. In the case
+        of containers, they will not run inside any container. 
+        
+        The current supported directives are:
+            - cpus
+            - memory
+            - container
+            - container tag/version
+        
+        An example of directives for two process is as follows::
+        
+            self.directives = {
+                "processA": {"cpus": 1, "memory": "1GB"},
+                "processB": {"memory": "5GB", "container": "my/image",
+                             "version": "0.5.0"}
+            }
         """
 
     def _set_template(self, template):
@@ -206,13 +248,14 @@ class Process:
         tpl_path = join(tpl_dir, template + ".nf")
 
         if not os.path.exists(tpl_path):
-            raise Exception("Template {} does not exist".format(tpl_path))
+            raise eh.ProcessError(
+                "Template {} does not exist".format(tpl_path))
 
         self._template_path = join(tpl_dir, template + ".nf")
 
     def set_main_channel_names(self, input_suffix, output_suffix, lane):
-        """Sets the main channel names based on the input and output lanes
-        of the process. This is performed when connecting processes.
+        """Sets the main channel names based on the provide input and
+        output channel suffixes. This is performed when connecting processes.
 
         Parameters
         ----------
@@ -228,20 +271,44 @@ class Process:
         self.output_channel = "{}_out_{}".format(self.template, output_suffix)
         self.lane = lane
 
-    def get_user_channel(self):
-        """Sets the main raw channels for the process
+    def get_user_channel(self, input_channel, input_type=None):
+        """Returns the main raw channel for the process
 
-        This will set the :attr:`~Process._input_user_channel` attribute
-        based on the :attr:`~Process.input_type` of the process. It retrieves
-        the information from the :attr:`~Process.RAW_MAPPINGS` dictionary.
-        If the input type is not present in the dictionary, it will set the
-        attribute to None
+        Provided with at least a channel name, this method returns the raw
+        channel name and specification (the nextflow string definition)
+        for the process. By default, it will fork from the raw input of
+        the process' :attr:`~Process.input_type` attribute. However, this
+        behaviour can be overridden by providing the ``input_type`` argument.
+
+        If the specified or inferred input type exists in the
+        :attr:`~Process.RAW_MAPPING` dictionary, the channel info dictionary
+        will be retrieved along with the specified input channel. Otherwise,
+        it will return None.
+
+        An example of the returned dictionary is::
+
+             {"input_channel": "myChannel",
+             "params": "fastq",
+             "channel": "IN_fastq_raw",
+             "channel_str":"IN_fastq_raw = Channel.fromFilePairs(params.fastq)"
+            }
+
+        Returns
+        -------
+        dict or None
+            Dictionary with the complete raw channel info. None if no
+            channel is found.
         """
 
-        res = {"input_channel": self.input_channel}
+        res = {"input_channel": input_channel}
 
-        if self.input_type in self.RAW_MAPPING:
-            return {**res, **self.RAW_MAPPING[self.input_type]}
+        itype = input_type if input_type else self.input_type
+
+        if itype in self.RAW_MAPPING:
+
+            channel_info = self.RAW_MAPPING[itype]
+
+            return {**res, **channel_info}
 
     @staticmethod
     def render(template, context):
@@ -276,8 +343,8 @@ class Process:
         """
 
         if not self._context:
-            raise Exception("Channels must be setup first using the "
-                            "set_channels method")
+            raise eh.ProcessError("Channels must be setup first using the "
+                                  "set_channels method")
 
         logger.debug("Setting context for template {}: {}".format(
             self.template, self._context
@@ -309,7 +376,8 @@ class Process:
             context
         """
 
-        self.pid = kwargs.get("pid")
+        if not self.pid:
+            self.pid = "{}_{}".format(self.lane, kwargs.get("pid"))
 
         for i in self.status_channels:
             self.status_strs.append("{}_{}".format(i, self.pid))
@@ -318,13 +386,14 @@ class Process:
             logger.debug("Setting main fork channels: {}".format(
                 self.main_forks))
             operator = "set" if len(self.main_forks) == 1 else "into"
-            self.forks.append("\n{}.{}{{ {} }}\n".format(
-                self.output_channel, operator, ";".join(self.main_forks)))
+            self.forks = ["\n{}.{}{{ {} }}\n".format(
+                self.output_channel, operator, ";".join(self.main_forks))]
 
         self._context = {**kwargs, **{"input_channel": self.input_channel,
                                       "output_channel": self.output_channel,
                                       "template": self.template,
-                                      "forks": "\n".join(self.forks)}}
+                                      "forks": "\n".join(self.forks),
+                                      "pid": self.pid}}
 
     def update_main_forks(self, sink):
         """Updates the forks attribute with the sink channel destination
@@ -336,7 +405,19 @@ class Process:
 
         """
 
+        if not self.main_forks:
+            self.main_forks = [self.output_channel]
+            self.output_channel = "_{}".format(self.output_channel)
         self.main_forks.append(sink)
+
+        # fork_lst = self.forks + self.main_forks
+        operator = "set" if len(self.main_forks) == 1 else "into"
+        self.forks = ["\n{}.{}{{ {} }}\n".format(
+            self.output_channel, operator, ";".join(self.main_forks))]
+
+        self._context = {**self._context,
+                         **{"forks": self.forks,
+                            "output_channel": self.output_channel}}
 
     def set_secondary_channel(self, source, channel_list):
         """ General purpose method for setting a secondary channel
@@ -375,35 +456,53 @@ class Process:
         logger.debug("Setting secondary channel for source '{}': {}".format(
             source, channel_list))
 
-        # Handle the case where the main channel is forked
-        if source.startswith("MAIN"):
-            # Update previous output_channel to prevent overlap with
-            # subsequent main channels. This is done by adding a "_" at the
-            # beginning of the channel name
-            self._context["output_channel"] = "_{}".format(
-                self._output_channel)
-            # Set source to modified output channel
-            source = self._context["output_channel"]
-            # Add the next first main channel to the channel_list
-            channel_list.append(self._output_channel)
-        # Handle forks from non main channels
-        else:
-            source = "{}_{}".format(source, self.pid)
+        source = "{}_{}".format(source, self.pid)
 
         # Removes possible duplicate channels, when the fork is terminal
-        channel_list = list(set(channel_list))
+        channel_list = sorted(list(set(channel_list)))
 
         # When there is only one channel to fork into, use the 'set' operator
         # instead of 'into'
-        if len(channel_list) == 1:
-            self.forks.append("\n{}.set{{ {} }}\n".format(source,
-                                                           channel_list[0]))
-        else:
-            self.forks.append("\n{}.into{{ {} }}\n".format(
-                source, ";".join(channel_list)))
+        op = "set" if len(channel_list) == 1 else "into"
+        self.forks.append("\n{}.{}{{ {} }}\n".format(
+            source, op, ";".join(channel_list)))
 
         logger.debug("Setting forks attribute to: {}".format(self.forks))
         self._context = {**self._context, **{"forks": "\n".join(self.forks)}}
+
+    def update_attributes(self, attr_dict):
+        """Updates the directives attribute from a dictionary object.
+
+        This will only update the directives for processes that have been
+        defined in the subclass.
+
+        Parameters
+        ----------
+        attr_dict : dict
+            Dictionary containing the attributes that will be used to update
+            the process attributes and/or directives.
+
+        """
+
+        # Update directives
+        valid_directives = ["cpus", "memory", "container", "version"]
+
+        for attribute, val in attr_dict.items():
+
+            # If the attribute has a valid directive key, update that
+            # directive
+            if attribute in valid_directives:
+
+                for p in self.directives:
+                    self.directives[p][attribute] = val
+
+            # If attribute is present in the class, update that attribute
+            elif hasattr(self, attribute):
+                setattr(self, attribute, val)
+
+            else:
+                raise eh.ProcessError(
+                    "Invalid attribute '{}'".format(attribute))
 
 
 class Status(Process):
@@ -432,6 +531,11 @@ class Status(Process):
         channel_list : list
             List of strings with the final name of the status channels
         """
+
+        if not channel_list:
+            raise eh.ProcessError("At least one status channel must be "
+                                  "provided to include this process in the "
+                                  "pipeline")
 
         if len(channel_list) == 1:
             logger.debug("Setting only one status channel: {}".format(
@@ -479,21 +583,18 @@ class Init(Process):
 
         for el in raw_input.values():
             primary_inputs.append(el["channel_str"])
-            if len(el["raw_forks"]) == 1:
-                self.forks.append("\n{}.set{{ {} }}\n".format(
-                    el["channel"], el["raw_forks"][0]
-                ))
-            else:
-                self.forks.append("\n{}.into{{ {} }}\n".format(
-                    el["channel"], ";".join(el["raw_forks"])
-                ))
+
+            op = "set" if len(el["raw_forks"]) == 1 else "into"
+
+            self.forks.append("\n{}.{}{{ {} }}\n".format(
+                el["channel"], op, ";".join(el["raw_forks"])
+            ))
 
         logger.debug("Setting raw inputs: {}".format(primary_inputs))
         logger.debug("Setting forks attribute to: {}".format(self.forks))
         self._context = {**self._context,
                          **{"forks": "\n".join(self.forks),
                             "main_inputs": "\n".join(primary_inputs)}}
-
 
     def set_secondary_inputs(self, channel_dict):
 
@@ -526,8 +627,6 @@ class IntegrityCoverage(Process):
         self.input_type = "fastq"
         self.output_type = "fastq"
 
-        self._main_in_str = "MAIN_raw"
-
         self.secondary_inputs = [
             {
                 "params": "genomeSize",
@@ -555,14 +654,18 @@ class SeqTyping(Process):
         self.input_type = "fastq"
         self.output_type = None
 
-        self.ignore_type = True
-        self.ignore_pid = True
-
         self.status_channels = []
 
         self.link_start = None
         self.link_end.append({"link": "MAIN_raw",
                               "alias": "SIDE_SeqType_raw"})
+
+        self.directives = {"seq_typing": {
+            "cpus": 4,
+            "memory": "4GB",
+            "container": "ummidock/seq_typing",
+            "version": "1.0.0-1"
+        }}
 
 
 class PathoTyping(Process):
@@ -578,7 +681,6 @@ class PathoTyping(Process):
         self.output_type = None
 
         self.ignore_type = True
-        self.ignore_pid = True
 
         self.status_channels = []
 
@@ -593,6 +695,13 @@ class PathoTyping(Process):
         self.link_start = None
         self.link_end.append({"link": "MAIN_raw",
                               "alias": "SIDE_PathoType_raw"})
+
+        self.directives = {"patho_typing": {
+            "cpus": 4,
+            "memory": "4GB",
+            "container": "ummidock/patho_typing",
+            "version": "1.0.0-2"
+        }}
 
 
 class CheckCoverage(Process):
@@ -632,6 +741,27 @@ class CheckCoverage(Process):
         self.link_start.extend(["SIDE_max_len"])
 
 
+class TrueCoverage(Process):
+    """TrueCoverage process template interface
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fastq"
+
+        self.directives = {
+            "true_coverage": {
+                "cpus": 4,
+                "memory": "1GB",
+                "container": "odiogosilva/true_coverage",
+                "version": "3.2"
+            }
+        }
+
+
 class FastQC(Process):
     """FastQC process template interface
 
@@ -655,7 +785,7 @@ class FastQC(Process):
         self.input_type = "fastq"
         self.output_type = "fastq"
 
-        self.status_channels = ["STATUS_fastqc", "STATUS_report"]
+        self.status_channels = ["STATUS_fastqc2", "STATUS_fastqc2_report"]
         """
         list: Setting status channels for FastQC execution and FastQC report
         """
@@ -666,6 +796,13 @@ class FastQC(Process):
                 "channel": "IN_adapters = Channel.value(params.adapters)"
             }
         ]
+
+        self.directives = {"fastqc2": {
+            "cpus": 2,
+            "memory": "4GB",
+            "container": "ummidock/fastqc",
+            "version": "0.11.7-1"
+        }}
 
 
 class Trimmomatic(Process):
@@ -701,6 +838,13 @@ class Trimmomatic(Process):
             }
         ]
 
+        self.directives = {"trimmomatic": {
+            "cpus": 2,
+            "memory": "{ 4.GB * task.attempt }",
+            "container": "ummidock/trimmomatic",
+            "version": "0.36-2"
+        }}
+
 
 class FastqcTrimmomatic(Process):
     """Fastqc + Trimmomatic process template interface
@@ -734,8 +878,8 @@ class FastqcTrimmomatic(Process):
 
         self.link_end.append({"link": "SIDE_phred", "alias": "SIDE_phred"})
 
-        self.status_channels = ["STATUS_fastqc", "STATUS_report",
-                                "STATUS_trim"]
+        self.status_channels = ["STATUS_fastqc", "STATUS_fastqc_report",
+                                "STATUS_trimmomatic"]
 
         self.secondary_inputs = [
             {
@@ -751,6 +895,21 @@ class FastqcTrimmomatic(Process):
             }
         ]
 
+        self.directives = {
+            "fastqc": {
+                "cpus": 2,
+                "memory": "4GB",
+                "container": "ummidock/fastqc",
+                "version": "0.11.7-1"
+            },
+            "trimmomatic": {
+                "cpus": 2,
+                "memory": "{ 4.GB * task.attempt }",
+                "container": "ummidock/trimmomatic",
+                "version": "0.36-2"
+            }
+        }
+
 
 class Skesa(Process):
     """Skesa process template interface
@@ -761,7 +920,14 @@ class Skesa(Process):
         super().__init__(**kwargs)
 
         self.input_type = "fastq"
-        self.output_type = "assembly"
+        self.output_type = "fasta"
+
+        self.directives = {"skesa": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "ummidock/skesa",
+            "version": "0.2.0-2"
+        }}
 
 
 class Spades(Process):
@@ -783,7 +949,7 @@ class Spades(Process):
         super().__init__(**kwargs)
 
         self.input_type = "fastq"
-        self.output_type = "assembly"
+        self.output_type = "fasta"
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
 
@@ -801,6 +967,13 @@ class Spades(Process):
             }
         ]
 
+        self.directives = {"spades": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "ummidock/spades",
+            "version": "3.11.1-1"
+        }}
+
 
 class ProcessSpades(Process):
     """Process spades process template interface
@@ -817,8 +990,8 @@ class ProcessSpades(Process):
 
         super().__init__(**kwargs)
 
-        self.input_type = "assembly"
-        self.output_type = "assembly"
+        self.input_type = "fasta"
+        self.output_type = "fasta"
 
         self.secondary_inputs = [
             {
@@ -829,6 +1002,11 @@ class ProcessSpades(Process):
                            "params.spadesMaxContigs])"
             }
         ]
+
+        self.directives = {"process_spades": {
+            "container": "ummidock/spades",
+            "version": "3.11.1-1"
+        }}
 
 
 class AssemblyMapping(Process):
@@ -855,13 +1033,14 @@ class AssemblyMapping(Process):
 
         super().__init__(**kwargs)
 
-        self.input_type = "assembly"
-        self.output_type = "assembly"
+        self.input_type = "fasta"
+        self.output_type = "fasta"
 
-        self.status_channels = ["STATUS_am", "STATUS_amp"]
+        self.status_channels = ["STATUS_assembly_mapping",
+                                "STATUS_process_am"]
 
         self.link_start.append("SIDE_BpCoverage")
-        self.link_end.append({"link": "MAIN_fq", "alias": "_MAIN_assembly"})
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
 
         self.secondary_inputs = [
             {
@@ -869,8 +1048,27 @@ class AssemblyMapping(Process):
                 "channel": "IN_assembly_mapping_opts = "
                            "Channel.value([params.minAssemblyCoverage,"
                            "params.AMaxContigs])"
+            },
+            {
+                "params": "genomeSize",
+                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
             }
         ]
+
+        self.directives = {
+            "assembly_mapping": {
+                "cpus": 4,
+                "memory": "{ 5.GB * task.attempt }",
+                "container": "ummidock/bowtie2_samtools",
+                "version": "1.0.0-2"
+            },
+            "process_assembly_mapping": {
+                "cpus": 4,
+                "memory": "{ 5.GB * task.attempt }",
+                "container": "ummidock/bowtie2_samtools",
+                "version": "1.0.0-2"
+            }
+        }
 
 
 class Pilon(Process):
@@ -892,13 +1090,29 @@ class Pilon(Process):
 
         super().__init__(**kwargs)
 
-        self.input_type = "assembly"
-        self.output_type = "assembly"
+        self.input_type = "fasta"
+        self.output_type = "fasta"
 
         self.dependencies = ["assembly_mapping"]
+        self.status_channels = ["STATUS_pilon", "STATUS_pilon_report"]
 
         self.link_end.append({"link": "SIDE_BpCoverage",
                               "alias": "SIDE_BpCoverage"})
+
+        self.directives = {
+            "pilon": {
+                "cpus": 4,
+                "memory": "{ 7.GB * task.attempt }",
+                "container": "ummidock/pilon",
+                "version": "1.22.0-2"
+            },
+            "pilon_report": {
+                "cpus": 4,
+                "memory": "{ 7.GB * task.attempt }",
+                "container": "ummidock/pilon",
+                "version": "1.22.0-2"
+            }
+        }
 
 
 class Mlst(Process):
@@ -920,8 +1134,12 @@ class Mlst(Process):
 
         super().__init__(**kwargs)
 
-        self.input_type = "assembly"
-        self.output_type = "assembly"
+        self.input_type = "fasta"
+        self.output_type = "fasta"
+
+        self.directives = {"mlst": {
+            "container": "ummidock/mlst",
+        }}
 
 
 class Abricate(Process):
@@ -943,14 +1161,27 @@ class Abricate(Process):
 
         super().__init__(**kwargs)
 
-        self.input_type = "assembly"
+        self.input_type = "fasta"
         self.output_type = None
 
         self.ignore_type = True
 
+        self.status_channels = ["STATUS_abricate"]
+
         self.link_start = None
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
+
+        self.directives = {
+            "abricate": {
+                "container": "ummidock/abricate",
+                "version": "0.7.0-4"
+            },
+            "process_abricate": {
+                "container": "ummidock/abricate",
+                "version": "0.7.0-4"
+            }
+        }
 
 
 class Prokka(Process):
@@ -972,7 +1203,7 @@ class Prokka(Process):
 
         super().__init__(**kwargs)
 
-        self.input_type = "assembly"
+        self.input_type = "fasta"
         self.output_type = None
 
         self.ignore_type = True
@@ -980,6 +1211,14 @@ class Prokka(Process):
         self.link_start = None
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
+
+        self.directives = {
+            "prokka": {
+                "cpus": 2,
+                "container": "ummidock/prokka-nf",
+                "version": "1.12.0-2"
+            }
+        }
 
 
 class Chewbbaca(Process):
@@ -1001,7 +1240,7 @@ class Chewbbaca(Process):
 
         super().__init__(**kwargs)
 
-        self.input_type = "assembly"
+        self.input_type = "fasta"
         self.output_type = None
 
         self.ignore_type = True
@@ -1010,16 +1249,17 @@ class Chewbbaca(Process):
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
 
-
-class TraceCompiler(Process):
-
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.link_start = None
-
-        self.ignore_type = True
+        self.directives = {
+            "chewbbaca": {
+                "cpus": 4,
+                "container": "mickaelsilva/chewbbaca_py3",
+                "version": "latest"
+            },
+            "chewbbacaExtractMLST": {
+                "container": "mickaelsilva/chewbbaca_py3",
+                "version": "latest"
+            }
+        }
 
 
 class StatusCompiler(Status):
@@ -1035,6 +1275,5 @@ class StatusCompiler(Status):
         super().__init__(**kwargs)
 
         self.ignore_type = True
-
         self.link_start = None
 

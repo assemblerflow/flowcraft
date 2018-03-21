@@ -1,5 +1,5 @@
 
-process patho_typing {
+process patho_typing_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -8,12 +8,14 @@ process patho_typing {
     errorStrategy "ignore"
 
     input:
-    set fastq_id, file(fastq_pair) from SIDE_PathoType_raw_{{ pid }}
+    set fastq_id, file(fastq_pair) from {{ input_channel }}
     val species from IN_pathoSpecies
 
     output:
     file "patho_typing.report.txt"
-    set file(".report.json"), file(".status")
+    {% with task_name="patho_typing" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     """

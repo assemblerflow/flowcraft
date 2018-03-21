@@ -58,7 +58,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'AssemblerFlow'
 copyright = '2018, Diogo N. Silva'
-author = 'Diogo N. Silva'
+author = 'Diogo N. Silva, Tiago F. Jesus'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -99,7 +99,7 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {"collapse_navigation": True}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

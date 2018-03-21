@@ -1,5 +1,17 @@
 
-process chewbbaca {
+if (params.chewbbacaToPhyloviz == true){
+    jsonOpt = ""
+} else {
+    jsonOpt = "--json"
+}
+
+if (params.chewbbacaTraining){
+    training = "--ptf ${params.chewbbacaTraining}"
+} else {
+    training = ""
+}
+
+process chewbbaca_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -7,7 +19,6 @@ process chewbbaca {
     maxForks 1
     tag { fastq_id + " getStats" }
     scratch true
-    publishDir "results/chewbbaca/${fastq_id}"
     if (params.chewbbacaQueue != null) {
         queue '${params.chewbbacaQueue}'
     }
@@ -18,8 +29,10 @@ process chewbbaca {
 
     output:
     file 'chew_results'
-    set fastq_id, val("chewbbaca"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
-    file '.report.json'
+    file '*_cgMLST.tsv' optional true into chewbbacaProfile_{{ pid }}
+    {% with task_name="chewbbaca" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.chewbbacaRun == true
@@ -27,14 +40,26 @@ process chewbbaca {
     script:
     """
     {
-        if [ -d ${params.schemaPath}/temp ];
+        set -x
+        if [ -d "$schema/temp" ];
         then
-            rm -r ${params.schemaPath}/temp
+            rm -r $schema/temp
+        fi
+
+        if [ "$params.schemaSelectedLoci" = "null" ];
+        then
+            inputGenomes=$schema
+        else
+            inputGenomes=${params.schemaSelectedLoci}
         fi
 
         echo $assembly >> input_file.txt
-        chewBBACA.py AlleleCall -i input_file.txt -g ${params.schemaSelectedLoci} -o chew_results --json --cpu $task.cpus -t "${params.chewbbacaSpecies}"
-        merge_json.py ${params.schemaCore} chew_results/*/results*
+        chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results $jsonOpt --cpu $task.cpus $training
+        if [ ! "$jsonOpt" = ""]; then
+            merge_json.py ${params.schemaCore} chew_results/*/results*
+        else
+            mv chew_results/*/results_alleles.tsv ${fastq_id}_cgMLST.tsv
+        fi
     } || {
         echo fail > .status
     }
@@ -42,3 +67,21 @@ process chewbbaca {
 
 }
 
+
+process chewbbacaExtractMLST_{{ pid }} {
+
+    publishDir "results/chewbbaca_{{ pid }}/", mode: "copy", overwrite: true
+
+    input:
+    file profiles from chewbbacaProfile_{{ pid }}.collect()
+
+    output:
+    file "results/cgMLST.tsv"
+
+    """
+    head -n1 ${profiles[0]} > chewbbaca_profiles.tsv
+    awk 'FNR == 2' $profiles >> chewbbaca_profiles.tsv
+    chewBBACA.py ExtractCgMLST -i chewbbaca_profiles.tsv -o results -p $params.chewbbacaProfilePercentage
+    """
+
+}

@@ -1,5 +1,5 @@
 
-process process_spades {
+process process_spades_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -7,7 +7,7 @@ process process_spades {
     tag { fastq_id + " getStats" }
     // This process can only use a single CPU
     cpus 1
-    publishDir "reports/assembly/spades_filter", pattern: '*.report.csv', mode: 'copy'
+    publishDir "reports/assembly/spades_filter_{{ pid }}", pattern: '*.report.csv', mode: 'copy'
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
@@ -16,9 +16,10 @@ process process_spades {
 
     output:
     set fastq_id, file('*.assembly.fasta') optional true into {{ output_channel }}
-    set fastq_id, val("process_spades"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
     file '*.report.csv' optional true
-    file ".report.json"
+    {% with task_name="process_spades" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.stopAt != "process_spades"

@@ -1,6 +1,13 @@
 assemblerflow\.templates package
 ================================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    assemblerflow.templates.utils
+
 Submodules
 ----------
 
@@ -13,6 +20,7 @@ Submodules
    assemblerflow.templates.mapping2json
    assemblerflow.templates.mashdist2json
    assemblerflow.templates.mashscreen2json
+   assemblerflow.templates.pATLAS_consensus_json
    assemblerflow.templates.pipeline_status
    assemblerflow.templates.process_abricate
    assemblerflow.templates.process_assembly_mapping

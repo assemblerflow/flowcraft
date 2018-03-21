@@ -1,11 +1,11 @@
 
-process abricate {
+process abricate_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
     tag { "${fastq_id} ${db}" + " getStats"}
-    publishDir "results/annotation/abricate/${fastq_id}"
+    publishDir "results/annotation/abricate_{{ pid }}/${fastq_id}"
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
@@ -13,7 +13,9 @@ process abricate {
 
     output:
     file '*.tsv' into abricate_out_{{ pid }}
-    set fastq_id, val("abricate_${db}"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
+    {% with task_name="abricate" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.abricateRun == true && params.annotationRun
@@ -32,7 +34,7 @@ process abricate {
 }
 
 
-process process_abricate {
+process process_abricate_{{ pid }} {
 
     // Send POST request to platform
     {% with overwrite="false" %}
@@ -41,9 +43,6 @@ process process_abricate {
 
     input:
     file abricate_file from abricate_out_{{ pid }}.collect()
-
-    output:
-    file ".report.json"
 
     script:
     template "process_abricate.py"

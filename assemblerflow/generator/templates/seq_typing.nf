@@ -1,6 +1,6 @@
 
 
-process seq_typing {
+process seq_typing_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -9,13 +9,15 @@ process seq_typing {
     errorStrategy "ignore"
 
     input:
-    set fastq_id, file(fastq_pair) from SIDE_SeqType_raw_{{ pid }}
+    set fastq_id, file(fastq_pair) from {{ input_channel }}
     file refO from Channel.fromPath(params.referenceFileO)
     file refH from Channel.fromPath(params.referenceFileH)
 
     output:
     file "seq_typing.report.txt"
-    set file(".report.json"), file(".status")
+    {% with task_name="seq_typing" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     """

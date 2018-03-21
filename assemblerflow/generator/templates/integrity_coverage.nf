@@ -1,5 +1,5 @@
 
-process integrity_coverage {
+process integrity_coverage_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -8,27 +8,28 @@ process integrity_coverage {
     // This process can only use a single CPU
     cpus 1
 
-	input:
-	set fastq_id, file(fastq_pair) from {{ input_channel }}
-	val gsize from IN_genome_size
-	val cov from IN_min_coverage
-	// This channel is for the custom options of the integrity_coverage.py
-	// script. See the script's documentation for more information.
-	val opts from Channel.value('')
+    input:
+    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    val gsize from IN_genome_size
+    val cov from IN_min_coverage
+    // This channel is for the custom options of the integrity_coverage.py
+    // script. See the script's documentation for more information.
+    val opts from Channel.value('')
 
-	output:
-	set fastq_id,
-	    file(fastq_pair),
-	    file('*_encoding'),
-	    file('*_phred'),
-	    file('*_coverage'),
-	    file('*_max_len') optional true into MAIN_integrity
-	file('*_report') optional true into LOG_report_coverage1
-	set fastq_id, val("integrity_coverage_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
-	file ".report.json"
+    output:
+    set fastq_id,
+        file(fastq_pair),
+        file('*_encoding'),
+        file('*_phred'),
+        file('*_coverage'),
+        file('*_max_len') optional true into MAIN_integrity
+    file('*_report') optional true into LOG_report_coverage1
+    {% with task_name="integrity_coverage" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
-	script:
-	template "integrity_coverage.py"
+    script:
+    template "integrity_coverage.py"
 
 }
 
@@ -58,11 +59,11 @@ MAIN_PreCoverageCheck
 This process will report the expected coverage for each non-corrupted sample
 and write the results to 'reports/coverage/estimated_coverage_initial.csv'
 */
-process report_coverage {
+process report_coverage_{{ pid }} {
 
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/coverage/'
+    publishDir 'reports/coverage_{{ pid }}/'
 
     input:
     file(report) from LOG_report_coverage1.filter{ it.text != "corrupt" }.collect()
@@ -80,11 +81,11 @@ process report_coverage {
 This process will report the corrupted samples and write the results to
 'reports/corrupted/corrupted_samples.txt'
 */
-process report_corrupt {
+process report_corrupt_{{ pid }} {
 
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/corrupted/'
+    publishDir 'reports/corrupted_{{ pid }}/'
 
     input:
     val fastq_id from LOG_corrupted.collect{it[0]}

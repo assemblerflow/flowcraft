@@ -1,5 +1,5 @@
 
-process fastqc {
+process fastqc_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -12,8 +12,9 @@ process fastqc {
 
     output:
     set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') optional true into MAIN_fastqc_out_{{ pid }}
-    set fastq_id, val("fastqc_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_fastqc_{{ pid }}
-    file ".report.json"
+    {% with task_name="fastqc" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.stopAt != "fastqc"
@@ -26,7 +27,7 @@ process fastqc {
 This process will parse the result files from a FastQC analyses and output
 the optimal_trim information for Trimmomatic
 */
-process fastqc_report {
+process fastqc_report_{{ pid }} {
 
     // Send POST request to platform
     {% with overwrite="false" %}
@@ -36,7 +37,7 @@ process fastqc_report {
     tag { fastq_id + " getStats" }
     // This process can only use a single CPU
     cpus 1
-    publishDir 'reports/fastqc/run_1/', pattern: '*summary.txt', mode: 'copy'
+    publishDir 'reports/fastqc_{{ pid }}/run_1/', pattern: '*summary.txt', mode: 'copy'
 
     input:
     set fastq_id, file(fastq_pair), file(result_p1), file(result_p2) from MAIN_fastqc_out_{{ pid }}
@@ -45,10 +46,11 @@ process fastqc_report {
     output:
     set fastq_id, file(fastq_pair), 'optimal_trim', ".status" into MAIN_fastqc_trim
     file '*_trim_report' into LOG_trim_{{ pid }}
-    set fastq_id, val("fastqc_report_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_report_{{ pid }}
     file "*_status_report" into LOG_fastqc_report_{{ pid }}
     file "${fastq_id}_*_summary.txt" optional true
-    file ".report.json"
+    {% with task_name="fastqc_report" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     template "fastqc_report.py"
@@ -66,9 +68,9 @@ MAIN_fastqc_trim
 This will collect the optimal trim points assessed by the fastqc_report
 process and write the results of all samples in a single csv file
 */
-process trim_report {
+process trim_report_{{ pid }} {
 
-    publishDir 'reports/fastqc/', mode: 'copy'
+    publishDir 'reports/fastqc_{{ pid }}/', mode: 'copy'
 
     input:
     file trim from LOG_trim_{{ pid }}.collect()
@@ -83,9 +85,9 @@ process trim_report {
 }
 
 
-process compile_fastqc_status {
+process compile_fastqc_status_{{ pid }} {
 
-    publishDir 'reports/fastqc/', mode: 'copy'
+    publishDir 'reports/fastqc_{{ pid }}/', mode: 'copy'
 
     input:
     file rep from LOG_fastqc_report_{{ pid }}.collect()
@@ -105,7 +107,7 @@ process compile_fastqc_status {
 This process will execute trimmomatic. Currently, the main channel requires
 information on the trim_range and phred score.
 */
-process trimmomatic {
+process trimmomatic_{{ pid }} {
 
     // Send POST request to platform
     {% with overwrite="false" %}
@@ -120,9 +122,10 @@ process trimmomatic {
 
     output:
     set fastq_id, "${fastq_id}_*P*" optional true into {{ output_channel }}
-    set fastq_id, val("trimmomatic_{{ pid }}"), file(".status"), file(".warning"), file(".fail") into STATUS_trim_{{ pid }}
     file 'trimmomatic_report.csv'
-    file ".report.json"
+    {% with task_name="trimmomatic" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.stopAt != "trimmomatic"

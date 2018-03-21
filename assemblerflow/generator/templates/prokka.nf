@@ -1,18 +1,20 @@
 
-process prokka {
+process prokka_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
     tag { fastq_id + " getStats" }
-    publishDir "results/annotation/prokka/${fastq_id}"
+    publishDir "results/annotation/prokka_{{ pid }}/${fastq_id}"
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
 
     output:
     file "${fastq_id}/*"
-    set fastq_id, val("prokka"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
+    {% with task_name="prokka" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     when:
     params.prokkaRun == true && params.annotationRun

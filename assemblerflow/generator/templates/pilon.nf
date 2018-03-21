@@ -1,20 +1,21 @@
 
-process pilon {
+process pilon_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
     tag { fastq_id + " getStats" }
     echo false
-    publishDir 'results/assembly/pilon/', mode: 'copy'
+    publishDir 'results/assembly/pilon_{{ pid }}/', mode: 'copy'
 
     input:
     set fastq_id, file(assembly), file(bam_file), file(bam_index) from {{ input_channel }}
 
     output:
     set fastq_id, '*_polished.assembly.fasta' into {{ output_channel }}, pilon_report_{{ pid }}
-    set fastq_id, val("pilon"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
-    file ".report.json"
+    {% with task_name="pilon" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     """
@@ -29,7 +30,7 @@ process pilon {
 
 }
 
-process pilon_report {
+process pilon_report_{{ pid }} {
 
     {% with overwrite="false" %}
     {% include "report_post.txt" ignore missing %}
@@ -42,7 +43,9 @@ process pilon_report {
 
     output:
     file "*_assembly_report.csv" into pilon_report_out_{{ pid }}
-    file ".report.json"
+    {% with task_name="pilon_report" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     template "assembly_report.py"
@@ -50,9 +53,9 @@ process pilon_report {
 }
 
 
-process compile_pilon_report {
+process compile_pilon_report_{{ pid }} {
 
-    publishDir "reports/assembly/pilon/", mode: 'copy'
+    publishDir "reports/assembly/pilon_{{ pid }}/", mode: 'copy'
 
     input:
     file(report) from pilon_report_out_{{ pid }}.collect()

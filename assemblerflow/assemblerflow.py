@@ -30,7 +30,7 @@ except ImportError:
 logger = logging.getLogger("main")
 
 
-def get_args():
+def get_args(args=None):
 
     parser = argparse.ArgumentParser(
         description="Nextflow pipeline generator")
@@ -53,19 +53,28 @@ def get_args():
                         help="Check only the validity of the pipeline"
                              "string and exit.")
     group_lists.add_argument("-L", "--detailed-list", action="store_const",
-                        dest="detailed_list", const=True,
-                        help="Print a detailed description for all the "
-                             "currently available processes")
+                             dest="detailed_list", const=True,
+                             help="Print a detailed description for all the "
+                                  "currently available processes")
     group_lists.add_argument("-l", "--short-list", action="store_const",
-                        dest="short_list", const=True,
-                        help="Print a short list of the currently available "
-                             "processes")
+                             dest="short_list", const=True,
+                             help="Print a short list of the currently"
+                                  " available processes")
     parser.add_argument("--debug", dest="debug", action="store_const",
                         const=True, help="Set log to debug mode")
 
-    args = parser.parse_args()
+    return parser.parse_args(args)
 
-    return args
+
+def check_arguments(args):
+
+    # Check if no args are passed
+    if len(sys.argv) == 1:
+        logger.info(colored_print("Please provide one of the supported "
+                                  "arguments!", "red_bold"))
+        return False
+
+    return True
 
 
 def check_arguments(args):
@@ -237,7 +246,7 @@ def run(args):
     nfg = NextflowGenerator(process_list=pipeline_list,
                             nextflow_file=args.output_nf)
 
-    logger.info(colored_print("\nBuilding your awesome pipeline..."))
+    logger.info(colored_print("Building your awesome pipeline..."))
 
     # building the actual pipeline nf file
     nfg.build()
@@ -246,7 +255,7 @@ def run(args):
     if args.include_templates:
         copy_project(args.output_nf)
 
-    logger.info(colored_print("\nDONE!", "green_bold"))
+    logger.info(colored_print("DONE!", "green_bold"))
 
 
 def main():

@@ -5,19 +5,22 @@ Reports the status of a sample in any given process.
 process status {
 
     tag { fastq_id }
+    publishDir "pipeline_status/$task_name"
 
     input:
-    set fastq_id, task_name, status, warning, fail from {{ status_channels }}
+    set fastq_id, task_name, status, warning, fail, file(log) from {{ status_channels }}
 
     output:
-    file 'status_*' into master_status
-    file 'warning_*' into master_warning
-    file 'fail_*' into master_fail
+    file '*.status' into master_status
+    file '*.warning' into master_warning
+    file '*.fail' into master_fail
+    file '*.log'
 
     """
-    echo $fastq_id, $task_name, \$(cat $status) > status_${fastq_id}_${task_name}
-    echo $fastq_id, $task_name, \$(cat $warning) > warning_${fastq_id}_${task_name}
-    echo $fastq_id, $task_name, \$(cat $fail) > fail_${fastq_id}_${task_name}
+    echo $fastq_id, $task_name, \$(cat $status) > ${fastq_id}_${task_name}.status
+    echo $fastq_id, $task_name, \$(cat $warning) > ${fastq_id}_${task_name}.warning
+    echo $fastq_id, $task_name, \$(cat $fail) > ${fastq_id}_${task_name}.fail
+    echo "\$(cat .command.log)" > ${fastq_id}_${task_name}.log
     """
 }
 
