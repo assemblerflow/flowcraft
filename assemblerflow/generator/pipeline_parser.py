@@ -17,6 +17,34 @@ LANE_TOKEN = "|"
 # Token that closes a fork
 CLOSE_TOKEN = ")"
 
+def remove_inner_forks(text):
+    """Recursively removes nested brackets
+
+    This function is used to remove nested brackets from fork strings using
+    regular expressions
+
+    Parameters
+    ----------
+    text: str
+        The string that contains brackets with inner forks to be removed
+
+    Returns
+    -------
+    text: str
+        the string with only the processes that are not in inner forks, thus
+        the processes that belong to a given fork.
+
+    """
+
+    n = 1  # run at least once for one level of fork
+    # Then this loop assures that all brackets will get removed in a nested
+    # structure
+    while n:
+        # this removes non-nested brackets
+        text, n = re.subn(r'\([^()]*\)', '', text)
+
+    return text
+
 def empty_tasks(p_string):
     """
     Function to check if -t parameter is empty or has an empty string
@@ -172,7 +200,7 @@ def late_proc_insanity_check(p_string):
              'processA processB processC(ProcessD | ProcessE)'
 
     """
-
+    
     if re.search('\{}[^|)]'.format(CLOSE_TOKEN), p_string):
         raise SanityError("After a fork it is not allowed to have any "
                           "alphanumeric value.")
@@ -233,7 +261,8 @@ def inner_fork_insanity_checks(pipeline_string):
                               " the prime suspect: '({})'".format(fork))
 
         # splits by LANE_TOKEN
-        list_fork_lanes = fork_simplified.split(LANE_TOKEN)
+        fork_simplified_unique = remove_inner_forks(fork_simplified)
+        list_fork_lanes = fork_simplified_unique.split(LANE_TOKEN)
 
         # Check if there is a repeated process within a fork - linked with the
         # above
@@ -248,7 +277,8 @@ def inner_fork_insanity_checks(pipeline_string):
                 raise SanityError(
                     "There are duplicated processes within a fork. "
                     "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2). "
-                    "This is the prime suspect: '({})'".format(fork))
+                    "This is the prime suspect: '({})'".format(fork)
+                )
 
 
 def insanity_checks(pipeline_str):

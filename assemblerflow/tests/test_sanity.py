@@ -25,7 +25,7 @@ def test_empty_tasks():
     for p in pipeline_strs:
         with pytest.raises(SanityError):
             ps.empty_tasks(p)
-            
+
 
 def test_no_brackets_fail():
 
@@ -127,7 +127,9 @@ def test_string_pass_all():
         "(A | B)",
         "A B ( C | D)",
         "A B (D | E (F | G))",
-        "A B ( C | B)"
+        "A B ( C | B)",
+        # spaces are important for this check
+        "F T (S(P(P| M) |M(P|M(P| M)))|Sp)"
     ]
 
     for p in pipeline_strs:
