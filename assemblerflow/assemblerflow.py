@@ -137,27 +137,8 @@ def run(args):
 
     logger.info(colored_print("\n".join(welcome), "green_bold"))
 
-    # prints a detailed list of the process class arguments
-    if args.detailed_list:
-        # list of attributes to be passed to proc_collector
-        arguments_list = [
-            "input_type",
-            "output_type",
-            "description",
-            "dependencies",
-            "conflicts"
-        ]
-
-        proc_collector(process_map, arguments_list)
-        sys.exit(0)
-
-    # prints a short list with each process and the corresponding description
-    if args.short_list:
-        arguments_list = [
-            "description"
-        ]
-        proc_collector(process_map, arguments_list)
-        sys.exit(0)
+    # used for lists print
+    proc_collector(process_map, args)
 
     # Validate arguments
     passed = check_arguments(args)
