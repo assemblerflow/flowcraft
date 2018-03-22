@@ -408,7 +408,6 @@ class Recipe:
                     continue
                 final_forks.append(forks[i])
 
-        print(final_forks)
         total_forks = len(final_forks)
         first_fork = final_forks[0]
 
@@ -431,15 +430,9 @@ class Recipe:
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
             # Case only one process in the pipeline
-            print(total_forks)
-            if total_forks == 1 and len(first_fork) == 1:
-                pipeline_string = pipeline_string \
-                    .replace("{}".format(key),
-                             "{}={{'pid':'{}'}}".format(key, val))
-            else:
-                pipeline_string = pipeline_string\
-                    .replace(" {} ".format(key),
-                             " {}={{'pid':'{}'}} ".format(key, val))
+            pipeline_string = pipeline_string\
+                .replace("{} ".format(key),
+                         "{}={{'pid':'{}'}} ".format(key, val))
 
         return pipeline_string
 
