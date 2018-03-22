@@ -6,6 +6,7 @@ COLORS = {
     "green_bold": "1;32m",
     "red_bold": "1;31m",
     "white_bold": "1;38m",
+    "white_underline": "4;38m",
     "blue_bold": "1;36m",
     "purple_bold": "1;34m"
 }
@@ -57,7 +58,7 @@ def procs_dict_parser(procs_dict):
         logger.info(colored_print(template_str, "blue_bold"))
 
         for info in dict_proc_info:
-            info_str = "   {}: ".format(info)
+            info_str = "{}:".format(info)
 
             if isinstance(dict_proc_info[info], list):
                 if len(dict_proc_info[info]) == 0:
@@ -67,8 +68,8 @@ def procs_dict_parser(procs_dict):
             else:
                 arg_msg = dict_proc_info[info]
 
-            logger.info("{} {}".format(
-                colored_print(info_str, "purple_bold"), arg_msg
+            logger.info("   {} {}".format(
+                colored_print(info_str, "white_underline"), arg_msg
             ))
 
 
