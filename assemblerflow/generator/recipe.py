@@ -491,12 +491,10 @@ class Innuendo(Recipe):
         self.process_descriptions = {
             "patho_typing": [True, None, None],
             "seq_typing": [True, None, None],
-            "integrity_coverage": [True, None, "check_coverage"],
-            "check_coverage": [False, "integrity_coverage", "fastqc"],
-            "fastqc": [False, "check_coverage", "trimmomatic"],
-            "trimmomatic": [False, "fastqc", "fastqc_trimmomatic"],
-            "fastqc_trimmomatic": [False, "trimmomatic", "skesa|spades"],
-            "skesa": [False, "fastqc_trimmomatic", "assembly_mapping"],
+            "integrity_coverage": [True, None, "fastqc_trimmomatic"],
+            "fastqc_trimmomatic": [False, "integrity_coverage", "fastqc"],
+            "fastqc": [False, "fastqc_trimmomatic", "check_coverage"],
+            "check_coverage": [False, "fastqc", "skesa|spades"],
             "spades": [False, "fastqc_trimmomatic", "process_spades"],
             "process_spades": [False, "spades", "assembly_mapping"],
             "assembly_mapping": [False, "skesa|process_spades", "pilon"],
@@ -505,6 +503,10 @@ class Innuendo(Recipe):
             "abricate": [True, "mlst", None],
             "prokka": [True, "mlst", None],
             "chewbbaca": [True, "mlst", None]
+
+            # Not in recipe
+            # "trimmomatic": [False, "fastqc", "fastqc_trimmomatic"],
+            # "skesa": [False, "fastqc_trimmomatic", "assembly_mapping"],
         }
 
 
