@@ -17,6 +17,20 @@ LANE_TOKEN = "|"
 # Token that closes a fork
 CLOSE_TOKEN = ")"
 
+def empty_tasks(p_string):
+    """
+    Function to check if -t parameter is empty or has an empty string
+
+    Parameters
+    ----------
+    p_string: str
+         String with the definition of the pipeline, e.g.::
+             'processA processB processC(ProcessD | ProcessE)'
+
+    """
+    if p_string.strip() == "":
+        raise SanityError("'-t' parameter received an empty string.")
+
 
 def brackets_but_no_lanes(p_string):
     """
@@ -251,8 +265,9 @@ def insanity_checks(pipeline_str):
 
     # some of the check functions use the pipeline_str as the user provided but
     # the majority uses the parsed p_string.
-    checks = {
-        p_string: [
+    checks = [
+        [p_string, [
+            empty_tasks,
             brackets_but_no_lanes,
             brackets_insanity_check,
             lane_char_insanity_check,
@@ -260,14 +275,14 @@ def insanity_checks(pipeline_str):
             fork_procs_insanity_check,
             start_proc_insanity_check,
             late_proc_insanity_check
-        ],
-        pipeline_str: [
+        ]],
+        [pipeline_str, [
             inner_fork_insanity_checks
-        ]
-    }
+        ]]
+    ]
 
     # executes sanity checks in pipeline string before parsing it.
-    for param, func_list in checks.items():
+    for param, func_list in checks:
         for func in func_list:
             func(param)
 
