@@ -1,6 +1,7 @@
 import pytest
 
 import assemblerflow.generator.process_details as pd
+import assemblerflow.assemblerflow as af
 
 from assemblerflow.generator.engine import process_map
 from assemblerflow.generator.process_details import COLORS
@@ -16,14 +17,16 @@ def test_color_print():
 
 def test_long_list():
 
-    arguments_list = [
-        "input_type",
-        "output_type",
-        "description",
-        "dependencies",
-        "conflicts"
-    ]
+    arguments = af.get_args(["-L"])
 
-    pd.proc_collector(process_map, arguments_list)
+    with pytest.raises(SystemExit):
+        pd.proc_collector(process_map, arguments)
 
-    assert 1
+
+def test_short_list():
+
+    arguments = af.get_args(["-l"])
+
+    with pytest.raises(SystemExit):
+        pd.proc_collector(process_map, arguments)
+        
