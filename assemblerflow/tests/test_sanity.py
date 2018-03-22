@@ -16,6 +16,16 @@ def not_raises(exception, msg):
     except exception:
         raise pytest.fail(msg)
 
+def test_empty_tasks():
+    pipeline_strs = [
+        "   ",
+        ""
+    ]
+
+    for p in pipeline_strs:
+        with pytest.raises(SanityError):
+            ps.empty_tasks(p)
+            
 
 def test_no_brackets_fail():
 
