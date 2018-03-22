@@ -282,7 +282,6 @@ class NextflowGenerator:
                 except IndexError:
                     pass
             else:
-
                 # Get parent process, naive version
                 parent_process = self.processes[-1]
 
@@ -811,7 +810,9 @@ class NextflowGenerator:
         }
         last_of_us = {}
 
-        for x, (k, v) in enumerate(self._fork_tree.items()):
+        f_tree = self._fork_tree if self._fork_tree else {1: [1]}
+
+        for x, (k, v) in enumerate(f_tree.items()):
             for p in self.processes[1:]:
 
                 if x == 0 and p.lane not in [k] + v :
@@ -841,7 +842,8 @@ class NextflowGenerator:
                     dir_var += "<b>&emsp;{}:</b><br>".format(k2)
                     for d in v2:
                         try:
-                            dir_var += "&emsp;&emsp;{}: {}</span><br>".format(d, v2[d])
+                            dir_var += "&emsp;&emsp;{}: {}</span><br>".\
+                                format(d, v2[d])
                         except KeyError:
                             pass
 
