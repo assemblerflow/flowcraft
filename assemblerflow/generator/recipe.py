@@ -46,24 +46,6 @@ class Recipe:
 
         self.process_descriptions = {}
 
-    def get_forks(self):
-        """Gets the instance forks
-
-        Returns
-        -------
-        list : resulting pipeline forks
-        """
-        return self.forks
-
-    def get_pipeline_string(self):
-        """Gets the instance pipeline string
-
-        Returns
-        -------
-        str : resulting pipeline string
-        """
-        return self.pipeline_string
-
     @staticmethod
     def validate_pipeline(pipeline_string):
         """Validate pipeline string
@@ -426,6 +408,8 @@ class Recipe:
                     continue
                 final_forks.append(forks[i])
 
+        total_forks = len(final_forks)
+
         if len(final_forks) == 1:
             final_forks = str(final_forks[0])
 
@@ -444,9 +428,15 @@ class Recipe:
 
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
-            pipeline_string = pipeline_string\
-                .replace(" {} ".format(key),
-                         " {}={{'pid':'{}'}} ".format(key, val))
+            # Case only one process in the pipeline
+            if total_forks == 1:
+                pipeline_string = pipeline_string \
+                    .replace("{}".format(key),
+                             "{}={{'pid':'{}'}}".format(key, val))
+            else:
+                pipeline_string = pipeline_string\
+                    .replace(" {} ".format(key),
+                             " {}={{'pid':'{}'}} ".format(key, val))
 
         return pipeline_string
 
