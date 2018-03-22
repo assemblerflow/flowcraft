@@ -831,7 +831,7 @@ class NextflowGenerator:
                     "process": {
                         "pid": p.pid,
                         "input": p.input_type,
-                        "output": p.output_type,
+                        "output": p.output_type if p.output_type else "None",
                         "lane": p.lane,
                     },
                     "children": []
