@@ -200,7 +200,7 @@ def late_proc_insanity_check(p_string):
              'processA processB processC(ProcessD | ProcessE)'
 
     """
-    
+
     if re.search('\{}[^|)]'.format(CLOSE_TOKEN), p_string):
         raise SanityError("After a fork it is not allowed to have any "
                           "alphanumeric value.")

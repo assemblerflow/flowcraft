@@ -122,6 +122,29 @@ def test_inner_forks_fail():
 
 def test_string_pass_all():
 
+    # all these functions listed here don't accept strings with spaces
+    pipeline_strs = [
+        "A B",
+        "(A|B)",
+        "A B (C|D)",
+        "A B (D|E(F|G))",
+        "A B (C|B)",
+        "F T(S(P(P|M)|M(P|M(P| M)))|Sp)"
+    ]
+
+    for p in pipeline_strs:
+        with not_raises(SanityError, "pipeline: {}".format(p)):
+            ps.brackets_insanity_check(p)
+            ps.lane_char_insanity_check(p)
+            ps.brackets_but_no_lanes(p)
+            ps.fork_procs_insanity_check(p)
+            ps.start_proc_insanity_check(p)
+            ps.late_proc_insanity_check(p)
+
+
+def test_string_spaces_pass_all():
+
+    # this test accepts strings with spaces
     pipeline_strs = [
         "A B",
         "(A | B)",
@@ -134,12 +157,6 @@ def test_string_pass_all():
 
     for p in pipeline_strs:
         with not_raises(SanityError, "pipeline: {}".format(p)):
-            ps.brackets_insanity_check(p)
-            ps.lane_char_insanity_check(p)
-            ps.brackets_but_no_lanes(p)
-            ps.fork_procs_insanity_check(p)
-            ps.start_proc_insanity_check(p)
-            ps.late_proc_insanity_check(p)
             ps.inner_fork_insanity_checks(p)
 
 
