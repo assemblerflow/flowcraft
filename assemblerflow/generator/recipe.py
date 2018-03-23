@@ -430,9 +430,6 @@ class Recipe:
 
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
-
-            print(key, val)
-
             # Case only one process in the pipeline
             pipeline_string = pipeline_string\
                 .replace(to_search.format(key),
