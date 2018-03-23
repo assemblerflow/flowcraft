@@ -485,7 +485,7 @@ class Process:
         """
 
         # Update directives
-        valid_directives = ["cpus", "memory", "container", "version"]
+        valid_directives = ["cpus", "memory", "container", "version", "queue"]
 
         for attribute, val in attr_dict.items():
 
@@ -1251,7 +1251,8 @@ class Chewbbaca(Process):
             "chewbbaca": {
                 "cpus": 4,
                 "container": "mickaelsilva/chewbbaca_py3",
-                "version": "latest"
+                "version": "latest",
+                "queue": "chewBBACA"
             },
             "chewbbacaExtractMLST": {
                 "container": "mickaelsilva/chewbbaca_py3",
