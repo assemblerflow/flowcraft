@@ -31,3 +31,5 @@ process true_coverage_{{ pid }} {
     """
 
 }
+
+{{ forks }}
