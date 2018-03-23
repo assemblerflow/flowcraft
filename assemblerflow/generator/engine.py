@@ -715,7 +715,7 @@ class NextflowGenerator:
         str : nextflow config string
         """
 
-        resource_directives = ["cpus", "memory"]
+        resource_directives = ["cpus", "memory", "queue"]
         config_str = ""
 
         for p, directives in res_dict.items():
