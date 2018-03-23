@@ -657,8 +657,6 @@ class SeqTyping(Process):
         self.status_channels = []
 
         self.link_start = None
-        self.link_end.append({"link": "MAIN_raw",
-                              "alias": "SIDE_SeqType_raw"})
 
         self.directives = {"seq_typing": {
             "cpus": 4,
@@ -686,9 +684,9 @@ class PathoTyping(Process):
 
         self.secondary_inputs = [
             {
-                "params": "pathoSpecies",
+                "params": "species",
                 "channel": "IN_pathoSpecies = "
-                           "Channel.value(params.pathoSpecies)"
+                           "Channel.value(params.species)"
             }
         ]
 

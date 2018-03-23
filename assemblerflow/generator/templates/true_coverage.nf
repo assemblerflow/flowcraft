@@ -25,6 +25,7 @@ process true_coverage_{{ pid }} {
         else
             parse_true_coverage.py sample_*.json
         fi
+        echo pass > .status
     } || {
         echo fail > .status
     }
