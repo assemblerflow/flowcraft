@@ -409,10 +409,11 @@ class Recipe:
                 final_forks.append(forks[i])
 
         if len(final_forks) == 1:
+            total_processes = len(final_forks[0])
             final_forks = str(final_forks[0])
 
         # parses the string array to the assemblerflow nomenclature
-        pipeline_string = str(final_forks)\
+        pipeline_string = " " + str(final_forks)\
             .replace("[[", "( ")\
             .replace("]]", " )")\
             .replace("]", " |")\
@@ -424,13 +425,8 @@ class Recipe:
         if pipeline_string[-1] == "|":
             pipeline_string = pipeline_string[:-1]
 
-        # Check if there are any forks. Replace depends on the number of forks
-        if isinstance(final_forks, str):
-            to_search = "{} "
-            to_replace = "{}={{'pid':'{}'}} "
-        else:
-            to_search = " {} "
-            to_replace = " {}={{'pid':'{}'}} "
+        to_search = " {} "
+        to_replace = " {}={{'pid':'{}'}} "
 
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
