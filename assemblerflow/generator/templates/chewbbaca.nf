@@ -1,8 +1,8 @@
 
-if (params.chewbbacaToPhyloviz == true){
-    jsonOpt = ""
-} else {
+if (params.chewbbacaJson == true){
     jsonOpt = "--json"
+} else {
+    jsonOpt = ""
 }
 
 if (params.chewbbacaTraining){
@@ -29,7 +29,7 @@ process chewbbaca_{{ pid }} {
     each file(schema) from Channel.fromPath(params.schemaPath)
 
     output:
-    file 'chew_results'
+    file 'chew_results_*'
     file '*_cgMLST.tsv' optional true into chewbbacaProfile_{{ pid }}
     {% with task_name="chewbbaca" %}
     {%- include "compiler_channels.txt" ignore missing -%}
