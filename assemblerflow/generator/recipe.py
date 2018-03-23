@@ -424,12 +424,20 @@ class Recipe:
         if pipeline_string[-1] == "|":
             pipeline_string = pipeline_string[:-1]
 
+        # Check if there are any forks. Replace depends on the number of forks
+        if isinstance(final_forks, str):
+            to_search = "{} "
+            to_replace = "{}={{'pid':'{}'}} "
+        else:
+            to_search = " {} "
+            to_replace = " {}={{'pid':'{}'}} "
+
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
             # Case only one process in the pipeline
             pipeline_string = pipeline_string\
-                .replace("{} ".format(key),
-                         "{}={{'pid':'{}'}} ".format(key, val))
+                .replace(to_search.format(key),
+                         to_replace.format(key, val))
 
         return pipeline_string
 
