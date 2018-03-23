@@ -1,8 +1,14 @@
 
-if (params.chewbbacaToPhyloviz == true){
-    jsonOpt = ""
-} else {
+if (params.chewbbacaJson == true){
     jsonOpt = "--json"
+} else {
+    jsonOpt = ""
+}
+
+if (params.chewbbacaTraining){
+    training = "--ptf ${params.chewbbacaTraining}"
+} else {
+    training = ""
 }
 
 process chewbbaca_{{ pid }} {
@@ -14,15 +20,16 @@ process chewbbaca_{{ pid }} {
     tag { fastq_id + " getStats" }
     scratch true
     if (params.chewbbacaQueue != null) {
-        queue '${params.chewbbacaQueue}'
+        queue "${params.chewbbacaQueue}"
     }
+    publishDir "results/chewbbaca_alleleCall_{{ pid }}/", mode: "copy"
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
     each file(schema) from Channel.fromPath(params.schemaPath)
 
     output:
-    file 'chew_results'
+    file 'chew_results_*'
     file '*_cgMLST.tsv' optional true into chewbbacaProfile_{{ pid }}
     {% with task_name="chewbbaca" %}
     {%- include "compiler_channels.txt" ignore missing -%}
@@ -34,14 +41,22 @@ process chewbbaca_{{ pid }} {
     script:
     """
     {
-        if [ -d ${params.schemaPath}/temp ];
+        set -x
+        if [ -d "$schema/temp" ];
         then
-            rm -r ${params.schemaPath}/temp
+            rm -r $schema/temp
+        fi
+
+        if [ "$params.schemaSelectedLoci" = "null" ];
+        then
+            inputGenomes=$schema
+        else
+            inputGenomes=${params.schemaSelectedLoci}
         fi
 
         echo $assembly >> input_file.txt
-        chewBBACA.py AlleleCall -i input_file.txt -g ${params.schemaSelectedLoci} -o chew_results $jsonOpt --cpu $task.cpus -t "${params.chewbbacaSpecies}"
-        if [ ! $jsonOpt = ""]; then
+        chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results_${fastq_id} $jsonOpt --cpu $task.cpus $training
+        if [ ! "$jsonOpt" = ""]; then
             merge_json.py ${params.schemaCore} chew_results/*/results*
         else
             mv chew_results/*/results_alleles.tsv ${fastq_id}_cgMLST.tsv

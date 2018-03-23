@@ -321,7 +321,7 @@ def test_directive_update():
 
     p = pc.Spades(template="spades")
 
-    p.update_directives({"version": "3.9.0"})
+    p.update_attributes({"version": "3.9.0"})
 
     assert p.directives["spades"]["version"] == "3.9.0"
 
@@ -330,7 +330,7 @@ def test_directive_update2():
 
     p = pc.FastQC(template="fastqc")
 
-    p.update_directives({"cpus": "3", "memory": "4GB"})
+    p.update_attributes({"cpus": "3", "memory": "4GB"})
 
     assert [p.directives["fastqc2"]["cpus"],
             p.directives["fastqc2"]["memory"]] ==\
@@ -341,7 +341,7 @@ def test_directive_update3():
 
     p = pc.Pilon(template="pilon")
 
-    p.update_directives({"cpus": "3", "memory": "4GB",
+    p.update_attributes({"cpus": "3", "memory": "4GB",
                          "container": "another", "version": "1.0"})
 
     assert [p.directives["pilon"]["cpus"],
@@ -355,7 +355,7 @@ def test_directive_update4():
 
     p = pc.Trimmomatic(template="trimmomatic")
 
-    p.update_directives({"cpus": "3", "memory": "{4.GB*task.attempt}",
+    p.update_attributes({"cpus": "3", "memory": "{4.GB*task.attempt}",
                          "container": "another", "version": "1.0"})
 
     assert [p.directives["trimmomatic"]["cpus"],
@@ -370,7 +370,7 @@ def test_directive_update_invalid():
     p = pc.Trimmomatic(template="trimmomatic")
 
     with pytest.raises(eh.ProcessError):
-        p.update_directives({"cpu": "3", "memory": "{4.GB*task.attempt}",
+        p.update_attributes({"cpu": "3", "memory": "{4.GB*task.attempt}",
                              "container": "another", "version": "1.0"})
 
 

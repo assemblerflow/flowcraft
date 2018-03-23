@@ -376,7 +376,8 @@ class Process:
             context
         """
 
-        self.pid = "{}_{}".format(self.lane, kwargs.get("pid"))
+        if not self.pid:
+            self.pid = "{}_{}".format(self.lane, kwargs.get("pid"))
 
         for i in self.status_channels:
             self.status_strs.append("{}_{}".format(i, self.pid))
@@ -415,7 +416,7 @@ class Process:
             self.output_channel, operator, ";".join(self.main_forks))]
 
         self._context = {**self._context,
-                         **{"forks": self.forks,
+                         **{"forks": "".join(self.forks),
                             "output_channel": self.output_channel}}
 
     def set_secondary_channel(self, source, channel_list):
@@ -469,7 +470,7 @@ class Process:
         logger.debug("Setting forks attribute to: {}".format(self.forks))
         self._context = {**self._context, **{"forks": "\n".join(self.forks)}}
 
-    def update_directives(self, directives_dict):
+    def update_attributes(self, attr_dict):
         """Updates the directives attribute from a dictionary object.
 
         This will only update the directives for processes that have been
@@ -477,26 +478,31 @@ class Process:
 
         Parameters
         ----------
-        directives_dict : dict
-            Dictionary containing the directives that will be used to update
-            all nextflow processes.
+        attr_dict : dict
+            Dictionary containing the attributes that will be used to update
+            the process attributes and/or directives.
 
         """
 
+        # Update directives
         valid_directives = ["cpus", "memory", "container", "version"]
 
-        for p, directives in self.directives.items():
+        for attribute, val in attr_dict.items():
 
-            for d, val in directives_dict.items():
+            # If the attribute has a valid directive key, update that
+            # directive
+            if attribute in valid_directives:
 
-                # Prevent update when an invalid directive is provided
-                if d not in valid_directives:
-                    raise eh.ProcessError(
-                        "Invalid directive '{}'. The currently supported "
-                        "directives are: {}".format(
-                            d, " ".join(valid_directives)))
+                for p in self.directives:
+                    self.directives[p][attribute] = val
 
-                self.directives[p][d] = val
+            # If attribute is present in the class, update that attribute
+            elif hasattr(self, attribute):
+                setattr(self, attribute, val)
+
+            else:
+                raise eh.ProcessError(
+                    "Invalid attribute '{}'".format(attribute))
 
 
 class Status(Process):
@@ -733,6 +739,27 @@ class CheckCoverage(Process):
         ]
 
         self.link_start.extend(["SIDE_max_len"])
+
+
+class TrueCoverage(Process):
+    """TrueCoverage process template interface
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fastq"
+
+        self.directives = {
+            "true_coverage": {
+                "cpus": 4,
+                "memory": "1GB",
+                "container": "odiogosilva/true_coverage",
+                "version": "3.2"
+            }
+        }
 
 
 class FastQC(Process):
@@ -1224,13 +1251,13 @@ class Chewbbaca(Process):
 
         self.directives = {
             "chewbbaca": {
-                "cpus": 5,
-                "container": "ummidock/chewbbaca",
-                "version": "py3"
+                "cpus": 4,
+                "container": "mickaelsilva/chewbbaca_py3",
+                "version": "latest"
             },
             "chewbbacaExtractMLST": {
-                "container": "ummidock/chewbbaca",
-                "version": "py3"
+                "container": "mickaelsilva/chewbbaca_py3",
+                "version": "latest"
             }
         }
 
