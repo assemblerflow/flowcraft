@@ -22,7 +22,7 @@ process chewbbaca_{{ pid }} {
     if (params.chewbbacaQueue != null) {
         queue "${params.chewbbacaQueue}"
     }
-    publishDir "results/chewbbaca/", mode: "copy"
+    publishDir "results/chewbbaca_alleleCall_{{ pid }}/", mode: "copy"
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
