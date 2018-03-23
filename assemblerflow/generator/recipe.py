@@ -264,7 +264,7 @@ class Recipe:
         tasks_array = tasks.split()
 
         for task_unsplit in tasks_array:
-            task = task_unsplit.split(":")[0]
+            task = task_unsplit.split("=")[0]
 
             if task not in process_descriptions.keys():
                 logger.error(
@@ -276,7 +276,7 @@ class Recipe:
 
                 sys.exit()
             else:
-                process_split = task_unsplit.split(":")
+                process_split = task_unsplit.split("=")
 
                 if len(process_split) > 1:
                     self.process_to_id[process_split[0]] = process_split[1]
@@ -426,7 +426,7 @@ class Recipe:
             pipeline_string = pipeline_string[:-1]
 
         to_search = " {} "
-        to_replace = " {}={{'pid':'{}'}} "
+        to_replace = " {}={} "
 
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
