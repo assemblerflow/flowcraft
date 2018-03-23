@@ -165,74 +165,42 @@ def run(args):
 
     logger.info(colored_print("\n".join(welcome), "green_bold"))
 
+    # If a recipe is specified, build pipeline based on the
+    # appropriate recipe
     if args.recipe:
+        # Exit if recipe does not exist
+        if args.recipe not in available_recipes:
+            logger.error(
+                colored_print("Please provide a recipe to use in automatic "
+                              "mode.", "red_bold"))
+            sys.exit(1)
+        # Create recipe class instance
         automatic_pipeline = available_recipes[args.recipe]()
+        # Get the list of processes for that recipe
+        list_processes = automatic_pipeline.get_process_info()
+        # Validate the provided pipeline processes
+        validated = automatic_pipeline.validate_pipeline(args.tasks)
+        if not validated:
+            sys.exit(1)
+        # Get the final pipeline string
+        pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
+    else:
+        list_processes = None
 
-    # prints a detailed list of the process class arguments
-    if args.detailed_list:
-        # list of attributes to be passed to proc_collector
-        arguments_list = [
-            "input_type",
-            "output_type",
-            "description",
-            "dependencies",
-            "conflicts"
-        ]
-
-        list_processes = []
-
-        if args.recipe:
-            list_processes = automatic_pipeline.get_process_info()
-
-        # shows only the processes from the recipe or all in case no recipe
-        # is passed
-        proc_collector(process_map, arguments_list, list_processes)
-        sys.exit(0)
-
-    # prints a short list with each process and the corresponding description
-    if args.short_list:
-        arguments_list = [
-            "description"
-        ]
-
-        list_processes = []
-
-        if args.recipe:
-            list_processes = automatic_pipeline.get_process_info()
-
-        # shows only the processes from the recipe or all in case no recipe
-        # is passed
-        proc_collector(process_map, arguments_list, list_processes)
-        sys.exit(0)
+    # used for lists print
+    proc_collector(process_map, args, list_processes)
 
     if args.tasks:
         pipeline_string = args.tasks
 
-    if args.recipe:
-        if args.recipe not in available_recipes:
-            logger.error(
-                colored_print("Please provide a recipe to use in automatic "
-                              "mode.", "red_bold"
-                              )
-            )
-            sys.exit(1)
-
-        validated = automatic_pipeline.validate_pipeline(args.tasks)
-
-        automatic_pipeline.get_process_info()
-
-        if not validated:
-            sys.exit(1)
-        pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
-
-    logger.info(colored_print("Resulting pipeline string:\n"))
-    logger.info(colored_print(pipeline_string + "\n"))
-
-    # Validate arguments
+    # Validate arguments. This must be done after the process collector part
     passed = check_arguments(args)
 
     if not passed:
         return
+
+    logger.info(colored_print("Resulting pipeline string:\n"))
+    logger.info(colored_print(pipeline_string + "\n"))
 
     try:
         logger.info(colored_print("Checking pipeline for errors..."))

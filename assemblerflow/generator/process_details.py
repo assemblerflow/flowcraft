@@ -1,4 +1,5 @@
 import logging
+import sys
 
 logger = logging.getLogger("main.{}".format(__name__))
 
@@ -6,6 +7,7 @@ COLORS = {
     "green_bold": "1;32m",
     "red_bold": "1;31m",
     "white_bold": "1;38m",
+    "white_underline": "4;38m",
     "blue_bold": "1;36m",
     "purple_bold": "1;34m"
 }
@@ -57,7 +59,7 @@ def procs_dict_parser(procs_dict):
         logger.info(colored_print(template_str, "blue_bold"))
 
         for info in dict_proc_info:
-            info_str = "   {}: ".format(info)
+            info_str = "{}:".format(info)
 
             if isinstance(dict_proc_info[info], list):
                 if len(dict_proc_info[info]) == 0:
@@ -67,12 +69,12 @@ def procs_dict_parser(procs_dict):
             else:
                 arg_msg = dict_proc_info[info]
 
-            logger.info("{} {}".format(
-                colored_print(info_str, "purple_bold"), arg_msg
+            logger.info("   {} {}".format(
+                colored_print(info_str, "white_underline"), arg_msg
             ))
 
 
-def proc_collector(process_map, arguments_list, processes_list=None):
+def proc_collector(process_map, args, processes_list=None):
     """
     Function that collects all processes available and stores a dictionary of
     the required arguments of each process class to be passed to
@@ -83,34 +85,52 @@ def proc_collector(process_map, arguments_list, processes_list=None):
     process_map: dict
         The dictionary with the Processes currently available in assemblerflow
         and their corresponding classes as values
-    arguments_list: list
-        The arguments to fetch from the classes in process_map. This depends on
-        the argparser option -l or -L that has been used.
+    args: argparse.Namespace
+        The arguments passed through argparser that will be access to check the
+        type of list to be printed
     processes_list: list
         List with all the available processes of a recipe. In case no recipe
         is passed, the list should come empty.
 
     """
 
-    # dict to store only the required entries
-    procs_dict = {}
-    # loops between all process_map Processes
-    for name, cls in process_map.items():
-        if processes_list:
+    arguments_list = []
 
-            # Skip process if process_list is provided and name not in
-            # processes list
-            if name not in processes_list:
-                continue
+    # prints a detailed list of the process class arguments
+    if args.detailed_list:
+        # list of attributes to be passed to proc_collector
+        arguments_list += [
+            "input_type",
+            "output_type",
+            "description",
+            "dependencies",
+            "conflicts"
+        ]
 
-        # instantiates each Process class
-        cls_inst = cls(template=name)
-        # dictionary comprehension to store only the required keys provided
-        #  by argument_list
-        d = {arg_key: vars(cls_inst)[arg_key] for arg_key in vars(cls_inst)
-             if arg_key in arguments_list}
-        procs_dict[name] = d
+    # prints a short list with each process and the corresponding description
+    if args.short_list:
+        arguments_list += [
+            "description"
+        ]
 
-    procs_dict_parser(procs_dict)
+    if arguments_list:
+        # dict to store only the required entries
+        procs_dict = {}
+        # loops between all process_map Processes
+        for name, cls in process_map.items():
 
+            if processes_list:
+                # Skip process if process_list is provided and name not in
+                # processes list
+                if name not in processes_list:
+                    continue
 
+            # instantiates each Process class
+            cls_inst = cls(template=name)
+            d = {arg_key: vars(cls_inst)[arg_key] for arg_key in vars(cls_inst)
+                 if arg_key in arguments_list}
+            procs_dict[name] = d
+
+        procs_dict_parser(procs_dict)
+
+        sys.exit(0)

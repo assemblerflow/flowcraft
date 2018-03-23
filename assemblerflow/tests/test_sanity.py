@@ -16,6 +16,16 @@ def not_raises(exception, msg):
     except exception:
         raise pytest.fail(msg)
 
+def test_empty_tasks():
+    pipeline_strs = [
+        "   ",
+        ""
+    ]
+
+    for p in pipeline_strs:
+        with pytest.raises(SanityError):
+            ps.empty_tasks(p)
+
 
 def test_no_brackets_fail():
 
@@ -112,12 +122,14 @@ def test_inner_forks_fail():
 
 def test_string_pass_all():
 
+    # all these functions listed here don't accept strings with spaces
     pipeline_strs = [
         "A B",
-        "(A | B)",
-        "A B ( C | D)",
-        "A B (D | E (F | G))",
-        "A B ( C | B)"
+        "(A|B)",
+        "A B (C|D)",
+        "A B (D|E(F|G))",
+        "A B (C|B)",
+        "F T(S(P(P|M)|M(P|M(P| M)))|Sp)"
     ]
 
     for p in pipeline_strs:
@@ -128,6 +140,23 @@ def test_string_pass_all():
             ps.fork_procs_insanity_check(p)
             ps.start_proc_insanity_check(p)
             ps.late_proc_insanity_check(p)
+
+
+def test_string_spaces_pass_all():
+
+    # this test accepts strings with spaces
+    pipeline_strs = [
+        "A B",
+        "(A | B)",
+        "A B ( C | D)",
+        "A B (D | E (F | G))",
+        "A B ( C | B)",
+        # spaces are important for this check
+        "F T (S(P(P| M) |M(P|M(P| M)))|Sp)"
+    ]
+
+    for p in pipeline_strs:
+        with not_raises(SanityError, "pipeline: {}".format(p)):
             ps.inner_fork_insanity_checks(p)
 
 

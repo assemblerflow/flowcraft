@@ -1,4 +1,4 @@
-header = """#!/usr/bin/nextflow
+header = """#!/usr/bin/env nextflow
 
 import Helper
 import CheckParams
