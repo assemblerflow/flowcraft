@@ -499,10 +499,6 @@ class Innuendo(Recipe):
             "abricate": [True, "mlst", None],
             "prokka": [True, "mlst", None],
             "chewbbaca": [True, "mlst", None]
-
-            # Not in recipe
-            # "trimmomatic": [False, "fastqc", "fastqc_trimmomatic"],
-            # "skesa": [False, "fastqc_trimmomatic", "assembly_mapping"],
         }
 
 
@@ -538,13 +534,19 @@ def brew_recipe(args):
     # Create recipe class instance
     automatic_pipeline = available_recipes[args.recipe]()
 
+    if not args.tasks:
+        input_processes = " ".join(
+            automatic_pipeline.process_descriptions.keys())
+    else:
+        input_processes = args.tasks
+
     # Get the list of processes for that recipe
     list_processes = automatic_pipeline.get_process_info()
     # Validate the provided pipeline processes
-    validated = automatic_pipeline.validate_pipeline(args.tasks)
+    validated = automatic_pipeline.validate_pipeline(input_processes)
     if not validated:
         sys.exit(1)
     # Get the final pipeline string
-    pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
+    pipeline_string = automatic_pipeline.run_auto_pipeline(input_processes)
 
     return pipeline_string, list_processes
