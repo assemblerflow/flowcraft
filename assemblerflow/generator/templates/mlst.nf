@@ -27,10 +27,10 @@ process mlst_{{ pid }} {
         expectedSpecies=${params.mlstSpecies}
         mlst $assembly >> ${fastq_id}.mlst.txt
         mlstSpecies=\$(cat *.mlst.txt | cut -f2)
-        json_str="{'expectedSpecies':\'$expectedSpecies\','species':'\$mlstSpecies','st':'\$(cat *.mlst.txt | cut -f3)'}"
+        json_str="{'expectedSpecies':\'\$expectedSpecies\','species':'\$mlstSpecies','st':'\$(cat *.mlst.txt | cut -f3)'}"
         echo \$json_str > .report.json
 
-        if [ ! \$mlstSpecies = $expectedSpecies ];
+        if [ ! \$mlstSpecies = \$expectedSpecies ];
         then
             printf fail > .status
         else
