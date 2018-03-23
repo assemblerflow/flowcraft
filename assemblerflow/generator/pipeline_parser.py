@@ -47,7 +47,7 @@ def remove_inner_forks(text):
 
 def empty_tasks(p_string):
     """
-    Function to check if -t parameter is empty or has an empty string
+    Function to check if pipeline string is empty or has an empty string
 
     Parameters
     ----------
@@ -57,7 +57,8 @@ def empty_tasks(p_string):
 
     """
     if p_string.strip() == "":
-        raise SanityError("'-t' parameter received an empty string.")
+        raise SanityError("'-t' parameter received an empty string or "
+                          "an empty file.")
 
 
 def brackets_but_no_lanes(p_string):
