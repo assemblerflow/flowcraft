@@ -410,6 +410,9 @@ class Recipe:
 
         total_forks = len(final_forks)
 
+        total_forks = len(final_forks)
+        first_fork = final_forks[0]
+
         if len(final_forks) == 1:
             final_forks = str(final_forks[0])
 
@@ -429,14 +432,9 @@ class Recipe:
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
             # Case only one process in the pipeline
-            if total_forks == 1:
-                pipeline_string = pipeline_string \
-                    .replace("{}".format(key),
-                             "{}={{'pid':'{}'}}".format(key, val))
-            else:
-                pipeline_string = pipeline_string\
-                    .replace(" {} ".format(key),
-                             " {}={{'pid':'{}'}} ".format(key, val))
+            pipeline_string = pipeline_string\
+                .replace("{} ".format(key),
+                         "{}={{'pid':'{}'}} ".format(key, val))
 
         return pipeline_string
 
@@ -491,12 +489,13 @@ class Innuendo(Recipe):
         self.process_descriptions = {
             "patho_typing": [True, None, None],
             "seq_typing": [True, None, None],
-            "integrity_coverage": [True, None, "check_coverage"],
-            "check_coverage": [False, "integrity_coverage", "fastqc"],
-            "fastqc": [False, "check_coverage", "trimmomatic"],
-            "trimmomatic": [False, "fastqc", "fastqc_trimmomatic"],
-            "fastqc_trimmomatic": [False, "trimmomatic", "skesa|spades"],
-            "skesa": [False, "fastqc_trimmomatic", "assembly_mapping"],
+            "integrity_coverage": [True, None, "fastqc_trimmomatic"],
+            "fastqc_trimmomatic": [False, "integrity_coverage",
+                                   "true_coverage"],
+            "true_coverage": [False, "fastqc_trimmomatic",
+                              "fastqc"],
+            "fastqc": [False, "true_coverage", "check_coverage"],
+            "check_coverage": [False, "fastqc", "skesa|spades"],
             "spades": [False, "fastqc_trimmomatic", "process_spades"],
             "process_spades": [False, "spades", "assembly_mapping"],
             "assembly_mapping": [False, "skesa|process_spades", "pilon"],
@@ -505,6 +504,10 @@ class Innuendo(Recipe):
             "abricate": [True, "mlst", None],
             "prokka": [True, "mlst", None],
             "chewbbaca": [True, "mlst", None]
+
+            # Not in recipe
+            # "trimmomatic": [False, "fastqc", "fastqc_trimmomatic"],
+            # "skesa": [False, "fastqc_trimmomatic", "assembly_mapping"],
         }
 
 
