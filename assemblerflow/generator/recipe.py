@@ -264,7 +264,7 @@ class Recipe:
         tasks_array = tasks.split()
 
         for task_unsplit in tasks_array:
-            task = task_unsplit.split(":")[0]
+            task = task_unsplit.split("=")[0]
 
             if task not in process_descriptions.keys():
                 logger.error(
@@ -276,7 +276,7 @@ class Recipe:
 
                 sys.exit()
             else:
-                process_split = task_unsplit.split(":")
+                process_split = task_unsplit.split("=")
 
                 if len(process_split) > 1:
                     self.process_to_id[process_split[0]] = process_split[1]
@@ -408,16 +408,12 @@ class Recipe:
                     continue
                 final_forks.append(forks[i])
 
-        total_forks = len(final_forks)
-
-        total_forks = len(final_forks)
-        first_fork = final_forks[0]
-
         if len(final_forks) == 1:
+            total_processes = len(final_forks[0])
             final_forks = str(final_forks[0])
 
         # parses the string array to the assemblerflow nomenclature
-        pipeline_string = str(final_forks)\
+        pipeline_string = " " + str(final_forks)\
             .replace("[[", "( ")\
             .replace("]]", " )")\
             .replace("]", " |")\
@@ -429,12 +425,18 @@ class Recipe:
         if pipeline_string[-1] == "|":
             pipeline_string = pipeline_string[:-1]
 
+        to_search = " {} "
+        to_replace = " {}={} "
+
         # Replace only names by names + process ids
         for key, val in self.process_to_id.items():
+
+            print(key, val)
+
             # Case only one process in the pipeline
             pipeline_string = pipeline_string\
-                .replace("{} ".format(key),
-                         "{}={{'pid':'{}'}} ".format(key, val))
+                .replace(to_search.format(key),
+                         to_replace.format(key, val))
 
         return pipeline_string
 
@@ -504,13 +506,54 @@ class Innuendo(Recipe):
             "abricate": [True, "mlst", None],
             "prokka": [True, "mlst", None],
             "chewbbaca": [True, "mlst", None]
-
-            # Not in recipe
-            # "trimmomatic": [False, "fastqc", "fastqc_trimmomatic"],
-            # "skesa": [False, "fastqc_trimmomatic", "assembly_mapping"],
         }
 
 
 available_recipes = {
     "innuendo": Innuendo
 }
+
+
+def brew_recipe(args):
+    """Brews a given list of processes according to the recipe
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        The arguments passed through argparser that will be used to check the
+        the recipe, tasks and brew the process
+
+    Returns
+    -------
+    str
+        The final pipeline string, ready for the engine.
+    list
+        List of process strings.
+    """
+
+    # Exit if recipe does not exist
+    if args.recipe not in available_recipes:
+        logger.error(
+            colored_print("Please provide a recipe to use in automatic "
+                          "mode.", "red_bold"))
+        sys.exit(1)
+
+    # Create recipe class instance
+    automatic_pipeline = available_recipes[args.recipe]()
+
+    if not args.tasks:
+        input_processes = " ".join(
+            automatic_pipeline.process_descriptions.keys())
+    else:
+        input_processes = args.tasks
+
+    # Get the list of processes for that recipe
+    list_processes = automatic_pipeline.get_process_info()
+    # Validate the provided pipeline processes
+    validated = automatic_pipeline.validate_pipeline(input_processes)
+    if not validated:
+        sys.exit(1)
+    # Get the final pipeline string
+    pipeline_string = automatic_pipeline.run_auto_pipeline(input_processes)
+
+    return pipeline_string, list_processes

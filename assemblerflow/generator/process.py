@@ -657,14 +657,12 @@ class SeqTyping(Process):
         self.status_channels = []
 
         self.link_start = None
-        self.link_end.append({"link": "MAIN_raw",
-                              "alias": "SIDE_SeqType_raw"})
 
         self.directives = {"seq_typing": {
             "cpus": 4,
             "memory": "4GB",
             "container": "ummidock/seq_typing",
-            "version": "1.0.0-1"
+            "version": "0.1.0-1"
         }}
 
 
@@ -686,9 +684,9 @@ class PathoTyping(Process):
 
         self.secondary_inputs = [
             {
-                "params": "pathoSpecies",
+                "params": "species",
                 "channel": "IN_pathoSpecies = "
-                           "Channel.value(params.pathoSpecies)"
+                           "Channel.value(params.species)"
             }
         ]
 
@@ -700,7 +698,7 @@ class PathoTyping(Process):
             "cpus": 4,
             "memory": "4GB",
             "container": "ummidock/patho_typing",
-            "version": "1.0.0-2"
+            "version": "0.3.0-1"
         }}
 
 

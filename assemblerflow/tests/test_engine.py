@@ -348,7 +348,7 @@ def test_set_secondary_inputs_raw_forks(raw_forks):
             "IN_genome_size = Channel.value(params.genomeSize)\n"
             "IN_min_coverage = Channel.value(params.minCoverage)\n"
             "IN_adapters = Channel.value(params.adapters)\n"
-            "IN_pathoSpecies = Channel.value(params.pathoSpecies)"]
+            "IN_pathoSpecies = Channel.value(params.species)"]
 
 
 def test_set_secondary_inputs_multi_raw(single_con_multi_raw):
