@@ -408,11 +408,6 @@ class Recipe:
                     continue
                 final_forks.append(forks[i])
 
-        total_forks = len(final_forks)
-
-        total_forks = len(final_forks)
-        first_fork = final_forks[0]
-
         if len(final_forks) == 1:
             final_forks = str(final_forks[0])
 
@@ -514,3 +509,42 @@ class Innuendo(Recipe):
 available_recipes = {
     "innuendo": Innuendo
 }
+
+
+def brew_recipe(args):
+    """Brews a given list of processes according to the recipe
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        The arguments passed through argparser that will be used to check the
+        the recipe, tasks and brew the process
+
+    Returns
+    -------
+    str
+        The final pipeline string, ready for the engine.
+    list
+        List of process strings.
+    """
+
+    # Exit if recipe does not exist
+    if args.recipe not in available_recipes:
+        logger.error(
+            colored_print("Please provide a recipe to use in automatic "
+                          "mode.", "red_bold"))
+        sys.exit(1)
+
+    # Create recipe class instance
+    automatic_pipeline = available_recipes[args.recipe]()
+
+    # Get the list of processes for that recipe
+    list_processes = automatic_pipeline.get_process_info()
+    # Validate the provided pipeline processes
+    validated = automatic_pipeline.validate_pipeline(args.tasks)
+    if not validated:
+        sys.exit(1)
+    # Get the final pipeline string
+    pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
+
+    return pipeline_string, list_processes

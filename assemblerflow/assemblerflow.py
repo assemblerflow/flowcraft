@@ -16,12 +16,12 @@ from os.path import join, dirname
 
 try:
     from generator.engine import NextflowGenerator, process_map
-    from generator.recipe import available_recipes
+    from generator.recipe import brew_recipe
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
 except ImportError:
     from assemblerflow.generator.engine import NextflowGenerator, process_map
-    from assemblerflow.generator.recipe import available_recipes
+    from assemblerflow.generator.recipe import brew_recipe
     from assemblerflow.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from assemblerflow.generator.process_details import proc_collector, \
@@ -168,30 +168,13 @@ def run(args):
     # If a recipe is specified, build pipeline based on the
     # appropriate recipe
     if args.recipe:
-        # Exit if recipe does not exist
-        if args.recipe not in available_recipes:
-            logger.error(
-                colored_print("Please provide a recipe to use in automatic "
-                              "mode.", "red_bold"))
-            sys.exit(1)
-        # Create recipe class instance
-        automatic_pipeline = available_recipes[args.recipe]()
-        # Get the list of processes for that recipe
-        list_processes = automatic_pipeline.get_process_info()
-        # Validate the provided pipeline processes
-        validated = automatic_pipeline.validate_pipeline(args.tasks)
-        if not validated:
-            sys.exit(1)
-        # Get the final pipeline string
-        pipeline_string = automatic_pipeline.run_auto_pipeline(args.tasks)
+        pipeline_string, list_processes = brew_recipe(args)
     else:
+        pipeline_string = args.tasks
         list_processes = None
 
     # used for lists print
     proc_collector(process_map, args, list_processes)
-
-    if args.tasks:
-        pipeline_string = args.tasks
 
     # Validate arguments. This must be done after the process collector part
     passed = check_arguments(args)
