@@ -13,7 +13,7 @@ process abricate_{{ pid }} {
 
     output:
     file '*.tsv' into abricate_out_{{ pid }}
-    {% with task_name="abricate" %}
+    {% with task_name="abricate", suffix="_$db" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
