@@ -662,7 +662,7 @@ class SeqTyping(Process):
             "cpus": 4,
             "memory": "4GB",
             "container": "ummidock/seq_typing",
-            "version": "1.0.0-1"
+            "version": "0.1.0-1"
         }}
 
 
@@ -698,7 +698,7 @@ class PathoTyping(Process):
             "cpus": 4,
             "memory": "4GB",
             "container": "ummidock/patho_typing",
-            "version": "1.0.0-2"
+            "version": "0.3.0-1"
         }}
 
 
