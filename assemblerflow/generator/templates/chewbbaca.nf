@@ -20,8 +20,9 @@ process chewbbaca_{{ pid }} {
     tag { fastq_id + " getStats" }
     scratch true
     if (params.chewbbacaQueue != null) {
-        queue '${params.chewbbacaQueue}'
+        queue "${params.chewbbacaQueue}"
     }
+    publishDir "results/chewbbaca/", mode: "copy"
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
