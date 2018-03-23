@@ -165,12 +165,6 @@ def run(args):
 
     logger.info(colored_print("\n".join(welcome), "green_bold"))
 
-    # Validate arguments
-    passed = check_arguments(args)
-
-    if not passed:
-        return
-
     # If a recipe is specified, build pipeline based on the
     # appropriate recipe
     if args.recipe:
@@ -198,6 +192,12 @@ def run(args):
 
     if args.tasks:
         pipeline_string = args.tasks
+
+    # Validate arguments. This must be done after the process collector part
+    passed = check_arguments(args)
+
+    if not passed:
+        return
 
     logger.info(colored_print("Resulting pipeline string:\n"))
     logger.info(colored_print(pipeline_string + "\n"))
