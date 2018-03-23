@@ -56,7 +56,7 @@ process chewbbaca_{{ pid }} {
 
         echo $assembly >> input_file.txt
         chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results_${fastq_id} $jsonOpt --cpu $task.cpus $training
-        if [ ! "$jsonOpt" = "--json"]; then
+        if [ "$jsonOpt" = "--json" ]; then
             merge_json.py ${params.schemaCore} chew_results/*/results*
         else
             mv chew_results/*/results_alleles.tsv ${fastq_id}_cgMLST.tsv
