@@ -67,7 +67,7 @@ def main():
         res = {"cagao": [j1, j2], "status": status, 'lnfPercentage': perc}
 
         with open(".report.json", "w") as fh:
-            fh.write(json.dumps(res))
+            fh.write(json.dumps(res, separators=(",", ":")))
 
 
 main()
