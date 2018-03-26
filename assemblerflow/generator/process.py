@@ -1169,11 +1169,11 @@ class Abricate(Process):
         self.directives = {
             "abricate": {
                 "container": "ummidock/abricate",
-                "version": "0.7.0-4"
+                "version": "0.8.0-1"
             },
             "process_abricate": {
                 "container": "ummidock/abricate",
-                "version": "0.7.0-4"
+                "version": "0.8.0-1"
             }
         }
 
