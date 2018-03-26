@@ -21,7 +21,7 @@ process report {
 
 process compile_reports {
 
-    publishDir "pipeline_report/pipeline_report.json"
+    publishDir "pipeline_report/"
 
     input:
     file report from master_report.collect()
