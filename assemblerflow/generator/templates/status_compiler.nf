@@ -8,7 +8,7 @@ process status {
     publishDir "pipeline_status/$task_name"
 
     input:
-    set fastq_id, task_name, status, warning, fail, file(log) from {{ status_channels }}
+    set fastq_id, task_name, status, warning, fail, file(log) from {{ compile_channels }}
 
     output:
     file '*.status' into master_status
