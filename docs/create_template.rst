@@ -135,9 +135,9 @@ E.g.::
 
 Besides searching for the script's version, build and template name this decorator
 will also search for a specific set of functions that start with the
-substring ``__set_version``. For example::
+substring ``__get_version``. For example::
 
-    def __set_version_fastqc():
+    def __get_version_fastqc():
 
         try:
 
