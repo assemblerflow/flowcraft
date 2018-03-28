@@ -53,6 +53,12 @@ class Process:
             "channel_str": "IN_fasta_raw = Channel.fromPath(params.fasta)"
                            ".map{ it -> [it.toString().tokenize('/').last()"
                            ".tokenize('.').first(), it] }"
+        },
+        "accessions": {
+            "params": "accessions",
+            "channel": "IN_accessions_raw",
+            "channel_str": "IN_accessions_raw = Channel.fromPath("
+                           "params.accessions)"
         }
     }
     """
@@ -603,6 +609,31 @@ class Init(Process):
         secondary_input_str = "\n".join(list(channel_dict.values()))
         self._context = {**self._context,
                          **{"secondary_inputs": secondary_input_str}}
+
+
+class DownloadReads(Process):
+    """Process template interface for reads downloading from SRA and NCBI
+
+    This process is set with:
+
+        - ``input_type``: accessions
+        - ``output_type`` fastq
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "accessions"
+        self.output_type = "fastq"
+
+        self.directives = {"download_reads": {
+            "cpus": 4,
+            "memory": "4GB",
+            "container": "ummidock/getseqena",
+            "version": "0.4.0-1"
+        }}
 
 
 class IntegrityCoverage(Process):
