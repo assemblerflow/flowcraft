@@ -3,22 +3,22 @@ process readsDownload_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
+    tag { accession_id }
+
     input:
-    file(accession_id) from {{ input_channel }}.splitText()
-    file(aspera_key) from Channel.fromPath(params.asperaKey)
+    val accession_id from {{ input_channel }}.splitText(){ it.trim() }
+    each file(aspera_key) from Channel.fromPath(params.asperaKey)
 
     output:
-    file "$accession_id/*fastq.gz" into file_list
-
-    {% with task_name="readsDownload" %}
+    set accession_id, file("${accession_id}/*fq.gz") into {{ output_channel }}
+    {% with task_name="reads_download", sample_id="accession_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
     script:
     """
-    echo $accession_id > accession_file.txt
-    getSeqENA.py -l ./accession_file.txt -a $aspera_key -o . --SRAopt
---downloadCramBam
+    echo "${accession_id}" >> accession_file.txt
+    getSeqENA.py -l accession_file.txt -a $aspera_key -o ./ --SRAopt --downloadCramBam
     """
 
 }

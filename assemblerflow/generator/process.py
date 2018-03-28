@@ -629,10 +629,10 @@ class DownloadReads(Process):
         self.output_type = "fastq"
 
         self.directives = {"download_reads": {
-            "cpus": 4,
-            "memory": "4GB",
+            "cpus": 1,
+            "memory": "1GB",
             "container": "ummidock/getseqena",
-            "version": "0.4.0-1"
+            "version": "0.4.0-2"
         }}
 
 

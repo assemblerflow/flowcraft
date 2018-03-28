@@ -1,2 +1,2 @@
-set fastq_id, val("{{ pid }}_{{ task_name }}{{ suffix }}"), file(".status"), file(".warning"), file(".fail"), file(".command.log") into STATUS_{{task_name}}_{{ pid }}
-set fastq_id, val("{{ task_name }}_{{ pid }}"), val("{{ pid }}"), file(".report.json") into REPORT_{{task_name}}_{{ pid }}
+set {{ sample_id|default("fastq_id") }}, val("{{ pid }}_{{ task_name }}{{ suffix }}"), file(".status"), file(".warning"), file(".fail"), file(".command.log") into STATUS_{{task_name}}_{{ pid }}
+set {{ sample_id|default("fastq_id") }}, val("{{ task_name }}_{{ pid }}"), val("{{ pid }}"), file(".report.json") into REPORT_{{task_name}}_{{ pid }}
