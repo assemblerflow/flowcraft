@@ -628,7 +628,7 @@ class DownloadReads(Process):
         self.input_type = "accessions"
         self.output_type = "fastq"
 
-        self.directives = {"download_reads": {
+        self.directives = {"reads_download": {
             "cpus": 1,
             "memory": "1GB",
             "container": "ummidock/getseqena",

@@ -1,12 +1,13 @@
 
-process readsDownload_{{ pid }} {
+process reads_download_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
     tag { accession_id }
+    publishDir "reads", mode: "move"
 
     input:
-    val accession_id from {{ input_channel }}.splitText(){ it.trim() }
+    val accession_id from {{ input_channel }}.splitText(){ it.trim() }.filter{ it.trim() != "" }
     each file(aspera_key) from Channel.fromPath(params.asperaKey)
 
     output:
