@@ -1015,7 +1015,7 @@ class Skesa(Process):
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "ummidock/skesa",
-            "version": "0.2.0-2",
+            "version": "0.2.0-3",
             "scratch": "true"
         }}
 
