@@ -24,6 +24,7 @@ except ImportError as e:
 
 
 process_map = {
+        "reads_download": pc.DownloadReads,
         "integrity_coverage": pc.IntegrityCoverage,
         "seq_typing": pc.SeqTyping,
         "patho_typing": pc.PathoTyping,
