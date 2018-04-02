@@ -793,8 +793,7 @@ class NextflowGenerator:
 
         return config_str
 
-    @staticmethod
-    def _get_params_string(param_dict):
+    def _get_params_string(self):
         """Returns the nextflow params string from a dictionary object.
 
         The params dict should be a set of key:value pairs with the
@@ -810,22 +809,25 @@ class NextflowGenerator:
         ``"'teste'" string will appear as ``param = 'teste'`` (Note the
         string).
 
-        Parameters
-        ----------
-        param_dict : dict
-            Dictionary with the containers for processes.
-
         Returns
         -------
         str
             Nextflow params configuration string
         """
 
-        config_str = ""
+        params_temp = {}
 
-        for param, val in param_dict.items():
+        for p in self.processes:
 
-            config_str += "\n\t{} = {}".format(param, val)
+            logger.debug("[{}] Adding parameters: {}".format(p.template,
+                                                             p.params))
+            for param, val in p.params.items():
+
+                params_temp[param] = val
+
+        config_str = "\n\t" + "\n\t".join([
+            "{} = {}".format(param, val) for param, val in params_temp.items()
+        ])
 
         return config_str
 
@@ -855,11 +857,9 @@ class NextflowGenerator:
         containers = ""
         params = ""
 
-        for p in self.processes:
+        params += self._get_params_string()
 
-            logger.debug("[{}] Adding parameters: {}".format(p.template,
-                                                             p.params))
-            params += self._get_params_string(p.params)
+        for p in self.processes:
 
             # Skip processes with the directives attribute populated
             if not p.directives:
