@@ -740,20 +740,13 @@ class NextflowGenerator:
             nextflow config string
         """
 
-        resource_directives = ["cpus", "memory", "queue"]
         config_str = ""
 
         for p, directives in res_dict.items():
 
             for d, val in directives.items():
 
-                if d not in resource_directives:
-                    continue
-
-                if "{" in str(val):
-                    config_str += '\n\t${}_{}.{} = {}'.format(p, pid, d, val)
-                else:
-                    config_str += '\n\t${}_{}.{} = "{}"'.format(p, pid, d, val)
+                config_str += '\n\t${}_{}.{} = {}'.format(p, pid, d, val)
 
         return config_str
 

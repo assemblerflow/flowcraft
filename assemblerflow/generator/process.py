@@ -643,7 +643,7 @@ class DownloadReads(Process):
 
         self.directives = {"reads_download": {
             "cpus": 1,
-            "memory": "1GB",
+            "memory": "'1GB'",
             "container": "ummidock/getseqena",
             "version": "0.4.0-2"
         }}
@@ -709,7 +709,7 @@ class SeqTyping(Process):
 
         self.directives = {"seq_typing": {
             "cpus": 4,
-            "memory": "4GB",
+            "memory": "'4GB'",
             "container": "ummidock/seq_typing",
             "version": "0.1.0-1"
         }}
@@ -754,7 +754,7 @@ class PathoTyping(Process):
 
         self.directives = {"patho_typing": {
             "cpus": 4,
-            "memory": "4GB",
+            "memory": "'4GB'",
             "container": "ummidock/patho_typing",
             "version": "0.3.0-1"
         }}
@@ -820,7 +820,7 @@ class TrueCoverage(Process):
         self.directives = {
             "true_coverage": {
                 "cpus": 4,
-                "memory": "1GB",
+                "memory": "'1GB'",
                 "container": "odiogosilva/true_coverage",
                 "version": "3.2"
             }
@@ -868,7 +868,7 @@ class FastQC(Process):
 
         self.directives = {"fastqc2": {
             "cpus": 2,
-            "memory": "4GB",
+            "memory": "'4GB'",
             "container": "ummidock/fastqc",
             "version": "0.11.7-1"
         }}
@@ -987,7 +987,7 @@ class FastqcTrimmomatic(Process):
         self.directives = {
             "fastqc": {
                 "cpus": 2,
-                "memory": "4GB",
+                "memory": "'4GB'",
                 "container": "ummidock/fastqc",
                 "version": "0.11.7-1"
             },
@@ -1015,7 +1015,8 @@ class Skesa(Process):
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "ummidock/skesa",
-            "version": "0.2.0-2"
+            "version": "0.2.0-2",
+            "scratch": "true"
         }}
 
 
@@ -1067,7 +1068,8 @@ class Spades(Process):
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "ummidock/spades",
-            "version": "3.11.1-1"
+            "version": "3.11.1-1",
+            "scratch": "true"
         }}
 
 
@@ -1168,7 +1170,8 @@ class AssemblyMapping(Process):
                 "cpus": 4,
                 "memory": "{ 5.GB * task.attempt }",
                 "container": "ummidock/bowtie2_samtools",
-                "version": "1.0.0-2"
+                "version": "1.0.0-2",
+                "scratch": "true"
             },
             "process_assembly_mapping": {
                 "cpus": 4,
