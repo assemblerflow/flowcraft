@@ -119,6 +119,7 @@ process trimmomatic_{{ pid }} {
     input:
     set fastq_id, file(fastq_pair), trim_range, phred from MAIN_fastqc_trim_{{ pid }}.join(SIDE_phred_{{ pid }})
     val opts from IN_trimmomatic_opts
+    val ad from IN_adapters
 
     output:
     set fastq_id, "${fastq_id}_*P*" optional true into {{ output_channel }}

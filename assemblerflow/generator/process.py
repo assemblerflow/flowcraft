@@ -833,6 +833,10 @@ class Trimmomatic(Process):
                            "Channel.value([params.trimSlidingWindow,"
                            "params.trimLeading,params.trimTrailing,"
                            "params.trimMinLength])"
+            },
+            {
+                "params": "adapters",
+                "channel": "IN_adapters = Channel.value(params.adapters)"
             }
         ]
 
