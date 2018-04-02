@@ -133,12 +133,20 @@ class NextflowGenerator:
 
         self.resources = ""
         """
-        str: Stores the resource directives string for each nextflow process. 
+        str: Stores the resource directives string for each nextflow process.
+        See :func:`NextflowGenerator._get_resources_string`.
         """
 
         self.containers = ""
         """
         str: Stores the container directives string for each nextflow process.
+        See :func:`NextflowGenerator._get_container_string`.
+        """
+
+        self.params = ""
+        """
+        str: Stores the params directives string for the nextflow pipeline.
+        See :func:`NextflowGenerator._get_params_string`
         """
 
     @staticmethod
@@ -720,7 +728,8 @@ class NextflowGenerator:
 
         Returns
         -------
-        str : nextflow config string
+        str
+            nextflow config string
         """
 
         resource_directives = ["cpus", "memory", "queue"]
@@ -734,9 +743,9 @@ class NextflowGenerator:
                     continue
 
                 if "{" in str(val):
-                    config_str += '\n${}_{}.{} = {}'.format(p, pid, d, val)
+                    config_str += '\n\t${}_{}.{} = {}'.format(p, pid, d, val)
                 else:
-                    config_str += '\n${}_{}.{} = "{}"'.format(p, pid, d, val)
+                    config_str += '\n\t${}_{}.{} = "{}"'.format(p, pid, d, val)
 
         return config_str
 
@@ -762,7 +771,8 @@ class NextflowGenerator:
 
         Returns
         -------
-        str : nextflow config string
+        str
+            nextflow config string
         """
 
         config_str = ""
@@ -779,7 +789,43 @@ class NextflowGenerator:
                 else:
                     container += ":latest"
 
-            config_str += '\n${}_{}.container = "{}"'.format(p, pid, container)
+            config_str += '\n\t${}_{}.container = "{}"'.format(p, pid, container)
+
+        return config_str
+
+    @staticmethod
+    def _get_params_string(param_dict):
+        """Returns the nextflow params string from a dictionary object.
+
+        The params dict should be a set of key:value pairs with the
+        parameter name, and the default parameter value::
+
+            self.params = {
+                "genomeSize": 2.1,
+                "minCoverage": 15
+            }
+
+        The values are then added to the string as they are. For instance,
+        a ``2.1`` float will appear as ``param = 2.1`` and a
+        ``"'teste'" string will appear as ``param = 'teste'`` (Note the
+        string).
+
+        Parameters
+        ----------
+        param_dict : dict
+            Dictionary with the containers for processes.
+
+        Returns
+        -------
+        str
+            Nextflow params configuration string
+        """
+
+        config_str = ""
+
+        for param, val in param_dict.items():
+
+            config_str += "\n\t{} = {}".format(param, val)
 
         return config_str
 
@@ -801,15 +847,26 @@ class NextflowGenerator:
         of each process in the pipeline.
         """
 
+        logger.debug("======================")
+        logger.debug("Setting configurations")
+        logger.debug("======================")
+
         resources = ""
         containers = ""
+        params = ""
 
         for p in self.processes:
+
+            logger.debug("[{}] Adding parameters: {}".format(p.template,
+                                                             p.params))
+            params += self._get_params_string(p.params)
 
             # Skip processes with the directives attribute populated
             if not p.directives:
                 continue
 
+            logger.debug("[{}] Adding directives: {}".format(
+                p.template, p.directives))
             resources += self._get_resources_string(p.directives, p.pid)
             containers += self._get_container_string(p.directives, p.pid)
 
@@ -818,6 +875,9 @@ class NextflowGenerator:
         })
         self.containers = self._render_config("containers.config", {
             "container_info": containers
+        })
+        self.params = self._render_config("params.config", {
+            "params_info": params
         })
 
     def render_pipeline(self):
@@ -884,6 +944,28 @@ class NextflowGenerator:
         # send with jinja to html resource
         return self._render_config("pipeline_graph.html", {"data": dict_viz})
 
+    def write_configs(self, project_root):
+        """Wrapper method that writes all configuration files to the pipeline
+        directory
+        """
+
+        # Write resources config
+        with open(join(project_root, "resources.config"), "w") as fh:
+            fh.write(self.resources)
+
+        # Write containers config
+        with open(join(project_root, "containers.config"), "w") as fh:
+            fh.write(self.containers)
+
+        # Write containers config
+        with open(join(project_root, "params.config"), "w") as fh:
+            fh.write(self.params)
+
+        # Generate the pipeline DAG
+        pipeline_to_json = self.render_pipeline()
+        with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
+            fh.write(pipeline_to_json)
+
     def build(self):
         """Main pipeline builder
 
@@ -907,8 +989,6 @@ class NextflowGenerator:
         self._build_header()
 
         self._set_channels()
-
-        pipeline_to_json = self.render_pipeline()
 
         self._set_secondary_inputs()
 
@@ -937,21 +1017,13 @@ class NextflowGenerator:
 
         project_root = dirname(self.nf_file)
 
+        # Write configs
+        self.write_configs(project_root)
+
         # Write pipeline file
         with open(self.nf_file, "w") as fh:
             fh.write(self.template)
 
-        # Write resources config
-        with open(join(project_root, "resources.config"), "w") as fh:
-            fh.write(self.resources)
-
-        # Write containers config
-        with open(join(project_root, "containers.config"), "w") as fh:
-            fh.write(self.containers)
-
-        # Write containers config
-        with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
-           fh.write(pipeline_to_json)
 
         logger.info(colored_print(
             "\tPipeline written into {} \u2713".format(self.nf_file)))

@@ -44,11 +44,13 @@ class Process:
     RAW_MAPPING = {
         "fastq": {
             "params": "fastq",
+            "default_value": "'fastq/*_{1,2}.*'",
             "channel": "IN_fastq_raw",
             "channel_str": "IN_fastq_raw = Channel.fromFilePairs(params.fastq)"
         },
         "fasta": {
             "params": "fasta",
+            "default_value": "'fasta/*.fasta'",
             "channel": "IN_fasta_raw",
             "channel_str": "IN_fasta_raw = Channel.fromPath(params.fasta)"
                            ".map{ it -> [it.toString().tokenize('/').last()"
@@ -56,6 +58,7 @@ class Process:
         },
         "accessions": {
             "params": "accessions",
+            "default_value": "null",
             "channel": "IN_accessions_raw",
             "channel_str": "IN_accessions_raw = Channel.fromPath("
                            "params.accessions)"
@@ -208,10 +211,9 @@ class Process:
         """
         self.secondary_input_str = ""
 
-        self.params = []
+        self.params = {}
         """
-        list: List of strings with the parameters required for any given 
-        process.
+        dict: Maps the parameter names to the corresponding default values.
         """
 
         self._context = {}
@@ -319,6 +321,7 @@ class Process:
         if itype in self.RAW_MAPPING:
 
             channel_info = self.RAW_MAPPING[itype]
+            self.params[channel_info["params"]] = channel_info["default_value"]
 
             return {**res, **channel_info}
 
@@ -575,6 +578,10 @@ class Init(Process):
         self.output_type = "raw"
 
         self.status_channels = []
+
+        for input_type, info in self.RAW_MAPPING.items():
+
+            self.params[info["params"]] = info["default_value"]
 
     def set_raw_inputs(self, raw_input):
         """

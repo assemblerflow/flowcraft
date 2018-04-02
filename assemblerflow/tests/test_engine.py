@@ -488,7 +488,7 @@ def test_resources_string(single_con):
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n$procA_1.cpus = "1"\n$procA_1.memory = "4GB"'
+    assert res == '\n\t$procA_1.cpus = "1"\n\t$procA_1.memory = "4GB"'
 
 
 def test_resources_string_2(single_con):
@@ -498,7 +498,7 @@ def test_resources_string_2(single_con):
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n$procA_1.cpus = "1"'
+    assert res == '\n\t$procA_1.cpus = "1"'
 
 
 def test_resources_string_3(single_con):
@@ -509,8 +509,8 @@ def test_resources_string_3(single_con):
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n$procA_1.cpus = "1"\n$procA_1.memory = "4GB"' \
-                  '\n$procB_1.memory = { 4.GB * task.attempt }'
+    assert res == '\n\t$procA_1.cpus = "1"\n\t$procA_1.memory = "4GB"' \
+                  '\n\t$procB_1.memory = { 4.GB * task.attempt }'
 
 
 def test_container_string(single_con):
@@ -520,7 +520,7 @@ def test_container_string(single_con):
 
     res = single_con._get_container_string(res_dict, 2)
 
-    assert res == '\n$procA_2.container = "img:1"'
+    assert res == '\n\t$procA_2.container = "img:1"'
 
 
 def test_container_string_2(single_con):
@@ -531,7 +531,7 @@ def test_container_string_2(single_con):
 
     res = single_con._get_container_string(res_dict, 2)
 
-    assert res == '\n$procA_2.container = "img:1"\n' \
+    assert res == '\n\t$procA_2.container = "img:1"\n\t' \
                   '$procB_2.container = "img:latest"'
 
 
