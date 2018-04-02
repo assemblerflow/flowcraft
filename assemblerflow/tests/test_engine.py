@@ -1,4 +1,5 @@
 import os
+import shutil
 import pytest
 
 import assemblerflow.generator.engine as eg
@@ -129,7 +130,9 @@ def multi_forks():
            {"input": {"process": "check_coverage", "lane": 3},
             "output": {"process": "skesa", "lane": 7}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    os.mkdir(".temp")
+    yield eg.NextflowGenerator(con, os.path.join(".temp", "teste.nf"))
+    shutil.rmtree(".temp")
 
 
 def test_simple_init():
@@ -476,7 +479,6 @@ def test_set_status_channels_duplicate_status(single_status):
 def test_build(multi_forks):
 
     multi_forks.build()
-    os.remove("teste.nf")
 
     assert multi_forks.template != ""
 

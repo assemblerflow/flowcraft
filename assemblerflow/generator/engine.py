@@ -4,7 +4,7 @@ import jinja2
 import logging
 
 from collections import defaultdict
-from os.path import dirname, join, abspath, split, splitext
+from os.path import dirname, join, abspath, split, splitext, exists
 
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -147,6 +147,14 @@ class NextflowGenerator:
         """
         str: Stores the params directives string for the nextflow pipeline.
         See :func:`NextflowGenerator._get_params_string`
+        """
+
+        self.user_config = ""
+        """
+        str: Stores the user configuration file placeholder. This is an 
+        empty configuration file that is only added the first time to a 
+        project directory. If the file already exists, it will not overwrite
+        it.
         """
 
     @staticmethod
@@ -879,6 +887,7 @@ class NextflowGenerator:
         self.params = self._render_config("params.config", {
             "params_info": params
         })
+        self.user_config = self._render_config("user.config", {})
 
     def render_pipeline(self):
         """Write pipeline attributes to json
@@ -960,6 +969,11 @@ class NextflowGenerator:
         # Write containers config
         with open(join(project_root, "params.config"), "w") as fh:
             fh.write(self.params)
+
+        # Write user config if not present in the project directory
+        if not exists(join(project_root, "user.config")):
+            with open(join(project_root, "user.config"), "w") as fh:
+                fh.write(self.user_config)
 
         # Generate the pipeline DAG
         pipeline_to_json = self.render_pipeline()

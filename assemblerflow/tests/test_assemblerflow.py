@@ -58,7 +58,7 @@ def test_build_file(tmp):
 
     assert sorted(os.listdir(tmp)) == ["containers.config", "params.config",
                                        "resources.config", "teste.html",
-                                       "teste.nf"]
+                                       "teste.nf", "user.config"]
 
 
 def test_build_file_2(tmp):
