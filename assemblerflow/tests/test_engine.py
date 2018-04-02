@@ -485,12 +485,12 @@ def test_build(multi_forks):
 
 def test_resources_string(single_con):
 
-    res_dict = {"procA": {"cpus": 1, "memory": "4GB", "container": "img",
+    res_dict = {"procA": {"cpus": 1, "memory": "'4GB'", "container": "img",
                           "version": "1"}}
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n\t$procA_1.cpus = "1"\n\t$procA_1.memory = "4GB"'
+    assert res == '\n\t$procA_1.cpus = 1\n\t$procA_1.memory = \'4GB\''
 
 
 def test_resources_string_2(single_con):
@@ -500,18 +500,18 @@ def test_resources_string_2(single_con):
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n\t$procA_1.cpus = "1"'
+    assert res == '\n\t$procA_1.cpus = 1'
 
 
 def test_resources_string_3(single_con):
 
-    res_dict = {"procA": {"cpus": 1, "memory": "4GB", "container": "img",
+    res_dict = {"procA": {"cpus": 1, "memory": "'4GB'", "container": "img",
                           "version": "1"},
                 "procB": {"memory": "{ 4.GB * task.attempt }"}}
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n\t$procA_1.cpus = "1"\n\t$procA_1.memory = "4GB"' \
+    assert res == '\n\t$procA_1.cpus = 1\n\t$procA_1.memory = \'4GB\'' \
                   '\n\t$procB_1.memory = { 4.GB * task.attempt }'
 
 
