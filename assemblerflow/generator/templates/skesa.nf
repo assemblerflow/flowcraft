@@ -17,22 +17,6 @@ process skesa_{{ pid }} {
     {% endwith %}
 
     script:
-    """
-    {
-        skesa --fastq ${fastq_pair[0]},${fastq_pair[1]} --gz --use_paired_ends \
-        --cores ${task.cpus} > ${fastq_id}_skesa.assembly.fasta
-        # Test if the output assembly file is empty
-        if [ -s ${fastq_id}_skesa.assembly.fasta ]
-        then
-            echo pass > .status
-        else
-            echo fail > .status
-            exit 1
-        fi
-
-    } || {
-        echo fail > .status
-    }
-    """
+    template "skesa.py"
 
 }
