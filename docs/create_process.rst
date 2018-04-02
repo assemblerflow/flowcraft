@@ -144,6 +144,18 @@ input/output types.
 However, a pipeline will only build successfully when all processes correctly
 link the output with the input type.
 
+Depending on the process, other attributes may be required:
+
+    - `Parameters`_: Parameters provided by the user to be used in the process.
+    - `Secondary inputs`_: Channels created from parameters provided by the
+      user.
+    - Secondary `Link start`_ and `Link end`_: Secondary links that connect
+      secondary information between two processes.
+    - `Dependencies`_: List of other processes that may be required for
+      the current process.
+    - `Directives`_: Default information for RAM/CPU/Container directives
+      and more.
+
 Add to available processes
 ::::::::::::::::::::::::::
 
@@ -182,6 +194,30 @@ two processes could not be linked.
 .. note::
 
     The input/ouput types that are currently used are ``fastq``, ``fasta``.
+
+Parameters
+::::::::::
+
+The :attr:`~assemblerflow.generator.process.Process.params` attribute sets
+the parameters, and their respective default values, that can be used
+by the process. These parameters can be simple values that are not feed into
+any channel, or can be automatically set to a secondary input channel via
+ `Secondary inputs`_ (see below). This attribute is a simple dictionary with
+a key:value pair for each parameter:default_value::
+
+    self.params = {
+        "genomeSize": 2.1,
+        "minCoverage": 15
+        "adapters": "'None'"
+    }
+
+These pairs are then used to populate the ``params.config`` file that is
+generated in the pipeline directory. Note that the values are replaced
+literally in the config file. For instance, ``"genomeSize": 2.1,`` will appear
+as ``genomeSize = 2.1``, whereas ``"adapters": "'None'"`` will appear as
+``adapters = 'None'``. If you want a value to appear as a string, the double
+and single quotes are necessary.
+
 
 Secondary inputs
 ::::::::::::::::

@@ -856,7 +856,7 @@ class FastQC(Process):
         """
 
         self.params = {
-            "adapters": "None"
+            "adapters": "'None'"
         }
 
         self.secondary_inputs = [
