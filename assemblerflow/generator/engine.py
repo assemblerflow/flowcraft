@@ -741,10 +741,14 @@ class NextflowGenerator:
         """
 
         config_str = ""
+        ignore_directives = ["container", "version"]
 
         for p, directives in res_dict.items():
 
             for d, val in directives.items():
+
+                if d in ignore_directives:
+                    continue
 
                 config_str += '\n\t${}_{}.{} = {}'.format(p, pid, d, val)
 
