@@ -151,8 +151,8 @@ class NextflowGenerator:
 
         self.user_config = ""
         """
-        str: Stores the user configuration file placeholder. This is an 
-        empty configuration file that is only added the first time to a 
+        str: Stores the user configuration file placeholder. This is an
+        empty configuration file that is only added the first time to a
         project directory. If the file already exists, it will not overwrite
         it.
         """
