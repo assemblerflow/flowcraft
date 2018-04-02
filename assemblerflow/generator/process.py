@@ -898,7 +898,7 @@ class Trimmomatic(Process):
         self.link_end.append({"link": "SIDE_phred", "alias": "SIDE_phred"})
 
         self.params = {
-            "adapters": "None",
+            "adapters": "'None'",
             "trimSlidingWindow": "'5:20'",
             "trimLeading": "3",
             "trimTrailing": "3",
@@ -963,7 +963,7 @@ class FastqcTrimmomatic(Process):
                                 "STATUS_trimmomatic"]
 
         self.params = {
-            "adapters": "None",
+            "adapters": "'None'",
             "trimSlidingWindow": "'5:20'",
             "trimLeading": "3",
             "trimTrailing": "3",
