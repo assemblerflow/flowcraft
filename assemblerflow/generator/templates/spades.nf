@@ -13,7 +13,7 @@ process spades_{{ pid }} {
     val kmers from IN_spades_kmers
 
     output:
-    set fastq_id, file('*.fasta') into {{ output_channel }}
+    set fastq_id, file('*_spades*.fasta') into {{ output_channel }}
     {% with task_name="spades" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
