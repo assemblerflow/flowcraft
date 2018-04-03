@@ -12,7 +12,7 @@ process pilon_{{ pid }} {
     set fastq_id, file(assembly), file(bam_file), file(bam_index) from {{ input_channel }}
 
     output:
-    set fastq_id, '*_polished.assembly.fasta' into {{ output_channel }}, pilon_report_{{ pid }}
+    set fastq_id, '*_polished.fasta' into {{ output_channel }}, pilon_report_{{ pid }}
     {% with task_name="pilon" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -21,7 +21,7 @@ process pilon_{{ pid }} {
     """
     {
         pilon_mem=${String.valueOf(task.memory).substring(0, String.valueOf(task.memory).length() - 1).replaceAll("\\s", "")}
-        java -jar -Xms256m -Xmx\${pilon_mem} /NGStools/pilon-1.22.jar --genome $assembly --frags $bam_file --output ${assembly.name.replaceFirst(~/\.[^\.]+$/, '')}_polished.assembly --changes --threads $task.cpus >> .command.log 2>&1
+        java -jar -Xms256m -Xmx\${pilon_mem} /NGStools/pilon-1.22.jar --genome $assembly --frags $bam_file --output ${assembly.name.replaceFirst(~/\.[^\.]+$/, '')}_polished --changes --threads $task.cpus >> .command.log 2>&1
         echo pass > .status
     } || {
         echo fail > .status
