@@ -20,3 +20,5 @@ process skesa_{{ pid }} {
     template "skesa.py"
 
 }
+
+{{ forks }}

@@ -36,6 +36,7 @@ process_map = {
         "skesa": pc.Skesa,
         "spades": pc.Spades,
         "process_spades": pc.ProcessSpades,
+        "process_skesa": pc.ProcessSkesa,
         "assembly_mapping": pc.AssemblyMapping,
         "pilon": pc.Pilon,
         "mlst": pc.Mlst,
