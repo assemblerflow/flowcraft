@@ -897,6 +897,8 @@ class Trimmomatic(Process):
 
         self.link_end.append({"link": "SIDE_phred", "alias": "SIDE_phred"})
 
+        self.dependencies = ["integrity_coverage"]
+
         self.params = {
             "adapters": "'None'",
             "trimSlidingWindow": "'5:20'",
@@ -961,6 +963,8 @@ class FastqcTrimmomatic(Process):
 
         self.status_channels = ["STATUS_fastqc", "STATUS_fastqc_report",
                                 "STATUS_trimmomatic"]
+
+        self.dependencies = ["integrity_coverage"]
 
         self.params = {
             "adapters": "'None'",
@@ -1042,6 +1046,8 @@ class Spades(Process):
         self.output_type = "fasta"
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
+
+        self.dependencies = ["integrity_coverage"]
 
         self.params = {
             "spadesMinCoverage": 2,
