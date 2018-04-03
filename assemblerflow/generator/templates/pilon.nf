@@ -6,7 +6,7 @@ process pilon_{{ pid }} {
 
     tag { fastq_id + " getStats" }
     echo false
-    publishDir 'results/assembly/pilon_{{ pid }}/', mode: 'copy'
+    publishDir 'results/assembly/pilon_{{ pid }}/', mode: 'copy', pattern: "*.fasta"
 
     input:
     set fastq_id, file(assembly), file(bam_file), file(bam_index) from {{ input_channel }}
