@@ -75,7 +75,7 @@ process process_assembly_mapping_{{ pid }} {
     val gsize from IN_genome_size
 
     output:
-    set fastq_id, '*_filtered.assembly.fasta', 'filtered.bam', 'filtered.bam.bai' optional true into {{ output_channel }}
+    set fastq_id, '*_filt.fasta', 'filtered.bam', 'filtered.bam.bai' optional true into {{ output_channel }}
     {% with task_name="process_am" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
