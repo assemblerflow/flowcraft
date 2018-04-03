@@ -13,7 +13,7 @@ process trimmomatic_{{ pid }} {
     val ad from IN_adapters
 
     output:
-    set fastq_id, "${fastq_id}_*P*" optional true into {{ output_channel }}
+    set fastq_id, "${fastq_id}_*trim.fastq.gz" optional true into {{ output_channel }}
     file 'trimmomatic_report.csv'
     {% with task_name="trimmomatic" %}
     {%- include "compiler_channels.txt" ignore missing -%}
