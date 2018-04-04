@@ -4,7 +4,7 @@ process reads_download_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { accession_id }
-    publishDir "reads", pattern: "*.gz", mode: "move"
+    publishDir "reads", pattern: "${accession_id}/*fq.gz"
     maxRetries 1
 
     input:
