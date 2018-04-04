@@ -1208,8 +1208,7 @@ class AssemblyMapping(Process):
                 "cpus": 4,
                 "memory": "{ 5.GB * task.attempt }",
                 "container": "ummidock/bowtie2_samtools",
-                "version": "1.0.0-2",
-                "scratch": "true"
+                "version": "1.0.0-2"
             },
             "process_assembly_mapping": {
                 "cpus": 4,
