@@ -46,22 +46,21 @@ class Process:
             "params": "fastq",
             "default_value": "'fastq/*_{1,2}.*'",
             "channel": "IN_fastq_raw",
-            "channel_str": "IN_fastq_raw = Channel.fromFilePairs(params.fastq)"
+            "channel_str": "Channel.fromFilePairs(params.{})"
         },
         "fasta": {
             "params": "fasta",
             "default_value": "'fasta/*.fasta'",
             "channel": "IN_fasta_raw",
-            "channel_str": "IN_fasta_raw = Channel.fromPath(params.fasta)"
-                           ".map{ it -> [it.toString().tokenize('/').last()"
-                           ".tokenize('.').first(), it] }"
+            "channel_str": "Channel.fromPath(params.{})"
+                           ".map{{ it -> [it.toString().tokenize('/')"
+                           ".last().tokenize('.').first(), it] }}"
         },
         "accessions": {
             "params": "accessions",
             "default_value": "null",
             "channel": "IN_accessions_raw",
-            "channel_str": "IN_accessions_raw = Channel.fromPath("
-                           "params.accessions)"
+            "channel_str": "Channel.fromPath(params.{})"
         }
     }
     """
@@ -210,6 +209,16 @@ class Process:
             }
         """
         self.secondary_input_str = ""
+
+        self.extra_input = ""
+        """
+        str:  with the name of the params that will be used to provide
+        extra input into the process. This extra input will be mixed with
+        the main input channel using nextflow's ``mix`` operator. Its
+        channel will be defined at the start of the pipeline, based on the
+        ``channel_str`` key of the :attr:`~Process.RAW_MAPPING` for the
+        corresponding input type.
+        """
 
         self.params = {}
         """
@@ -409,6 +418,11 @@ class Process:
                                       "template": self.template,
                                       "forks": "\n".join(self.forks),
                                       "pid": self.pid}}
+
+    def update_main_input(self, input_str):
+
+        self.input_channel = input_str
+        self._context["input_channel"] = self.input_channel
 
     def update_main_forks(self, sink):
         """Updates the forks attribute with the sink channel destination
@@ -622,6 +636,44 @@ class Init(Process):
         secondary_input_str = "\n".join(list(channel_dict.values()))
         self._context = {**self._context,
                          **{"secondary_inputs": secondary_input_str}}
+
+    def set_extra_inputs(self, channel_dict):
+        """Sets the initial definition of the extra input channels.
+
+        The ``channel_dict`` argument should contain the input type and
+        destination channel of each parameter (which is the key)::
+
+            channel_dict = {
+                "param1": {
+                    "input_type": "fasta"
+                    "channels": ["abricate_2_3", "chewbbaca_3_4"]
+                }
+            }
+
+        Parameters
+        ----------
+        channel_dict : dict
+            Dictionary with the extra_input parameter as key, and a dictionary
+            as a value with the input_type and destination channels
+        """
+
+        extra_inputs = []
+
+        for param, info in channel_dict.items():
+
+            channel_name = "IN_{}_extraInput".format(param)
+            channel_str = self.RAW_MAPPING[info["input_type"]]["channel_str"]
+            extra_inputs.append("{} = {}".format(channel_name,
+                                                 channel_str.format(param)))
+
+            op = "set" if len(info["channels"]) == 1 else "into"
+            extra_inputs.append("{}.{}{{ {} }}".format(
+                channel_name, op, ";".join(info["channels"])))
+
+        self._context = {
+            **self._context,
+            **{"extra_inputs": "\n".join(extra_inputs)}
+        }
 
 
 class DownloadReads(Process):

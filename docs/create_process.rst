@@ -254,6 +254,52 @@ file. Note that this channel definition mentions the parameters (e.g.
     In future versions, the parameters will be dynamically generated in the
     nextflow.config file
 
+Extra input
+:::::::::::
+
+The :attr:`~assemblerflow.generator.process.Process.extra_input` attribute
+is mostly a user specified directive that allows the injection of additional
+input data from a parameter into the main input channel of the process.
+When a pipeline is defined as::
+
+    process1 process2={'extra_input':'var'}
+
+assemblerflow will expose a new ``var`` parameter, setup an extra input
+channel and mix it with ``process2`` main input channel. A more detailed
+explanation follows below.
+
+First, assemblerflow will create a nextflow channel from the parameter name
+provided via the ``extra_input`` directive. The channel string will depend
+on the input type of the process (this string is fetched from the
+:attr:`~assemblerflow.generator.process.Process.RAW_MAPPING` attribute).
+For instance, if the input type of
+``process2`` is ``fastq``, the new extra channel will be::
+
+    IN_var_extraInput = Channel.fromFilePairs(params.var)
+
+Since the same extra input parameter may be used by more than one process,
+the ``IN_var_extraInput`` channel will be automatically forked into the
+final destination channels::
+
+    // When there is a single destination channel
+    IN_var_extraInput.set{ EXTRA_process2_1_2 }
+    // When there are multiple destination channels for the same parameter
+    IN_var_extraInput.into{ EXTRA_process2_1_2; EXTRA_process3_1_3 }
+
+The destination channels are the ones that will be actually mixed with
+the main input channels::
+
+    process process2 {
+        input:
+        (...) main_channel.mix(EXTRA_process2_1_2)
+    }
+
+In these cases, the processes that receive the extra input will process the
+data provided by the preceding channel **AND** by the parameter. The data
+provided via the extra input parameter does not have to wait for the
+``main_channel``, which means that they can run in parallel, if there are
+enough resources.
+
 Link start
 ::::::::::
 

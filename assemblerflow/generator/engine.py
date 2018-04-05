@@ -121,6 +121,10 @@ class NextflowGenerator:
 
         """
 
+        self.extra_inputs = {}
+        """
+        """
+
         self.status_channels = []
         """
         list: Stores the status channels from each process
@@ -414,7 +418,9 @@ class NextflowGenerator:
         else:
             self.main_raw_inputs[process_input] = {
                 "channel": raw_in["channel"],
-                "channel_str": raw_in["channel_str"],
+                "channel_str": "{} = {}".format(
+                    raw_in["channel"],
+                    raw_in["channel_str"].format(raw_in["params"])),
                 "raw_forks": [raw_in["input_channel"]]
             }
         logger.debug("[{}] Updated main raw inputs: {}".format(
@@ -423,7 +429,7 @@ class NextflowGenerator:
     def _update_secondary_inputs(self, p):
         """Given a process, this method updates the
         :attr:`~Process.secondary_inputs` attribute with the corresponding
-        secondary inputs of that channel.
+        secondary inputs of that process.
 
         Parameters
         ----------
@@ -439,6 +445,63 @@ class NextflowGenerator:
                     logger.debug("[{}] Added channel: {}".format(
                         p.template, ch["channel"]))
                     self.secondary_inputs[ch["params"]] = ch["channel"]
+
+    def _update_extra_inputs(self, p):
+        """Given a process, this method updates the
+        :attr:`~Process.extra_inputs` attribute with the corresponding extra
+        inputs of that process
+
+        Parameters
+        ----------
+        p : assemblerflow.Process.Process
+        """
+
+        if p.extra_input:
+            logger.debug("[{}] Found extra input: {}".format(
+                p.template, p.extra_input))
+
+            if p.extra_input == "default":
+                # Check if the default type is now present in the main raw
+                # inputs. If so, issue an error. The default param can only
+                # be used when not present in the main raw inputs
+                if p.input_type in self.main_raw_inputs:
+                    logger.error(colored_print(
+                        "\nThe default input param '{}' of the process '{}'"
+                        " is already specified as a main input parameter of"
+                        " the pipeline. Please choose a different extra_input"
+                        " name.".format(p.input_type, p.template), "red_bold"))
+                    sys.exit(1)
+                param = p.input_type
+            else:
+                param = p.extra_input
+
+            dest_channel = "EXTRA_{}_{}".format(p.template, p.pid)
+
+            if param not in self.extra_inputs:
+                self.extra_inputs[param] = {
+                    "input_type": p.input_type,
+                    "channels": [dest_channel]
+                }
+            else:
+                if self.extra_inputs[param]["input_type"] != p.input_type:
+                    logger.error(colored_print(
+                        "\nThe extra_input parameter '{}' for process"
+                        " '{}' was already defined with a different "
+                        "input type '{}'. Please choose a different "
+                        "extra_input name.".format(
+                            p.input_type, p.template,
+                            self.extra_inputs[param]["input_type"]),
+                        "red_bold"))
+                    sys.exit(1)
+                self.extra_inputs[param]["channels"].append(dest_channel)
+
+            logger.debug("[{}] Added extra channel '{}' linked to param: '{}' "
+                         "".format(p.template, param,
+                                   self.extra_inputs[param]))
+            p.update_main_input(
+                "{}.mix({})".format(p.input_channel, dest_channel)
+            )
+
 
     def _get_fork_tree(self, p):
         """
@@ -612,12 +675,14 @@ class NextflowGenerator:
 
             self._update_secondary_inputs(p)
 
+            self._update_extra_inputs(p)
+
             self._update_secondary_channels(p)
 
             logger.info(colored_print(
                 "\tChannels set for {} \u2713".format(p.template)))
 
-    def _set_secondary_inputs(self):
+    def _set_init_process(self):
         """Sets the main raw inputs and secondary inputs on the init process
 
         This method will fetch the :class:`assemblerflow.process.Init` process
@@ -640,6 +705,8 @@ class NextflowGenerator:
         logger.debug("Setting secondary inputs: "
                      "{}".format(self.secondary_inputs))
         init_process.set_secondary_inputs(self.secondary_inputs)
+        logger.debug("Setting extra inputs: {}".format(self.extra_inputs))
+        init_process.set_extra_inputs(self.extra_inputs)
 
     def _set_secondary_channels(self):
         """Sets the secondary channels for the pipeline
@@ -1002,7 +1069,7 @@ class NextflowGenerator:
 
         self._set_channels()
 
-        self._set_secondary_inputs()
+        self._set_init_process()
 
         logger.info(colored_print(
             "\tSuccessfully set {} secondary input(s) \u2713".format(
