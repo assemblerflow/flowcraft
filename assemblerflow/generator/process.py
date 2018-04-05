@@ -46,21 +46,46 @@ class Process:
             "params": "fastq",
             "default_value": "'fastq/*_{1,2}.*'",
             "channel": "IN_fastq_raw",
-            "channel_str": "Channel.fromFilePairs(params.{})"
+            "channel_str":
+                "Channel.fromFilePairs(params.{0})"
+                ".ifEmpty {{ exit 1, \"No fastq files provided with pattern:"
+                "'${{params.{0}}}'\" }}",
+            "checks":
+                "if (params.{0} instanceof Boolean){{"
+                "exit 1, \"'{0}' must be a path pattern. Provide value:"
+                "'$params.{0}'\"}}\n"
+                "if (!params.{0}){{ exit 1, \"'{0}' parameter "
+                "missing\"}}"
         },
         "fasta": {
             "params": "fasta",
             "default_value": "'fasta/*.fasta'",
             "channel": "IN_fasta_raw",
-            "channel_str": "Channel.fromPath(params.{})"
-                           ".map{{ it -> [it.toString().tokenize('/')"
-                           ".last().tokenize('.').first(), it] }}"
+            "channel_str":
+                "Channel.fromPath(params.{0})."
+                "map{{ it -> file(it).exists() ? [it.toString().tokenize('/').last()"
+                ".tokenize('.').first(), it] : null }}"
+                ".ifEmpty {{ exit 1, \"No fasta files provided with pattern:"
+                "'${{params.{0}}}'\" }}",
+            "checks":
+                "if (params.{0} instanceof Boolean){{"
+                "exit 1, \"'{0}' must be a path pattern. Provide value:"
+                "'$params.{0}'\"}}\n"
+                "if (!params.{0}){{ exit 1, \"'{0}' parameter "
+                "missing\"}}"
+
         },
         "accessions": {
             "params": "accessions",
             "default_value": "null",
             "channel": "IN_accessions_raw",
-            "channel_str": "Channel.fromPath(params.{})"
+            "channel_str":
+                "Channel.fromPath(params.{0})"
+                ".ifEmpty {{ exit 1, \"No accessions file provided with path:"
+                "'${{params.{0}}}'\" }}",
+            "checks":
+                "if (!params.{0}){{ exit 1, \"'{0}' parameter "
+                "missing\" }}\n"
         }
     }
     """

@@ -15,7 +15,7 @@ if (params.help){
     exit 0
 }
 
-nsamples = file(params.fastq).size()
-nfasta = file(params.fasta).size()
-Help.start_info(version, nsamples, nfasta, "$workflow.start", "$workflow.profile")
+//nsamples = file(params.fastq).size()
+//nfasta = file(params.fasta).size()
+//Help.start_info(version, nsamples, nfasta, "$workflow.start", "$workflow.profile")
     """
