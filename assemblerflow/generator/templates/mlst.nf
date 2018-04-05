@@ -18,9 +18,6 @@ process mlst_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-    when:
-    params.mlstRun  == true && params.annotationRun
-
     script:
     """
     {

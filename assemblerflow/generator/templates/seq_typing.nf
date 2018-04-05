@@ -10,8 +10,8 @@ process seq_typing_{{ pid }} {
 
     input:
     set fastq_id, file(fastq_pair) from {{ input_channel }}
-    file refO from Channel.fromPath(params.referenceFileO)
-    file refH from Channel.fromPath(params.referenceFileH)
+    file refO from IN_refO
+    file refH from IN_refH
 
     output:
     file "seq_typing.report.txt"

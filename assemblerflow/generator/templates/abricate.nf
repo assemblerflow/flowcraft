@@ -17,9 +17,6 @@ process abricate_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-    when:
-    params.abricateRun == true && params.annotationRun
-
     script:
     """
     {

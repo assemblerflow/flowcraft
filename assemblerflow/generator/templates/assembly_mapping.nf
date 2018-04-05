@@ -16,9 +16,6 @@ process assembly_mapping_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-    when:
-    params.stopAt != "assembly_mapping"
-
     script:
     """
     {

@@ -679,12 +679,22 @@ class IntegrityCoverage(Process):
         self.secondary_inputs = [
             {
                 "params": "genomeSize",
-                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+                "channel":
+                    "IN_genome_size = Channel"
+                    ".value(params.genomeSize)"
+                    "map{it -> it.toString().isNumber() ?"
+                    " it : exit(1, \"The genomeSize parameter must be a number"
+                    "or a float. Provided value: '${params.genomeSize}'\")}"
             },
             {
                 "params": "minCoverage",
-                "channel": "IN_min_coverage = "
-                           "Channel.value(params.minCoverage)"
+                "channel":
+                    "IN_min_coverage = Channel"
+                    ".value(params.minCoverage)"
+                    "map{it -> it.toString().isNumber() ?"
+                    " it : exit(1, \"The minCoverage parameter must be a "
+                    "number or a float. Provided value: "
+                    "'${params.minCoverage}'\")}"
             }
         ]
 
@@ -719,6 +729,29 @@ class SeqTyping(Process):
             "referenceFileH": "null",
         }
 
+        self.secondary_inputs = [
+            {
+                "params": "referenceFileO",
+                "channel":
+                    "file(params.referenceFileO) ? params.referenceFileO : "
+                    "exit(1, \"'referenceFileO' parameter missing\")\n"
+                    "IN_refO = Channel"
+                    ".fromPath(params.referenceFileO)"
+                    "map{ it -> it.exists() ? it : exit(1, \"referenceFileO"
+                    " file was not found: '${params.referenceFileO}'\")}"
+            },
+            {
+                "params": "referenceFileH",
+                "channel":
+                    "file(params.referenceFileH) ? params.referenceFileH : "
+                    "exit(1, \"'referenceFileH' parameter missing\")\n"
+                    "IN_refH = Channel"
+                    ".fromPath(params.referenceFileH)"
+                    "map{ it -> it.exists() ? it : exit(1, \"referenceFileH"
+                    " file was not found: '${params.referenceFileH}'\")}"
+            }
+        ]
+
 
 class PathoTyping(Process):
     """
@@ -743,8 +776,14 @@ class PathoTyping(Process):
         self.secondary_inputs = [
             {
                 "params": "species",
-                "channel": "IN_pathoSpecies = "
-                           "Channel.value(params.species)"
+                "channel":
+                    "if ( !params.species){ exit 1, \"'species' parameter "
+                    "missing\" }\n"
+                    "if ( params.species.toString().split(\" \").size() != 2 )"
+                    "{ exit 1, \"'species' parameter must contain two "
+                    "values (e.g.: 'escherichia coli'). Provided value: "
+                    "${params.species}\"}\n"
+                    "IN_pathoSpecies = Channel.value(params.species)"
             }
         ]
 
@@ -790,12 +829,22 @@ class CheckCoverage(Process):
         self.secondary_inputs = [
             {
                 "params": "genomeSize",
-                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+                "channel":
+                    "IN_genome_size = Channel"
+                    ".value(params.genomeSize)"
+                    "map{it -> it.toString().isNumber() ?"
+                    " it : exit(1, \"The genomeSize parameter must be a number"
+                    "or a float. Provided value: '${params.genomeSize}'\")}"
             },
             {
                 "params": "minCoverage",
-                "channel": "IN_min_coverage = "
-                           "Channel.value(params.minCoverage)"
+                "channel":
+                    "IN_min_coverage = Channel"
+                    ".value(params.minCoverage)"
+                    "map{it -> it.toString().isNumber() ?"
+                    " it : exit(1, \"The minCoverage parameter must be a "
+                    "number or a float. Provided value: "
+                    "'${params.minCoverage}'\")}"
             }
         ]
 
@@ -818,11 +867,16 @@ class TrueCoverage(Process):
         }
 
         self.directives = {
-            "true_coverage": {
-                "cpus": 4,
-                "memory": "'1GB'",
-                "container": "odiogosilva/true_coverage",
-                "version": "3.2"
+            {
+                "params": "species",
+                "channel":
+                    "if ( !params.species){ exit 1, \"'species' parameter "
+                    "missing\" }\n"
+                    "if ( params.species.toString().split(\" \").size() != 2 )"
+                    "{ exit 1, \"'species' parameter must contain two "
+                    "values (e.g.: 'escherichia coli').Provided value: "
+                    "'${params.species}'\"}\n"
+                    "IN_pathoSpecies = Channel.value(params.species)"
             }
         }
 
@@ -910,10 +964,26 @@ class Trimmomatic(Process):
         self.secondary_inputs = [
             {
                 "params": "trimOpts",
-                "channel": "IN_trimmomatic_opts = "
-                           "Channel.value([params.trimSlidingWindow,"
-                           "params.trimLeading,params.trimTrailing,"
-                           "params.trimMinLength])"
+                "channel":
+                    "// Check sliding window parameter\n"
+                    "if ( params.trimSlidingWindow.toString().split(\":\")"
+                    ".size() != 2 )"
+                    "{ exit 1, \"'trimSlidingWindow' parameter must contain"
+                    "two values separated by a ':'. Provided value: "
+                    "'${params.trimSlidingWindow}' \"}\n"
+                    "if ( !params.trimLeading.toString().isNumber() )"
+                    "{ exit 1, \"'trimLeading' parameter must be a number."
+                    "Provide value: '${params.trimLeading}'\"}\n"
+                    "if ( !params.trimTrailing.toString().isNumber() )"
+                    "{ exit 1, \"'trimTrailing' parameter must be a number."
+                    "Provide value: '${params.trimTrailing}'\"}\n"
+                    "if ( !params.trimMinLength.toString().isNumber() )"
+                    "{ exit 1, \"'trimMinLength' parameter must be a number."
+                    "Provide value: '${params.trimMinLength}'\"}\n"
+                    "IN_trimmomatic_opts = Channel."
+                    "value([params.trimSlidingWindow,"
+                    "params.trimLeading,params.trimTrailing,"
+                    "params.trimMinLength])"
             },
             {
                 "params": "adapters",
@@ -981,10 +1051,26 @@ class FastqcTrimmomatic(Process):
             },
             {
                 "params": "trimOpts",
-                "channel": "IN_trimmomatic_opts = "
-                           "Channel.value([params.trimSlidingWindow,"
-                           "params.trimLeading,params.trimTrailing,"
-                           "params.trimMinLength])"
+                "channel":
+                    "// Check sliding window parameter\n"
+                    "if ( params.trimSlidingWindow.toString().split(\":\")"
+                    ".size() != 2 )"
+                    "{ exit 1, \"'trimSlidingWindow' parameter must contain"
+                    "two values separated by a ':'. Provided value: "
+                    "'${params.trimSlidingWindow}' \"}\n"
+                    "if ( !params.trimLeading.toString().isNumber() )"
+                    "{ exit 1, \"'trimLeading' parameter must be a number."
+                    "Provide value: '${params.trimLeading}'\"}\n"
+                    "if ( !params.trimTrailing.toString().isNumber() )"
+                    "{ exit 1, \"'trimTrailing' parameter must be a number."
+                    "Provide value: '${params.trimTrailing}'\"}\n"
+                    "if ( !params.trimMinLength.toString().isNumber() )"
+                    "{ exit 1, \"'trimMinLength' parameter must be a number."
+                    "Provide value: '${params.trimMinLength}'\"}\n"
+                    "IN_trimmomatic_opts = Channel."
+                    "value([params.trimSlidingWindow,"
+                    "params.trimLeading,params.trimTrailing,"
+                    "params.trimMinLength])"
             }
         ]
 
@@ -1042,10 +1128,22 @@ class ProcessSkesa(Process):
         self.secondary_inputs = [
             {
                 "params": "processSkesaOpts",
-                "channel": "IN_process_skesa_opts = "
-                           "Channel.value([params.skesaMinContigLen,"
-                           "params.skesaMinKmerCoverage,"
-                           "params.skesaMaxContigs])"
+                "channel":
+                    "if ( !params.skesaMinKmerCoverage.toString().isNumber() )"
+                    "{ exit 1, \"'skesaMinKmerCoverage' parameter must "
+                    "be a number. Provided value: "
+                    "${params.skesaMinKmerCoverage}\"}\n"
+                    "if ( !params.skesaMinContigLen.toString().isNumber() )"
+                    "{ exit 1, \"'skesaMinContigLen' parameter must "
+                    "be a number. Provided value: "
+                    "${params.skesaMinContigLen}\"}\n"
+                    "if ( !params.skesaMaxContigs.toString().isNumber() )"
+                    "{ exit 1, \"'skesaMaxContigs' parameter must "
+                    "be a number. Provided value: "
+                    "${params.skesaMaxContigs}\"}\n"
+                    "IN_process_skesa_opts = Channel"
+                    ".value([params.skesaMinContigLen,"
+                    "params.skesaMinKmerCoverage,params.skesaMaxContigs])"
             }
         ]
 
@@ -1091,14 +1189,29 @@ class Spades(Process):
         self.secondary_inputs = [
             {
                 "params": "spadesOpts",
-                "channel": "IN_spades_opts = Channel.value("
-                           "[params.spadesMinCoverage,"
-                           "params.spadesMinKmerCoverage])"
+                "channel":
+                    "if ( !params.spadesMinCoverage.toString().isNumber() )"
+                    "{ exit 1, \"'spadesMinCoverage' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMinCoverage}\"}\n"
+                    "if ( !params.spadesMinKmerCoverage.toString().isNumber())"
+                    "{ exit 1, \"'spadesMinKmerCoverage' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMinKmerCoverage}\"}\n"
+                    "IN_spades_opts = Channel"
+                    ".value([params.spadesMinCoverage,"
+                    "params.spadesMinKmerCoverage])"
             },
             {
                 "params": "spadesKmers",
-                "channel": "IN_spades_kmers = "
-                           "Channel.value(params.spadesKmers)"
+                "channel":
+                    "if ( params.spadesKmers.toString().split(\" \").size() "
+                    "<= 1 )"
+                    "{ if (params.spadesKmers.toString() != 'auto'){"
+                    "exit 1, \"'spadesKmers' parameter must be a sequence "
+                    "of space separated numbers or 'auto'. Provided "
+                    "value: ${params.spadesKmers}\"} }\n"
+                    "IN_spades_kmers = Channel.value(params.spadesKmers)"
             }
         ]
 
@@ -1138,10 +1251,22 @@ class ProcessSpades(Process):
         self.secondary_inputs = [
             {
                 "params": "processSpadesOpts",
-                "channel": "IN_process_spades_opts = "
-                           "Channel.value([params.spadesMinContigLen,"
-                           "params.spadesMinKmerCoverage,"
-                           "params.spadesMaxContigs])"
+                "channel":
+                    "if ( !params.spadesMinKmerCoverage.toString().isNumber())"
+                    "{ exit 1, \"'spadesMinKmerCoverage' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMinKmerCoverage}\"}\n"
+                    "if ( !params.spadesMinContigLen.toString().isNumber() )"
+                    "{ exit 1, \"'spadesMinContigLen' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMinContigLen}\"}\n"
+                    "if ( !params.spadesMaxContigs.toString().isNumber() )"
+                    "{ exit 1, \"'spadesMaxContigs' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMaxContigs}\"}\n"
+                    "IN_process_spades_opts = Channel"
+                    ".value([params.spadesMinContigLen, "
+                    "params.spadesMinKmerCoverage, params.spadesMaxContigs])"
             }
         ]
 
@@ -1193,13 +1318,25 @@ class AssemblyMapping(Process):
         self.secondary_inputs = [
             {
                 "params": "assemblyMappingOpts",
-                "channel": "IN_assembly_mapping_opts = "
-                           "Channel.value([params.minAssemblyCoverage,"
-                           "params.AMaxContigs])"
+                "channel":
+                    "if ( !params.minAssemblyCoverage.toString().isNumber() )"
+                    "{ if (params.minAssemblyCoverage.toString() != 'auto'){"
+                    "exit 1, \"'minAssemblyCoverage' parameter must be a"
+                    " number or 'auto'. Provided value: "
+                    "${params.minAssemblyCoverage}\"} }\n"
+                    "if ( !params.AMaxContigs.toString().isNumber() )"
+                    "{ exit 1, \"'AMaxContigs' parameter must be a number."
+                    "Provide value: '${params.AMaxContigs}'\"}\n"
+                    "IN_assembly_mapping_opts = Channel"
+                    ".value([params.minAssemblyCoverage,params.AMaxContigs])"
             },
             {
                 "params": "genomeSize",
-                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+                "channel":
+                    "if ( !params.genomeSize.toString().isNumber() )"
+                    "{ exit 1, \"'genomeSize' parameter must be a number."
+                    "Provide value: '${params.genomeSize}'\"}\n"
+                    "IN_genome_size = Channel.value(params.genomeSize)"
             }
         ]
 
@@ -1416,7 +1553,6 @@ class Chewbbaca(Process):
                 "cpus": 4,
                 "container": "mickaelsilva/chewbbaca_py3",
                 "version": "latest",
-                "queue": "chewBBACA"
             },
             "chewbbacaExtractMLST": {
                 "container": "mickaelsilva/chewbbaca_py3",
@@ -1425,7 +1561,6 @@ class Chewbbaca(Process):
         }
 
         self.params = {
-            "chewbbacaRun": "true",
             "chewbbacaQueue": "null",
             "chewbbacaTraining": "null",
             "schemaPath": "null",
@@ -1435,6 +1570,28 @@ class Chewbbaca(Process):
             "chewbbacaToPhyloviz": "false",
             "chewbbacaProfilePercentage": 0.95
         }
+
+        self.secondary_inputs = [
+            {
+                "params": "schemaPath",
+                "channel":
+                    "if ( !params.schemaPath ){ exit 1, \"'schemaPath' "
+                    "parameter missing\"}\n"
+                    "if ( params.chewbbacaTraining){"
+                    "if (!file(params.chewbbacaTraining).exists()) {"
+                    "exit 1, \"'chewbbacaTraining' file was not found: "
+                    "'${params.chewbbacaTraining}'\"}}\n"
+                    "if ( params.schemaSelectedLoci){"
+                    "if (!file(params.schemaSelectedLoci).exists()) {"
+                    "exit 1, \"'schemaSelectedLoci' file was not found: "
+                    "'${params.schemaSelectedLoci}'\"}}\n"
+                    "if ( params.schemaCore){"
+                    "if (!file(params.schemaCore).exists()) {"
+                    "exit 1, \"'schemaCore' file was not found: "
+                    "'${params.schemaCore}'\"}}\n"
+                    "IN_schema = Channel.fromPath(params.schemaPath)"
+            }
+        ]
 
 
 class StatusCompiler(Compiler):
