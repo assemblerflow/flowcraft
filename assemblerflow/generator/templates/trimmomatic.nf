@@ -19,9 +19,6 @@ process trimmomatic_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-    when:
-    params.stopAt != "trimmomatic"
-
     script:
     template "trimmomatic.py"
 

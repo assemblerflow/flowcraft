@@ -16,9 +16,6 @@ process prokka_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-    when:
-    params.prokkaRun == true && params.annotationRun
-
     script:
     """
     {

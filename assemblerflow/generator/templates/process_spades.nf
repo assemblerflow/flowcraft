@@ -22,8 +22,6 @@ process process_spades_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-    when:
-    params.stopAt != "process_spades"
 
     script:
     template "process_assembly.py"
