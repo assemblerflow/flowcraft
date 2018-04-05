@@ -1,10 +1,11 @@
+import os
 import sys
 import json
 import jinja2
 import logging
 
 from collections import defaultdict
-from os.path import dirname, join, abspath, split, splitext, exists
+from os.path import dirname, join, abspath, split, splitext, exists, basename
 
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -905,6 +906,36 @@ class NextflowGenerator:
 
         return config_str
 
+    def _get_params_help(self):
+        """
+
+        Returns
+        -------
+
+        """
+
+        help_dict = {}
+
+        for p in self.processes:
+
+            for param, val in p.params.items():
+
+                if param in help_dict:
+                    help_dict[param]["process"].append(p.template)
+                else:
+                    tpl = [p.template] if p.template != "init" else []
+                    help_dict[param] = {"process": tpl,
+                                        "description": val}
+
+        # Transform process list into final template string
+        for p, val in help_dict.items():
+            if not val["process"]:
+                val["process"] = ""
+            else:
+                val["process"] = "({})".format(";".join(val["process"]))
+
+        return help_dict
+
     @staticmethod
     def _render_config(template, context):
 
@@ -932,6 +963,7 @@ class NextflowGenerator:
         params = ""
 
         params += self._get_params_string()
+        help_dict = self._get_params_help()
 
         for p in self.processes:
 
@@ -952,6 +984,10 @@ class NextflowGenerator:
         })
         self.params = self._render_config("params.config", {
             "params_info": params
+        })
+        self.help = self._render_config("Helper.groovy", {
+            "pipeline_name": basename(self.nf_file),
+            "help_dict": help_dict
         })
         self.user_config = self._render_config("user.config", {})
 
@@ -1040,6 +1076,12 @@ class NextflowGenerator:
         if not exists(join(project_root, "user.config")):
             with open(join(project_root, "user.config"), "w") as fh:
                 fh.write(self.user_config)
+
+        lib_dir = join(project_root, "lib")
+        if not exists(lib_dir):
+            os.makedirs(lib_dir)
+        with open(join(lib_dir, "Helper.groovy"), "w") as fh:
+            fh.write(self.help)
 
         # Generate the pipeline DAG
         pipeline_to_json = self.render_pipeline()

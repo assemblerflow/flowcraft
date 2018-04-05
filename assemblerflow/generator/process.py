@@ -63,7 +63,8 @@ class Process:
             "channel": "IN_fasta_raw",
             "channel_str":
                 "Channel.fromPath(params.{0})."
-                "map{{ it -> file(it).exists() ? [it.toString().tokenize('/').last()"
+                "map{{ it -> file(it).exists() ? [it.toString()"
+                ".tokenize('/').last()"
                 ".tokenize('.').first(), it] : null }}"
                 ".ifEmpty {{ exit 1, \"No fasta files provided with pattern:"
                 "'${{params.{0}}}'\" }}",
