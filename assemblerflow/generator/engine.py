@@ -502,7 +502,6 @@ class NextflowGenerator:
                 "{}.mix({})".format(p.input_channel, dest_channel)
             )
 
-
     def _get_fork_tree(self, p):
         """
 
