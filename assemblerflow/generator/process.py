@@ -866,7 +866,7 @@ class TrueCoverage(Process):
             "species": "null"
         }
 
-        self.directives = {
+        self.secondary_inputs = [
             {
                 "params": "species",
                 "channel":
@@ -877,6 +877,15 @@ class TrueCoverage(Process):
                     "values (e.g.: 'escherichia coli').Provided value: "
                     "'${params.species}'\"}\n"
                     "IN_pathoSpecies = Channel.value(params.species)"
+            }
+        ]
+
+        self.directives = {
+            "true_coverage": {
+                "cpus": 4,
+                "memory": "'1GB'",
+                "container": "odiogosilva/true_coverage",
+                "version": "3.2"
             }
         }
 

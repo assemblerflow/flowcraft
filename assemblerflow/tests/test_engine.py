@@ -329,13 +329,10 @@ def test_set_secondary_inputs_single(single_con):
     single_con._set_channels()
     single_con._set_secondary_inputs()
 
-    p = single_con.processes[0]
+    p = single_con
 
-    assert [p._context["forks"], p._context["secondary_inputs"]] == \
-           ["\nIN_fastq_raw.set{ integrity_coverage_in_1_0 }\n",
-            "IN_genome_size = Channel.value(params.genomeSize)\n"
-            "IN_min_coverage = Channel.value(params.minCoverage)\n"
-            "IN_adapters = Channel.value(params.adapters)"]
+    assert sorted(p.secondary_inputs.keys()) == ["adapters", "genomeSize",
+                                                 "minCoverage"]
 
 
 def test_set_secondary_inputs_raw_forks(raw_forks):
@@ -343,15 +340,12 @@ def test_set_secondary_inputs_raw_forks(raw_forks):
     raw_forks._set_channels()
     raw_forks._set_secondary_inputs()
 
-    p = raw_forks.processes[0]
+    p = raw_forks
 
-    assert [p._context["forks"], p._context["secondary_inputs"]] == \
-           ["\nIN_fastq_raw.into{ integrity_coverage_in_0_0;"
-            "patho_typing_in_0_2;seq_typing_in_0_3 }\n",
-            "IN_genome_size = Channel.value(params.genomeSize)\n"
-            "IN_min_coverage = Channel.value(params.minCoverage)\n"
-            "IN_adapters = Channel.value(params.adapters)\n"
-            "IN_pathoSpecies = Channel.value(params.species)"]
+    assert p.main_raw_inputs["fastq"]["raw_forks"] == \
+           ["integrity_coverage_in_0_0",
+            "patho_typing_in_0_2",
+            "seq_typing_in_0_3"]
 
 
 def test_set_secondary_inputs_multi_raw(single_con_multi_raw):
@@ -359,15 +353,9 @@ def test_set_secondary_inputs_multi_raw(single_con_multi_raw):
     single_con_multi_raw._set_channels()
     single_con_multi_raw._set_secondary_inputs()
 
-    p = single_con_multi_raw.processes[0]
+    p = single_con_multi_raw
 
-    assert [p._context["main_inputs"], p._context["secondary_inputs"]] == \
-           ["IN_fasta_raw = Channel.fromPath(params.fasta).map{ it -> ["
-            "it.toString().tokenize('/').last().tokenize('.').first(), it] }"
-            "\nIN_fastq_raw = Channel.fromFilePairs(params.fastq)",
-            "IN_assembly_mapping_opts = Channel.value(["
-            "params.minAssemblyCoverage,params.AMaxContigs])\nIN_genome_size"
-            " = Channel.value(params.genomeSize)"]
+    assert sorted(list(p.main_raw_inputs.keys())) == ["fasta", "fastq"]
 
 
 def test_set_secondary_channels(multi_forks):
