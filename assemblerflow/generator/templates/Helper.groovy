@@ -40,15 +40,16 @@ class Help {
 
         println ""
         println "============================================================"
-        println "                A S S E M B L E R F L O W"
+        println "                {{ pipeline_name }}"
         println "============================================================"
+        println "Built using assemblerflow v{{ version }}"
         println ""
         println ""
         println "Usage: "
-        println "    nextflow run {{ pipeline_name }}"
+        println "    nextflow run {{ nf_file }}"
         println ""
         {% for param, info in help_dict.items() -%}
-        println "   --{{ "%-25s" | format(param,) }} {{ info.description }} {{ info.process }}"
+        println "       --{{ "%-25s" | format(param,) }} {{ info.description }} {{ info.process }}"
         {% endfor %}
     }
 

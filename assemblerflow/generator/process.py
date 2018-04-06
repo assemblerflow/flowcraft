@@ -44,6 +44,8 @@ class Process:
     RAW_MAPPING = {
         "fastq": {
             "params": "fastq",
+            "description": "Path expression to paired-end fastq files."
+                           " (default: $params.fastq)",
             "default_value": "'fastq/*_{1,2}.*'",
             "channel": "IN_fastq_raw",
             "channel_str":
@@ -59,6 +61,7 @@ class Process:
         },
         "fasta": {
             "params": "fasta",
+            "description": "Path fasta files. (default: $params.fastq)",
             "default_value": "'fasta/*.fasta'",
             "channel": "IN_fasta_raw",
             "channel_str":
@@ -78,6 +81,8 @@ class Process:
         },
         "accessions": {
             "params": "accessions",
+            "description": "Path file with accessions, one perline. ("
+                           "default: $params.fastq)",
             "default_value": "null",
             "channel": "IN_accessions_raw",
             "channel_str":
@@ -356,7 +361,10 @@ class Process:
         if itype in self.RAW_MAPPING:
 
             channel_info = self.RAW_MAPPING[itype]
-            self.params[channel_info["params"]] = channel_info["default_value"]
+            self.params[channel_info["params"]] = {
+                "default": channel_info["default_value"],
+                "description": channel_info["description"]
+            }
 
             return {**res, **channel_info}
 
@@ -621,7 +629,10 @@ class Init(Process):
 
         for input_type, info in self.RAW_MAPPING.items():
 
-            self.params[info["params"]] = info["default_value"]
+            self.params[info["params"]] = {
+                "default": info["default_value"],
+                "description": info["description"]
+            }
 
     def set_raw_inputs(self, raw_input):
         """
@@ -719,6 +730,18 @@ class DownloadReads(Process):
         self.input_type = "accessions"
         self.output_type = "fastq"
 
+        self.params = {
+            "asperaKey": {
+                "default": "null",
+                "description":
+                    "Downloads fastq accessions from ENA using Aspera Connect "
+                    "by providing the private-key file "
+                    "'asperaweb_id_dsa.openssh' normally found in "
+                    "~/.aspera/connect/etc/asperaweb_id_dsa.openssh "
+                    "(Default: null)"
+            }
+        }
+
         self.directives = {"reads_download": {
             "cpus": 1,
             "memory": "'1GB'",
@@ -750,8 +773,19 @@ class IntegrityCoverage(Process):
         self.output_type = "fastq"
 
         self.params = {
-            "genomeSize": 2.1,
-            "minCoverage": 15
+            "genomeSize": {
+                "default": 2.1,
+                "description":
+                    "Genome size estimate for the samples. It is used to "
+                    "estimate the coverage and other assembly parameters and"
+                    "checks (default: $params.genomeSize)"
+            },
+            "minCoverage": {
+                "default": 15,
+                "description":
+                    "Minimum coverage for a sample to proceed. Can be set to"
+                    "0 to allow any coverage (default: $params.minCoverage)"
+            }
         }
 
         self.secondary_inputs = [
@@ -803,8 +837,22 @@ class SeqTyping(Process):
         }}
 
         self.params = {
-            "referenceFileO": "null",
-            "referenceFileH": "null",
+            "referenceFileO": {
+                "default": "null",
+                "description":
+                    "Fasta file containing reference sequences. If more"
+                    "than one file is passed via the 'referenceFileH parameter"
+                    ", a reference sequence for each file will be determined. "
+                    "(default: $params.referenceFileO)"
+            },
+            "referenceFileH": {
+                "default": "null",
+                "description":
+                    "Fasta file containing reference sequences. If more"
+                    "than one file is passed via the 'referenceFileO parameter"
+                    ", a reference sequence for each file will be determined. "
+                    "(default: $params.referenceFileH)"
+            }
         }
 
         self.secondary_inputs = [
@@ -848,7 +896,13 @@ class PathoTyping(Process):
         self.status_channels = []
 
         self.params = {
-            "species": "null"
+            "species": {
+                "default": "null",
+                "description":
+                    "Species name. Must be the complete species name with"
+                    "genus and species, e.g.: 'Yersinia enterocolitica'. "
+                    "(default: $params.species)"
+            }
         }
 
         self.secondary_inputs = [
@@ -900,8 +954,19 @@ class CheckCoverage(Process):
         self.output_type = "fastq"
 
         self.params = {
-            "genomeSize": 2.1,
-            "minCoverage": 15
+            "genomeSize": {
+                "default": 2.1,
+                "description":
+                    "Genome size estimate for the samples. It is used to "
+                    "estimate the coverage and other assembly parameters and"
+                    "checks (default: $params.genomeSize)"
+            },
+            "minCoverage": {
+                "default": 15,
+                "description":
+                    "Minimum coverage for a sample to proceed. Can be set to"
+                    "0 to allow any coverage (default: $params.minCoverage)"
+            }
         }
 
         self.secondary_inputs = [
@@ -941,7 +1006,13 @@ class TrueCoverage(Process):
         self.output_type = "fastq"
 
         self.params = {
-            "species": "null"
+            "species": {
+                "default": "null",
+                "description":
+                    "Species name. Must be the complete species name with"
+                    "genus and species, e.g.: 'Yersinia enterocolitica'. "
+                    "(default: $params.species)"
+            }
         }
 
         self.secondary_inputs = [
@@ -997,7 +1068,12 @@ class FastQC(Process):
         """
 
         self.params = {
-            "adapters": "'None'"
+            "adapters": {
+                "default": "'None'",
+                "description":
+                    "Path to adapters files, if any "
+                    "(default: $params.adapters)"
+            }
         }
 
         self.secondary_inputs = [
@@ -1041,11 +1117,37 @@ class Trimmomatic(Process):
         self.dependencies = ["integrity_coverage"]
 
         self.params = {
-            "adapters": "'None'",
-            "trimSlidingWindow": "'5:20'",
-            "trimLeading": "3",
-            "trimTrailing": "3",
-            "trimMinLength": "55"
+            "adapters": {
+                "default": "'None'",
+                "description":
+                    "Path to adapters files, if any "
+                    "(default: $params.adapters)"
+            },
+            "trimSlidingWindow": {
+                "default": "'5:20'",
+                "description":
+                    "Perform sliding window trimming, cutting once the "
+                    "average quality within the window falls below a "
+                    "threshold (default: $params.trimSlidingWindow)"
+            },
+            "trimLeading": {
+                "default": "3",
+                "description":
+                    "Cut bases off the start of a read, if below a threshold "
+                    "quality (default: $params.trimLeading"
+            },
+            "trimTrailing": {
+                "default": "3",
+                "description":
+                    "Cut bases of the end of a read, if below a "
+                    "threshold quality (default: $params.trimTrailing)"
+            },
+            "trimMinLength": {
+                "default": "55",
+                "description":
+                    "Drop the read if it is below a specified length "
+                    "(default: $params.trimMinLength)"
+            }
         }
 
         self.secondary_inputs = [
@@ -1124,11 +1226,37 @@ class FastqcTrimmomatic(Process):
         self.dependencies = ["integrity_coverage"]
 
         self.params = {
-            "adapters": "'None'",
-            "trimSlidingWindow": "'5:20'",
-            "trimLeading": "3",
-            "trimTrailing": "3",
-            "trimMinLength": "55"
+            "adapters": {
+                "default": "'None'",
+                "description":
+                    "Path to adapters files, if any "
+                    "(default: $params.adapters)"
+            },
+            "trimSlidingWindow": {
+                "default": "'5:20'",
+                "description":
+                    "Perform sliding window trimming, cutting once the "
+                    "average quality within the window falls below a "
+                    "threshold (default: $params.trimSlidingWindow)"
+            },
+            "trimLeading": {
+                "default": "3",
+                "description":
+                    "Cut bases off the start of a read, if below a threshold "
+                    "quality (default: $params.trimLeading"
+            },
+            "trimTrailing": {
+                "default": "3",
+                "description":
+                    "Cut bases of the end of a read, if below a "
+                    "threshold quality (default: $params.trimTrailing)"
+            },
+            "trimMinLength": {
+                "default": "55",
+                "description":
+                    "Drop the read if it is below a specified length "
+                    "(default: $params.trimMinLength)"
+            }
         }
 
         self.secondary_inputs = [
@@ -1207,9 +1335,25 @@ class ProcessSkesa(Process):
         self.output_type = "fasta"
 
         self.params = {
-            "skesaMinKmerCoverage": 2,
-            "skesaMinContigLen": 200,
-            "skesaMaxContigs": 100
+            "skesaMinKmerCoverage": {
+                "default": 2,
+                "description":
+                    "Minimum contigs K-mer coverage. After assembly only keep"
+                    " contigs with reported k-mer coverage equal or above "
+                    "this value (default: $params.skesaMinKmerCoverage)"
+            },
+            "skesaMinContigLen": {
+                "default": 200,
+                "description":
+                    "Filter contigs for length greater or equal than this "
+                    "value (default: $params.skesaMinContigLen)"
+            },
+            "skesaMaxContigs": {
+                "default": 100,
+                "description":
+                    "Maximum number of contigs per 1.5 Mb of expected "
+                    "genome size (default: $params.skesaMaxContigs)"
+            }
         }
 
         self.secondary_inputs = [
@@ -1268,9 +1412,29 @@ class Spades(Process):
         self.dependencies = ["integrity_coverage"]
 
         self.params = {
-            "spadesMinCoverage": 2,
-            "spadesMinKmerCoverage": 2,
-            "spadesKmers": "'auto'",
+            "spadesMinCoverage": {
+                "default": 2,
+                "description":
+                    "The minimum number of reads to consider an edge in the"
+                    " de Bruijn graph during the assembly (default: "
+                    "$params.spadesMinCoverage)"
+            },
+            "spadesMinKmerCoverage": {
+                "default": 2,
+                "description":
+                    "Minimum contigs K-mer coverage. After assembly only "
+                    "keep contigs with reported k-mer coverage equal or "
+                    "above this value (default: "
+                    "$params.spadesMinKmerCoverage)"
+            },
+            "spadesKmers": {
+                "default": "'auto'",
+                "description":
+                    "If 'auto' the SPAdes k-mer lengths will be determined "
+                    "from the maximum read length of each assembly. If "
+                    "'default', SPAdes will use the default k-mer lengths. "
+                    "(default: $params.spadesKmers)"
+            }
         }
 
         self.secondary_inputs = [
@@ -1330,9 +1494,25 @@ class ProcessSpades(Process):
         self.output_type = "fasta"
 
         self.params = {
-            "spadesMinKmerCoverage": 2,
-            "spadesMinContigLen": 200,
-            "spadesMaxContigs": 100
+            "spadesMinKmerCoverage": {
+                "default": 2,
+                "description":
+                    "Minimum contigs K-mer coverage. After assembly only keep"
+                    " contigs with reported k-mer coverage equal or above "
+                    "this value (default: $params.spadesMinKmerCoverage)"
+            },
+            "spadesMinContigLen": {
+                "default": 200,
+                "description":
+                    "Filter contigs for length greater or equal than this "
+                    "value (default: $params.spadesMinContigLen)"
+            },
+            "spadesMaxContigs": {
+                "default": 100,
+                "description":
+                    "Maximum number of contigs per 1.5 Mb of expected "
+                    "genome size (default: $params.spadesMaxContigs)"
+            }
         }
 
         self.secondary_inputs = [
@@ -1397,9 +1577,27 @@ class AssemblyMapping(Process):
         self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
 
         self.params = {
-            "minAssemblyCoverage": "'auto'",
-            "AMaxContigs": 100,
-            "genomeSize": 2.1
+            "minAssemblyCoverage": {
+                "default": "'auto'",
+                "description":
+                    "In auto, the default minimum coverage for each "
+                    "assembled contig is 1/3 of the assembly mean coverage or"
+                    " 10x, if the mean coverage is below 10x (default: "
+                    "$params.minAssemblyCoverage)"
+            },
+            "AMaxContigs": {
+                "default": 100,
+                "description":
+                    "A warning is issues if the number of contigs is over"
+                    "this threshold"
+            },
+            "genomeSize": {
+                "default": 2.1,
+                "description":
+                    "Genome size estimate for the samples. It is used to "
+                    "check the ratio of contig number per genome MB "
+                    "(default: $params.genomeSize)"
+            }
         }
 
         self.secondary_inputs = [
@@ -1545,6 +1743,14 @@ class Abricate(Process):
 
         self.status_channels = ["STATUS_abricate"]
 
+        self.params = {
+            "abricateDatabases": {
+                "default": '["resfinder", "card", "vfdb", "plasmidfinder", '
+                           '"virulencefinder"]',
+                "description": "Specify the databases for abricate."
+            }
+        }
+
         self.link_start = None
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
@@ -1558,11 +1764,6 @@ class Abricate(Process):
                 "container": "ummidock/abricate",
                 "version": "0.8.0-1"
             }
-        }
-
-        self.params = {
-            "abricateDatabases": '["resfinder", "card", "vfdb", '
-                                 '"plasmidfinder", "virulencefinder"]'
         }
 
 
@@ -1648,14 +1849,58 @@ class Chewbbaca(Process):
         }
 
         self.params = {
-            "chewbbacaQueue": "null",
-            "chewbbacaTraining": "null",
-            "schemaPath": "null",
-            "schemaSelectedLoci": "null",
-            "schemaCore": "null",
-            "chewbbacaJson": "false",
-            "chewbbacaToPhyloviz": "false",
-            "chewbbacaProfilePercentage": 0.95
+            "chewbbacaQueue": {
+                "default": "null",
+                "description":
+                    "Specifiy a queue/partition for chewbbaca. This option"
+                    " is only used for grid schedulers. (default: "
+                    "$params.chewbbacaQueue)"
+            },
+            "chewbbacaTraining": {
+                "default": "null",
+                "description":
+                    "Specify the full path to the prodigal training file "
+                    "of the corresponding species. (default: "
+                    "$params.chewbbacaTraining)"
+            },
+            "schemaPath": {
+                "default": "null",
+                "description":
+                    "The path to the chewbbaca schema directory. (default: "
+                    "$params.schemaPath)"
+            },
+            "schemaSelectedLoci": {
+                "default": "null",
+                "description":
+                    "The path to the selection of loci in the schema "
+                    "directory to be used. If not specified, all loci in the"
+                    " schema will be used. (default: "
+                    "$params.schemaSelectedLoci)"
+            },
+            "schemaCore": {
+                "default": "null",
+                "description": ""
+            },
+            "chewbbacaJson": {
+                "default": "false",
+                "description":
+                    "If set to True, chewbbaca's allele call output will be "
+                    "set to JSON format. (default: $params.chewbbacaJson)"
+            },
+            "chewbbacaToPhyloviz": {
+                "default": "false",
+                "description":
+                    "If set to True, the ExtractCgMLST module of chewbbaca"
+                    " will be executed after the allele calling (default: "
+                    "$params.chewbbacaToPhyloviz)",
+            },
+            "chewbbacaProfilePercentage": {
+                "default": 0.95,
+                "description":
+                    "Specifies the proportion of samples that must be "
+                    "present in a locus to save the profile. (default: "
+                    "$params.chewbbacaProfilePercentage)"
+            }
         }
 
         self.secondary_inputs = [

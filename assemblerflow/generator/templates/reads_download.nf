@@ -22,7 +22,14 @@ process reads_download_{{ pid }} {
     {
         echo "${accession_id}" >> accession_file.txt
         echo "pass" > ".status"
-        getSeqENA.py -l accession_file.txt -a $aspera_key -o ./ --SRAopt --downloadCramBam
+
+        if [ -f $aspera_key ]; then
+            asperaOpt="-a $aspera_key"
+        else
+            asperaOpt=""
+        fi
+
+        getSeqENA.py -l accession_file.txt \$asperaOpt -o ./ --SRAopt --downloadCramBam
     } || {
         # If exit code other than 0
         if [ \$? -eq 0 ]

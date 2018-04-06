@@ -43,6 +43,8 @@ def get_args(args=None):
                         help="Use one of the available recipes")
     parser.add_argument("-o", dest="output_nf",
                         help="Name of the pipeline file")
+    parser.add_argument("-n", dest="pipeline_name", default="assemblerflow",
+                        help="Provide a name for your pipeline.")
     parser.add_argument("--include-templates", dest="include_templates",
                         action="store_const", const=True,
                         help="This will copy the necessary templates and lib"
@@ -198,7 +200,8 @@ def run(args):
         sys.exit()
 
     nfg = NextflowGenerator(process_connections=pipeline_list,
-                            nextflow_file=args.output_nf)
+                            nextflow_file=args.output_nf,
+                            pipeline_name=args.pipeline_name)
 
     logger.info(colored_print("Building your awesome pipeline..."))
 

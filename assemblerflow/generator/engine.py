@@ -13,12 +13,14 @@ logger = logging.getLogger("main.{}".format(__name__))
 try:
     import generator.process as pc
     import generator.error_handling as eh
+    from __init__ import __version__
     from generator import header_skeleton as hs
     from generator import footer_skeleton as fs
     from generator.process_details import colored_print
 except ImportError as e:
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
+    from assemblerflow import __version__
     from assemblerflow.generator import header_skeleton as hs
     from assemblerflow.generator import footer_skeleton as fs
     from assemblerflow.generator.process_details import colored_print
@@ -59,7 +61,8 @@ the format::
 
 class NextflowGenerator:
 
-    def __init__(self, process_connections, nextflow_file):
+    def __init__(self, process_connections, nextflow_file,
+                 pipeline_name="assemblerflow"):
 
         self.processes = []
 
@@ -94,6 +97,11 @@ class NextflowGenerator:
         self.nf_file = nextflow_file
         """
         str: Path to file where the pipeline will be generated
+        """
+
+        self.pipeline_name = pipeline_name
+        """
+        str: Name of the pipeline, for customization and help purposes.
         """
 
         self.template = ""
@@ -898,7 +906,7 @@ class NextflowGenerator:
                                                              p.params))
             for param, val in p.params.items():
 
-                params_temp[param] = val
+                params_temp[param] = val["default"]
 
         config_str = "\n\t" + "\n\t".join([
             "{} = {}".format(param, val) for param, val in params_temp.items()
@@ -925,7 +933,7 @@ class NextflowGenerator:
                 else:
                     tpl = [p.template] if p.template != "init" else []
                     help_dict[param] = {"process": tpl,
-                                        "description": val}
+                                        "description": val["description"]}
 
         # Transform process list into final template string
         for p, val in help_dict.items():
@@ -986,8 +994,10 @@ class NextflowGenerator:
             "params_info": params
         })
         self.help = self._render_config("Helper.groovy", {
-            "pipeline_name": basename(self.nf_file),
-            "help_dict": help_dict
+            "nf_file": basename(self.nf_file),
+            "help_dict": help_dict,
+            "version": __version__,
+            "pipeline_name": " ".join([x.upper() for x in self.pipeline_name])
         })
         self.user_config = self._render_config("user.config", {})
 
