@@ -627,13 +627,6 @@ class Init(Process):
 
         self.status_channels = []
 
-        for input_type, info in self.RAW_MAPPING.items():
-
-            self.params[info["params"]] = {
-                "default": info["default_value"],
-                "description": info["description"]
-            }
-
     def set_raw_inputs(self, raw_input):
         """
 
@@ -646,13 +639,21 @@ class Init(Process):
 
         """
 
-        logger.debug("Setting raw inputs using raw input list: {}".format(
+        logger.debug("Setting raw inputs using raw input dict: {}".format(
             raw_input))
 
         primary_inputs = []
 
-        for el in raw_input.values():
+        for input_type, el in raw_input.items():
+
             primary_inputs.append(el["channel_str"])
+
+            # Update the process' parameters with the raw input
+            raw_channel = self.RAW_MAPPING[input_type]
+            self.params[input_type] = {
+                "default": raw_channel["default_value"],
+                "description": raw_channel["description"]
+            }
 
             op = "set" if len(el["raw_forks"]) == 1 else "into"
 
@@ -697,6 +698,13 @@ class Init(Process):
         extra_inputs = []
 
         for param, info in channel_dict.items():
+
+            # Update the process' parameters with the raw input
+            raw_channel = self.RAW_MAPPING[info["input_type"]]
+            self.params[param] = {
+                "default": raw_channel["default_value"],
+                "description": raw_channel["description"]
+            }
 
             channel_name = "IN_{}_extraInput".format(param)
             channel_str = self.RAW_MAPPING[info["input_type"]]["channel_str"]
