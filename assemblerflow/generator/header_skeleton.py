@@ -11,11 +11,29 @@ if (workflow.commitId){
 
 params.help = false
 if (params.help){
-    Help.print_help(version, params)
+    Help.print_help(params)
     exit 0
 }
 
-//nsamples = file(params.fastq).size()
-//nfasta = file(params.fasta).size()
-//Help.start_info(version, nsamples, nfasta, "$workflow.start", "$workflow.profile")
+def infoMap = [:]
+if (params.containsKey("fastq")){
+    infoMap.put("fastq", file(params.fastq).size())
+}
+if (params.containsKey("fasta")){
+    if (file(params.fasta) instanceof LinkedList){
+        infoMap.put("fasta", file(params.fasta).size())
+    } else {
+        infoMap.put("fasta", 1) 
+    }
+}
+if (params.containsKey("accessions")){
+    BufferedReader reader = new BufferedReader(new FileReader(params.accessions));
+    int lines = 0;
+    while (reader.readLine() != null) lines++;
+    reader.close();
+    infoMap.put("accessions", lines)
+}
+
+println infoMap
+Help.start_info(infoMap, "$workflow.start", "$workflow.profile")
     """

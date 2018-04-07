@@ -1,18 +1,24 @@
 class Help {
 
-    static def start_info(String ver, int fastq, int fasta, String time,
-                          String profile) {
-
-        int nsamples = fastq / 2
+    static def start_info(Map info, String time, String profile) {
 
         println ""
         println "============================================================"
-        println "                A S S E M B L E R F L O W"
+        println "                {{ pipeline_name }}"
         println "============================================================"
+        println "Built using assemblerflow v{{ version }}"
         println ""
-        println " Input FastQ                 : $fastq"
-        println " Input Fasta                 : $fasta"
+        if (info.containsKey("fastq")){
+        int nsamples = info.fastq / 2
+        println " Input FastQ                 : $info.fastq"
         println " Input samples               : $nsamples"
+        }
+        if (info.containsKey("fasta")){
+        println " Input Fasta                 : $info.fasta"
+        }
+        if (info.containsKey("accessions")){
+        println " Input accessions            : $info.accessions"
+        }
         println " Reports are found in        : ./reports"
         println " Results are found in        : ./results"
         println " Profile                     : $profile"
@@ -36,7 +42,7 @@ class Help {
 
     }
 
-    static def print_help(String ver, Map params) {
+    static def print_help(Map params) {
 
         println ""
         println "============================================================"
