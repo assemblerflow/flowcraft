@@ -251,6 +251,7 @@ class NextflowGenerator:
             logger.debug("[{}] Input lane: {}".format(p, in_lane))
             logger.debug("[{}] Output lane: {}".format(p, out_lane))
 
+            # Update the total number of lines of the pipeline
             if out_lane > self.lanes:
                 self.lanes = out_lane
 
@@ -269,20 +270,23 @@ class NextflowGenerator:
                 logger.error(colored_print(ex.value, "red_bold"))
                 sys.exit(1)
 
-            # Instance output process
+            # Check if process is available or correctly named
             if p_out_name not in process_map:
                 logger.error(colored_print(
                     "\nThe process '{}' is not available".format(p_out_name),
                     "red_bold"))
                 sys.exit(1)
 
+            # Instance output process
             out_process = process_map[p_out_name](template=p_out_name)
 
             # Update directives, if provided
             if out_directives:
                 out_process.update_attributes(out_directives)
 
-            # Set suffix strings for main input/output channels
+            # Set suffix strings for main input/output channels. Suffixes are
+            # based on the lane and the arbitrary and unique process id
+            # e.g.: 'process_1_1'
             input_suf = "{}_{}".format(in_lane, p)
             output_suf = "{}_{}".format(out_lane, p)
             logger.debug("[{}] Setting main channels with input suffix '{}'"
@@ -302,9 +306,8 @@ class NextflowGenerator:
                 out_process.parent_lane = in_lane
             else:
                 # When the input process is __init__, set the parent_lane
-                # to None. This will tell the engine that the main input
-                # channel the output process of this connection will received
-                # from the raw user input.
+                # to None. This will tell the engine that this process
+                # will receive the main input from the raw user input.
                 out_process.parent_lane = None
 
             # If the current connection is a fork, add it to the fork tree
@@ -314,12 +317,14 @@ class NextflowGenerator:
                 self._fork_tree[in_lane].append(out_lane)
                 # Update main output fork of parent process
                 try:
-                    parent_process = [x for x in self.processes
-                                   if x.lane == in_lane and
-                                   x.template == p_in_name][0]
-                    logger.debug("[{}] Updating main forks of parent fork "
-                                 "'{}' with '{}'".format(
-                                    p, parent_process, out_process.input_channel))
+                    parent_process = [
+                        x for x in self.processes if x.lane == in_lane and
+                        x.template == p_in_name
+                    ][0]
+                    logger.debug(
+                        "[{}] Updating main forks of parent fork '{}' with"
+                        " '{}'".format(p, parent_process,
+                                       out_process.input_channel))
                     parent_process.update_main_forks(out_process.input_channel)
                 except IndexError:
                     pass
