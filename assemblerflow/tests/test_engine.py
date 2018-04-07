@@ -25,7 +25,7 @@ def single_con():
 def single_status():
 
     con = [{"input": {"process": "__init__", "lane": 1},
-            "output": {"process": "spades", "lane": 1}}]
+            "output": {"process": "skesa", "lane": 1}}]
 
     return eg.NextflowGenerator(con, "teste.nf")
 
@@ -118,8 +118,8 @@ def multi_forks():
            {"input": {"process": "__init__", "lane": 0},
             "output": {"process": "seq_typing", "lane": 2}},
            {"input": {"process": "__init__", "lane": 0},
-            "output": {"process": "trimmomatic", "lane": 3}},
-           {"input": {"process": "trimmomatic", "lane": 3},
+            "output": {"process": "integrity_coverage", "lane": 3}},
+           {"input": {"process": "integrity_coverage", "lane": 3},
             "output": {"process": "check_coverage", "lane": 3}},
            {"input": {"process": "integrity_coverage", "lane": 1},
             "output": {"process": "spades", "lane": 4}},
@@ -143,7 +143,8 @@ def test_simple_init():
     for p in process_map:
 
         con[0]["output"]["process"] = p
-        nf = eg.NextflowGenerator(con, "teste/teste.nf")
+        nf = eg.NextflowGenerator(con, "teste/teste.nf",
+                                  ignore_dependencies=True)
 
         assert [len(nf.processes), nf.processes[1].template] == \
             [2, p]
@@ -183,8 +184,8 @@ def test_connections_invalid():
 def test_connections_ignore_type():
 
     con = [{"input": {"process": "__init__", "lane": 1},
-            "output": {"process": "spades", "lane": 1}},
-           {"input": {"process": "spades", "lane": 1},
+            "output": {"process": "skesa", "lane": 1}},
+           {"input": {"process": "skesa", "lane": 1},
             "output": {"process": "patho_typing", "lane": 1}}
            ]
 
@@ -427,7 +428,7 @@ def test_set_status_channels_single(single_status):
     p = [x for x in single_status.processes[::-1]
          if isinstance(x, pc.StatusCompiler)][0]
 
-    assert p._context["compile_channels"] == "STATUS_spades_1_1"
+    assert p._context["compile_channels"] == "STATUS_skesa_1_1"
 
 
 def test_set_compiler_channels(single_status):
@@ -439,7 +440,7 @@ def test_set_compiler_channels(single_status):
     p = [x for x in single_status.processes[::-1]
          if isinstance(x, pc.StatusCompiler)][0]
 
-    assert p._context["compile_channels"] == "STATUS_spades_1_1"
+    assert p._context["compile_channels"] == "STATUS_skesa_1_1"
 
 
 def test_set_status_channels_no_status(single_status):

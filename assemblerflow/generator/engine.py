@@ -62,7 +62,7 @@ the format::
 class NextflowGenerator:
 
     def __init__(self, process_connections, nextflow_file,
-                 pipeline_name="assemblerflow"):
+                 pipeline_name="assemblerflow", ignore_dependencies=False):
 
         self.processes = []
 
@@ -92,7 +92,7 @@ class NextflowGenerator:
         # Builds the connections in the processes, which parses the
         # process_connections dictionary into the self.processes attribute
         # list.
-        self._build_connections(process_connections)
+        self._build_connections(process_connections, ignore_dependencies)
 
         self.nf_file = nextflow_file
         """
@@ -220,7 +220,7 @@ class NextflowGenerator:
 
         return process_name, directives
 
-    def _build_connections(self, process_list):
+    def _build_connections(self, process_list, ignore_dependencies):
         """Parses the process connections dictionaries into a process list
 
         This method is called upon instantiation of the NextflowGenerator
@@ -346,10 +346,56 @@ class NextflowGenerator:
                             p, parent_process.output_channel))
                     out_process.input_channel = parent_process.output_channel
 
+            # Check for process dependencies
+            if out_process.dependencies and not ignore_dependencies:
+                logger.debug("[{}] Dependencies found for process '{}': "
+                             "{}".format(p, p_out_name,
+                                         out_process.dependencies))
+                parent_lanes = self._get_fork_tree(out_lane)
+                for dep in out_process.dependencies:
+                    if not self._search_tree_backwards(dep, parent_lanes):
+                        logger.error(colored_print(
+                            "\nThe following dependency of the process '{}' "
+                            "is missing: {}".format(p_out_name, dep),
+                            "red_bold"))
+                        sys.exit(1)
+
             self.processes.append(out_process)
 
         logger.debug("Completed connections: {}".format(self.processes))
         logger.debug("Fork tree: {}".format(self._fork_tree))
+
+    def _search_tree_backwards(self, template, parent_lanes):
+        """Searches the process tree backwards in search of a provided process
+
+        The search takes into consideration the provided parent lanes and
+        searches only those
+
+        Parameters
+        ----------
+        template : str
+            Name of the process template attribute being searched
+        parent_lanes : list
+            List of integers with the parent lanes to be searched
+
+        Returns
+        -------
+        bool
+            Returns True when the template is found. Otherwise returns False.
+        """
+
+        for p in self.processes[::-1]:
+
+            # Ignore process in different lanes
+            if p.lane not in parent_lanes:
+                continue
+
+            # template found
+            if p.template == template:
+                return True
+
+        return False
+
 
     @staticmethod
     def _test_connection(parent_process, child_process):
@@ -517,7 +563,7 @@ class NextflowGenerator:
                 "{}.mix({})".format(p.input_channel, dest_channel)
             )
 
-    def _get_fork_tree(self, p):
+    def _get_fork_tree(self, lane):
         """
 
         Parameters
@@ -528,7 +574,6 @@ class NextflowGenerator:
         -------
         """
 
-        lane = p.lane
         parent_lanes = [lane]
 
         while True:
@@ -556,7 +601,7 @@ class NextflowGenerator:
         """
 
         output_type = link["link"].lstrip("_")
-        parent_forks = self._get_fork_tree(p)
+        parent_forks = self._get_fork_tree(p.lane)
         fork_sink = "{}_{}".format(link["alias"], p.pid)
 
         for proc in self.processes[::-1]:
@@ -619,7 +664,7 @@ class NextflowGenerator:
             for l in p.link_end:
 
                 # Get list of lanes from the parent forks.
-                parent_forks = self._get_fork_tree(p)
+                parent_forks = self._get_fork_tree(p.lane)
 
                 # Parse special case where the secondary channel links with
                 # the main output of the specified type
