@@ -1,4 +1,5 @@
 import os
+import shutil
 import pytest
 
 import assemblerflow.generator.engine as eg
@@ -129,7 +130,9 @@ def multi_forks():
            {"input": {"process": "check_coverage", "lane": 3},
             "output": {"process": "skesa", "lane": 7}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    os.mkdir(".temp")
+    yield eg.NextflowGenerator(con, os.path.join(".temp", "teste.nf"))
+    shutil.rmtree(".temp")
 
 
 def test_simple_init():
@@ -324,7 +327,7 @@ def test_set_channels_secondary_chanels_link(multi_forks):
 def test_set_secondary_inputs_single(single_con):
 
     single_con._set_channels()
-    single_con._set_secondary_inputs()
+    single_con._set_init_process()
 
     p = single_con.processes[0]
 
@@ -338,7 +341,7 @@ def test_set_secondary_inputs_single(single_con):
 def test_set_secondary_inputs_raw_forks(raw_forks):
 
     raw_forks._set_channels()
-    raw_forks._set_secondary_inputs()
+    raw_forks._set_init_process()
 
     p = raw_forks.processes[0]
 
@@ -354,7 +357,7 @@ def test_set_secondary_inputs_raw_forks(raw_forks):
 def test_set_secondary_inputs_multi_raw(single_con_multi_raw):
 
     single_con_multi_raw._set_channels()
-    single_con_multi_raw._set_secondary_inputs()
+    single_con_multi_raw._set_init_process()
 
     p = single_con_multi_raw.processes[0]
 
@@ -476,19 +479,18 @@ def test_set_status_channels_duplicate_status(single_status):
 def test_build(multi_forks):
 
     multi_forks.build()
-    os.remove("teste.nf")
 
     assert multi_forks.template != ""
 
 
 def test_resources_string(single_con):
 
-    res_dict = {"procA": {"cpus": 1, "memory": "4GB", "container": "img",
+    res_dict = {"procA": {"cpus": 1, "memory": "'4GB'", "container": "img",
                           "version": "1"}}
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n$procA_1.cpus = "1"\n$procA_1.memory = "4GB"'
+    assert res == '\n\t$procA_1.cpus = 1\n\t$procA_1.memory = \'4GB\''
 
 
 def test_resources_string_2(single_con):
@@ -498,19 +500,19 @@ def test_resources_string_2(single_con):
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n$procA_1.cpus = "1"'
+    assert res == '\n\t$procA_1.cpus = 1'
 
 
 def test_resources_string_3(single_con):
 
-    res_dict = {"procA": {"cpus": 1, "memory": "4GB", "container": "img",
+    res_dict = {"procA": {"cpus": 1, "memory": "'4GB'", "container": "img",
                           "version": "1"},
                 "procB": {"memory": "{ 4.GB * task.attempt }"}}
 
     res = single_con._get_resources_string(res_dict, 1)
 
-    assert res == '\n$procA_1.cpus = "1"\n$procA_1.memory = "4GB"' \
-                  '\n$procB_1.memory = { 4.GB * task.attempt }'
+    assert res == '\n\t$procA_1.cpus = 1\n\t$procA_1.memory = \'4GB\'' \
+                  '\n\t$procB_1.memory = { 4.GB * task.attempt }'
 
 
 def test_container_string(single_con):
@@ -520,7 +522,7 @@ def test_container_string(single_con):
 
     res = single_con._get_container_string(res_dict, 2)
 
-    assert res == '\n$procA_2.container = "img:1"'
+    assert res == '\n\t$procA_2.container = "img:1"'
 
 
 def test_container_string_2(single_con):
@@ -531,8 +533,99 @@ def test_container_string_2(single_con):
 
     res = single_con._get_container_string(res_dict, 2)
 
-    assert res == '\n$procA_2.container = "img:1"\n' \
+    assert res == '\n\t$procA_2.container = "img:1"\n\t' \
                   '$procB_2.container = "img:latest"'
+
+
+def test_extra_inputs_1():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "fastqc={'extra_input':'teste'}", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert nf.processes[2].extra_input == "teste"
+
+
+def test_extra_inputs_2():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "spades", "lane": 1}},
+           {"input": {"process": "spades", "lane": 1},
+            "output": {"process": "abricate={'extra_input':'teste'}", "lane": 1}}
+           ]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert nf.processes[3].extra_input == "teste"
+
+
+def test_extra_inputs_3():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "fastqc={'extra_input':'teste'}", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf._set_channels()
+
+    assert [list(nf.extra_inputs.keys())[0],
+            nf.extra_inputs["teste"]["input_type"],
+            nf.extra_inputs["teste"]["channels"]] == \
+           ["teste", "fastq", ["EXTRA_fastqc_1_2"]]
+
+
+def test_extra_inputs_default():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "spades", "lane": 1}},
+           {"input": {"process": "spades", "lane": 1},
+            "output": {"process": "abricate={'extra_input':'default'}", "lane": 1}}
+           ]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf._set_channels()
+
+    assert [list(nf.extra_inputs.keys())[0],
+            nf.extra_inputs["fasta"]["input_type"],
+            nf.extra_inputs["fasta"]["channels"]] == \
+           ["fasta", "fasta", ["EXTRA_abricate_1_3"]]
+
+
+def test_extra_inputs_invalid():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "fastqc={'extra_input':'default'}", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    with pytest.raises(SystemExit):
+        nf._set_channels()
+
+
+def test_extra_inputs_invalid_2():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "integrity_coverage", "lane": 1}},
+           {"input": {"process": "integrity_coverage", "lane": 1},
+            "output": {"process": "spades={'extra_input':'teste'}", "lane": 1}},
+           {"input": {"process": "spades", "lane": 1},
+            "output": {"process": "abricate={'extra_input':'teste'}", "lane": 1}}
+           ]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    with pytest.raises(SystemExit):
+        nf._set_channels()
 
 
 def test_run_time_directives():

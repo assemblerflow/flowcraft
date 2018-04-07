@@ -44,15 +44,23 @@ class Process:
     RAW_MAPPING = {
         "fastq": {
             "params": "fastq",
+            "default_value": "'fastq/*_{1,2}.*'",
             "channel": "IN_fastq_raw",
-            "channel_str": "IN_fastq_raw = Channel.fromFilePairs(params.fastq)"
+            "channel_str": "Channel.fromFilePairs(params.{})"
         },
         "fasta": {
             "params": "fasta",
+            "default_value": "'fasta/*.fasta'",
             "channel": "IN_fasta_raw",
-            "channel_str": "IN_fasta_raw = Channel.fromPath(params.fasta)"
-                           ".map{ it -> [it.toString().tokenize('/').last()"
-                           ".tokenize('.').first(), it] }"
+            "channel_str": "Channel.fromPath(params.{})"
+                           ".map{{ it -> [it.toString().tokenize('/')"
+                           ".last().tokenize('.').first(), it] }}"
+        },
+        "accessions": {
+            "params": "accessions",
+            "default_value": "null",
+            "channel": "IN_accessions_raw",
+            "channel_str": "Channel.fromPath(params.{})"
         }
     }
     """
@@ -202,6 +210,21 @@ class Process:
         """
         self.secondary_input_str = ""
 
+        self.extra_input = ""
+        """
+        str:  with the name of the params that will be used to provide
+        extra input into the process. This extra input will be mixed with
+        the main input channel using nextflow's ``mix`` operator. Its
+        channel will be defined at the start of the pipeline, based on the
+        ``channel_str`` key of the :attr:`~Process.RAW_MAPPING` for the
+        corresponding input type.
+        """
+
+        self.params = {}
+        """
+        dict: Maps the parameter names to the corresponding default values.
+        """
+
         self._context = {}
         """
         dict: Dictionary with the keyword placeholders for the string template
@@ -307,6 +330,7 @@ class Process:
         if itype in self.RAW_MAPPING:
 
             channel_info = self.RAW_MAPPING[itype]
+            self.params[channel_info["params"]] = channel_info["default_value"]
 
             return {**res, **channel_info}
 
@@ -394,6 +418,11 @@ class Process:
                                       "template": self.template,
                                       "forks": "\n".join(self.forks),
                                       "pid": self.pid}}
+
+    def update_main_input(self, input_str):
+
+        self.input_channel = input_str
+        self._context["input_channel"] = self.input_channel
 
     def update_main_forks(self, sink):
         """Updates the forks attribute with the sink channel destination
@@ -564,6 +593,10 @@ class Init(Process):
 
         self.status_channels = []
 
+        for input_type, info in self.RAW_MAPPING.items():
+
+            self.params[info["params"]] = info["default_value"]
+
     def set_raw_inputs(self, raw_input):
         """
 
@@ -604,6 +637,69 @@ class Init(Process):
         self._context = {**self._context,
                          **{"secondary_inputs": secondary_input_str}}
 
+    def set_extra_inputs(self, channel_dict):
+        """Sets the initial definition of the extra input channels.
+
+        The ``channel_dict`` argument should contain the input type and
+        destination channel of each parameter (which is the key)::
+
+            channel_dict = {
+                "param1": {
+                    "input_type": "fasta"
+                    "channels": ["abricate_2_3", "chewbbaca_3_4"]
+                }
+            }
+
+        Parameters
+        ----------
+        channel_dict : dict
+            Dictionary with the extra_input parameter as key, and a dictionary
+            as a value with the input_type and destination channels
+        """
+
+        extra_inputs = []
+
+        for param, info in channel_dict.items():
+
+            channel_name = "IN_{}_extraInput".format(param)
+            channel_str = self.RAW_MAPPING[info["input_type"]]["channel_str"]
+            extra_inputs.append("{} = {}".format(channel_name,
+                                                 channel_str.format(param)))
+
+            op = "set" if len(info["channels"]) == 1 else "into"
+            extra_inputs.append("{}.{}{{ {} }}".format(
+                channel_name, op, ";".join(info["channels"])))
+
+        self._context = {
+            **self._context,
+            **{"extra_inputs": "\n".join(extra_inputs)}
+        }
+
+
+class DownloadReads(Process):
+    """Process template interface for reads downloading from SRA and NCBI
+
+    This process is set with:
+
+        - ``input_type``: accessions
+        - ``output_type`` fastq
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "accessions"
+        self.output_type = "fastq"
+
+        self.directives = {"reads_download": {
+            "cpus": 1,
+            "memory": "'1GB'",
+            "container": "ummidock/getseqena",
+            "version": "0.4.0-2"
+        }}
+
 
 class IntegrityCoverage(Process):
     """Process template interface for first integrity_coverage process
@@ -626,6 +722,11 @@ class IntegrityCoverage(Process):
 
         self.input_type = "fastq"
         self.output_type = "fastq"
+
+        self.params = {
+            "genomeSize": 2.1,
+            "minCoverage": 15
+        }
 
         self.secondary_inputs = [
             {
@@ -660,10 +761,15 @@ class SeqTyping(Process):
 
         self.directives = {"seq_typing": {
             "cpus": 4,
-            "memory": "4GB",
+            "memory": "'4GB'",
             "container": "ummidock/seq_typing",
             "version": "0.1.0-1"
         }}
+
+        self.params = {
+            "referenceFileO": "null",
+            "referenceFileH": "null",
+        }
 
 
 class PathoTyping(Process):
@@ -682,6 +788,10 @@ class PathoTyping(Process):
 
         self.status_channels = []
 
+        self.params = {
+            "species": "null"
+        }
+
         self.secondary_inputs = [
             {
                 "params": "species",
@@ -696,7 +806,7 @@ class PathoTyping(Process):
 
         self.directives = {"patho_typing": {
             "cpus": 4,
-            "memory": "4GB",
+            "memory": "'4GB'",
             "container": "ummidock/patho_typing",
             "version": "0.3.0-1"
         }}
@@ -724,6 +834,11 @@ class CheckCoverage(Process):
         self.input_type = "fastq"
         self.output_type = "fastq"
 
+        self.params = {
+            "genomeSize": 2.1,
+            "minCoverage": 15
+        }
+
         self.secondary_inputs = [
             {
                 "params": "genomeSize",
@@ -750,10 +865,14 @@ class TrueCoverage(Process):
         self.input_type = "fastq"
         self.output_type = "fastq"
 
+        self.params = {
+            "species": "null"
+        }
+
         self.directives = {
             "true_coverage": {
                 "cpus": 4,
-                "memory": "1GB",
+                "memory": "'1GB'",
                 "container": "odiogosilva/true_coverage",
                 "version": "3.2"
             }
@@ -788,6 +907,10 @@ class FastQC(Process):
         list: Setting status channels for FastQC execution and FastQC report
         """
 
+        self.params = {
+            "adapters": "'None'"
+        }
+
         self.secondary_inputs = [
             {
                 "params": "adapters",
@@ -797,7 +920,7 @@ class FastQC(Process):
 
         self.directives = {"fastqc2": {
             "cpus": 2,
-            "memory": "4GB",
+            "memory": "'4GB'",
             "container": "ummidock/fastqc",
             "version": "0.11.7-1"
         }}
@@ -826,6 +949,16 @@ class Trimmomatic(Process):
 
         self.link_end.append({"link": "SIDE_phred", "alias": "SIDE_phred"})
 
+        self.dependencies = ["integrity_coverage"]
+
+        self.params = {
+            "adapters": "'None'",
+            "trimSlidingWindow": "'5:20'",
+            "trimLeading": "3",
+            "trimTrailing": "3",
+            "trimMinLength": "55"
+        }
+
         self.secondary_inputs = [
             {
                 "params": "trimOpts",
@@ -833,6 +966,10 @@ class Trimmomatic(Process):
                            "Channel.value([params.trimSlidingWindow,"
                            "params.trimLeading,params.trimTrailing,"
                            "params.trimMinLength])"
+            },
+            {
+                "params": "adapters",
+                "channel": "IN_adapters = Channel.value(params.adapters)"
             }
         ]
 
@@ -879,6 +1016,16 @@ class FastqcTrimmomatic(Process):
         self.status_channels = ["STATUS_fastqc", "STATUS_fastqc_report",
                                 "STATUS_trimmomatic"]
 
+        self.dependencies = ["integrity_coverage"]
+
+        self.params = {
+            "adapters": "'None'",
+            "trimSlidingWindow": "'5:20'",
+            "trimLeading": "3",
+            "trimTrailing": "3",
+            "trimMinLength": "55"
+        }
+
         self.secondary_inputs = [
             {
                 "params": "adapters",
@@ -896,7 +1043,7 @@ class FastqcTrimmomatic(Process):
         self.directives = {
             "fastqc": {
                 "cpus": 2,
-                "memory": "4GB",
+                "memory": "'4GB'",
                 "container": "ummidock/fastqc",
                 "version": "0.11.7-1"
             },
@@ -924,7 +1071,41 @@ class Skesa(Process):
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "ummidock/skesa",
-            "version": "0.2.0-2"
+            "version": "0.2.0-3",
+            "scratch": "true"
+        }}
+
+
+class ProcessSkesa(Process):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "fasta"
+
+        self.params = {
+            "skesaMinKmerCoverage": 2,
+            "skesaMinContigLen": 200,
+            "skesaMaxContigs": 100
+        }
+
+        self.secondary_inputs = [
+            {
+                "params": "processSkesaOpts",
+                "channel": "IN_process_skesa_opts = "
+                           "Channel.value([params.skesaMinContigLen,"
+                           "params.skesaMinKmerCoverage,"
+                           "params.skesaMaxContigs])"
+            }
+        ]
+
+        self.directives = {"skesa": {
+            "cpus": 1,
+            "memory": "'2GB'",
+            "container": "ummidock/skesa",
+            "version": "0.2.0-3",
         }}
 
 
@@ -951,6 +1132,14 @@ class Spades(Process):
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
 
+        self.dependencies = ["integrity_coverage"]
+
+        self.params = {
+            "spadesMinCoverage": 2,
+            "spadesMinKmerCoverage": 2,
+            "spadesKmers": "'auto'",
+        }
+
         self.secondary_inputs = [
             {
                 "params": "spadesOpts",
@@ -969,7 +1158,8 @@ class Spades(Process):
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "ummidock/spades",
-            "version": "3.11.1-1"
+            "version": "3.11.1-1",
+            "scratch": "true"
         }}
 
 
@@ -990,6 +1180,12 @@ class ProcessSpades(Process):
 
         self.input_type = "fasta"
         self.output_type = "fasta"
+
+        self.params = {
+            "spadesMinKmerCoverage": 2,
+            "spadesMinContigLen": 200,
+            "spadesMaxContigs": 100
+        }
 
         self.secondary_inputs = [
             {
@@ -1039,6 +1235,12 @@ class AssemblyMapping(Process):
 
         self.link_start.append("SIDE_BpCoverage")
         self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
+        self.params = {
+            "minAssemblyCoverage": "'auto'",
+            "AMaxContigs": 100,
+            "genomeSize": 2.1
+        }
 
         self.secondary_inputs = [
             {
@@ -1139,6 +1341,11 @@ class Mlst(Process):
             "container": "ummidock/mlst",
         }}
 
+        self.params = {
+            "mlstRun": "true",
+            "mlstSpecies": "null"
+        }
+
 
 class Abricate(Process):
     """Abricate mapping process template interface
@@ -1181,6 +1388,11 @@ class Abricate(Process):
             }
         }
 
+        self.params = {
+            "abricateDatabases": '["resfinder", "card", "vfdb", '
+                                 '"plasmidfinder", "virulencefinder"]'
+        }
+
 
 class Prokka(Process):
     """Prokka mapping process template interface
@@ -1216,6 +1428,10 @@ class Prokka(Process):
                 "container": "ummidock/prokka-nf",
                 "version": "1.12.0-2"
             }
+        }
+
+        self.params = {
+            "prokkaRun": "true"
         }
 
 
@@ -1258,6 +1474,18 @@ class Chewbbaca(Process):
                 "container": "mickaelsilva/chewbbaca_py3",
                 "version": "latest"
             }
+        }
+
+        self.params = {
+            "chewbbacaRun": "true",
+            "chewbbacaQueue": "null",
+            "chewbbacaTraining": "null",
+            "schemaPath": "null",
+            "schemaSelectedLoci": "null",
+            "schemaCore": "null",
+            "chewbbacaJson": "false",
+            "chewbbacaToPhyloviz": "false",
+            "chewbbacaProfilePercentage": 0.95
         }
 
 

@@ -35,9 +35,6 @@ process chewbbaca_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-    when:
-    params.chewbbacaRun == true
-
     script:
     """
     {

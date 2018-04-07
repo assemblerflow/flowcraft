@@ -5,6 +5,7 @@ process fastqc_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { fastq_id + " getStats" }
+    publishDir "reports/fastqc_{{ pid }}/", pattern: "*.html"
 
     input:
     set fastq_id, file(fastq_pair) from {{ input_channel }}
@@ -12,6 +13,7 @@ process fastqc_{{ pid }} {
 
     output:
     set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') optional true into MAIN_fastqc_out_{{ pid }}
+    file "*html"
     {% with task_name="fastqc" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -119,16 +121,14 @@ process trimmomatic_{{ pid }} {
     input:
     set fastq_id, file(fastq_pair), trim_range, phred from MAIN_fastqc_trim_{{ pid }}.join(SIDE_phred_{{ pid }})
     val opts from IN_trimmomatic_opts
+    val ad from IN_adapters
 
     output:
-    set fastq_id, "${fastq_id}_*P*" optional true into {{ output_channel }}
+    set fastq_id, "${fastq_id}_*trim.fastq.gz" optional true into {{ output_channel }}
     file 'trimmomatic_report.csv'
     {% with task_name="trimmomatic" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
-
-    when:
-    params.stopAt != "trimmomatic"
 
     script:
     template "trimmomatic.py"

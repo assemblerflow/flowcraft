@@ -5,7 +5,7 @@ process spades_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { fastq_id + " getStats" }
-    publishDir 'results/assembly/spades_{{ pid }}/', pattern: '*_spades.assembly.fasta', mode: 'copy'
+    publishDir 'results/assembly/spades_{{ pid }}/', pattern: '*_spades*.fasta', mode: 'copy'
 
     input:
     set fastq_id, file(fastq_pair), max_len from {{ input_channel }}.join(SIDE_max_len_{{ pid }})
@@ -13,13 +13,10 @@ process spades_{{ pid }} {
     val kmers from IN_spades_kmers
 
     output:
-    set fastq_id, file('*_spades.assembly.fasta') into {{ output_channel }}
+    set fastq_id, file('*_spades*.fasta') into {{ output_channel }}
     {% with task_name="spades" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
-
-    when:
-    params.stopAt != "spades"
 
     script:
     template "spades.py"

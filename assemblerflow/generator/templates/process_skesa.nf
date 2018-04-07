@@ -1,5 +1,5 @@
 
-process process_spades_{{ pid }} {
+process process_skesa_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -7,21 +7,20 @@ process process_spades_{{ pid }} {
     tag { fastq_id }
     // This process can only use a single CPU
     cpus 1
-    publishDir "reports/assembly/spades_filter_{{ pid }}", pattern: '*.report.csv', mode: 'copy'
+    publishDir "reports/assembly/skesa_filter_{{ pid }}", pattern: '*.report.csv', mode: 'copy'
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
-    val opts from IN_process_spades_opts
+    val opts from IN_process_skesa_opts
     val gsize from IN_genome_size
-    val assembler from Channel.value("spades")
+    val assembler from Channel.value("skesa")
 
     output:
     set fastq_id, file('*.fasta') into {{ output_channel }}
     file '*.report.csv' optional true
-    {% with task_name="process_spades" %}
+    {% with task_name="process_skesa" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
-
 
     script:
     template "process_assembly.py"
@@ -29,4 +28,3 @@ process process_spades_{{ pid }} {
 }
 
 {{ forks }}
-

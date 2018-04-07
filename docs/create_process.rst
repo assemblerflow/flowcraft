@@ -144,6 +144,18 @@ input/output types.
 However, a pipeline will only build successfully when all processes correctly
 link the output with the input type.
 
+Depending on the process, other attributes may be required:
+
+    - `Parameters`_: Parameters provided by the user to be used in the process.
+    - `Secondary inputs`_: Channels created from parameters provided by the
+      user.
+    - Secondary `Link start`_ and `Link end`_: Secondary links that connect
+      secondary information between two processes.
+    - `Dependencies`_: List of other processes that may be required for
+      the current process.
+    - `Directives`_: Default information for RAM/CPU/Container directives
+      and more.
+
 Add to available processes
 ::::::::::::::::::::::::::
 
@@ -183,6 +195,30 @@ two processes could not be linked.
 
     The input/ouput types that are currently used are ``fastq``, ``fasta``.
 
+Parameters
+::::::::::
+
+The :attr:`~assemblerflow.generator.process.Process.params` attribute sets
+the parameters, and their respective default values, that can be used
+by the process. These parameters can be simple values that are not feed into
+any channel, or can be automatically set to a secondary input channel via
+ `Secondary inputs`_ (see below). This attribute is a simple dictionary with
+a key:value pair for each parameter:default_value::
+
+    self.params = {
+        "genomeSize": 2.1,
+        "minCoverage": 15
+        "adapters": "'None'"
+    }
+
+These pairs are then used to populate the ``params.config`` file that is
+generated in the pipeline directory. Note that the values are replaced
+literally in the config file. For instance, ``"genomeSize": 2.1,`` will appear
+as ``genomeSize = 2.1``, whereas ``"adapters": "'None'"`` will appear as
+``adapters = 'None'``. If you want a value to appear as a string, the double
+and single quotes are necessary.
+
+
 Secondary inputs
 ::::::::::::::::
 
@@ -217,6 +253,52 @@ file. Note that this channel definition mentions the parameters (e.g.
 .. note::
     In future versions, the parameters will be dynamically generated in the
     nextflow.config file
+
+Extra input
+:::::::::::
+
+The :attr:`~assemblerflow.generator.process.Process.extra_input` attribute
+is mostly a user specified directive that allows the injection of additional
+input data from a parameter into the main input channel of the process.
+When a pipeline is defined as::
+
+    process1 process2={'extra_input':'var'}
+
+assemblerflow will expose a new ``var`` parameter, setup an extra input
+channel and mix it with ``process2`` main input channel. A more detailed
+explanation follows below.
+
+First, assemblerflow will create a nextflow channel from the parameter name
+provided via the ``extra_input`` directive. The channel string will depend
+on the input type of the process (this string is fetched from the
+:attr:`~assemblerflow.generator.process.Process.RAW_MAPPING` attribute).
+For instance, if the input type of
+``process2`` is ``fastq``, the new extra channel will be::
+
+    IN_var_extraInput = Channel.fromFilePairs(params.var)
+
+Since the same extra input parameter may be used by more than one process,
+the ``IN_var_extraInput`` channel will be automatically forked into the
+final destination channels::
+
+    // When there is a single destination channel
+    IN_var_extraInput.set{ EXTRA_process2_1_2 }
+    // When there are multiple destination channels for the same parameter
+    IN_var_extraInput.into{ EXTRA_process2_1_2; EXTRA_process3_1_3 }
+
+The destination channels are the ones that will be actually mixed with
+the main input channels::
+
+    process process2 {
+        input:
+        (...) main_channel.mix(EXTRA_process2_1_2)
+    }
+
+In these cases, the processes that receive the extra input will process the
+data provided by the preceding channel **AND** by the parameter. The data
+provided via the extra input parameter does not have to wait for the
+``main_channel``, which means that they can run in parallel, if there are
+enough resources.
 
 Link start
 ::::::::::

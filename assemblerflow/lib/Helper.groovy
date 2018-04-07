@@ -1,6 +1,6 @@
 class Help {
 
-    static def start_info(String ver, int fastq, String time,
+    static def start_info(String ver, int fastq, int fasta, String time,
                           String profile) {
 
         int nsamples = fastq / 2
@@ -11,6 +11,7 @@ class Help {
         println "============================================================"
         println ""
         println " Input FastQ                 : $fastq"
+        println " Input Fasta                 : $fasta"
         println " Input samples               : $nsamples"
         println " Reports are found in        : ./reports"
         println " Results are found in        : ./results"

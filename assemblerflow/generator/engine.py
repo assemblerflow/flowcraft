@@ -4,7 +4,7 @@ import jinja2
 import logging
 
 from collections import defaultdict
-from os.path import dirname, join, abspath, split, splitext
+from os.path import dirname, join, abspath, split, splitext, exists
 
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -24,6 +24,7 @@ except ImportError as e:
 
 
 process_map = {
+        "reads_download": pc.DownloadReads,
         "integrity_coverage": pc.IntegrityCoverage,
         "seq_typing": pc.SeqTyping,
         "patho_typing": pc.PathoTyping,
@@ -35,6 +36,7 @@ process_map = {
         "skesa": pc.Skesa,
         "spades": pc.Spades,
         "process_spades": pc.ProcessSpades,
+        "process_skesa": pc.ProcessSkesa,
         "assembly_mapping": pc.AssemblyMapping,
         "pilon": pc.Pilon,
         "mlst": pc.Mlst,
@@ -119,6 +121,10 @@ class NextflowGenerator:
 
         """
 
+        self.extra_inputs = {}
+        """
+        """
+
         self.status_channels = []
         """
         list: Stores the status channels from each process
@@ -132,12 +138,28 @@ class NextflowGenerator:
 
         self.resources = ""
         """
-        str: Stores the resource directives string for each nextflow process. 
+        str: Stores the resource directives string for each nextflow process.
+        See :func:`NextflowGenerator._get_resources_string`.
         """
 
         self.containers = ""
         """
         str: Stores the container directives string for each nextflow process.
+        See :func:`NextflowGenerator._get_container_string`.
+        """
+
+        self.params = ""
+        """
+        str: Stores the params directives string for the nextflow pipeline.
+        See :func:`NextflowGenerator._get_params_string`
+        """
+
+        self.user_config = ""
+        """
+        str: Stores the user configuration file placeholder. This is an
+        empty configuration file that is only added the first time to a
+        project directory. If the file already exists, it will not overwrite
+        it.
         """
 
     @staticmethod
@@ -396,7 +418,9 @@ class NextflowGenerator:
         else:
             self.main_raw_inputs[process_input] = {
                 "channel": raw_in["channel"],
-                "channel_str": raw_in["channel_str"],
+                "channel_str": "{} = {}".format(
+                    raw_in["channel"],
+                    raw_in["channel_str"].format(raw_in["params"])),
                 "raw_forks": [raw_in["input_channel"]]
             }
         logger.debug("[{}] Updated main raw inputs: {}".format(
@@ -405,7 +429,7 @@ class NextflowGenerator:
     def _update_secondary_inputs(self, p):
         """Given a process, this method updates the
         :attr:`~Process.secondary_inputs` attribute with the corresponding
-        secondary inputs of that channel.
+        secondary inputs of that process.
 
         Parameters
         ----------
@@ -421,6 +445,62 @@ class NextflowGenerator:
                     logger.debug("[{}] Added channel: {}".format(
                         p.template, ch["channel"]))
                     self.secondary_inputs[ch["params"]] = ch["channel"]
+
+    def _update_extra_inputs(self, p):
+        """Given a process, this method updates the
+        :attr:`~Process.extra_inputs` attribute with the corresponding extra
+        inputs of that process
+
+        Parameters
+        ----------
+        p : assemblerflow.Process.Process
+        """
+
+        if p.extra_input:
+            logger.debug("[{}] Found extra input: {}".format(
+                p.template, p.extra_input))
+
+            if p.extra_input == "default":
+                # Check if the default type is now present in the main raw
+                # inputs. If so, issue an error. The default param can only
+                # be used when not present in the main raw inputs
+                if p.input_type in self.main_raw_inputs:
+                    logger.error(colored_print(
+                        "\nThe default input param '{}' of the process '{}'"
+                        " is already specified as a main input parameter of"
+                        " the pipeline. Please choose a different extra_input"
+                        " name.".format(p.input_type, p.template), "red_bold"))
+                    sys.exit(1)
+                param = p.input_type
+            else:
+                param = p.extra_input
+
+            dest_channel = "EXTRA_{}_{}".format(p.template, p.pid)
+
+            if param not in self.extra_inputs:
+                self.extra_inputs[param] = {
+                    "input_type": p.input_type,
+                    "channels": [dest_channel]
+                }
+            else:
+                if self.extra_inputs[param]["input_type"] != p.input_type:
+                    logger.error(colored_print(
+                        "\nThe extra_input parameter '{}' for process"
+                        " '{}' was already defined with a different "
+                        "input type '{}'. Please choose a different "
+                        "extra_input name.".format(
+                            p.input_type, p.template,
+                            self.extra_inputs[param]["input_type"]),
+                        "red_bold"))
+                    sys.exit(1)
+                self.extra_inputs[param]["channels"].append(dest_channel)
+
+            logger.debug("[{}] Added extra channel '{}' linked to param: '{}' "
+                         "".format(p.template, param,
+                                   self.extra_inputs[param]))
+            p.update_main_input(
+                "{}.mix({})".format(p.input_channel, dest_channel)
+            )
 
     def _get_fork_tree(self, p):
         """
@@ -594,12 +674,14 @@ class NextflowGenerator:
 
             self._update_secondary_inputs(p)
 
+            self._update_extra_inputs(p)
+
             self._update_secondary_channels(p)
 
             logger.info(colored_print(
                 "\tChannels set for {} \u2713".format(p.template)))
 
-    def _set_secondary_inputs(self):
+    def _set_init_process(self):
         """Sets the main raw inputs and secondary inputs on the init process
 
         This method will fetch the :class:`assemblerflow.process.Init` process
@@ -622,6 +704,8 @@ class NextflowGenerator:
         logger.debug("Setting secondary inputs: "
                      "{}".format(self.secondary_inputs))
         init_process.set_secondary_inputs(self.secondary_inputs)
+        logger.debug("Setting extra inputs: {}".format(self.extra_inputs))
+        init_process.set_extra_inputs(self.extra_inputs)
 
     def _set_secondary_channels(self):
         """Sets the secondary channels for the pipeline
@@ -719,23 +803,21 @@ class NextflowGenerator:
 
         Returns
         -------
-        str : nextflow config string
+        str
+            nextflow config string
         """
 
-        resource_directives = ["cpus", "memory", "queue"]
         config_str = ""
+        ignore_directives = ["container", "version"]
 
         for p, directives in res_dict.items():
 
             for d, val in directives.items():
 
-                if d not in resource_directives:
+                if d in ignore_directives:
                     continue
 
-                if "{" in str(val):
-                    config_str += '\n${}_{}.{} = {}'.format(p, pid, d, val)
-                else:
-                    config_str += '\n${}_{}.{} = "{}"'.format(p, pid, d, val)
+                config_str += '\n\t${}_{}.{} = {}'.format(p, pid, d, val)
 
         return config_str
 
@@ -761,7 +843,8 @@ class NextflowGenerator:
 
         Returns
         -------
-        str : nextflow config string
+        str
+            nextflow config string
         """
 
         config_str = ""
@@ -778,7 +861,45 @@ class NextflowGenerator:
                 else:
                     container += ":latest"
 
-            config_str += '\n${}_{}.container = "{}"'.format(p, pid, container)
+            config_str += '\n\t${}_{}.container = "{}"'.format(p, pid, container)
+
+        return config_str
+
+    def _get_params_string(self):
+        """Returns the nextflow params string from a dictionary object.
+
+        The params dict should be a set of key:value pairs with the
+        parameter name, and the default parameter value::
+
+            self.params = {
+                "genomeSize": 2.1,
+                "minCoverage": 15
+            }
+
+        The values are then added to the string as they are. For instance,
+        a ``2.1`` float will appear as ``param = 2.1`` and a
+        ``"'teste'" string will appear as ``param = 'teste'`` (Note the
+        string).
+
+        Returns
+        -------
+        str
+            Nextflow params configuration string
+        """
+
+        params_temp = {}
+
+        for p in self.processes:
+
+            logger.debug("[{}] Adding parameters: {}".format(p.template,
+                                                             p.params))
+            for param, val in p.params.items():
+
+                params_temp[param] = val
+
+        config_str = "\n\t" + "\n\t".join([
+            "{} = {}".format(param, val) for param, val in params_temp.items()
+        ])
 
         return config_str
 
@@ -800,8 +921,15 @@ class NextflowGenerator:
         of each process in the pipeline.
         """
 
+        logger.debug("======================")
+        logger.debug("Setting configurations")
+        logger.debug("======================")
+
         resources = ""
         containers = ""
+        params = ""
+
+        params += self._get_params_string()
 
         for p in self.processes:
 
@@ -809,6 +937,8 @@ class NextflowGenerator:
             if not p.directives:
                 continue
 
+            logger.debug("[{}] Adding directives: {}".format(
+                p.template, p.directives))
             resources += self._get_resources_string(p.directives, p.pid)
             containers += self._get_container_string(p.directives, p.pid)
 
@@ -818,6 +948,10 @@ class NextflowGenerator:
         self.containers = self._render_config("containers.config", {
             "container_info": containers
         })
+        self.params = self._render_config("params.config", {
+            "params_info": params
+        })
+        self.user_config = self._render_config("user.config", {})
 
     def render_pipeline(self):
         """Write pipeline attributes to json
@@ -883,6 +1017,33 @@ class NextflowGenerator:
         # send with jinja to html resource
         return self._render_config("pipeline_graph.html", {"data": dict_viz})
 
+    def write_configs(self, project_root):
+        """Wrapper method that writes all configuration files to the pipeline
+        directory
+        """
+
+        # Write resources config
+        with open(join(project_root, "resources.config"), "w") as fh:
+            fh.write(self.resources)
+
+        # Write containers config
+        with open(join(project_root, "containers.config"), "w") as fh:
+            fh.write(self.containers)
+
+        # Write containers config
+        with open(join(project_root, "params.config"), "w") as fh:
+            fh.write(self.params)
+
+        # Write user config if not present in the project directory
+        if not exists(join(project_root, "user.config")):
+            with open(join(project_root, "user.config"), "w") as fh:
+                fh.write(self.user_config)
+
+        # Generate the pipeline DAG
+        pipeline_to_json = self.render_pipeline()
+        with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
+            fh.write(pipeline_to_json)
+
     def build(self):
         """Main pipeline builder
 
@@ -907,9 +1068,7 @@ class NextflowGenerator:
 
         self._set_channels()
 
-        pipeline_to_json = self.render_pipeline()
-
-        self._set_secondary_inputs()
+        self._set_init_process()
 
         logger.info(colored_print(
             "\tSuccessfully set {} secondary input(s) \u2713".format(
@@ -936,21 +1095,13 @@ class NextflowGenerator:
 
         project_root = dirname(self.nf_file)
 
+        # Write configs
+        self.write_configs(project_root)
+
         # Write pipeline file
         with open(self.nf_file, "w") as fh:
             fh.write(self.template)
 
-        # Write resources config
-        with open(join(project_root, "resources.config"), "w") as fh:
-            fh.write(self.resources)
-
-        # Write containers config
-        with open(join(project_root, "containers.config"), "w") as fh:
-            fh.write(self.containers)
-
-        # Write containers config
-        with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
-           fh.write(pipeline_to_json)
 
         logger.info(colored_print(
             "\tPipeline written into {} \u2713".format(self.nf_file)))

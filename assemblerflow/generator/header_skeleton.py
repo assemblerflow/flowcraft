@@ -1,7 +1,6 @@
 header = """#!/usr/bin/env nextflow
 
 import Helper
-import CheckParams
 
 // Pipeline version
 if (workflow.commitId){
@@ -16,8 +15,7 @@ if (params.help){
     exit 0
 }
 
-CheckParams.check(params)
-
 nsamples = file(params.fastq).size()
-Help.start_info(version, nsamples, "$workflow.start", "$workflow.profile")
+nfasta = file(params.fasta).size()
+Help.start_info(version, nsamples, nfasta, "$workflow.start", "$workflow.profile")
     """
