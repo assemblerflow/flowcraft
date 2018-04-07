@@ -169,9 +169,6 @@
         let nodes = treeData.descendants(),
             links = treeData.descendants().slice(1)
 
-        // Normalize for fixed-depth.
-        nodes.forEach( (d) => { d.y = d.depth * 100} )
-
         // hide root node
         nodes = nodes.filter( (d) => {
             return d.depth
@@ -211,6 +208,15 @@
             .attr("y", "-20")
             .attr("text-anchor", "middle")
             .text( (d) => { return d.data.name } )
+
+                // gets labels variable
+        const labels = d3.selectAll("text")
+        // returns the label with max width value
+        const maxTextWidth = d3.max(labels.nodes(),
+            n => n.getComputedTextLength())
+
+        // Normalize for fixed-depth, according to max_width
+        nodes.forEach( (d) => { d.y = d.depth * maxTextWidth} )
 
         // UPDATE
         const nodeUpdate = nodeEnter.merge(node)
