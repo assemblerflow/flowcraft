@@ -65,13 +65,12 @@ assemblerflow:
   It is also important for for unique secondary output channels, such as
   those that send run status information (see `Status channels`_).
 
-- ``include "post.txt"`` (**Recommended**): Inserts
-  ``beforeScript`` and ``afterScript`` statements to the process. These
-  include a bash script that created a series of *dotfiles* for the process
-  and scripts for sending requests to REST APIs (only when certain pipeline
-  parameters are used). We recommend the inclusion of this placeholder to
-  to ensure that the reports of a pipeline are correctly created for
-  latter visualization (see :ref:`dotfiles` for more information).
+- ``include "post.txt"`` (**Mandatory**): Inserts
+  ``beforeScript`` and ``afterScript`` statements to the process that setup
+  environmental variables and a series of *dotfiles* for the process to
+  log their status, warnings, fails and reports (see :ref:`dotfiles` for
+  more information). It also includes scripts for sending requests to
+  REST APIs (only when certain pipeline parameters are used).
 
 - ``input_channel`` (**Mandatory**): All process must include an input channel.
 
@@ -79,7 +78,7 @@ assemblerflow:
   channel entirely. However, if you want to link the main output of this
   process with subsequent ones, this placeholder must be used.
 
-- ``include "compiler_channels.txt"`` (**Recommended**): This will include the
+- ``include "compiler_channels.txt"`` (**Mandatory**): This will include the
   special channels that will compile the status/logging of the processes
   throughout the pipeline (see `Status channels`_).
 
@@ -199,24 +198,37 @@ Parameters
 ::::::::::
 
 The :attr:`~assemblerflow.generator.process.Process.params` attribute sets
-the parameters, and their respective default values, that can be used
-by the process. These parameters can be simple values that are not feed into
-any channel, or can be automatically set to a secondary input channel via
- `Secondary inputs`_ (see below). This attribute is a simple dictionary with
-a key:value pair for each parameter:default_value::
+the parameters that can be used by the process. For each parameter, a default
+value and a description should be provided. The default value will be set
+in the ``params.config`` file in the pipeline directory and the description
+will be used to generated the custom help message of the pipeline::
 
     self.params = {
-        "genomeSize": 2.1,
-        "minCoverage": 15
-        "adapters": "'None'"
+        "genomeSize": {
+            "default": 2.1,
+            "description": "Expected genome size (default: params.genomeSiz)
+        },
+        "minCoverage": {
+            "default": 15,
+            "description": "Minimum coverage to proceed (default: params.minCoverage)"
+        }
     }
 
-These pairs are then used to populate the ``params.config`` file that is
-generated in the pipeline directory. Note that the values are replaced
-literally in the config file. For instance, ``"genomeSize": 2.1,`` will appear
-as ``genomeSize = 2.1``, whereas ``"adapters": "'None'"`` will appear as
-``adapters = 'None'``. If you want a value to appear as a string, the double
-and single quotes are necessary.
+These parameters can be simple values that are not feed into
+any channel, or can be automatically set to a secondary input channel via
+`Secondary inputs`_ (see below).
+
+They can be specified when running the pipeline like any nextflow parameter
+(e.g.: ``--genomeSize 5``) and used in the nextflow process as usual
+(e.g.: ``params.genomeSize``).
+
+.. note::
+    These pairs are then used to populate the ``params.config`` file that is
+    generated in the pipeline directory. Note that the values are replaced
+    literally in the config file. For instance, ``"genomeSize": 2.1,`` will appear
+    as ``genomeSize = 2.1``, whereas ``"adapters": "'None'"`` will appear as
+    ``adapters = 'None'``. If you want a value to appear as a string, the double
+    and single quotes are necessary.
 
 
 Secondary inputs
@@ -238,21 +250,30 @@ definition of the nextflow channel (``channel``). Consider the example below::
             },
             {
                 "params": "minCoverage",
-                "channel": "IN_min_coverage = "
-                           "Channel.value(params.minCoverage)"
+                "channel": "IN_min_coverage = Channel.value(params.minCoverage)"
             }
         ]
 
 This process will receive two secondary inputs that are given by the
-``genomeSize`` and ``minCoverage`` parameters. These should be made available
-in the ``nextflow.config`` file. For each of these parameters, the dictionary
+``genomeSize`` and ``minCoverage`` parameters. These should be also specified
+in the :attr:`~assemblerflow.generator.process.Process.params` attribute
+(See `Parameters`_ above).
+
+For each of these parameters, the dictionary
 also stores how the channel should be defined at the beginning of the pipeline
 file. Note that this channel definition mentions the parameters (e.g.
-``params.genomeSize``).
+``params.genomeSize``). An additional best practice for channel definition
+is to include one or more sanity checks to ensure that the provided arguments
+are correct. These checks can be added in the nextflow template file, or
+literally in the ``channel`` string::
 
-.. note::
-    In future versions, the parameters will be dynamically generated in the
-    nextflow.config file
+    self.secondary_inputs = [
+        {
+            "params": "genomeSize",
+            "channel":
+                    "IN_genome_size = Channel.value(params.genomeSize)"
+                    "map{it -> it.toString().isNumber() ? it : exit(1, \"The genomeSize parameter must be a number or a float. Provided value: '${params.genomeSize}'\")}"
+            }
 
 Extra input
 :::::::::::
