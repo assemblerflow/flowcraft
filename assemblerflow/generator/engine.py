@@ -1,10 +1,11 @@
+import os
 import sys
 import json
 import jinja2
 import logging
 
 from collections import defaultdict
-from os.path import dirname, join, abspath, split, splitext, exists
+from os.path import dirname, join, abspath, split, splitext, exists, basename
 
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -12,12 +13,14 @@ logger = logging.getLogger("main.{}".format(__name__))
 try:
     import generator.process as pc
     import generator.error_handling as eh
+    from __init__ import __version__
     from generator import header_skeleton as hs
     from generator import footer_skeleton as fs
     from generator.process_details import colored_print
 except ImportError as e:
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
+    from assemblerflow import __version__
     from assemblerflow.generator import header_skeleton as hs
     from assemblerflow.generator import footer_skeleton as fs
     from assemblerflow.generator.process_details import colored_print
@@ -58,7 +61,8 @@ the format::
 
 class NextflowGenerator:
 
-    def __init__(self, process_connections, nextflow_file):
+    def __init__(self, process_connections, nextflow_file,
+                 pipeline_name="assemblerflow"):
 
         self.processes = []
 
@@ -93,6 +97,11 @@ class NextflowGenerator:
         self.nf_file = nextflow_file
         """
         str: Path to file where the pipeline will be generated
+        """
+
+        self.pipeline_name = pipeline_name
+        """
+        str: Name of the pipeline, for customization and help purposes.
         """
 
         self.template = ""
@@ -242,6 +251,7 @@ class NextflowGenerator:
             logger.debug("[{}] Input lane: {}".format(p, in_lane))
             logger.debug("[{}] Output lane: {}".format(p, out_lane))
 
+            # Update the total number of lines of the pipeline
             if out_lane > self.lanes:
                 self.lanes = out_lane
 
@@ -260,20 +270,23 @@ class NextflowGenerator:
                 logger.error(colored_print(ex.value, "red_bold"))
                 sys.exit(1)
 
-            # Instance output process
+            # Check if process is available or correctly named
             if p_out_name not in process_map:
                 logger.error(colored_print(
                     "\nThe process '{}' is not available".format(p_out_name),
                     "red_bold"))
                 sys.exit(1)
 
+            # Instance output process
             out_process = process_map[p_out_name](template=p_out_name)
 
             # Update directives, if provided
             if out_directives:
                 out_process.update_attributes(out_directives)
 
-            # Set suffix strings for main input/output channels
+            # Set suffix strings for main input/output channels. Suffixes are
+            # based on the lane and the arbitrary and unique process id
+            # e.g.: 'process_1_1'
             input_suf = "{}_{}".format(in_lane, p)
             output_suf = "{}_{}".format(out_lane, p)
             logger.debug("[{}] Setting main channels with input suffix '{}'"
@@ -293,9 +306,8 @@ class NextflowGenerator:
                 out_process.parent_lane = in_lane
             else:
                 # When the input process is __init__, set the parent_lane
-                # to None. This will tell the engine that the main input
-                # channel the output process of this connection will received
-                # from the raw user input.
+                # to None. This will tell the engine that this process
+                # will receive the main input from the raw user input.
                 out_process.parent_lane = None
 
             # If the current connection is a fork, add it to the fork tree
@@ -305,12 +317,14 @@ class NextflowGenerator:
                 self._fork_tree[in_lane].append(out_lane)
                 # Update main output fork of parent process
                 try:
-                    parent_process = [x for x in self.processes
-                                   if x.lane == in_lane and
-                                   x.template == p_in_name][0]
-                    logger.debug("[{}] Updating main forks of parent fork "
-                                 "'{}' with '{}'".format(
-                                    p, parent_process, out_process.input_channel))
+                    parent_process = [
+                        x for x in self.processes if x.lane == in_lane and
+                        x.template == p_in_name
+                    ][0]
+                    logger.debug(
+                        "[{}] Updating main forks of parent fork '{}' with"
+                        " '{}'".format(p, parent_process,
+                                       out_process.input_channel))
                     parent_process.update_main_forks(out_process.input_channel)
                 except IndexError:
                     pass
@@ -418,7 +432,8 @@ class NextflowGenerator:
         else:
             self.main_raw_inputs[process_input] = {
                 "channel": raw_in["channel"],
-                "channel_str": "{} = {}".format(
+                "channel_str": "{}\n{} = {}".format(
+                    raw_in["checks"].format(raw_in["params"]),
                     raw_in["channel"],
                     raw_in["channel_str"].format(raw_in["params"])),
                 "raw_forks": [raw_in["input_channel"]]
@@ -895,13 +910,43 @@ class NextflowGenerator:
                                                              p.params))
             for param, val in p.params.items():
 
-                params_temp[param] = val
+                params_temp[param] = val["default"]
 
         config_str = "\n\t" + "\n\t".join([
             "{} = {}".format(param, val) for param, val in params_temp.items()
         ])
 
         return config_str
+
+    def _get_params_help(self):
+        """
+
+        Returns
+        -------
+
+        """
+
+        help_dict = {}
+
+        for p in self.processes:
+
+            for param, val in p.params.items():
+
+                if param in help_dict:
+                    help_dict[param]["process"].append(p.template)
+                else:
+                    tpl = [p.template] if p.template != "init" else []
+                    help_dict[param] = {"process": tpl,
+                                        "description": val["description"]}
+
+        # Transform process list into final template string
+        for p, val in help_dict.items():
+            if not val["process"]:
+                val["process"] = ""
+            else:
+                val["process"] = "({})".format(";".join(val["process"]))
+
+        return help_dict
 
     @staticmethod
     def _render_config(template, context):
@@ -930,6 +975,7 @@ class NextflowGenerator:
         params = ""
 
         params += self._get_params_string()
+        help_dict = self._get_params_help()
 
         for p in self.processes:
 
@@ -950,6 +996,12 @@ class NextflowGenerator:
         })
         self.params = self._render_config("params.config", {
             "params_info": params
+        })
+        self.help = self._render_config("Helper.groovy", {
+            "nf_file": basename(self.nf_file),
+            "help_dict": help_dict,
+            "version": __version__,
+            "pipeline_name": " ".join([x.upper() for x in self.pipeline_name])
         })
         self.user_config = self._render_config("user.config", {})
 
@@ -1038,6 +1090,12 @@ class NextflowGenerator:
         if not exists(join(project_root, "user.config")):
             with open(join(project_root, "user.config"), "w") as fh:
                 fh.write(self.user_config)
+
+        lib_dir = join(project_root, "lib")
+        if not exists(lib_dir):
+            os.makedirs(lib_dir)
+        with open(join(lib_dir, "Helper.groovy"), "w") as fh:
+            fh.write(self.help)
 
         # Generate the pipeline DAG
         pipeline_to_json = self.render_pipeline()

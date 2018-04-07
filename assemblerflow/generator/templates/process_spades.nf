@@ -22,7 +22,6 @@ process process_spades_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-
     script:
     template "process_assembly.py"
 

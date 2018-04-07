@@ -44,23 +44,54 @@ class Process:
     RAW_MAPPING = {
         "fastq": {
             "params": "fastq",
+            "description": "Path expression to paired-end fastq files."
+                           " (default: $params.fastq)",
             "default_value": "'fastq/*_{1,2}.*'",
             "channel": "IN_fastq_raw",
-            "channel_str": "Channel.fromFilePairs(params.{})"
+            "channel_str":
+                "Channel.fromFilePairs(params.{0})"
+                ".ifEmpty {{ exit 1, \"No fastq files provided with pattern:"
+                "'${{params.{0}}}'\" }}",
+            "checks":
+                "if (params.{0} instanceof Boolean){{"
+                "exit 1, \"'{0}' must be a path pattern. Provide value:"
+                "'$params.{0}'\"}}\n"
+                "if (!params.{0}){{ exit 1, \"'{0}' parameter "
+                "missing\"}}"
         },
         "fasta": {
             "params": "fasta",
+            "description": "Path fasta files. (default: $params.fastq)",
             "default_value": "'fasta/*.fasta'",
             "channel": "IN_fasta_raw",
-            "channel_str": "Channel.fromPath(params.{})"
-                           ".map{{ it -> [it.toString().tokenize('/')"
-                           ".last().tokenize('.').first(), it] }}"
+            "channel_str":
+                "Channel.fromPath(params.{0})."
+                "map{{ it -> file(it).exists() ? [it.toString()"
+                ".tokenize('/').last()"
+                ".tokenize('.').first(), it] : null }}"
+                ".ifEmpty {{ exit 1, \"No fasta files provided with pattern:"
+                "'${{params.{0}}}'\" }}",
+            "checks":
+                "if (params.{0} instanceof Boolean){{"
+                "exit 1, \"'{0}' must be a path pattern. Provide value:"
+                "'$params.{0}'\"}}\n"
+                "if (!params.{0}){{ exit 1, \"'{0}' parameter "
+                "missing\"}}"
+
         },
         "accessions": {
             "params": "accessions",
+            "description": "Path file with accessions, one perline. ("
+                           "default: $params.fastq)",
             "default_value": "null",
             "channel": "IN_accessions_raw",
-            "channel_str": "Channel.fromPath(params.{})"
+            "channel_str":
+                "Channel.fromPath(params.{0})"
+                ".ifEmpty {{ exit 1, \"No accessions file provided with path:"
+                "'${{params.{0}}}'\" }}",
+            "checks":
+                "if (!params.{0}){{ exit 1, \"'{0}' parameter "
+                "missing\" }}\n"
         }
     }
     """
@@ -330,7 +361,10 @@ class Process:
         if itype in self.RAW_MAPPING:
 
             channel_info = self.RAW_MAPPING[itype]
-            self.params[channel_info["params"]] = channel_info["default_value"]
+            self.params[channel_info["params"]] = {
+                "default": channel_info["default_value"],
+                "description": channel_info["description"]
+            }
 
             return {**res, **channel_info}
 
@@ -593,10 +627,6 @@ class Init(Process):
 
         self.status_channels = []
 
-        for input_type, info in self.RAW_MAPPING.items():
-
-            self.params[info["params"]] = info["default_value"]
-
     def set_raw_inputs(self, raw_input):
         """
 
@@ -609,13 +639,21 @@ class Init(Process):
 
         """
 
-        logger.debug("Setting raw inputs using raw input list: {}".format(
+        logger.debug("Setting raw inputs using raw input dict: {}".format(
             raw_input))
 
         primary_inputs = []
 
-        for el in raw_input.values():
+        for input_type, el in raw_input.items():
+
             primary_inputs.append(el["channel_str"])
+
+            # Update the process' parameters with the raw input
+            raw_channel = self.RAW_MAPPING[input_type]
+            self.params[input_type] = {
+                "default": raw_channel["default_value"],
+                "description": raw_channel["description"]
+            }
 
             op = "set" if len(el["raw_forks"]) == 1 else "into"
 
@@ -661,6 +699,13 @@ class Init(Process):
 
         for param, info in channel_dict.items():
 
+            # Update the process' parameters with the raw input
+            raw_channel = self.RAW_MAPPING[info["input_type"]]
+            self.params[param] = {
+                "default": raw_channel["default_value"],
+                "description": raw_channel["description"]
+            }
+
             channel_name = "IN_{}_extraInput".format(param)
             channel_str = self.RAW_MAPPING[info["input_type"]]["channel_str"]
             extra_inputs.append("{} = {}".format(channel_name,
@@ -693,6 +738,18 @@ class DownloadReads(Process):
         self.input_type = "accessions"
         self.output_type = "fastq"
 
+        self.params = {
+            "asperaKey": {
+                "default": "null",
+                "description":
+                    "Downloads fastq accessions from ENA using Aspera Connect "
+                    "by providing the private-key file "
+                    "'asperaweb_id_dsa.openssh' normally found in "
+                    "~/.aspera/connect/etc/asperaweb_id_dsa.openssh "
+                    "(Default: null)"
+            }
+        }
+
         self.directives = {"reads_download": {
             "cpus": 1,
             "memory": "'1GB'",
@@ -724,19 +781,40 @@ class IntegrityCoverage(Process):
         self.output_type = "fastq"
 
         self.params = {
-            "genomeSize": 2.1,
-            "minCoverage": 15
+            "genomeSize": {
+                "default": 2.1,
+                "description":
+                    "Genome size estimate for the samples. It is used to "
+                    "estimate the coverage and other assembly parameters and"
+                    "checks (default: $params.genomeSize)"
+            },
+            "minCoverage": {
+                "default": 15,
+                "description":
+                    "Minimum coverage for a sample to proceed. Can be set to"
+                    "0 to allow any coverage (default: $params.minCoverage)"
+            }
         }
 
         self.secondary_inputs = [
             {
                 "params": "genomeSize",
-                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+                "channel":
+                    "IN_genome_size = Channel"
+                    ".value(params.genomeSize)"
+                    "map{it -> it.toString().isNumber() ?"
+                    " it : exit(1, \"The genomeSize parameter must be a number"
+                    "or a float. Provided value: '${params.genomeSize}'\")}"
             },
             {
                 "params": "minCoverage",
-                "channel": "IN_min_coverage = "
-                           "Channel.value(params.minCoverage)"
+                "channel":
+                    "IN_min_coverage = Channel"
+                    ".value(params.minCoverage)"
+                    "map{it -> it.toString().isNumber() ?"
+                    " it : exit(1, \"The minCoverage parameter must be a "
+                    "number or a float. Provided value: "
+                    "'${params.minCoverage}'\")}"
             }
         ]
 
@@ -767,9 +845,46 @@ class SeqTyping(Process):
         }}
 
         self.params = {
-            "referenceFileO": "null",
-            "referenceFileH": "null",
+            "referenceFileO": {
+                "default": "null",
+                "description":
+                    "Fasta file containing reference sequences. If more"
+                    "than one file is passed via the 'referenceFileH parameter"
+                    ", a reference sequence for each file will be determined. "
+                    "(default: $params.referenceFileO)"
+            },
+            "referenceFileH": {
+                "default": "null",
+                "description":
+                    "Fasta file containing reference sequences. If more"
+                    "than one file is passed via the 'referenceFileO parameter"
+                    ", a reference sequence for each file will be determined. "
+                    "(default: $params.referenceFileH)"
+            }
         }
+
+        self.secondary_inputs = [
+            {
+                "params": "referenceFileO",
+                "channel":
+                    "file(params.referenceFileO) ? params.referenceFileO : "
+                    "exit(1, \"'referenceFileO' parameter missing\")\n"
+                    "IN_refO = Channel"
+                    ".fromPath(params.referenceFileO)"
+                    "map{ it -> it.exists() ? it : exit(1, \"referenceFileO"
+                    " file was not found: '${params.referenceFileO}'\")}"
+            },
+            {
+                "params": "referenceFileH",
+                "channel":
+                    "file(params.referenceFileH) ? params.referenceFileH : "
+                    "exit(1, \"'referenceFileH' parameter missing\")\n"
+                    "IN_refH = Channel"
+                    ".fromPath(params.referenceFileH)"
+                    "map{ it -> it.exists() ? it : exit(1, \"referenceFileH"
+                    " file was not found: '${params.referenceFileH}'\")}"
+            }
+        ]
 
 
 class PathoTyping(Process):
@@ -789,14 +904,26 @@ class PathoTyping(Process):
         self.status_channels = []
 
         self.params = {
-            "species": "null"
+            "species": {
+                "default": "null",
+                "description":
+                    "Species name. Must be the complete species name with"
+                    "genus and species, e.g.: 'Yersinia enterocolitica'. "
+                    "(default: $params.species)"
+            }
         }
 
         self.secondary_inputs = [
             {
                 "params": "species",
-                "channel": "IN_pathoSpecies = "
-                           "Channel.value(params.species)"
+                "channel":
+                    "if ( !params.species){ exit 1, \"'species' parameter "
+                    "missing\" }\n"
+                    "if ( params.species.toString().split(\" \").size() != 2 )"
+                    "{ exit 1, \"'species' parameter must contain two "
+                    "values (e.g.: 'escherichia coli'). Provided value: "
+                    "${params.species}\"}\n"
+                    "IN_pathoSpecies = Channel.value(params.species)"
             }
         ]
 
@@ -835,19 +962,40 @@ class CheckCoverage(Process):
         self.output_type = "fastq"
 
         self.params = {
-            "genomeSize": 2.1,
-            "minCoverage": 15
+            "genomeSize": {
+                "default": 2.1,
+                "description":
+                    "Genome size estimate for the samples. It is used to "
+                    "estimate the coverage and other assembly parameters and"
+                    "checks (default: $params.genomeSize)"
+            },
+            "minCoverage": {
+                "default": 15,
+                "description":
+                    "Minimum coverage for a sample to proceed. Can be set to"
+                    "0 to allow any coverage (default: $params.minCoverage)"
+            }
         }
 
         self.secondary_inputs = [
             {
                 "params": "genomeSize",
-                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+                "channel":
+                    "IN_genome_size = Channel"
+                    ".value(params.genomeSize)"
+                    "map{it -> it.toString().isNumber() ?"
+                    " it : exit(1, \"The genomeSize parameter must be a number"
+                    "or a float. Provided value: '${params.genomeSize}'\")}"
             },
             {
                 "params": "minCoverage",
-                "channel": "IN_min_coverage = "
-                           "Channel.value(params.minCoverage)"
+                "channel":
+                    "IN_min_coverage = Channel"
+                    ".value(params.minCoverage)"
+                    "map{it -> it.toString().isNumber() ?"
+                    " it : exit(1, \"The minCoverage parameter must be a "
+                    "number or a float. Provided value: "
+                    "'${params.minCoverage}'\")}"
             }
         ]
 
@@ -866,8 +1014,28 @@ class TrueCoverage(Process):
         self.output_type = "fastq"
 
         self.params = {
-            "species": "null"
+            "species": {
+                "default": "null",
+                "description":
+                    "Species name. Must be the complete species name with"
+                    "genus and species, e.g.: 'Yersinia enterocolitica'. "
+                    "(default: $params.species)"
+            }
         }
+
+        self.secondary_inputs = [
+            {
+                "params": "species",
+                "channel":
+                    "if ( !params.species){ exit 1, \"'species' parameter "
+                    "missing\" }\n"
+                    "if ( params.species.toString().split(\" \").size() != 2 )"
+                    "{ exit 1, \"'species' parameter must contain two "
+                    "values (e.g.: 'escherichia coli').Provided value: "
+                    "'${params.species}'\"}\n"
+                    "IN_pathoSpecies = Channel.value(params.species)"
+            }
+        ]
 
         self.directives = {
             "true_coverage": {
@@ -908,7 +1076,12 @@ class FastQC(Process):
         """
 
         self.params = {
-            "adapters": "'None'"
+            "adapters": {
+                "default": "'None'",
+                "description":
+                    "Path to adapters files, if any "
+                    "(default: $params.adapters)"
+            }
         }
 
         self.secondary_inputs = [
@@ -952,20 +1125,62 @@ class Trimmomatic(Process):
         self.dependencies = ["integrity_coverage"]
 
         self.params = {
-            "adapters": "'None'",
-            "trimSlidingWindow": "'5:20'",
-            "trimLeading": "3",
-            "trimTrailing": "3",
-            "trimMinLength": "55"
+            "adapters": {
+                "default": "'None'",
+                "description":
+                    "Path to adapters files, if any "
+                    "(default: $params.adapters)"
+            },
+            "trimSlidingWindow": {
+                "default": "'5:20'",
+                "description":
+                    "Perform sliding window trimming, cutting once the "
+                    "average quality within the window falls below a "
+                    "threshold (default: $params.trimSlidingWindow)"
+            },
+            "trimLeading": {
+                "default": "3",
+                "description":
+                    "Cut bases off the start of a read, if below a threshold "
+                    "quality (default: $params.trimLeading"
+            },
+            "trimTrailing": {
+                "default": "3",
+                "description":
+                    "Cut bases of the end of a read, if below a "
+                    "threshold quality (default: $params.trimTrailing)"
+            },
+            "trimMinLength": {
+                "default": "55",
+                "description":
+                    "Drop the read if it is below a specified length "
+                    "(default: $params.trimMinLength)"
+            }
         }
 
         self.secondary_inputs = [
             {
                 "params": "trimOpts",
-                "channel": "IN_trimmomatic_opts = "
-                           "Channel.value([params.trimSlidingWindow,"
-                           "params.trimLeading,params.trimTrailing,"
-                           "params.trimMinLength])"
+                "channel":
+                    "// Check sliding window parameter\n"
+                    "if ( params.trimSlidingWindow.toString().split(\":\")"
+                    ".size() != 2 )"
+                    "{ exit 1, \"'trimSlidingWindow' parameter must contain"
+                    "two values separated by a ':'. Provided value: "
+                    "'${params.trimSlidingWindow}' \"}\n"
+                    "if ( !params.trimLeading.toString().isNumber() )"
+                    "{ exit 1, \"'trimLeading' parameter must be a number."
+                    "Provide value: '${params.trimLeading}'\"}\n"
+                    "if ( !params.trimTrailing.toString().isNumber() )"
+                    "{ exit 1, \"'trimTrailing' parameter must be a number."
+                    "Provide value: '${params.trimTrailing}'\"}\n"
+                    "if ( !params.trimMinLength.toString().isNumber() )"
+                    "{ exit 1, \"'trimMinLength' parameter must be a number."
+                    "Provide value: '${params.trimMinLength}'\"}\n"
+                    "IN_trimmomatic_opts = Channel."
+                    "value([params.trimSlidingWindow,"
+                    "params.trimLeading,params.trimTrailing,"
+                    "params.trimMinLength])"
             },
             {
                 "params": "adapters",
@@ -1019,11 +1234,37 @@ class FastqcTrimmomatic(Process):
         self.dependencies = ["integrity_coverage"]
 
         self.params = {
-            "adapters": "'None'",
-            "trimSlidingWindow": "'5:20'",
-            "trimLeading": "3",
-            "trimTrailing": "3",
-            "trimMinLength": "55"
+            "adapters": {
+                "default": "'None'",
+                "description":
+                    "Path to adapters files, if any "
+                    "(default: $params.adapters)"
+            },
+            "trimSlidingWindow": {
+                "default": "'5:20'",
+                "description":
+                    "Perform sliding window trimming, cutting once the "
+                    "average quality within the window falls below a "
+                    "threshold (default: $params.trimSlidingWindow)"
+            },
+            "trimLeading": {
+                "default": "3",
+                "description":
+                    "Cut bases off the start of a read, if below a threshold "
+                    "quality (default: $params.trimLeading"
+            },
+            "trimTrailing": {
+                "default": "3",
+                "description":
+                    "Cut bases of the end of a read, if below a "
+                    "threshold quality (default: $params.trimTrailing)"
+            },
+            "trimMinLength": {
+                "default": "55",
+                "description":
+                    "Drop the read if it is below a specified length "
+                    "(default: $params.trimMinLength)"
+            }
         }
 
         self.secondary_inputs = [
@@ -1033,10 +1274,26 @@ class FastqcTrimmomatic(Process):
             },
             {
                 "params": "trimOpts",
-                "channel": "IN_trimmomatic_opts = "
-                           "Channel.value([params.trimSlidingWindow,"
-                           "params.trimLeading,params.trimTrailing,"
-                           "params.trimMinLength])"
+                "channel":
+                    "// Check sliding window parameter\n"
+                    "if ( params.trimSlidingWindow.toString().split(\":\")"
+                    ".size() != 2 )"
+                    "{ exit 1, \"'trimSlidingWindow' parameter must contain"
+                    "two values separated by a ':'. Provided value: "
+                    "'${params.trimSlidingWindow}' \"}\n"
+                    "if ( !params.trimLeading.toString().isNumber() )"
+                    "{ exit 1, \"'trimLeading' parameter must be a number."
+                    "Provide value: '${params.trimLeading}'\"}\n"
+                    "if ( !params.trimTrailing.toString().isNumber() )"
+                    "{ exit 1, \"'trimTrailing' parameter must be a number."
+                    "Provide value: '${params.trimTrailing}'\"}\n"
+                    "if ( !params.trimMinLength.toString().isNumber() )"
+                    "{ exit 1, \"'trimMinLength' parameter must be a number."
+                    "Provide value: '${params.trimMinLength}'\"}\n"
+                    "IN_trimmomatic_opts = Channel."
+                    "value([params.trimSlidingWindow,"
+                    "params.trimLeading,params.trimTrailing,"
+                    "params.trimMinLength])"
             }
         ]
 
@@ -1086,18 +1343,46 @@ class ProcessSkesa(Process):
         self.output_type = "fasta"
 
         self.params = {
-            "skesaMinKmerCoverage": 2,
-            "skesaMinContigLen": 200,
-            "skesaMaxContigs": 100
+            "skesaMinKmerCoverage": {
+                "default": 2,
+                "description":
+                    "Minimum contigs K-mer coverage. After assembly only keep"
+                    " contigs with reported k-mer coverage equal or above "
+                    "this value (default: $params.skesaMinKmerCoverage)"
+            },
+            "skesaMinContigLen": {
+                "default": 200,
+                "description":
+                    "Filter contigs for length greater or equal than this "
+                    "value (default: $params.skesaMinContigLen)"
+            },
+            "skesaMaxContigs": {
+                "default": 100,
+                "description":
+                    "Maximum number of contigs per 1.5 Mb of expected "
+                    "genome size (default: $params.skesaMaxContigs)"
+            }
         }
 
         self.secondary_inputs = [
             {
                 "params": "processSkesaOpts",
-                "channel": "IN_process_skesa_opts = "
-                           "Channel.value([params.skesaMinContigLen,"
-                           "params.skesaMinKmerCoverage,"
-                           "params.skesaMaxContigs])"
+                "channel":
+                    "if ( !params.skesaMinKmerCoverage.toString().isNumber() )"
+                    "{ exit 1, \"'skesaMinKmerCoverage' parameter must "
+                    "be a number. Provided value: "
+                    "${params.skesaMinKmerCoverage}\"}\n"
+                    "if ( !params.skesaMinContigLen.toString().isNumber() )"
+                    "{ exit 1, \"'skesaMinContigLen' parameter must "
+                    "be a number. Provided value: "
+                    "${params.skesaMinContigLen}\"}\n"
+                    "if ( !params.skesaMaxContigs.toString().isNumber() )"
+                    "{ exit 1, \"'skesaMaxContigs' parameter must "
+                    "be a number. Provided value: "
+                    "${params.skesaMaxContigs}\"}\n"
+                    "IN_process_skesa_opts = Channel"
+                    ".value([params.skesaMinContigLen,"
+                    "params.skesaMinKmerCoverage,params.skesaMaxContigs])"
             }
         ]
 
@@ -1135,22 +1420,57 @@ class Spades(Process):
         self.dependencies = ["integrity_coverage"]
 
         self.params = {
-            "spadesMinCoverage": 2,
-            "spadesMinKmerCoverage": 2,
-            "spadesKmers": "'auto'",
+            "spadesMinCoverage": {
+                "default": 2,
+                "description":
+                    "The minimum number of reads to consider an edge in the"
+                    " de Bruijn graph during the assembly (default: "
+                    "$params.spadesMinCoverage)"
+            },
+            "spadesMinKmerCoverage": {
+                "default": 2,
+                "description":
+                    "Minimum contigs K-mer coverage. After assembly only "
+                    "keep contigs with reported k-mer coverage equal or "
+                    "above this value (default: "
+                    "$params.spadesMinKmerCoverage)"
+            },
+            "spadesKmers": {
+                "default": "'auto'",
+                "description":
+                    "If 'auto' the SPAdes k-mer lengths will be determined "
+                    "from the maximum read length of each assembly. If "
+                    "'default', SPAdes will use the default k-mer lengths. "
+                    "(default: $params.spadesKmers)"
+            }
         }
 
         self.secondary_inputs = [
             {
                 "params": "spadesOpts",
-                "channel": "IN_spades_opts = Channel.value("
-                           "[params.spadesMinCoverage,"
-                           "params.spadesMinKmerCoverage])"
+                "channel":
+                    "if ( !params.spadesMinCoverage.toString().isNumber() )"
+                    "{ exit 1, \"'spadesMinCoverage' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMinCoverage}\"}\n"
+                    "if ( !params.spadesMinKmerCoverage.toString().isNumber())"
+                    "{ exit 1, \"'spadesMinKmerCoverage' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMinKmerCoverage}\"}\n"
+                    "IN_spades_opts = Channel"
+                    ".value([params.spadesMinCoverage,"
+                    "params.spadesMinKmerCoverage])"
             },
             {
                 "params": "spadesKmers",
-                "channel": "IN_spades_kmers = "
-                           "Channel.value(params.spadesKmers)"
+                "channel":
+                    "if ( params.spadesKmers.toString().split(\" \").size() "
+                    "<= 1 )"
+                    "{ if (params.spadesKmers.toString() != 'auto'){"
+                    "exit 1, \"'spadesKmers' parameter must be a sequence "
+                    "of space separated numbers or 'auto'. Provided "
+                    "value: ${params.spadesKmers}\"} }\n"
+                    "IN_spades_kmers = Channel.value(params.spadesKmers)"
             }
         ]
 
@@ -1182,18 +1502,46 @@ class ProcessSpades(Process):
         self.output_type = "fasta"
 
         self.params = {
-            "spadesMinKmerCoverage": 2,
-            "spadesMinContigLen": 200,
-            "spadesMaxContigs": 100
+            "spadesMinKmerCoverage": {
+                "default": 2,
+                "description":
+                    "Minimum contigs K-mer coverage. After assembly only keep"
+                    " contigs with reported k-mer coverage equal or above "
+                    "this value (default: $params.spadesMinKmerCoverage)"
+            },
+            "spadesMinContigLen": {
+                "default": 200,
+                "description":
+                    "Filter contigs for length greater or equal than this "
+                    "value (default: $params.spadesMinContigLen)"
+            },
+            "spadesMaxContigs": {
+                "default": 100,
+                "description":
+                    "Maximum number of contigs per 1.5 Mb of expected "
+                    "genome size (default: $params.spadesMaxContigs)"
+            }
         }
 
         self.secondary_inputs = [
             {
                 "params": "processSpadesOpts",
-                "channel": "IN_process_spades_opts = "
-                           "Channel.value([params.spadesMinContigLen,"
-                           "params.spadesMinKmerCoverage,"
-                           "params.spadesMaxContigs])"
+                "channel":
+                    "if ( !params.spadesMinKmerCoverage.toString().isNumber())"
+                    "{ exit 1, \"'spadesMinKmerCoverage' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMinKmerCoverage}\"}\n"
+                    "if ( !params.spadesMinContigLen.toString().isNumber() )"
+                    "{ exit 1, \"'spadesMinContigLen' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMinContigLen}\"}\n"
+                    "if ( !params.spadesMaxContigs.toString().isNumber() )"
+                    "{ exit 1, \"'spadesMaxContigs' parameter must "
+                    "be a number. Provided value: "
+                    "${params.spadesMaxContigs}\"}\n"
+                    "IN_process_spades_opts = Channel"
+                    ".value([params.spadesMinContigLen, "
+                    "params.spadesMinKmerCoverage, params.spadesMaxContigs])"
             }
         ]
 
@@ -1237,21 +1585,51 @@ class AssemblyMapping(Process):
         self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
 
         self.params = {
-            "minAssemblyCoverage": "'auto'",
-            "AMaxContigs": 100,
-            "genomeSize": 2.1
+            "minAssemblyCoverage": {
+                "default": "'auto'",
+                "description":
+                    "In auto, the default minimum coverage for each "
+                    "assembled contig is 1/3 of the assembly mean coverage or"
+                    " 10x, if the mean coverage is below 10x (default: "
+                    "$params.minAssemblyCoverage)"
+            },
+            "AMaxContigs": {
+                "default": 100,
+                "description":
+                    "A warning is issues if the number of contigs is over"
+                    "this threshold"
+            },
+            "genomeSize": {
+                "default": 2.1,
+                "description":
+                    "Genome size estimate for the samples. It is used to "
+                    "check the ratio of contig number per genome MB "
+                    "(default: $params.genomeSize)"
+            }
         }
 
         self.secondary_inputs = [
             {
                 "params": "assemblyMappingOpts",
-                "channel": "IN_assembly_mapping_opts = "
-                           "Channel.value([params.minAssemblyCoverage,"
-                           "params.AMaxContigs])"
+                "channel":
+                    "if ( !params.minAssemblyCoverage.toString().isNumber() )"
+                    "{ if (params.minAssemblyCoverage.toString() != 'auto'){"
+                    "exit 1, \"'minAssemblyCoverage' parameter must be a"
+                    " number or 'auto'. Provided value: "
+                    "${params.minAssemblyCoverage}\"} }\n"
+                    "if ( !params.AMaxContigs.toString().isNumber() )"
+                    "{ exit 1, \"'AMaxContigs' parameter must be a number."
+                    "Provide value: '${params.AMaxContigs}'\"}\n"
+                    "IN_assembly_mapping_opts = Channel"
+                    ".value([params.minAssemblyCoverage,params.AMaxContigs])"
             },
             {
                 "params": "genomeSize",
-                "channel": "IN_genome_size = Channel.value(params.genomeSize)"
+                "channel":
+                    "if ( !params.genomeSize.toString().isNumber() )"
+                    "{ exit 1, \"'genomeSize' parameter must be a number."
+                    "Provide value: '${params.genomeSize}'\"}\n"
+                    "IN_genome_size = Channel.value(params.genomeSize)"
             }
         ]
 
@@ -1373,6 +1751,14 @@ class Abricate(Process):
 
         self.status_channels = ["STATUS_abricate"]
 
+        self.params = {
+            "abricateDatabases": {
+                "default": '["resfinder", "card", "vfdb", "plasmidfinder", '
+                           '"virulencefinder"]',
+                "description": "Specify the databases for abricate."
+            }
+        }
+
         self.link_start = None
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
@@ -1386,11 +1772,6 @@ class Abricate(Process):
                 "container": "ummidock/abricate",
                 "version": "0.8.0-1"
             }
-        }
-
-        self.params = {
-            "abricateDatabases": '["resfinder", "card", "vfdb", '
-                                 '"plasmidfinder", "virulencefinder"]'
         }
 
 
@@ -1468,7 +1849,6 @@ class Chewbbaca(Process):
                 "cpus": 4,
                 "container": "mickaelsilva/chewbbaca_py3",
                 "version": "latest",
-                "queue": "chewBBACA"
             },
             "chewbbacaExtractMLST": {
                 "container": "mickaelsilva/chewbbaca_py3",
@@ -1477,16 +1857,81 @@ class Chewbbaca(Process):
         }
 
         self.params = {
-            "chewbbacaRun": "true",
-            "chewbbacaQueue": "null",
-            "chewbbacaTraining": "null",
-            "schemaPath": "null",
-            "schemaSelectedLoci": "null",
-            "schemaCore": "null",
-            "chewbbacaJson": "false",
-            "chewbbacaToPhyloviz": "false",
-            "chewbbacaProfilePercentage": 0.95
+            "chewbbacaQueue": {
+                "default": "null",
+                "description":
+                    "Specifiy a queue/partition for chewbbaca. This option"
+                    " is only used for grid schedulers. (default: "
+                    "$params.chewbbacaQueue)"
+            },
+            "chewbbacaTraining": {
+                "default": "null",
+                "description":
+                    "Specify the full path to the prodigal training file "
+                    "of the corresponding species. (default: "
+                    "$params.chewbbacaTraining)"
+            },
+            "schemaPath": {
+                "default": "null",
+                "description":
+                    "The path to the chewbbaca schema directory. (default: "
+                    "$params.schemaPath)"
+            },
+            "schemaSelectedLoci": {
+                "default": "null",
+                "description":
+                    "The path to the selection of loci in the schema "
+                    "directory to be used. If not specified, all loci in the"
+                    " schema will be used. (default: "
+                    "$params.schemaSelectedLoci)"
+            },
+            "schemaCore": {
+                "default": "null",
+                "description": ""
+            },
+            "chewbbacaJson": {
+                "default": "false",
+                "description":
+                    "If set to True, chewbbaca's allele call output will be "
+                    "set to JSON format. (default: $params.chewbbacaJson)"
+            },
+            "chewbbacaToPhyloviz": {
+                "default": "false",
+                "description":
+                    "If set to True, the ExtractCgMLST module of chewbbaca"
+                    " will be executed after the allele calling (default: "
+                    "$params.chewbbacaToPhyloviz)",
+            },
+            "chewbbacaProfilePercentage": {
+                "default": 0.95,
+                "description":
+                    "Specifies the proportion of samples that must be "
+                    "present in a locus to save the profile. (default: "
+                    "$params.chewbbacaProfilePercentage)"
+            }
         }
+
+        self.secondary_inputs = [
+            {
+                "params": "schemaPath",
+                "channel":
+                    "if ( !params.schemaPath ){ exit 1, \"'schemaPath' "
+                    "parameter missing\"}\n"
+                    "if ( params.chewbbacaTraining){"
+                    "if (!file(params.chewbbacaTraining).exists()) {"
+                    "exit 1, \"'chewbbacaTraining' file was not found: "
+                    "'${params.chewbbacaTraining}'\"}}\n"
+                    "if ( params.schemaSelectedLoci){"
+                    "if (!file(params.schemaSelectedLoci).exists()) {"
+                    "exit 1, \"'schemaSelectedLoci' file was not found: "
+                    "'${params.schemaSelectedLoci}'\"}}\n"
+                    "if ( params.schemaCore){"
+                    "if (!file(params.schemaCore).exists()) {"
+                    "exit 1, \"'schemaCore' file was not found: "
+                    "'${params.schemaCore}'\"}}\n"
+                    "IN_schema = Channel.fromPath(params.schemaPath)"
+            }
+        ]
 
 
 class StatusCompiler(Compiler):

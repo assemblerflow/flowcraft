@@ -26,7 +26,7 @@ process chewbbaca_{{ pid }} {
 
     input:
     set fastq_id, file(assembly) from {{ input_channel }}
-    each file(schema) from Channel.fromPath(params.schemaPath)
+    each file(schema) from IN_schema
 
     output:
     file 'chew_results_*'

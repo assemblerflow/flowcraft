@@ -265,7 +265,7 @@ def test_init_process(mock_init):
 
 def test_init_raw_inputs_single(mock_init):
 
-    mock_init.set_raw_inputs({"A": {"channel": "rawChannel",
+    mock_init.set_raw_inputs({"fasta": {"channel": "rawChannel",
                                     "raw_forks": ["A"],
                                     "channel_str": "rawChannel.Channel"}})
 
@@ -275,7 +275,7 @@ def test_init_raw_inputs_single(mock_init):
 
 def test_init_raw_inputs_multi_forks(mock_init):
 
-    mock_init.set_raw_inputs({"A": {"channel": "rawChannel",
+    mock_init.set_raw_inputs({"fastq": {"channel": "rawChannel",
                                     "raw_forks": ["A", "B"],
                                     "channel_str": "rawChannel.Channel"}})
 
@@ -285,10 +285,10 @@ def test_init_raw_inputs_multi_forks(mock_init):
 
 def test_init_multi_raw_inputs(mock_init):
 
-    mock_init.set_raw_inputs({"A": {"channel": "rawChannel",
+    mock_init.set_raw_inputs({"fastq": {"channel": "rawChannel",
                                     "raw_forks": ["A", "B"],
                                     "channel_str": "rawChannel.Channel"},
-                              "B": {"channel": "otherChannel",
+                              "fasta": {"channel": "otherChannel",
                                     "raw_forks": ["C"],
                                     "channel_str": "otherChannel.Channel"}})
 
