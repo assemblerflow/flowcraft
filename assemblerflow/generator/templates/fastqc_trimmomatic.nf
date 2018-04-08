@@ -12,7 +12,7 @@ process fastqc_{{ pid }} {
     val ad from Channel.value('None')
 
     output:
-    set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') optional true into MAIN_fastqc_out_{{ pid }}
+    set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') into MAIN_fastqc_out_{{ pid }}
     file "*html"
     {% with task_name="fastqc" %}
     {%- include "compiler_channels.txt" ignore missing -%}
@@ -124,7 +124,7 @@ process trimmomatic_{{ pid }} {
     val ad from IN_adapters
 
     output:
-    set fastq_id, "${fastq_id}_*trim.fastq.gz" optional true into {{ output_channel }}
+    set fastq_id, "${fastq_id}_*trim.fastq.gz" into {{ output_channel }}
     file 'trimmomatic_report.csv'
     {% with task_name="trimmomatic" %}
     {%- include "compiler_channels.txt" ignore missing -%}

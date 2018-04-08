@@ -22,7 +22,7 @@ process integrity_coverage_{{ pid }} {
         file('*_encoding'),
         file('*_phred'),
         file('*_coverage'),
-        file('*_max_len') optional true into MAIN_integrity
+        file('*_max_len') into MAIN_integrity
     file('*_report') optional true into LOG_report_coverage1
     {% with task_name="integrity_coverage" %}
     {%- include "compiler_channels.txt" ignore missing -%}

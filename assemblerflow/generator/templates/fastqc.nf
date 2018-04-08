@@ -12,7 +12,7 @@ process fastqc2_{{ pid }} {
     val ad from IN_adapters
 
     output:
-    set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') optional true into MAIN_fastqc_out_{{ pid }}
+    set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') into MAIN_fastqc_out_{{ pid }}
     file "*html"
     {% with task_name="fastqc2" %}
     {%- include "compiler_channels.txt" ignore missing -%}
