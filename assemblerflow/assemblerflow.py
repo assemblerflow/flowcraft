@@ -58,10 +58,9 @@ def get_args(args=None):
         "-n", dest="pipeline_name", default="assemblerflow",
         help="Provide a name for your pipeline.")
     build_parser.add_argument(
-        "--include-templates", dest="include_templates", action="store_const",
-        const=True, help="This will copy the necessary templates and lib"
-                          " files to the directory where the nextflow"
-                          " pipeline will be generated")
+        "--pipeline-only", dest="pipeline_only", action="store_true",
+        help="Write only the pipeline files and not the templates, bin, and"
+             " lib folders.")
     build_parser.add_argument(
         "-nd", "--no-dependecy", dest="no_dep", action="store_false",
         help="Do not automatically add dependencies to the pipeline.")
@@ -199,7 +198,8 @@ def build(args):
     nfg.build()
 
     # copy template to cwd, to allow for immediate execution
-    if args.include_templates:
+    print(args.pipeline_only)
+    if not args.pipeline_only:
         copy_project(args.output_nf)
 
     logger.info(colored_print("DONE!", "green_bold"))
