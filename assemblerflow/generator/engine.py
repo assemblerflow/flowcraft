@@ -52,7 +52,7 @@ process_map = {
 """
 dict: Maps the process ids to the corresponding template interface class wit
 the format::
-    
+
     {
         "<template_string>": pc.TemplateClass
     }
@@ -1265,8 +1265,7 @@ class NextflowGenerator:
         self._set_configurations()
 
         logger.info(colored_print(
-            "\tFinished configurations \u2713".format(
-                len(self.secondary_channels))))
+            "\tFinished configurations \u2713"))
 
         for p in self.processes:
             self.template += p.template_str

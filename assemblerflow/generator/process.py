@@ -141,8 +141,8 @@ class Process:
         self.ignore_type = False
         """
         boolean: If True, this process will ignore the input/output type
-        requirements. This attribute is set to True for terminal singleton 
-        forks in the pipeline. 
+        requirements. This attribute is set to True for terminal singleton
+        forks in the pipeline.
         """
 
         self.ignore_pid = False
@@ -220,11 +220,11 @@ class Process:
         """
 
         self.main_forks = []
-        """                                                                                                                                                                                                          
-        list: List of the channels onto which the main output should be              
-        forked into. They will be automatically added to the                         
-        :attr:`~Process.main_forks` attribute when setting the secondary             
-        channels                                                                     
+        """
+        list: List of the channels onto which the main output should be
+        forked into. They will be automatically added to the
+        :attr:`~Process.main_forks` attribute when setting the secondary
+        channels
         """
 
         self.secondary_inputs = []
@@ -233,7 +233,7 @@ class Process:
         parameters. This dictionary should contain two key:value pairs
         with the ``params`` key, containing the parameter name, and the
         ``channel`` key, containing the nextflow channel definition::
-        
+
             {
                 "params": "pathoSpecies",
                 "channel": "IN_pathoSpecies = Channel.value(params.pathoSpecies)"
@@ -266,7 +266,7 @@ class Process:
         """
         dict: Specifies the directives (cpus, memory, container) for each
         nextflow process in the template. If specified, this directives
-        will be added to the nextflow configuration file. Otherwise, 
+        will be added to the nextflow configuration file. Otherwise,
         the default values for cpus and memory will be used. In the case
         of containers, they will not run inside any container. 
         

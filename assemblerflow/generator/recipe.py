@@ -1,8 +1,6 @@
 try:
-    from generator.engine import process_map
     from generator.process_details import colored_print
 except ImportError:
-    from assemblerflow.generator.engine import process_map
     from assemblerflow.generator.process_details import colored_print
 
 from collections import OrderedDict
