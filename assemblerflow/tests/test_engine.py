@@ -667,3 +667,72 @@ def test_run_time_directives_invalid2():
 
     with pytest.raises(eh.ProcessError):
         eg.NextflowGenerator(con, "teste.nf")
+
+
+def test_automatic_dependency():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "spades", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert nf.processes[1].template == "integrity_coverage"
+
+
+def test_automatic_dependency_2():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "spades", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert nf.processes[1].output_channel == nf.processes[2].input_channel
+
+
+def test_automatic_dependency_3():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "spades", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert [nf.processes[1].parent_lane, nf.processes[2].parent_lane] == \
+           [None, 1]
+
+
+def test_automatic_dependency_wfork():
+
+    con = [{"input": {"process": "__init__", "lane": 0},
+            "output": {"process": "spades", "lane": 1}},
+           {"input": {"process": "__init__", "lane": 0},
+            "output": {"process": "integrity_coverage", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert nf.processes[1].template == "integrity_coverage"
+
+
+def test_automatic_dependency_wfork_2():
+
+    con = [{"input": {"process": "__init__", "lane": 0},
+            "output": {"process": "spades", "lane": 1}},
+           {"input": {"process": "__init__", "lane": 0},
+            "output": {"process": "integrity_coverage", "lane": 2}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf._set_channels()
+
+    assert len(nf.main_raw_inputs["fastq"]["raw_forks"]) == 2
+
+
+def test_automatic_dependency_multi():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "trimmomatic", "lane": 1}},
+           {"input": {"process": "trimmomatic", "lane": 1},
+            "output": {"process": "spades", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert len([x for x in nf.processes
+                if x.template == "integrity_coverage"]) == 1
