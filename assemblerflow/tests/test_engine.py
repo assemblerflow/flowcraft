@@ -669,6 +669,15 @@ def test_run_time_directives_invalid2():
         eg.NextflowGenerator(con, "teste.nf")
 
 
+def test_not_automatic_dependency():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "spades", "lane": 1}}]
+
+    with pytest.raises(SystemExit):
+        eg.NextflowGenerator(con, "teste.nf", auto_dependency=False)
+
+
 def test_automatic_dependency():
 
     con = [{"input": {"process": "__init__", "lane": 1},
