@@ -440,6 +440,8 @@ class NextflowGenerator:
         if not p.parent_lane:
             p.parent_lane = outlane
             dependency_proc.parent_lane = None
+        else:
+            dependency_proc.parent_lane = outlane
 
         self.processes.append(dependency_proc)
 

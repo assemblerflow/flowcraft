@@ -745,3 +745,15 @@ def test_automatic_dependency_multi():
 
     assert len([x for x in nf.processes
                 if x.template == "integrity_coverage"]) == 1
+
+
+def test_automatic_dependency_non_raw():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "spades", "lane": 1}},
+           {"input": {"process": "spades", "lane": 1},
+            "output": {"process": "pilon", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    assert nf.processes[2].parent_lane == 1
