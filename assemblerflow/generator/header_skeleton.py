@@ -34,6 +34,5 @@ if (params.containsKey("accessions")){
     infoMap.put("accessions", lines)
 }
 
-println infoMap
 Help.start_info(infoMap, "$workflow.start", "$workflow.profile")
     """

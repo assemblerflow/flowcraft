@@ -198,7 +198,6 @@ def build(args):
     nfg.build()
 
     # copy template to cwd, to allow for immediate execution
-    print(args.pipeline_only)
     if not args.pipeline_only:
         copy_project(args.output_nf)
 
