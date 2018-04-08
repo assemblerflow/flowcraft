@@ -15,12 +15,6 @@ A [nextflow](https://www.nextflow.io/) pipeline assembler for bacterial genomics
 What if building your own genomics pipeline would be as simple as:
 
 ```
-assemblerflow.py build -t "fastqc spades pilon" -o my_pipeline.nf
-```
-
-Or maybe with trimming and a different assembler?
-
-```
 assemblerflow.py build -t "trimmomatic fastqc skesa pilon abricate" -o my_pipeline.nf
 ```
 
