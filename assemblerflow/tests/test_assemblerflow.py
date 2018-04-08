@@ -16,36 +16,38 @@ def tmp():
 
 def test_list_short():
 
-    args = af.get_args(["-l"])
+    sys.argv.append(1)
+    args = af.get_args(["build", "-l"])
 
     with pytest.raises(SystemExit):
-        af.run(args)
+        af.build(args)
 
 
 def test_list_long():
 
-    args = af.get_args(["-L"])
+    sys.argv.append(1)
+    args = af.get_args(["build", "-L"])
 
     with pytest.raises(SystemExit):
-        af.run(args)
+        af.build(args)
 
 
 def test_check():
 
-    args = af.get_args(["-t 'A B C'", "-c", "-o teste.nf"])
     sys.argv.append(1)
+    args = af.get_args(["build", "-t 'A B C'", "-c", "-o teste.nf"])
 
     with pytest.raises(SystemExit):
-        af.run(args)
+        af.build(args)
 
 
 def test_check_invalid():
 
-    args = af.get_args(["-t 'A B C()'", "-c", "-o teste.nf"])
     sys.argv.append(1)
+    args = af.get_args(["build", "-t",  "'A B C()'", "-c", "-o teste.nf"])
 
     with pytest.raises(SystemExit):
-        af.run(args)
+        af.build(args)
 
 
 def test_build_file(tmp):
@@ -53,8 +55,9 @@ def test_build_file(tmp):
     p = os.path.join(os.path.abspath(tmp), "teste.nf")
     sys.argv.append(1)
 
-    args = af.get_args(["-t integrity_coverage fastqc", "-o", "{}".format(p)])
-    af.run(args)
+    args = af.get_args(["build", "-t integrity_coverage fastqc", "-o",
+                        "{}".format(p)])
+    af.build(args)
 
     assert sorted(os.listdir(tmp)) == ["containers.config", "lib",
                                        "params.config", "resources.config",
@@ -63,9 +66,9 @@ def test_build_file(tmp):
 
 def test_build_file_2(tmp):
 
-    p = os.path.join(os.path.abspath(tmp), "teste.nf")
     sys.argv.append(1)
+    p = os.path.join(os.path.abspath(tmp), "teste.nf")
 
-    args = af.get_args(["-t integrity_coverage fastqc", "-o", "{}".format(p),
-                        "--include-templates"])
-    af.run(args)
+    args = af.get_args(["build", "-t integrity_coverage fastqc", "-o",
+                        "{}".format(p), "--include-templates"])
+    af.build(args)

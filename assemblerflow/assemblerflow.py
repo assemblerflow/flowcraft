@@ -15,11 +15,13 @@ from distutils.dir_util import copy_tree
 from os.path import join, dirname
 
 try:
+    from __init__ import __version__, __build__
     from generator.engine import NextflowGenerator, process_map
     from generator.recipe import brew_recipe
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
 except ImportError:
+    from assemblerflow import __version__, __build__
     from assemblerflow.generator.engine import NextflowGenerator, process_map
     from assemblerflow.generator.recipe import brew_recipe
     from assemblerflow.generator.pipeline_parser import parse_pipeline, \
@@ -33,67 +35,85 @@ logger = logging.getLogger("main")
 def get_args(args=None):
 
     parser = argparse.ArgumentParser(
-        description="Nextflow pipeline generator")
+        description="A Nextflow pipeline generator")
 
-    group_lists = parser.add_mutually_exclusive_group()
+    subparsers = parser.add_subparsers(help="Select which mode to run",
+                                       dest="main_op")
 
-    parser.add_argument("-t", "--tasks", type=str, dest="tasks",
-                        help="Space separated tasks of the pipeline")
-    parser.add_argument("-r", "--recipe", dest="recipe",
-                        help="Use one of the available recipes")
-    parser.add_argument("-o", dest="output_nf",
-                        help="Name of the pipeline file")
-    parser.add_argument("-n", dest="pipeline_name", default="assemblerflow",
-                        help="Provide a name for your pipeline.")
-    parser.add_argument("--include-templates", dest="include_templates",
-                        action="store_const", const=True,
-                        help="This will copy the necessary templates and lib"
-                             " files to the directory where the nextflow"
-                             " pipeline will be generated")
-    parser.add_argument("-nd", "--no-dependecy", dest="no_dep",
-                        action="store_false",
-                        help="Do not automatically add dependencies to the"
-                             "pipeline.")
-    parser.add_argument("-c", "--check-pipeline", dest="check_only",
-                        action="store_const", const=True,
-                        help="Check only the validity of the pipeline"
-                             "string and exit.")
-    group_lists.add_argument("-L", "--detailed-list", action="store_const",
-                             dest="detailed_list", const=True,
-                             help="Print a detailed description for all the "
-                                  "currently available processes")
-    group_lists.add_argument("-l", "--short-list", action="store_const",
-                             dest="short_list", const=True,
-                             help="Print a short list of the currently"
-                                  " available processes")
-    parser.add_argument("--debug", dest="debug", action="store_const",
-                        const=True, help="Set log to debug mode")
+    # BUILD MODE
+    build_parser = subparsers.add_parser("build",
+                                         help="Build a nextflow pipeline")
+
+    group_lists = build_parser.add_mutually_exclusive_group()
+
+    build_parser.add_argument(
+        "-t", "--tasks", type=str, dest="tasks",
+        help="Space separated tasks of the pipeline")
+    build_parser.add_argument(
+        "-r", "--recipe", dest="recipe",
+        help="Use one of the available recipes")
+    build_parser.add_argument(
+        "-o", dest="output_nf", help="Name of the pipeline file")
+    build_parser.add_argument(
+        "-n", dest="pipeline_name", default="assemblerflow",
+        help="Provide a name for your pipeline.")
+    build_parser.add_argument(
+        "--include-templates", dest="include_templates", action="store_const",
+        const=True, help="This will copy the necessary templates and lib"
+                          " files to the directory where the nextflow"
+                          " pipeline will be generated")
+    build_parser.add_argument(
+        "-nd", "--no-dependecy", dest="no_dep", action="store_false",
+        help="Do not automatically add dependencies to the pipeline.")
+    build_parser.add_argument(
+        "-c", "--check-pipeline", dest="check_only", action="store_const",
+        const=True, help="Check only the validity of the pipeline "
+                         "string and exit.")
+    group_lists.add_argument(
+        "-L", "--detailed-list", action="store_const", dest="detailed_list",
+        const=True, help="Print a detailed description for all the "
+                         "currently available processes")
+    group_lists.add_argument(
+        "-l", "--short-list", action="store_const", dest="short_list",
+        const=True, help="Print a short list of the currently "
+                         "available processes")
+
+    # GENERAL OPTIONS
+    parser.add_argument(
+        "--debug", dest="debug", action="store_const", const=True,
+        help="Set log to debug mode")
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
 
     return parser.parse_args(args)
 
 
-def check_arguments(args):
+def validate_build_arguments(args):
 
-    passed = True
+    if not args.tasks and not args.recipe and not args.check_only \
+            and not args.detailed_list and not args.short_list:
+        logger.error(colored_print(
+            "At least one of these options is required: -t, -r, -c, "
+            "-l, -L", "red_bold"))
+        sys.exit(1)
 
-    # Check if no args are passed
-    if len(sys.argv) == 1:
-        logger.info(colored_print("Please provide one of the supported "
-                                  "arguments!", "red_bold"))
-        passed = False
+    if (args.tasks or args.recipe) and not args.output_nf:
+        logger.error(colored_print(
+            "Please provide the path and name of the pipeline file using the"
+            " -o option.", "red_bold"))
+        sys.exit(1)
 
-    # Check if output argument is valid
-    # Check if output file was provided, if it is not a directory, and if
-    # the directory exists
-    if not args.output_nf \
-            or os.path.isdir(args.output_nf) \
-            or (os.path.dirname(args.output_nf) and
-                not os.path.isdir(os.path.dirname(args.output_nf))):
-        logger.info(colored_print("Please provide a valid output file and "
-                                  "location!", "red_bold"))
-        passed = False
-
-    return passed
+    if args.output_nf:
+        opath = args.output_nf
+        if os.path.dirname(opath):
+            parent_dir = os.path.dirname(opath)
+            if not os.path.exists(parent_dir):
+                logger.error(colored_print(
+                    "The provided directory '{}' does not exist.".format(
+                        parent_dir), "red_bold"))
+                sys.exit(1)
 
 
 def copy_project(path):
@@ -128,35 +148,17 @@ def copy_project(path):
                 join(target_dir, "nextflow.config"))
 
 
-def run(args):
-
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-
-        # create formatter
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    else:
-        logger.setLevel(logging.INFO)
-
-        # create special formatter for info logs
-        formatter = logging.Formatter('%(message)s')
-
-    # create console handler and set level to debug
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.DEBUG)
-
-    # add formatter to ch
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+def build(args):
 
     welcome = [
         "========= A S S E M B L E R F L O W =========",
+        "Build mode\n"
         "version: {}".format(__version__),
         "build: {}".format(__build__),
         "============================================="
     ]
+
+    validate_build_arguments(args)
 
     logger.info(colored_print("\n".join(welcome), "green_bold"))
 
@@ -170,12 +172,6 @@ def run(args):
 
     # used for lists print
     proc_collector(process_map, args, list_processes)
-
-    # Validate arguments. This must be done after the process collector part
-    passed = check_arguments(args)
-
-    if not passed:
-        return
 
     logger.info(colored_print("Resulting pipeline string:\n"))
     logger.info(colored_print(pipeline_string + "\n"))
@@ -212,7 +208,30 @@ def run(args):
 def main():
 
     args = get_args()
-    run(args)
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+
+        # create formatter
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    else:
+        logger.setLevel(logging.INFO)
+
+        # create special formatter for info logs
+        formatter = logging.Formatter('%(message)s')
+
+    # create console handler and set level to debug
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+
+    # add formatter to ch
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    if args.main_op == "build":
+        build(args)
 
 
 if __name__ == '__main__':

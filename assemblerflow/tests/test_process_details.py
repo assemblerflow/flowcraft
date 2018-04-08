@@ -17,7 +17,7 @@ def test_color_print():
 
 def test_long_list():
 
-    arguments = af.get_args(["-L"])
+    arguments = af.get_args(["build", "-L"])
 
     with pytest.raises(SystemExit):
         pd.proc_collector(process_map, arguments)
@@ -25,7 +25,7 @@ def test_long_list():
 
 def test_short_list():
 
-    arguments = af.get_args(["-l"])
+    arguments = af.get_args(["build", "-l"])
 
     with pytest.raises(SystemExit):
         pd.proc_collector(process_map, arguments)
