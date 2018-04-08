@@ -17,6 +17,7 @@ LANE_TOKEN = "|"
 # Token that closes a fork
 CLOSE_TOKEN = ")"
 
+
 def remove_inner_forks(text):
     """Recursively removes nested brackets
 

@@ -50,6 +50,10 @@ def get_args(args=None):
                         help="This will copy the necessary templates and lib"
                              " files to the directory where the nextflow"
                              " pipeline will be generated")
+    parser.add_argument("-nd", "--no-dependecy", dest="no_dep",
+                        action="store_false",
+                        help="Do not automatically add dependencies to the"
+                             "pipeline.")
     parser.add_argument("-c", "--check-pipeline", dest="check_only",
                         action="store_const", const=True,
                         help="Check only the validity of the pipeline"
@@ -66,17 +70,6 @@ def get_args(args=None):
                         const=True, help="Set log to debug mode")
 
     return parser.parse_args(args)
-
-
-def check_arguments(args):
-
-    # Check if no args are passed
-    if len(sys.argv) == 1:
-        logger.info(colored_print("Please provide one of the supported "
-                                  "arguments!", "red_bold"))
-        return False
-
-    return True
 
 
 def check_arguments(args):
@@ -201,7 +194,8 @@ def run(args):
 
     nfg = NextflowGenerator(process_connections=pipeline_list,
                             nextflow_file=args.output_nf,
-                            pipeline_name=args.pipeline_name)
+                            pipeline_name=args.pipeline_name,
+                            auto_dependency=args.no_dep)
 
     logger.info(colored_print("Building your awesome pipeline..."))
 

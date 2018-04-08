@@ -62,7 +62,8 @@ the format::
 class NextflowGenerator:
 
     def __init__(self, process_connections, nextflow_file,
-                 pipeline_name="assemblerflow"):
+                 pipeline_name="assemblerflow", ignore_dependencies=False,
+                 auto_dependency=True):
 
         self.processes = []
 
@@ -92,7 +93,8 @@ class NextflowGenerator:
         # Builds the connections in the processes, which parses the
         # process_connections dictionary into the self.processes attribute
         # list.
-        self._build_connections(process_connections)
+        self._build_connections(process_connections, ignore_dependencies,
+                                auto_dependency)
 
         self.nf_file = nextflow_file
         """
@@ -220,7 +222,8 @@ class NextflowGenerator:
 
         return process_name, directives
 
-    def _build_connections(self, process_list):
+    def _build_connections(self, process_list, ignore_dependencies,
+                           auto_dependency):
         """Parses the process connections dictionaries into a process list
 
         This method is called upon instantiation of the NextflowGenerator
@@ -255,20 +258,9 @@ class NextflowGenerator:
             if out_lane > self.lanes:
                 self.lanes = out_lane
 
-            # Get process names
-            try:
-                _p_in_name = con["input"]["process"]
-                p_in_name, _ = self._parse_process_name(_p_in_name)
-                logger.debug("[{}] Input channel: {}".format(p, p_in_name))
-                _p_out_name = con["output"]["process"]
-                p_out_name, out_directives = self._parse_process_name(
-                    _p_out_name)
-                logger.debug("[{}] Output channel: {}".format(p, p_out_name))
-            # Exception is triggered when the process name/directives cannot
-            # be processes.
-            except eh.ProcessError as ex:
-                logger.error(colored_print(ex.value, "red_bold"))
-                sys.exit(1)
+            # Get process names and directives for the output process
+            p_in_name, p_out_name, out_directives = self._get_process_names(
+                con, p)
 
             # Check if process is available or correctly named
             if p_out_name not in process_map:
@@ -346,10 +338,141 @@ class NextflowGenerator:
                             p, parent_process.output_channel))
                     out_process.input_channel = parent_process.output_channel
 
+            # Check for process dependencies
+            if out_process.dependencies and not ignore_dependencies:
+                logger.debug("[{}] Dependencies found for process '{}': "
+                             "{}".format(p, p_out_name,
+                                         out_process.dependencies))
+                parent_lanes = self._get_fork_tree(out_lane)
+                for dep in out_process.dependencies:
+                    if not self._search_tree_backwards(dep, parent_lanes):
+                        if auto_dependency:
+                            self._add_dependency(
+                                out_process, dep, in_lane, out_lane, p)
+                        else:
+                            logger.error(colored_print(
+                                "\nThe following dependency of the process"
+                                " '{}' is missing: {}".format(p_out_name, dep),
+                                "red_bold"))
+                            sys.exit(1)
+
             self.processes.append(out_process)
 
         logger.debug("Completed connections: {}".format(self.processes))
         logger.debug("Fork tree: {}".format(self._fork_tree))
+
+    def _get_process_names(self, con, pid):
+        """Returns the input/output process names and output process directives
+
+        Parameters
+        ----------
+        con : dict
+            Dictionary with the connection information between two processes.
+
+        Returns
+        -------
+        input_name : str
+            Name of the input process
+        output_name : str
+            Name of the output process
+        output_directives : dict
+            Parsed directives from the output process
+        """
+
+        try:
+            _p_in_name = con["input"]["process"]
+            p_in_name, _ = self._parse_process_name(_p_in_name)
+            logger.debug("[{}] Input channel: {}".format(pid, p_in_name))
+            _p_out_name = con["output"]["process"]
+            p_out_name, out_directives = self._parse_process_name(
+                _p_out_name)
+            logger.debug("[{}] Output channel: {}".format(pid, p_out_name))
+        # Exception is triggered when the process name/directives cannot
+        # be processes.
+        except eh.ProcessError as ex:
+            logger.error(colored_print(ex.value, "red_bold"))
+            sys.exit(1)
+
+        return p_in_name, p_out_name, out_directives
+
+    def _add_dependency(self, p, template, inlane, outlane, pid):
+        """Automatically Adds a dependency of a process.
+
+        This method adds a template to the process list attribute as a
+        dependency. It will adapt the input lane, output lane and process
+        id of the process that depends on it.
+
+        Parameters
+        ----------
+        p : Process
+            Process class that contains the dependency.
+        template : str
+            Template name of the dependency.
+        inlane : int
+            Input lane.
+        outlane : int
+            Output lane.
+        pid : int
+            Process ID.
+        """
+
+        dependency_proc = process_map[template](template=template)
+
+        if dependency_proc.input_type != p.input_type:
+            logger.error("Cannot automatically add dependency with different"
+                         " input type. Input type of process '{}' is '{}."
+                         " Input type of dependency '{}' is '{}'".format(
+                            p.template, p.input_type, template,
+                            dependency_proc.input_type))
+
+        input_suf = "{}_{}_dep".format(inlane, pid)
+        output_suf = "{}_{}_dep".format(outlane, pid)
+        dependency_proc.set_main_channel_names(input_suf, output_suf, outlane)
+
+        # To insert the dependency process before the current process, we'll
+        # need to move the input channel name of the later to the former, and
+        # set a new connection between the dependency and the process.
+        dependency_proc.input_channel = p.input_channel
+        p.input_channel = dependency_proc.output_channel
+
+        # If the current process was the first in the pipeline, change the
+        # lanes so that the dependency becomes the first process
+        if not p.parent_lane:
+            p.parent_lane = outlane
+            dependency_proc.parent_lane = None
+
+        self.processes.append(dependency_proc)
+
+    def _search_tree_backwards(self, template, parent_lanes):
+        """Searches the process tree backwards in search of a provided process
+
+        The search takes into consideration the provided parent lanes and
+        searches only those
+
+        Parameters
+        ----------
+        template : str
+            Name of the process template attribute being searched
+        parent_lanes : list
+            List of integers with the parent lanes to be searched
+
+        Returns
+        -------
+        bool
+            Returns True when the template is found. Otherwise returns False.
+        """
+
+        for p in self.processes[::-1]:
+
+            # Ignore process in different lanes
+            if p.lane not in parent_lanes:
+                continue
+
+            # template found
+            if p.template == template:
+                return True
+
+        return False
 
     @staticmethod
     def _test_connection(parent_process, child_process):
@@ -517,7 +640,7 @@ class NextflowGenerator:
                 "{}.mix({})".format(p.input_channel, dest_channel)
             )
 
-    def _get_fork_tree(self, p):
+    def _get_fork_tree(self, lane):
         """
 
         Parameters
@@ -528,7 +651,6 @@ class NextflowGenerator:
         -------
         """
 
-        lane = p.lane
         parent_lanes = [lane]
 
         while True:
@@ -556,7 +678,7 @@ class NextflowGenerator:
         """
 
         output_type = link["link"].lstrip("_")
-        parent_forks = self._get_fork_tree(p)
+        parent_forks = self._get_fork_tree(p.lane)
         fork_sink = "{}_{}".format(link["alias"], p.pid)
 
         for proc in self.processes[::-1]:
@@ -619,7 +741,7 @@ class NextflowGenerator:
             for l in p.link_end:
 
                 # Get list of lanes from the parent forks.
-                parent_forks = self._get_fork_tree(p)
+                parent_forks = self._get_fork_tree(p.lane)
 
                 # Parse special case where the secondary channel links with
                 # the main output of the specified type
