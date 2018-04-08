@@ -4,7 +4,7 @@ process true_coverage_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
 
     input:
     set fastq_id, file(fastq_pair) from {{ input_channel }}

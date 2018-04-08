@@ -4,7 +4,7 @@ process assembly_mapping_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
 
     input:
     set fastq_id, file(assembly), file(fastq) from {{ input_channel }}.join(_LAST_fastq_{{ pid }})
@@ -62,7 +62,7 @@ process process_assembly_mapping_{{ pid }} {
     {% include "post.txt" ignore missing %}
     {% endwith %}
 
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
     // This process can only use a single CPU
     cpus 1
 

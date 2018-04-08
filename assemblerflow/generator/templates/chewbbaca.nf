@@ -17,7 +17,7 @@ process chewbbaca_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     maxForks 1
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
     scratch true
     if (params.chewbbacaQueue != null) {
         queue "${params.chewbbacaQueue}"

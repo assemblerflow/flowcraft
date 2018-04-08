@@ -4,7 +4,7 @@ process pilon_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
     echo false
     publishDir 'results/assembly/pilon_{{ pid }}/', mode: 'copy', pattern: "*.fasta"
 
@@ -36,7 +36,7 @@ process pilon_report_{{ pid }} {
     {% include "report_post.txt" ignore missing %}
     {% endwith %}
 
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
 
     input:
     set fastq_id, file(assembly), file(coverage_bp) from pilon_report_{{ pid }}.join(SIDE_BpCoverage_{{ pid }})

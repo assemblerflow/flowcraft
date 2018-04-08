@@ -4,7 +4,7 @@ process integrity_coverage_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
     // This process can only use a single CPU
     cpus 1
 

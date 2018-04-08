@@ -4,7 +4,7 @@ process fastqc2_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
     publishDir "reports/fastqc_{{ pid }}/", pattern: "*.html"
 
     input:
@@ -30,7 +30,7 @@ process fastqc2_report_{{ pid }} {
     {% include "post.txt" ignore missing %}
     {% endwith %}
 
-    tag { fastq_id + " getStats" }
+    tag { fastq_id }
     // This process can only use a single CPU
     cpus 1
     publishDir 'reports/fastqc_{{ pid }}/run_2/', pattern: '*summary.txt', mode: 'copy'
