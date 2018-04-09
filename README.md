@@ -47,15 +47,7 @@ Starting pipeline at Sun Apr 08 18:22:24 WEST 2018
 
 [warm up] executor > local
 [7c/eb5f2f] Submitted process > integrity_coverage_1_1 (02AR0553)
-[d9/4de147] Submitted process > report_coverage_1_1
-[9e/b10203] Submitted process > trimmomatic_1_2 (02AR0553)
-[fb/644650] Submitted process > fastqc2_1_3 (02AR0553)
-[8b/797db5] Submitted process > compile_fastqc_status2_1_3
-[f7/5ae81e] Submitted process > skesa_1_4 (02AR0553)
-[44/e1f2c1] Submitted process > assembly_mapping_1_5 (02AR0553)
-[67/12738a] Submitted process > process_assembly_mapping_1_5 (02AR0553)
-[50/018345] Submitted process > pilon_1_6 (02AR0553)
-[d2/8350d4] Submitted process > pilon_report_1_6 (02AR0553)
+(...)
 [31/7d90a1] Submitted process > compile_pilon_report_1_6
 Completed at: Sun Apr 08 18:43:41 WEST 2018
 Duration    : 21m 17s
