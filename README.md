@@ -1,6 +1,7 @@
 # assemblerflow
 
-A [nextflow](https://www.nextflow.io/) pipeline assembler for bacterial genomics.
+A [Nextflow](https://www.nextflow.io/) pipeline assembler for genomics data.
+Pick your modules. Assemble them. Run the pipeline.
 
 ![Nextflow version](https://img.shields.io/badge/nextflow->0.26.0-brightgreen.svg)
 ![Python version](https://img.shields.io/badge/python-3.6-brightgreen.svg)
@@ -49,11 +50,15 @@ Starting pipeline at Sun Apr 08 18:22:24 WEST 2018
 [7c/eb5f2f] Submitted process > integrity_coverage_1_1 (02AR0553)
 (...)
 [31/7d90a1] Submitted process > compile_pilon_report_1_6
+
 Completed at: Sun Apr 08 18:43:41 WEST 2018
 Duration    : 21m 17s
 Success     : true
 Exit status : 0
 ```
+
+Congratulations! You just built and executed your own pipeline with
+only two commands! :tada:
 
 ## Installation
 
