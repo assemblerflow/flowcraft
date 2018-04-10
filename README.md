@@ -8,7 +8,7 @@
 [![Documentation Status](https://readthedocs.org/projects/assemblerflow/badge/?version=latest)](http://assemblerflow.readthedocs.io/en/latest/?badge=latest)
 [![PyPI](https://img.shields.io/pypi/v/assemblerflow.svg)](https://pypi.python.org/pypi/assemblerflow/1.0.0rc3)
 
-A [Nextflow](https://www.nextflow.io/) pipeline assembler for genomics data.
+A [Nextflow](https://www.nextflow.io/) pipeline assembler for genomics.
 Pick your modules. Assemble them. Run the pipeline.
 
 ## The premisse
