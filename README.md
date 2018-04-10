@@ -90,7 +90,7 @@ For a quick and dirty demonstration, see below.
 
 #### Building a pipeline
 
-Assemblerflow comes with a number of ready to use components to build your
+Assemblerflow comes with a number of [ready-to-use components](http://assemblerflow.readthedocs.io/en/latest/available_processes.html) to build your
 own pipeline. Following some basic rules, such as the output type of one process
 must match the input type of the next process, assembling a pipeline is done
 using the `build` mode and the `-t` option:
@@ -99,11 +99,11 @@ using the `build` mode and the `-t` option:
 assemblerflow build -t "trimmomatic spades abricate" -o my_pipeline.nf -n "assembly pipe"
 ```
 
-This command will generated several directories and files that will be
-necessary to run the pipeline automatically, but the main pipeline executable
-file will be `my_pipeline.nf`. This file will contain a linear nextflow pipeline
+This command will generated everything that is necessary to run the
+pipeline automatically, but the main pipeline executable
+file will be `my_pipeline.nf`. This file will contain a nextflow pipeline
 for genome assembly starts with `trimmomatic` and finishes with anti-microbial
-gene annotation using `abricate`. You can check the help of that pipeline
+gene annotation using `abricate`. You can check the options of that pipeline
 using the `help` option:
 
 ```
@@ -118,7 +118,7 @@ Since this pipeline starts with `trimmomatic`, which receives fastq files as inp
 
 Now that we have our nextflow pipeline built, we are ready to executed it by
 providing input data. By default, assemblerflow pipelines will run locally and use
-`singularity` to run the containers of each component. However, this can be
+`singularity` to run the containers of each component. This can be
 changed in multiple ways, but for convenience assemblerflow has already defined
 profiles for most configurations of `executors` and `container` engines.
 
