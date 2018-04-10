@@ -83,6 +83,11 @@ conda install singularity
 
 ## How to use it
 
+The complete user guide of assemblerflow can be found on [readthedocs.org](http://assemblerflow.readthedocs.io/en/latest/?badge=latest).
+For a quick and dirty demonstration, see the quick guide below.
+
+### Quick guide
+
 #### Building a pipeline
 
 Assemblerflow comes with a number of ready to use components to build your
