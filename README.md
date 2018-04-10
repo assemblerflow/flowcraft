@@ -108,6 +108,32 @@ using the `help` option:
 
 ```
 nextflow my_pipeline.nf --help
+
+N E X T F L O W  ~  version 0.28.0
+Launching `my_pipeline.nf` [prickly_keller] - revision: 1b3fec5658
+
+============================================================
+                A S S E M B L Y   P I P E
+============================================================
+Built using assemblerflow v1.0.2
+
+
+Usage:
+    nextflow run my_pipeline.nf
+
+       --fastq                     Path expression to paired-end fastq files. (default: fastq/*_{1,2}.*) (integrity_coverage)
+       --genomeSize                Genome size estimate for the samples. It is used to estimate the coverage and other assembly parameters andchecks (default: 2.1) (integrity_coverage)
+       --minCoverage               Minimum coverage for a sample to proceed. Can be set to0 to allow any coverage (default: 15) (integrity_coverage)
+       --adapters                  Path to adapters files, if any (default: None) (trimmomatic)
+       --trimSlidingWindow         Perform sliding window trimming, cutting once the average quality within the window falls below a threshold (default: 5:20) (trimmomatic)
+       --trimLeading               Cut bases off the start of a read, if below a threshold quality (default: 3 (trimmomatic)
+       --trimTrailing              Cut bases of the end of a read, if below a threshold quality (default: 3) (trimmomatic)
+       --trimMinLength             Drop the read if it is below a specified length (default: 55) (trimmomatic)
+       --spadesMinCoverage         The minimum number of reads to consider an edge in the de Bruijn graph during the assembly (default: 2) (spades)
+       --spadesMinKmerCoverage     Minimum contigs K-mer coverage. After assembly only keep contigs with reported k-mer coverage equal or above this value (default: 2) (spades)
+       --spadesKmers               If 'auto' the SPAdes k-mer lengths will be determined from the maximum read length of each assembly. If 'default', SPAdes will use the default k-mer lengths. (default: auto) (spades)
+       --abricateDatabases         Specify the databases for abricate. (abricate)
+
 ```
 
 This help message is dynamically generated depending on the pipeline you build.
