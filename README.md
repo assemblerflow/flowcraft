@@ -139,6 +139,50 @@ nextflow run my_pipeline --fastq "path/to/fastq/*_{1,2}.*" -profile slurm_sing
 During the execution of the pipeline, the results and reports for each component
 are continuously saved to the `results` and `reports` directory, respectively.
 
+## Why not write just a Nextflow pipeline?
+
+In many cases, building a static nextflow pipeline is sufficient for our goals.
+However, when building our own pipelines, we often felt the need to add dynamism
+to this process, particularly if we take into account how fast new tools arise
+and existing ones change. Our biological goals also change over time and we
+might need different pipelines to answer different questions. Assemblerflow makes
+this very easy, by having a set of pre-made and ready-to-use components that can
+be freely assembled.
+
+For instance, changing the assembly software in a genome assembly pipeline becomes
+as easy as:
+
+```
+# Use spades
+trimmomatic spades pilon
+# Use skesa
+trimmomatic skesa pilon
+```
+
+If you are interested in having some sort of genome annotation, simply add those
+components at the end, using a fork syntax:
+
+```
+# Run prokka and abricate at the end of the assembly
+trimmomatic spades pilon (prokka | abricate)
+```
+
+On the other hand, if you are interest in just perform allele calling for wgMLST,
+simply add `chewbbaca`:
+
+```
+trimmomatic spades pilon chewbbaca
+```
+
+Since nextflow handles parallelism of large sets of data so well, simple pipelines
+of two components are also useful to build:
+
+```
+trimmomatic fastqc
+```
+
+As the number of existing components grow, so does your freedom to build pipelines.
+
 ## Developer guide
 
 ### Adding new components
