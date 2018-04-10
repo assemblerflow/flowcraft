@@ -103,8 +103,14 @@ This command will generated everything that is necessary to run the
 pipeline automatically, but the main pipeline executable
 file will be `my_pipeline.nf`. This file will contain a nextflow pipeline
 for genome assembly starts with `trimmomatic` and finishes with anti-microbial
-gene annotation using `abricate`. You can check the options of that pipeline
-using the `help` option:
+gene annotation using `abricate`.
+
+#### Wait... what about the software parameters?
+
+Each component in the pipeline has it's one set of parameters that can be
+modified before or when executing the pipeline. These parameters are
+described in the documentation of each process and you can check the options
+of your particular pipeline using the `help` option:
 
 ```
 nextflow my_pipeline.nf --help
