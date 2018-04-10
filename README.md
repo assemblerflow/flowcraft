@@ -1,4 +1,4 @@
-# assemblerflow :whale2::package:
+# Assemblerflow :whale2::package:
 
 ![Nextflow version](https://img.shields.io/badge/nextflow->0.26.0-brightgreen.svg)
 ![Python version](https://img.shields.io/badge/python-3.6-brightgreen.svg)
@@ -99,7 +99,7 @@ using the `build` mode and the `-t` option:
 assemblerflow build -t "trimmomatic spades abricate" -o my_pipeline.nf -n "assembly pipe"
 ```
 
-This command will generated everything that is necessary to run the
+This command will generate everything that is necessary to run the
 pipeline automatically, but the main pipeline executable
 file will be `my_pipeline.nf`. This file will contain a nextflow pipeline
 for genome assembly starts with `trimmomatic` and finishes with anti-microbial
@@ -107,7 +107,7 @@ gene annotation using `abricate`.
 
 #### Wait... what about the software parameters?
 
-Each component in the pipeline has it's one set of parameters that can be
+Each component in the pipeline has its own set of parameters that can be
 modified before or when executing the pipeline. These parameters are
 described in the documentation of each process and you can check the options
 of your particular pipeline using the `help` option:
