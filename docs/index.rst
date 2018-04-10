@@ -8,19 +8,28 @@ AssemblerFlow
 
 A NextFlow pipeline assembler for genomics.
 
-.. _Processes:
+.. _Getting Started:
 
 .. toctree::
    :maxdepth: 3
-   :caption: Available processes
+   :caption: Getting Started
+
+   getting_started/overview
+   getting_started/installation
+
+.. _User Guide:
+
+.. toctree::
+   :maxdepth: 3
+   :caption: User Guide
 
    available_processes
 
-.. _Contributing:
+.. _Developer Guide:
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contributing
+   :caption: Developer Guide
 
    create_template
    create_process
