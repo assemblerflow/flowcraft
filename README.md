@@ -139,7 +139,7 @@ nextflow run my_pipeline --fastq "path/to/fastq/*_{1,2}.*" -profile slurm_sing
 During the execution of the pipeline, the results and reports for each component
 are continuously saved to the `results` and `reports` directory, respectively.
 
-## Why not write just a Nextflow pipeline?
+## Why not just write a Nextflow pipeline?
 
 In many cases, building a static nextflow pipeline is sufficient for our goals.
 However, when building our own pipelines, we often felt the need to add dynamism
