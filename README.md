@@ -9,7 +9,7 @@
 [![PyPI](https://img.shields.io/pypi/v/assemblerflow.svg)](https://pypi.python.org/pypi/assemblerflow/1.0.0rc3)
 
 A [Nextflow](https://www.nextflow.io/) pipeline assembler for genomics data.
-Pick your modules. Assemble them. Run the pipeline.
+Pick your modules. Assemble them. Run the pipeline. :whale2::package:
 
 ## The premisse
 
