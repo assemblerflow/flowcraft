@@ -21,9 +21,9 @@ What if building your own genomics pipeline would be as simple as:
 assemblerflow.py build -t "trimmomatic fastqc skesa pilon" -o my_pipeline.nf
 ```
 
-Seems pretty simple right? What if we could run this pipeline on any linux machine or cluster by leveraging
+Seems pretty simple right? What if we could run this pipeline with a single command on any linux machine or cluster by leveraging
 the awesomeness of [nextflow](https://www.nextflow.io/) and [docker](https://www.docker.com/)/[singularity](http://singularity.lbl.gov/)
-containers without having to install any of the pipeline dependencies in a single command?
+containers without having to install any of the pipeline dependencies?
 
 #### Run
 
