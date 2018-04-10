@@ -1,4 +1,4 @@
-# assemblerflow
+# assemblerflow :whale2::package:
 
 ![Nextflow version](https://img.shields.io/badge/nextflow->0.26.0-brightgreen.svg)
 ![Python version](https://img.shields.io/badge/python-3.6-brightgreen.svg)
@@ -9,7 +9,7 @@
 [![PyPI](https://img.shields.io/pypi/v/assemblerflow.svg)](https://pypi.python.org/pypi/assemblerflow/1.0.0rc3)
 
 A [Nextflow](https://www.nextflow.io/) pipeline assembler for genomics data.
-Pick your modules. Assemble them. Run the pipeline. :whale2::package:
+Pick your modules. Assemble them. Run the pipeline.
 
 ## The premisse
 
