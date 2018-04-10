@@ -2,6 +2,9 @@ import os
 import pytest
 
 import assemblerflow.generator.process as pc
+import assemblerflow.generator.market.assembly as assembly
+import assemblerflow.generator.market.assembly_processing as ap
+import assemblerflow.generator.market.reads_quality_control as readsqc
 import assemblerflow.generator.error_handling as eh
 
 from assemblerflow.generator.engine import process_map
@@ -319,7 +322,7 @@ def test_init_multi_secondary_inputs(mock_init):
 
 def test_directive_update():
 
-    p = pc.Spades(template="spades")
+    p = assembly.Spades(template="spades")
 
     p.update_attributes({"version": "3.9.0"})
 
@@ -328,7 +331,7 @@ def test_directive_update():
 
 def test_directive_update2():
 
-    p = pc.FastQC(template="fastqc")
+    p = readsqc.FastQC(template="fastqc")
 
     p.update_attributes({"cpus": "3", "memory": "4GB"})
 
@@ -339,7 +342,7 @@ def test_directive_update2():
 
 def test_directive_update3():
 
-    p = pc.Pilon(template="pilon")
+    p = ap.Pilon(template="pilon")
 
     p.update_attributes({"cpus": "3", "memory": "4GB",
                          "container": "another", "version": "1.0"})
@@ -353,7 +356,7 @@ def test_directive_update3():
 
 def test_directive_update4():
 
-    p = pc.Trimmomatic(template="trimmomatic")
+    p = readsqc.Trimmomatic(template="trimmomatic")
 
     p.update_attributes({"cpus": "3", "memory": "{4.GB*task.attempt}",
                          "container": "another", "version": "1.0"})
@@ -367,7 +370,7 @@ def test_directive_update4():
 
 def test_directive_update_invalid():
 
-    p = pc.Trimmomatic(template="trimmomatic")
+    p = readsqc.Trimmomatic(template="trimmomatic")
 
     with pytest.raises(eh.ProcessError):
         p.update_attributes({"cpu": "3", "memory": "{4.GB*task.attempt}",
