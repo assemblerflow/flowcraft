@@ -62,6 +62,105 @@ only two commands! :tada:
 
 ## Installation
 
-## User guide
+Assemblerflow is available as a bioconda package, which already brings
+nextflow:
+
+```
+conda install assemblerflow
+```
+
+Alternatively, you can install only assemblerflow via `pip`:
+
+```
+pip3 install assemblerflow
+```
+
+Pipelines built with assemblerflow require at least one container
+engine to be installed, among `docker`, `singularity` or `shifter`.
+If you already have any one of these installed, you're good to go.
+If not, we recommend installing singularity, which also has a bioconda
+package:
+
+```
+conda install singularity
+```
+
+## How to use it
+
+#### Building a pipeline
+
+Assemblerflow comes with a number of ready to use components to build your
+own pipeline. Following some basic rules, such as the output type of one process
+must match the input type of the next process, assembling a pipeline is done
+using the `build` mode and the `-t` option:
+
+```
+assemblerflow build -t "trimmomatic spades abricate" -o my_pipeline.nf -n "assembly pipe"
+```
+
+This command will generated several directories and files that will be
+necessary to run the pipeline automatically, but the main pipeline executable
+file will be `my_pipeline.nf`. This file will contain a linear nextflow pipeline
+for genome assembly starts with `trimmomatic` and finishes with anti-microbial
+gene annotation using `abricate`. You can check the help of that pipeline
+using the `help` option:
+
+```
+nextflow my_pipeline.nf --help
+
+N E X T F L O W  ~  version 0.28.0
+Launching `my_pipeline.nf` [ridiculous_montalcini] - revision: 1b3fec5658
+
+============================================================
+                A S S E M B L Y   P I P E
+============================================================
+Built using assemblerflow v1.0.2
+
+
+Usage:
+    nextflow run my_pipeline.nf
+
+       --fastq                     Path expression to paired-end fastq files. (default: fastq/*_{1,2}.*) (integrity_coverage)
+       --genomeSize                Genome size estimate for the samples. It is used to estimate the coverage and other assembly parameters andchecks (default: 2.1) (integrity_coverage)
+       --minCoverage               Minimum coverage for a sample to proceed. Can be set to0 to allow any coverage (default: 15) (integrity_coverage)
+       --adapters                  Path to adapters files, if any (default: None) (trimmomatic)
+       --trimSlidingWindow         Perform sliding window trimming, cutting once the average quality within the window falls below a threshold (default: 5:20) (trimmomatic)
+       --trimLeading               Cut bases off the start of a read, if below a threshold quality (default: 3 (trimmomatic)
+       --trimTrailing              Cut bases of the end of a read, if below a threshold quality (default: 3) (trimmomatic)
+       --trimMinLength             Drop the read if it is below a specified length (default: 55) (trimmomatic)
+       --spadesMinCoverage         The minimum number of reads to consider an edge in the de Bruijn graph during the assembly (default: 2) (spades)
+       --spadesMinKmerCoverage     Minimum contigs K-mer coverage. After assembly only keep contigs with reported k-mer coverage equal or above this value (default: 2) (spades)
+       --spadesKmers               If 'auto' the SPAdes k-mer lengths will be determined from the maximum read length of each assembly. If 'default', SPAdes will use the default k-mer lengths. (default: auto) (spades)
+       --abricateDatabases         Specify the databases for abricate. (abricate)
+```
+
+This help message is dynamically generated depending on the pipeline you build.
+Since this pipeline starts with `trimmomatic`, which receives fastq files as input,
+`--fastq` is the default parameter for providing paired-end fastq files.
+
+#### Running a pipeline
+
+Now that we have our nextflow pipeline built, we are ready to executed it by
+providing input data. By default, assemblerflow pipelines will run locally and use
+`singularity` to run the containers of each component. However, this can be
+changed is multiple ways, but for convenience assemblerflow has already defined
+profiles for most configurations of `executors` and `container` engines.
+
+Running a pipeline locally with `singularity` can be done with:
+
+```
+# Pattern for paired-end fastq is '<sample>_1.fastq.gz <sample>_2.fastq.gz'
+nextflow run my_pipeline --fastq "path/to/fastq/*_{1,2}.*"
+```
+
+If you want to run a pipeline in a cluster with SLURM and singularity, just use
+the appropriate profile:
+
+```
+nextflow run my_pipeline --fastq "path/to/fastq/*_{1,2}.*" -profile slurm_sing
+```
+
+During the execution of the pipeline, the results and reports for each component
+are continuously saved to the `results` and `reports` directory, respectively.
 
 ## Developer guide
