@@ -29,12 +29,11 @@ input and output types, parameters, directives, etc. This modular nature
 allows them to be freely connected as long as they respect some basic rules,
 such as the input type of a component must match with the output type of
 the preceding component. In this way, nextflow processes can be
-written only once, and assemblerflow can used them freely to create any number
-of pipeline variations, handling the linking and forking of channels
-automatically. Moreover, each component is associated with a docker image,
-which means that there is no need to install any dependencies at all and
-all software runs on a transparent and reliable box.
-To illustrate:
+written only once, and assemblerflow is the magic glue that connects them,
+handling the linking and forking of channels automatically. Moreover, each
+component is associated with a docker image, which means that there is no
+need to install any dependencies at all and all software runs on a
+transparent and reliable box. To illustrate:
 
 - A linear genome assembly pipeline can be easily built using assemblerflow
   with the following pipeline string::
@@ -96,5 +95,22 @@ bacterial genome assembly simply because that was how we started.
 However, our goal is to expand the library of existing components to other
 commonly used tools in the field of genomics and to widen the applicability
 and usefulness of assemblerflow pipelines.
+
+Why not just write a Nextflow pipeline?
+:::::::::::::::::::::::::::::::::::::::
+
+In many cases, building a static nextflow pipeline is sufficient for our goals.
+However, when building our own pipelines, we often felt the need to add
+dynamism to this process, particularly if we take into account how fast new
+tools arise and existing ones change. Our biological goals also change over
+time and we might need different pipelines to answer different questions.
+Assemblerflow makes this very easy by having a set of pre-made and ready-to-use
+components that can be freely assembled. By using components (``fastqc``,
+``trimmomatic``) as its atomic elements, very complex pielines can be built
+with little effort. Moreover, these components have explicit and standardized
+input and output types, which means that the addition of new modules does not
+require any changes in the existing code base. They just need to take into
+account how data will be received by the process and how data may be emitted
+from the process, to ensure that it can link with other components.
 
 .. _nextflow: https://www.nextflow.io/
