@@ -106,8 +106,9 @@ tools arise and existing ones change. Our biological goals also change over
 time and we might need different pipelines to answer different questions.
 Assemblerflow makes this very easy by having a set of pre-made and ready-to-use
 components that can be freely assembled. By using components (``fastqc``,
-``trimmomatic``) as its atomic elements, very complex pielines can be built
-with little effort. Moreover, these components have explicit and standardized
+``trimmomatic``) as its atomic elements, very complex pielines that take
+full advantage of nextflow can be built with little effort. Moreover,
+these components have explicit and standardized
 input and output types, which means that the addition of new modules does not
 require any changes in the existing code base. They just need to take into
 account how data will be received by the process and how data may be emitted
