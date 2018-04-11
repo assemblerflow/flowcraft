@@ -11,7 +11,7 @@ A NextFlow pipeline assembler for genomics.
 .. _Getting Started:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: Getting Started
 
    getting_started/overview
@@ -20,10 +20,11 @@ A NextFlow pipeline assembler for genomics.
 .. _User Guide:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: User Guide
 
-   available_processes
+   user/basic_usage
+   user/available_processes
 
 .. _Developer Guide:
 
