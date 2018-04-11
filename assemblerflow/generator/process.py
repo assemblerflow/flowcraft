@@ -877,8 +877,6 @@ class Mlst(Process):
         }
 
 
-
-
 class Chewbbaca(Process):
     """Prokka mapping process template interface
 
@@ -909,6 +907,11 @@ class Chewbbaca(Process):
 
         self.directives = {
             "chewbbaca": {
+                "cpus": 4,
+                "container": "mickaelsilva/chewbbaca_py3",
+                "version": "latest",
+            },
+            "chewbbaca_batch": {
                 "cpus": 4,
                 "container": "mickaelsilva/chewbbaca_py3",
                 "version": "latest",
@@ -971,6 +974,13 @@ class Chewbbaca(Process):
                     "Specifies the proportion of samples that must be "
                     "present in a locus to save the profile. (default: "
                     "$params.chewbbacaProfilePercentage)"
+            },
+            "chewbbacaBatch": {
+                "default": "false",
+                "description":
+                    "Specifies whther a chewbbaca run will be performed on the"
+                    " complete input batch (all at the same time) or one by "
+                    "one."
             }
         }
 
