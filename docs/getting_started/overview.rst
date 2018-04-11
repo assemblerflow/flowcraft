@@ -1,7 +1,7 @@
 Overview
 ========
 
-Assemblerflow is an assembler of pipelines written in  nextflow_ for several
+Assemblerflow is an assembler of pipelines written in  nextflow_ for
 analyses of genomic data.
 
 What is Nextflow
@@ -11,11 +11,12 @@ If you do not know nextflow, be sure to check it out. It's an awesome
 framework based on the dataflow programming model used for building
 parallelized, scalable and reproducible workflows using software containers.
 It provides an abstraction layer between the execution and the logic of the
-pipeline, which means that the same pipeline code can be executed in
-multiple platforms, such as SLURM, SGE, etc. These are quite attractive features
-since genomic pipelines are increasingly executed on large computer clusters
-to handle large volumes of data and/or tasks. Moreover, portability and
-reproducibility are becoming central pillars in modern data science.
+pipeline, which means that the same pipeline code can be executed on
+multiple platforms, from a local laptop to clusters managed with SLURM, SGE,
+etc. These are quite attractive features since genomic pipelines are
+increasingly executed on large computer clusters to handle large volumes
+of data and/or tasks. Moreover, portability and reproducibility are becoming
+central pillars in modern data science.
 
 What Assemblerflow does
 :::::::::::::::::::::::
@@ -27,9 +28,10 @@ etc, that are written for nextflow and have a set of attributes, such as
 input and output types, parameters, directives, etc. This modular nature
 allows them to be freely connected as long as they respect some basic rules,
 such as the input type of a component must match with the output type of
-the preceding component. In this way, portions of nextflow pipelines can be
-written only once, and then freely used to create any number of pipeline
-variations. Moreover, each component is associated with a docker image,
+the preceding component. In this way, nextflow processes can be
+written only once, and assemblerflow can used them freely to create any number
+of pipeline variations, handling the linking and forking of channels
+automatically. Moreover, each component is associated with a docker image,
 which means that there is no need to install any dependencies at all and
 all software runs on a transparent and reliable box.
 To illustrate:
@@ -42,7 +44,8 @@ To illustrate:
 Which will generate all the necessary files to run the nextflow
 pipeline on any linux system that has nextflow and a container engine.
 
-- You can easily add more components to perform assembly polishing::
+- You can easily add more components to perform assembly polishing, in this
+  case, ``pilon``::
 
     trimmomatic fastqc spades pilon
 
@@ -70,13 +73,13 @@ the pipeline will proceed independently in these two new 'lanes'.
 
 - And extra input can be directly inserted in any part of the pipeline. For
   example, it is possible to assemble genomes from both fastq files and SRR
-  accessions (downloaded from public databases)::
+  accessions (downloaded from public databases) in a single workflow::
 
     download_reads trimmomatic={'extra_input':'reads'} fastqc skesa pilon
 
 This pipeline can be executed by providing a file with accession numbers
 (``--accessions`` parameter by default) **and** fastq reads, using the
-``--reads`` parameter.
+``--reads`` parameter defined with the ``extra_input`` directive.
 
 
 Who is Assemblerflow for
