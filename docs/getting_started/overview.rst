@@ -114,4 +114,9 @@ require any changes in the existing code base. They just need to take into
 account how data will be received by the process and how data may be emitted
 from the process, to ensure that it can link with other components.
 
+**However, why not both?**
+
+Assemblerflow generates a complete Nextflow pipeline file, which ca be used
+as a starting point for your customized processes!
+
 .. _nextflow: https://www.nextflow.io/
