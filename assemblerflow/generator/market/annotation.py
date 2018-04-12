@@ -91,6 +91,3 @@ class Prokka(Process):
             }
         }
 
-        self.params = {
-            "prokkaRun": "true"
-        }
