@@ -2,10 +2,11 @@ Basic Usage
 ===========
 
 Assemblerflow has currently one execution mode, ``build``, that is used to
-build the nextflow pipeline. However, more execution modes are being developed.
+build the nextflow pipeline. However, more execution modes are slated for
+release.
 
-Building a pipeline
--------------------
+Assembling a pipeline
+---------------------
 
 Pipelines can be generated using the ``build`` execution mode of assemblerflow
 and the ``-t`` parameter to specify the components inside quotes::
@@ -13,105 +14,101 @@ and the ``-t`` parameter to specify the components inside quotes::
     assemblerflow build -t "trimmomatic fastqc spades" -o my_pipe.nf
 
 This command will generate a linear pipeline with three components on the
-current working directory. In addition to the main nextflow pipeline file
-(``my_pipe.nf``), assemblerflow will write several auxiliary files that will
-be necessary for the pipeline to run (see `Pipeline files`_).
+current working directory (for more features and tips on how pipelines can be
+built, see the :doc:`pipeline_building` section). A linear pipeline means that
+there are no bifurcations between components, and the input data will flow
+linearly across components. In this particular case, the input data of the
+pipeline will be paired-end FastQ data, since that is the input data type
+of the first component, ``trimmomatic``.
 
-Pipeline forks
-::::::::::::::
+The rational of how the data flows across the pipeline is simple and intuitive.
+Data enters a component and is processed in some way, which may result on the
+creation of results (stored in the ``results`` directory) and reports (stored
+in the ``reports`` directory). If that component has an ``output_type``, it
+will feed the processed data into the next component (or components). This
+will
 
-The output of any component in an assemblerflow pipeline can be forked into
-two or more components, using the following fork syntax::
+Pipeline directory
+------------------
 
-    trimmomatic fastqc ( spades | skesa )
+In addition to the main nextflow pipeline file (``my_pipe.nf``),
+assemblerflow will write several auxiliary files that are necessary for
+the pipeline to run. The contents of the directory should look something like
+this::
 
-In this example, the output of ``fastqc`` will be fork into two new *lanes*,
-which will proceed independently from each other. In this syntax, a fork is
-triggered by the ``(`` symbol (and the corresponding closing ``)``) and each
-lane will be separated by a ``|`` symbol. There is no limitation to the number
-of forks or lanes that a pipeline has. For instance, we could add more
-components after the ``skesa`` module, including another fork::
+    $ ls
+    bin                lib           my_pipe.nf       params.config     templates
+    containers.config  my_pipe.html  nextflow.config  resources.config  user.config
 
-    trimmomatic fastqc ( spades | skesa pilon (abricate | prokka | chewbbaca) )
 
-In this example, data will be forked after ``fastqc`` into two new lanes,
-processed by ``spades`` and ``skesa``. In the skesa lane, data will continue
-to flow into the ``pilon`` component and its output will fork into three new
-lanes.
 
-.. warning::
-    Pay special attention to the syntax of the pipeline string when using
-    forks. However, when unable to parse it, assemblerflow will do its best
-    to inform you where the parsing error occurred.
+Parameters
+----------
 
-Directives
-::::::::::
+The parameters of the pipeline can be viewed by running the pipeline file
+with ``nextflow`` and using the ``--help`` option::
 
-Several directives with information on cpu usage, RAM, version, etc. can be
-specified to each individual component when building the pipeline using the
-``={}`` notation. These
-directives are written to the ``resources.config`` and
-``containers.config`` files that are generated in the pipeline directory. You
-can pass any of the directives already supported by nextflow (https://www.nextflow.io/docs/latest/process.html#directives),
-but the most commonly used include:
+    $ nextflow my_pipe.nf --help
 
-    - ``cpus``
-    - ``memory``
-    - ``queue``
+    N E X T F L O W  ~  version 0.28.0
+    Launching `my_pipe.nf` [stupefied_booth] - revision: 504208431f
 
-In addition, you can also pass the ``container`` and ``version`` directives
-which are parsed by assemblerflow to dynamically change the container and/or
-version tag of any process.
+    ============================================================
+                    A S S E M B L E R F L O W
+    ============================================================
+    Built using assemblerflow v1.0.2
 
-Here is an example where we specify cpu usage, allocated memory and container
-version in the pipeline string::
 
-    assemblerflow build -t "fastqc={'version':'0.11.5'} \
-                            trimmomatic={'cpus':'2'} \
-                            spades={'memory':'\"10GB\"'}" -o my_pipeline.nf
+    Usage:
+        nextflow run my_pipe.nf
 
-When a directive is not specified, it will assume the default value of the
-nextflow directive.
+           --fastq                     Path expression to paired-end fastq files. (default: fastq/*_{1,2}.*) (integrity_coverage)
+           --genomeSize                Genome size estimate for the samples. It is used to estimate the coverage and other assembly parameters andchecks (default: 2.1) (integrity_coverage)
+           --minCoverage               Minimum coverage for a sample to proceed. Can be set to0 to allow any coverage (default: 15) (integrity_coverage)
+           --adapters                  Path to adapters files, if any (default: None) (trimmomatic;fastqc)
+           --trimSlidingWindow         Perform sliding window trimming, cutting once the average quality within the window falls below a threshold (default: 5:20) (trimmomatic)
+           --trimLeading               Cut bases off the start of a read, if below a threshold quality (default: 3 (trimmomatic)
+           --trimTrailing              Cut bases of the end of a read, if below a threshold quality (default: 3) (trimmomatic)
+           --trimMinLength             Drop the read if it is below a specified length (default: 55) (trimmomatic)
+           --spadesMinCoverage         The minimum number of reads to consider an edge in the de Bruijn graph during the assembly (default: 2) (spades)
+           --spadesMinKmerCoverage     Minimum contigs K-mer coverage. After assembly only keep contigs with reported k-mer coverage equal or above this value (default: 2) (spades)
+           --spadesKmers               If 'auto' the SPAdes k-mer lengths will be determined from the maximum read length of each assembly. If 'default', SPAdes will use the default k-mer lengths. (default: auto) (spades)
 
-.. warning::
-    Take special care not to include any white space characters inside the
-    directives field. Common mistakes occur when specifying directives like
-    ``fastqc={'version': '0.11.5'}``.
-
-.. note::
-    The values specified in these directives are placed in the
-    respective config files exactly as they are. For instance,
-    ``spades={'memory':'10GB'}"`` will appear in the config as
-    ``spades.memory = 10Gb``, which will raise an error in nextflow because
-    ``10Gb`` should be a string. Therefore, if you want a string you'll need to add
-    the ``"`` as in this example: ``spades={'memory':'\"10GB\"'}"``. The
-    reason why these directives are not automatically converted is to allow
-    the specification of dynamic computing resources, such as
-    ``spades={'memory':'{10.Gb*task.attempt}'}"``
-
-Extra inputs
-::::::::::::
-
-Pipeline file
-:::::::::::::
-
-Instead of providing the pipeline components via the command line, you can
-specify them in a text file::
-
-    # my_pipe.txt
-    trimmomatic fastqc spades
-
-And then provide the pipeline file to the ``-t`` parameter::
-
-    assemblerflow build -t my_pipe.txt -o my_pipe.nf
-
-This is equivalent to the first build example. Pipeline files are usually more
-readable
-
-Pipeline files
---------------
-
+All these parameters are related to the components of the pipeline. However,
+the main input parameter (or parameters) of the pipeline are always available.
+Since this pipeline started with FastQ paired-end files as the main input,
+the ``--fastq`` parameter is available. If the pipeline started with any other
+input type or with more than one input type, the appropriate parameters would
+become available.
 
 Executing the pipeline
 ----------------------
+
+Most parameters in assemblerflow's components already come with sensible
+defaults, which means that usually you'll only need to provide a small number
+of arguments. In the example above, the ``--fastq`` is the only parameter
+required. I have placed fastq files on the ``data`` directory, so::
+
+    nextflow run my_pipe.nf --fastq "data/*_{1,2}.*"
+
+The pattern for the fastq files is perhaps a bit confusing at first, but it's
+necessary for the correct inference of the pairs. My fastq files are::
+
+    $ ls data
+    sample_1.fastq.gz  sample_2.fastq.gz
+
+In this case, the pattern is given by the "_1." or "_2." substring, which leads
+to the pattern ``*_{1,2}.*``. Another common nomenclature for paired fastq
+files is something like ``sample_R1_L001.fastq.gz``. In this case, an
+acceptable pattern would be ``*_R{1,2}_*``.
+
+.. important::
+
+    Note the quotes around the fastq path pattern. These quotes are necessary
+    to allow nextflow to resolve the pattern, otherwise your shell might try
+    to resolve the pattern and provide the wrong input to nextflow.
+
+Results
+-------
+
 

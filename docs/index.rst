@@ -24,6 +24,7 @@ A NextFlow pipeline assembler for genomics.
    :caption: User Guide
 
    user/basic_usage
+   user/pipeline_building
    user/available_processes
 
 .. _Developer Guide:
