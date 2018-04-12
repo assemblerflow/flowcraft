@@ -4,6 +4,8 @@ process trimmomatic_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
+    publishDir "results/trimmomatic_{{ pid }}", pattern: "*.gz"
+
     tag { fastq_id }
 
     input:
