@@ -549,7 +549,7 @@ class Process:
 
         # Update directives
         # Allowed attributes to write
-        valid_directives = ["pid", "ignore_type", "ignore_pid", ]
+        valid_directives = ["pid", "ignore_type", "ignore_pid", "extra_input"]
 
         for attribute, val in attr_dict.items():
 

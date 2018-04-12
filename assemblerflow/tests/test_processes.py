@@ -368,12 +368,3 @@ def test_directive_update4():
            ["3", "{4.GB*task.attempt}", "another", "1.0"]
 
 
-def test_directive_update_invalid():
-
-    p = readsqc.Trimmomatic(template="trimmomatic")
-
-    with pytest.raises(eh.ProcessError):
-        p.update_attributes({"cpu": "3", "memory": "{4.GB*task.attempt}",
-                             "container": "another", "version": "1.0"})
-
-

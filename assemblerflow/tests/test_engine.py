@@ -658,17 +658,6 @@ def test_run_time_directives_invalid():
         eg.NextflowGenerator(con, "teste.nf")
 
 
-def test_run_time_directives_invalid2():
-
-    con = [{"input": {"process": "__init__", "lane": 1},
-            "output": {"process": "integrity_coverage", "lane": 1}},
-           {"input": {"process": "integrity_coverage", "lane": 1},
-            "output": {"process": "fastqc={'cpu':'2'}", "lane": 1}}]
-
-    with pytest.raises(eh.ProcessError):
-        eg.NextflowGenerator(con, "teste.nf")
-
-
 def test_not_automatic_dependency():
 
     con = [{"input": {"process": "__init__", "lane": 1},
