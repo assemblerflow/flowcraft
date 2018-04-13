@@ -31,7 +31,7 @@ except ImportError as e:
     import assemblerflow.generator.market.assembly_processing as ap
     import assemblerflow.generator.market.downloads as downloads
     import assemblerflow.generator.market.distance_estimation as distest
-    import assemblerflow.generator.market.mapping as mapping
+    import assemblerflow.generator.market.mapping as mapping_patlas
     import assemblerflow.generator.market.reads_quality_control as readsqc
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
@@ -63,7 +63,7 @@ process_map = {
         "chewbbaca": pc.Chewbbaca,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
-        "mapping": mapping.PatlasMapping
+        "mapping_patlas": mapping_patlas.PatlasMapping
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
