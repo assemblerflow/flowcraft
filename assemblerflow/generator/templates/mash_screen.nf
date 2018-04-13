@@ -6,6 +6,8 @@ winnerVar = (params.noWinner == false) ? "-w" : ""
 // sortedMashScreenResults_{sampleId}.txt
 process mashScreen_{{ pid }} {
 
+    {% include "post.txt" ignore missing %}
+
     tag { "running mash screen for sample: " + id }
 
     input:
@@ -27,6 +29,8 @@ process mashScreen_{{ pid }} {
 
 // process to parse the output to json format
 process mashOutputJson_{{ pid }} {
+
+    {% include "post.txt" ignore missing %}
 
     tag { "dumping json file from: " + mashtxt }
 
