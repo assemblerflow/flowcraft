@@ -1,5 +1,5 @@
-Available processes
-===================
+Available components
+====================
 
 These are the currently supported assemblerflow processes with a short
 description of their tasks. For a more detailed information, follow the

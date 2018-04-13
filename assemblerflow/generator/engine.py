@@ -12,12 +12,23 @@ logger = logging.getLogger("main.{}".format(__name__))
 
 try:
     import generator.process as pc
+    import generator.market.assembly as assembly
+    import generator.market.annotation as annotation
+    import generator.market.assembly_processing as ap
+    import generator.market.downloads as downloads
+    import generator.market.reads_quality_control as readsqc
     import generator.error_handling as eh
     from __init__ import __version__
     from generator import header_skeleton as hs
     from generator import footer_skeleton as fs
     from generator.process_details import colored_print
 except ImportError as e:
+    import assemblerflow.generator.process as pc
+    import assemblerflow.generator.market.assembly as assembly
+    import assemblerflow.generator.market.annotation as annotation
+    import assemblerflow.generator.market.assembly_processing as ap
+    import assemblerflow.generator.market.downloads as downloads
+    import assemblerflow.generator.market.reads_quality_control as readsqc
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
     from assemblerflow import __version__
@@ -27,34 +38,32 @@ except ImportError as e:
 
 
 process_map = {
-        "reads_download": pc.DownloadReads,
-        "integrity_coverage": pc.IntegrityCoverage,
+        "reads_download": downloads.DownloadReads,
+        "integrity_coverage": readsqc.IntegrityCoverage,
         "seq_typing": pc.SeqTyping,
         "patho_typing": pc.PathoTyping,
-        "check_coverage": pc.CheckCoverage,
-        "true_coverage": pc.TrueCoverage,
-        "fastqc": pc.FastQC,
-        "trimmomatic": pc.Trimmomatic,
-        "fastqc_trimmomatic": pc.FastqcTrimmomatic,
-        "skesa": pc.Skesa,
-        "spades": pc.Spades,
-        "process_spades": pc.ProcessSpades,
-        "process_skesa": pc.ProcessSkesa,
-        "assembly_mapping": pc.AssemblyMapping,
-        "pilon": pc.Pilon,
+        "check_coverage": readsqc.CheckCoverage,
+        "true_coverage": readsqc.TrueCoverage,
+        "fastqc": readsqc.FastQC,
+        "trimmomatic": readsqc.Trimmomatic,
+        "fastqc_trimmomatic": readsqc.FastqcTrimmomatic,
+        "skesa": assembly.Skesa,
+        "spades": assembly.Spades,
+        "process_spades": ap.ProcessSpades,
+        "process_skesa": ap.ProcessSkesa,
+        "assembly_mapping": ap.AssemblyMapping,
+        "pilon": ap.Pilon,
         "mlst": pc.Mlst,
-        "abricate": pc.Abricate,
-        "prokka": pc.Prokka,
+        "abricate": annotation.Abricate,
+        "prokka": annotation.Prokka,
         "chewbbaca": pc.Chewbbaca,
-        # "status_compiler": pc.StatusCompiler,
-        # "trace_compiler": pc.TraceCompiler
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
 the format::
 
     {
-        "<template_string>": pc.TemplateClass
+        "<template_string>": module.TemplateClass
     }
 """
 
