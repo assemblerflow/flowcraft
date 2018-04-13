@@ -1,6 +1,6 @@
 
 // process that runs bowtie2
-process mappingBowtie {
+process mappingBowtie_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
@@ -35,7 +35,7 @@ process mappingBowtie {
 * samtools faidx is escaped because index file is already provided in docker
 * image.
 */
-process samtoolsView {
+process samtoolsView_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
@@ -63,7 +63,7 @@ process samtoolsView {
 * These dumping process parses the depth file for each sample and filters it
 * depending on the cutoff set by the user.
 */
-process jsonDumpingMapping {
+process jsonDumpingMapping_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
@@ -84,3 +84,5 @@ process jsonDumpingMapping {
     script:
     template "mapping2json.py"
 }
+
+{{ forks }}

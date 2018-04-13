@@ -48,3 +48,5 @@ process mashOutputJson_{{ pid }} {
     script:
     template "mashscreen2json.py"
 }
+
+{{ forks }}
