@@ -17,7 +17,7 @@ try:
     import generator.market.assembly_processing as ap
     import generator.market.downloads as downloads
     import generator.market.distance_estimation as distest
-    import generator.market.mapping as mapping
+    import generator.market.mapping as mapping_patlas
     import generator.market.reads_quality_control as readsqc
     import generator.error_handling as eh
     from __init__ import __version__
