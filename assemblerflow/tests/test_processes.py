@@ -185,7 +185,7 @@ def test_channels_setup_status(process_wchannels):
     process_wchannels.lane = 3
     process_wchannels.set_channels(pid=1)
 
-    assert process_wchannels.status_strs == ["A_3_1", "B_3_1"]
+    assert process_wchannels.status_strs == ["STATUS_A_3_1", "STATUS_B_3_1"]
 
 
 def test_update_main_fork_noprevious(process_wchannels):
