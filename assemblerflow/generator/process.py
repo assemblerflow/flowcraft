@@ -68,7 +68,7 @@ class Process:
                 "Channel.fromPath(params.{0})."
                 "map{{ it -> file(it).exists() ? [it.toString()"
                 ".tokenize('/').last()"
-                ".tokenize('.').first(), it] : null }}"
+                ".tokenize('.')[0..-2].join('.'), it] : null }}"
                 ".ifEmpty {{ exit 1, \"No fasta files provided with pattern:"
                 "'${{params.{0}}}'\" }}",
             "checks":
@@ -438,7 +438,10 @@ class Process:
             self.pid = "{}_{}".format(self.lane, kwargs.get("pid"))
 
         for i in self.status_channels:
-            self.status_strs.append("{}_{}".format(i, self.pid))
+            if i.startswith("STATUS_"):
+                self.status_strs.append("{}_{}".format(i, self.pid))
+            else:
+                self.status_strs.append("STATUS_{}_{}".format(i, self.pid))
 
         if self.main_forks:
             logger.debug("Setting main fork channels: {}".format(

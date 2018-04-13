@@ -72,15 +72,22 @@ assemblerflow:
   more information). It also includes scripts for sending requests to
   REST APIs (only when certain pipeline parameters are used).
 
-- ``input_channel`` (**Mandatory**): All process must include an input channel.
+- ``input_channel`` (**Mandatory**): All process must include **one and only
+  one** input channel.
 
 - ``output_channel`` (**Optional**): Terminal processes may skip the output
   channel entirely. However, if you want to link the main output of this
-  process with subsequent ones, this placeholder must be used.
+  process with subsequent ones, this placeholder must be used **only once**.
 
 - ``include "compiler_channels.txt"`` (**Mandatory**): This will include the
   special channels that will compile the status/logging of the processes
-  throughout the pipeline (see `Status channels`_).
+  throughout the pipeline. **You must include the
+  whole block** (see `Status channels`_)::
+
+    {% with task_name="abricate" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
 
 - ``forks`` (**Conditional**): Inserts potential forks of the main output
   channel. It is **mandatory** if the ``output_channel`` is set.
