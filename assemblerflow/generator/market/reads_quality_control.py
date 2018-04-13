@@ -356,6 +356,10 @@ class FastqcTrimmomatic(Process):
 
         self.link_end.append({"link": "SIDE_phred", "alias": "SIDE_phred"})
 
+        self.compiler = {
+            "patlas_consensus": ["channel"]
+        }
+
         self.status_channels = ["STATUS_fastqc", "STATUS_fastqc_report",
                                 "STATUS_trimmomatic"]
 

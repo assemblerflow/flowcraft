@@ -189,6 +189,17 @@ class NextflowGenerator:
         it.
         """
 
+        self.compilers = {
+            "patlas_consensus": {
+                "cls": pc.PatlasConsensus,
+                "channels": []
+            }
+        }
+        """
+        dict: coco
+        """
+
+
     @staticmethod
     def _parse_process_name(name_str):
         """Parses the process string and returns the process name and its
@@ -897,6 +908,20 @@ class NextflowGenerator:
     def _set_compiler_channels(self):
 
         self._set_status_channels()
+        self._set_general_compilers()
+
+    def _set_general_compilers(self):
+
+        for c, c_info in self.compilers.items():
+
+            compiler_cls = c_info["cls"]()
+
+            for p in self.processes:
+                if not any([isinstance(p, x) for x in self.skip_class]):
+                    if c in p.compiler:
+                        c_info["channels"].extend(p.compiler[c])
+
+            c_info["cls"].set_compiler_channels(c_info["channels"])
 
     def _set_status_channels(self):
         """Compiles all status channels for the status compiler process
@@ -1299,7 +1324,6 @@ class NextflowGenerator:
         # Write pipeline file
         with open(self.nf_file, "w") as fh:
             fh.write(self.template)
-
 
         logger.info(colored_print(
             "\tPipeline written into {} \u2713".format(self.nf_file)))
