@@ -622,7 +622,7 @@ class Compiler(Process):
                 for ch in channel_list[1:]:
                     s += ".join({})".format(ch)
 
-                s += ".map{ it -> [ it[0], it[1..-1] ] }"
+                s += ".map{ ot -> [ ot[0], ot[1..-1] ] }"
 
             logger.debug("Status channel string: {}".format(s))
 
