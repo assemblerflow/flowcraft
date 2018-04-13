@@ -32,6 +32,11 @@ def mock_status():
 
     return pc.StatusCompiler(template="status_compiler")
 
+@pytest.fixture
+def mock_patlas_compiler():
+
+    return pc.StatusCompiler(template="patlas_consensus")
+
 
 @pytest.fixture
 def mock_init():
@@ -368,3 +373,17 @@ def test_directive_update4():
            ["3", "{4.GB*task.attempt}", "another", "1.0"]
 
 
+def test_join_compiler(mock_patlas_compiler):
+
+    mock_patlas_compiler.set_compiler_channels(["A", "B"], operator="join")
+
+    assert mock_patlas_compiler._context == \
+        {"compile_channels": "A.join(B).map{ ot -> [ ot[0], ot[1..-1] ] }"}
+
+
+def test_join_compiler_one_channel(mock_patlas_compiler):
+
+    mock_patlas_compiler.set_compiler_channels(["A"], operator="join")
+
+    assert mock_patlas_compiler._context == \
+        {"compile_channels": "A"}
