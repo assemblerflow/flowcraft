@@ -93,3 +93,5 @@ class PatlasMapping(Process):
             "samtoolsView",
             "jsonDumpingMapping"
         ]
+
+        self.compiler["patlas_consensus"] = ["mappingOutputChannel"]

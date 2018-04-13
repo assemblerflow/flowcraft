@@ -40,7 +40,7 @@ process mashOutputJson_{{ pid }} {
     set id, file(mashtxt) from mashScreenResults_{{ pid }}
 
     output:
-    set id, file("sortedMashScreenResults_${id}.json") optional true into {{ output_channel }}
+    set id, file("sortedMashScreenResults_${id}.json") optional true into mashScreenOutputChannel_{{ pid }}
     {% with task_name="mashOutputJson", sample_id="id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

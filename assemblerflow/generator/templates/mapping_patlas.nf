@@ -76,7 +76,7 @@ process jsonDumpingMapping_{{ pid }} {
     val lengthJson from IN_length_json
 
     output:
-    set id, file("samtoolsDepthOutput_${id}.txt_mapping.json") optional true into {{ output_channel }}
+    set id, file("samtoolsDepthOutput_${id}.txt_mapping.json") optional true into mappingOutputChannel_{{ pid }}
     {% with task_name="jsonDumpingMapping", sample_id="id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

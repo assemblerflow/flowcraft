@@ -120,3 +120,5 @@ class PatlasMashScreen(Process):
             "mashScreen",
             "mashOutputJson"
         ]
+
+        self.compiler["patlas_consensus"] = ["mashScreenOutputChannel"]

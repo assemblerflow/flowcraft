@@ -192,7 +192,8 @@ class NextflowGenerator:
         self.compilers = {
             "patlas_consensus": {
                 "cls": pc.PatlasConsensus,
-                "channels": []
+                "channels": [],
+                "template": "patlas_consensus"
             }
         }
         """
@@ -914,14 +915,20 @@ class NextflowGenerator:
 
         for c, c_info in self.compilers.items():
 
-            compiler_cls = c_info["cls"]()
+            compiler_cls = c_info["cls"](template=c_info["template"])
 
             for p in self.processes:
                 if not any([isinstance(p, x) for x in self.skip_class]):
                     if c in p.compiler:
-                        c_info["channels"].extend(p.compiler[c])
+                        # Provide ids
+                        channels = ["{}_{}".format(i, p.pid) for i in
+                                    p.compiler[c]]
+                        c_info["channels"].extend(channels)
 
-            c_info["cls"].set_compiler_channels(c_info["channels"])
+            if c_info["channels"]:
+                compiler_cls.set_compiler_channels(c_info["channels"],
+                                                   operator="join")
+                self.processes.append(compiler_cls)
 
     def _set_status_channels(self):
         """Compiles all status channels for the status compiler process
