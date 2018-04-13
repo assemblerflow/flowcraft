@@ -17,6 +17,7 @@ try:
     import generator.market.assembly_processing as ap
     import generator.market.downloads as downloads
     import generator.market.distance_estimation as distest
+    import generator.market.mapping as mapping
     import generator.market.reads_quality_control as readsqc
     import generator.error_handling as eh
     from __init__ import __version__
@@ -30,6 +31,7 @@ except ImportError as e:
     import assemblerflow.generator.market.assembly_processing as ap
     import assemblerflow.generator.market.downloads as downloads
     import assemblerflow.generator.market.distance_estimation as distest
+    import assemblerflow.generator.market.mapping as mapping
     import assemblerflow.generator.market.reads_quality_control as readsqc
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
@@ -60,7 +62,8 @@ process_map = {
         "prokka": annotation.Prokka,
         "chewbbaca": pc.Chewbbaca,
         "mash_dist": distest.PatlasMashDist,
-        "mash_screen": distest.PatlasMashScreen
+        "mash_screen": distest.PatlasMashScreen,
+        "mapping": mapping.PatlasMapping
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
