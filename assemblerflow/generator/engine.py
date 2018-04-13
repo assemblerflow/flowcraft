@@ -59,7 +59,8 @@ process_map = {
         "abricate": annotation.Abricate,
         "prokka": annotation.Prokka,
         "chewbbaca": pc.Chewbbaca,
-        "mash_dist": distest.PatlasMashDist
+        "mash_dist": distest.PatlasMashDist,
+        "mash_screen": distest.PatlasMashScreen
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
