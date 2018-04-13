@@ -285,6 +285,10 @@ class Process:
             }
         """
 
+        self.compiler = {}
+        """
+        """
+
     def _set_template(self, template):
         """Sets the path to the appropriate jinja template file
 
@@ -574,7 +578,7 @@ class Compiler(Process):
 
         super().__init__(**kwargs)
 
-    def set_compiler_channels(self, channel_list):
+    def set_compiler_channels(self, channel_list, operator="mix"):
         """General method for setting the input channels for the status process
 
         Given a list of status channels that are gathered during the pipeline
@@ -604,10 +608,19 @@ class Compiler(Process):
             self._context = {"compile_channels": channel_list[0]}
 
         else:
-            first_status = channel_list[0]
-            lst = ",".join(channel_list[1:])
 
-            s = "{}.mix({})".format(first_status, lst)
+            first_status = channel_list[0]
+
+            if operator == "mix":
+                lst = ",".join(channel_list[1:])
+
+                s = "{}.mix({})".format(first_status, lst)
+
+            elif operator == "join":
+
+                s = first_status
+                for ch in channel_list[1:]:
+                    s += ".join({})".format(ch)
 
             logger.debug("Status channel string: {}".format(s))
 
@@ -1022,6 +1035,16 @@ class StatusCompiler(Compiler):
 
 
 class ReportCompiler(Compiler):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.ignore_type = True
+        self.link_start = None
+
+
+class PatlasConsensus(Compiler):
 
     def __init__(self, **kwargs):
 
