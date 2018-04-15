@@ -146,6 +146,10 @@ def copy_project(path):
     shutil.copy(join(repo_dir, "nextflow.config"),
                 join(target_dir, "nextflow.config"))
 
+    # Copy static profiles file
+    shutil.copy(join(repo_dir, "profiles.config"),
+                join(target_dir, "profiles.config"))
+
 
 def build(args):
 

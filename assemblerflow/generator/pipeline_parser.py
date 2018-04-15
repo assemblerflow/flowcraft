@@ -293,7 +293,7 @@ def insanity_checks(pipeline_str):
     """
 
     # Gets rid of all spaces in string
-    p_string = pipeline_str.replace(" ", "")
+    p_string = pipeline_str.replace(" ", "").strip()
 
     # some of the check functions use the pipeline_str as the user provided but
     # the majority uses the parsed p_string.
@@ -362,7 +362,7 @@ def parse_pipeline(pipeline_str):
 
     for i in range(nforks):
 
-        logger.debug("Processing fork {}".format(i))
+        logger.debug("Processing fork {} in lane {}".format(i, lane))
         # Split the pipeline at each fork start position. fields[-1] will
         # hold the process after the fork. fields[-2] will hold the processes
         # before the fork.
@@ -371,7 +371,8 @@ def parse_pipeline(pipeline_str):
         # Get the processes before the fork. This may be empty when the
         # fork is at the beginning of the pipeline.
         previous_process = fields[-2].split(LANE_TOKEN)[-1].split()
-        logger.debug("Previous processes: {}".format(fields[-2]))
+        logger.debug("Previous processes string: {}".format(fields[-2]))
+        logger.debug("Previous processes list: {}".format(previous_process))
         # Get lanes after the fork
         next_lanes = get_lanes(fields[-1])
         logger.debug("Next lanes object: {}".format(next_lanes))
@@ -399,7 +400,7 @@ def parse_pipeline(pipeline_str):
 
         fork_source = previous_process[-1]
         logger.debug("Fork source is set to: {}".format(fork_source))
-        fork_lane = get_source_lane(fork_source, pipeline_links)
+        fork_lane = get_source_lane(previous_process, pipeline_links)
         logger.debug("Fork lane is set to: {}".format(fork_lane))
         # Add the forking modules
         pipeline_links.extend(
@@ -418,8 +419,8 @@ def get_source_lane(fork_process, pipeline_list):
 
     Parameters
     ----------
-    fork_process : str
-        Process name.
+    fork_process : list
+        List of processes before the fork.
     pipeline_list : list
         List with the pipeline connection dictionaries.
 
@@ -429,9 +430,23 @@ def get_source_lane(fork_process, pipeline_list):
         Lane of the last process that matches fork_process
     """
 
-    for p in pipeline_list[::-1]:
-        if p["output"]["process"] == fork_process:
-            return p["output"]["lane"]
+    fork_source = fork_process[-1]
+    fork_sig = [x for x in fork_process if x != "__init__"]
+
+    for position, p in enumerate(pipeline_list[::-1]):
+
+        if p["output"]["process"] == fork_source:
+
+            lane = p["output"]["lane"]
+            logger.debug("Possible source match found in position {} in lane"
+                         " {}".format(position, lane))
+            lane_sequence = [x["output"]["process"] for x in pipeline_list
+                             if x["output"]["lane"] == lane]
+            logger.debug("Testing lane sequence '{}' against fork signature"
+                         " '{}'".format(lane_sequence, fork_sig))
+            print(lane_sequence, fork_sig)
+            if lane_sequence == fork_sig:
+                return p["output"]["lane"]
 
     return 0
 

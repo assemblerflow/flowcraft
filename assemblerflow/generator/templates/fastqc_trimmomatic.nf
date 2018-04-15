@@ -117,6 +117,7 @@ process trimmomatic_{{ pid }} {
     {% endwith %}
 
     tag { fastq_id }
+    publishDir "results/trimmomatic_{{ pid }}", pattern: "*.gz"
 
     input:
     set fastq_id, file(fastq_pair), trim_range, phred from MAIN_fastqc_trim_{{ pid }}.join(SIDE_phred_{{ pid }})

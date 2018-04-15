@@ -214,9 +214,31 @@ def test_get_source_lane():
                      {'input': {'process': 'fastqc_trimmomatic', 'lane': 1},
                       'output': {'process': 'skesa', 'lane': 3}}]
 
-    for p, lane in zip(["fastqc_trimmomatic", "spades", "skesa"], [1, 2, 3]):
-        res = ps.get_source_lane(p, pipeline_list)
-        assert res == lane
+    res = ps.get_source_lane(["integrity_coverage", "fastqc_trimmomatic"],
+                             pipeline_list)
+
+    assert res == 1
+
+
+def test_get_source_lane_2():
+
+    pipeline_list = [{'input': {'process': '__init__', 'lane': 1},
+                      'output': {'process': 'integrity_coverage', 'lane': 1}},
+                     {'input': {'process': 'integrity_coverage', 'lane': 1},
+                      'output': {'process': 'fastqc_trimmomatic', 'lane': 1}},
+                     {'input': {'process': 'fastqc_trimmomatic', 'lane': 1},
+                      'output': {'process': 'spades', 'lane': 2}},
+                     {'input': {'process': 'fastqc_trimmomatic', 'lane': 1},
+                      'output': {'process': 'skesa', 'lane': 3}},
+                     {'input': {'process': 'spades', 'lane': 2},
+                      'output': {'process': 'pilon', 'lane': 2}},
+                     {'input': {'process': 'skesa', 'lane': 3},
+                      'output': {'process': 'pilon', 'lane': 3}},
+                     ]
+
+    res = ps.get_source_lane(["spades", "pilon"], pipeline_list)
+
+    assert res == 2
 
 
 def test_parse_pipeline():
@@ -235,4 +257,5 @@ def test_parse_pipeline_file():
         expected = pipes[i - 1][1]
         print(p_path)
         res = ps.parse_pipeline(p_path)
+        print(res)
         assert res == expected
