@@ -1,6 +1,10 @@
 assemblerflow\.generator package
 ================================
 
+.. toctree::
+
+    assemblerflow.generator.components
+
 Submodules
 ----------
 

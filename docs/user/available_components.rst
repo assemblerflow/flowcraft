@@ -1,14 +1,14 @@
-Available components
-====================
+Components
+==========
 
-These are the currently supported assemblerflow processes with a short
+These are the currently supported assemblerflow components with a short
 description of their tasks. For a more detailed information, follow the
 links of each process.
 
 Annotation
 ----------
 
-- :mod:`~assemblerflow.templates.prokka`: Performs assembly annotation using
+- :doc:`components/integrity_coverage`: Performs assembly annotation using
   prokka.
 
 - :mod:`~assemblerflow.templates.abricate`: Performs anti-microbial gene
