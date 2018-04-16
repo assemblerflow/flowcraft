@@ -10,3 +10,8 @@ A nextflow pipeline assembler for bacterial genomics.
 [![Documentation Status](https://readthedocs.org/projects/assemblerflow/badge/?version=latest)](http://assemblerflow.readthedocs.io/en/latest/?badge=latest)
 [![PyPI](https://img.shields.io/pypi/v/assemblerflow.svg)](https://pypi.python.org/pypi/assemblerflow/1.0.0rc3)
 
+We're building!
+
+[Temporary README](https://github.com/ODiogoSilva/assemblerflow/blob/userland/README.md)
+
+[Latest user documentation](http://assemblerflow.readthedocs.io/en/process_market/)
