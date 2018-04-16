@@ -4,14 +4,29 @@ Integrity_coverage
 Purpose
 -------
 
-This module receives paired FastQ files, a genome size estimate and a
-minimum coverage threshold and has three purposes while iterating over the
-FastQ files:
+This component is intended to test the integrity of the provided FastQ files.
+It does so by attempting to parse uncompressed or compressed (``gz``, ``bz2``
+or ``zip``) FastQ files (paired-end or single-end). During this parse, if the
+FastQ files are not corrupt, it retrieves the following information:
 
-- Checks the integrity of FastQ files (corrupted files).
-- Guesses the encoding of FastQ files (this can be turned off in the opts argument).
-- Estimates the coverage for each sample.
+- **sequence encoding**: Estimates the sequence encoding based on the quality
+  scores. This information can then be passed to other components that might
+  required it.
+- **estimated coverage**: Provides a rough coverage estimation for each sample
+  based on a user-provided genome size (see `Parameters`_). This estimation
+  is essentially
 
+  .. math::
+      \frac{\text{number of base pairs}}{(\text{genome size} \times 1e^{6})}
+
+  This information is written to the ``reports`` directory (See
+  `Published reports`_)
+- **maximum read length.**: Retrieves the maximum read length for each sample.
+
+.. important::
+    If the ``minCoverage`` parameter value is set to higher than 0, this
+    component will filter samples with an estimated coverage below that
+    threshold.
 
 Input/Output type
 ------------------

@@ -1,14 +1,35 @@
 Components
 ==========
 
-These are the currently supported assemblerflow components with a short
+These are the currently available assemblerflow components with a short
 description of their tasks. For a more detailed information, follow the
-links of each process.
+links of each component.
+
+Read Quality Control
+--------------------
+
+- :doc:`components/integrity_coverage`: Tests the integrity
+  of the provided FastQ files, provides the option to filter FastQ files
+  based on the expected assembly coverage and provides information about
+  the maximum read length and sequence encoding.
+
+- :mod:`~assemblerflow.templates.fastqc`: Runs FastQC on paired-end FastQ
+  files. It has the option of filtering FastQ files based on quality control
+  checks.
+
+- :mod:`~assemblerflow.templates.trimmomatic`: Runs Trimmomatic on paired-end
+  FastQ files.
+
+- :mod:`~assemblerflow.templates.fastqc_trimmomatic`: Runs Trimmomatic on
+  paired-end FastQ files informed by FastQC metrics.
+
+- :mod:`~assemblerflow.templates.check_coverage`: Filters FastQ files based
+  on the expected assembly coverage.
 
 Annotation
 ----------
 
-- :doc:`components/integrity_coverage`: Performs assembly annotation using
+- : Performs assembly annotation using
   prokka.
 
 - :mod:`~assemblerflow.templates.abricate`: Performs anti-microbial gene
@@ -26,26 +47,6 @@ Assembly
 Distance estimation
 -------------------
 
-FastQ QC
---------
-
-- :mod:`~assemblerflow.templates.integrity_coverage`: Tests the integrity
-  of the provided FastQ files, provides the option to filter FastQ files
-  based on the expected assembly coverage and provides information about
-  the maximum read length and sequence encoding.
-
-- :mod:`~assemblerflow.templates.fastqc`: Runs FastQC on paired-end FastQ
-  files. It has the option of filtering FastQ files based on quality control
-  checks.
-
-- :mod:`~assemblerflow.templates.trimmomatic`: Runs Trimmomatic on paired-end
-  FastQ files.
-
-- :mod:`~assemblerflow.templates.fastqc_trimmomatic`: Runs Trimmomatic on
-  paired-end FastQ files informed by FastQC metrics.
-
-- :mod:`~assemblerflow.templates.check_coverage`: Filters FastQ files based
-  on the expected assembly coverage.
 
 Mapping
 -------
