@@ -56,8 +56,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'AssemblerFlow'
-copyright = '2018, Diogo N. Silva'
+project = 'Assemblerflow'
+copyright = '2018, Assemblerflow team'
 author = 'Diogo N. Silva, Tiago F. Jesus'
 
 # The version info for the project you're documenting, acts as replacement for
