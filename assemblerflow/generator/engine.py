@@ -12,27 +12,27 @@ logger = logging.getLogger("main.{}".format(__name__))
 
 try:
     import generator.process as pc
-    import generator.market.assembly as assembly
-    import generator.market.annotation as annotation
-    import generator.market.assembly_processing as ap
-    import generator.market.downloads as downloads
-    import generator.market.distance_estimation as distest
-    import generator.market.mapping as mapping_patlas
-    import generator.market.reads_quality_control as readsqc
+    import generator.components.assembly as assembly
+    import generator.components.annotation as annotation
+    import generator.components.assembly_processing as ap
+    import generator.components.downloads as downloads
+    import generator.components.distance_estimation as distest
+    import generator.components.mapping as mapping_patlas
+    import generator.components.reads_quality_control as readsqc
     import generator.error_handling as eh
     from __init__ import __version__
     from generator import header_skeleton as hs
     from generator import footer_skeleton as fs
     from generator.process_details import colored_print
-except ImportError as e:
+except ImportError:
     import assemblerflow.generator.process as pc
-    import assemblerflow.generator.market.assembly as assembly
-    import assemblerflow.generator.market.annotation as annotation
-    import assemblerflow.generator.market.assembly_processing as ap
-    import assemblerflow.generator.market.downloads as downloads
-    import assemblerflow.generator.market.distance_estimation as distest
-    import assemblerflow.generator.market.mapping as mapping_patlas
-    import assemblerflow.generator.market.reads_quality_control as readsqc
+    import assemblerflow.generator.components.assembly as assembly
+    import assemblerflow.generator.components.annotation as annotation
+    import assemblerflow.generator.components.assembly_processing as ap
+    import assemblerflow.generator.components.downloads as downloads
+    import assemblerflow.generator.components.distance_estimation as distest
+    import assemblerflow.generator.components.mapping as mapping_patlas
+    import assemblerflow.generator.components.reads_quality_control as readsqc
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
     from assemblerflow import __version__

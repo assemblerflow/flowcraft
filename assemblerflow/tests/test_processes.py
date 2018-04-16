@@ -2,9 +2,9 @@ import os
 import pytest
 
 import assemblerflow.generator.process as pc
-import assemblerflow.generator.market.assembly as assembly
-import assemblerflow.generator.market.assembly_processing as ap
-import assemblerflow.generator.market.reads_quality_control as readsqc
+import assemblerflow.generator.components.assembly as assembly
+import assemblerflow.generator.components.assembly_processing as ap
+import assemblerflow.generator.components.reads_quality_control as readsqc
 import assemblerflow.generator.error_handling as eh
 
 from assemblerflow.generator.engine import process_map
