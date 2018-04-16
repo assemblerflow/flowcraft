@@ -287,6 +287,14 @@ class Process:
 
         self.compiler = {}
         """
+        dict: Specifies channels from the current process that are received
+        by a compiler process. Each key in this dictionary should match
+        a compiler process key in 
+        :attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers`.
+        The value should be a list of the channels that will be fed to the
+        compiler process::
+        
+            self.compiler["patlas_consensus"] = ["mashScreenOutputChannel"]
         """
 
     def _set_template(self, template):
@@ -556,7 +564,8 @@ class Process:
 
         # Update directives
         # Allowed attributes to write
-        valid_directives = ["pid", "ignore_type", "ignore_pid", "extra_input"]
+        valid_directives = ["pid", "ignore_type", "ignore_pid", "extra_input",
+                            "group"]
 
         for attribute, val in attr_dict.items():
 

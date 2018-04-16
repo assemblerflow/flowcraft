@@ -192,12 +192,16 @@ class NextflowGenerator:
         self.compilers = {
             "patlas_consensus": {
                 "cls": pc.PatlasConsensus,
-                "channels": [],
                 "template": "patlas_consensus"
             }
         }
         """
-        dict: coco
+        dict: Maps the information about each available compiler process in
+        assemblerflow. The key of each entry is the name/signature of the
+        compiler process. The value is a json/dict object that contains two
+        key:pair values:
+            - ``cls``: The reference to the compiler class object.
+            - ``template``: The nextflow template file of the process.
         """
 
 
@@ -907,24 +911,39 @@ class NextflowGenerator:
                 vals["p"].set_secondary_channel(source, vals["end"])
 
     def _set_compiler_channels(self):
+        """Wrapper method that calls functions related to compiler channels
+        """
 
         self._set_status_channels()
         self._set_general_compilers()
 
     def _set_general_compilers(self):
+        """Adds compiler channels to the :attr:`processes` attribute.
+
+        This method will iterate over the pipeline's processes and check
+        if any process is feeding channels to a compiler process. If so, that
+        compiler process is added to the pipeline and those channels are
+        linked to the compiler via some operator.
+        """
 
         for c, c_info in self.compilers.items():
 
+            # Instantiate compiler class object and set empty channel list
             compiler_cls = c_info["cls"](template=c_info["template"])
+            c_info["channels"] = []
 
             for p in self.processes:
                 if not any([isinstance(p, x) for x in self.skip_class]):
+                    # Check if process has channels to feed to a compiler
                     if c in p.compiler:
-                        # Provide ids
+                        # Correct channel names according to the pid of the
+                        # process
                         channels = ["{}_{}".format(i, p.pid) for i in
                                     p.compiler[c]]
                         c_info["channels"].extend(channels)
 
+            # If one ore more channels were detected, establish connections
+            # and append compiler to the process list.
             if c_info["channels"]:
                 compiler_cls.set_compiler_channels(c_info["channels"],
                                                    operator="join")
