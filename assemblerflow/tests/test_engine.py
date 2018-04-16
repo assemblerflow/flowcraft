@@ -658,17 +658,6 @@ def test_run_time_directives_invalid():
         eg.NextflowGenerator(con, "teste.nf")
 
 
-def test_run_time_directives_invalid2():
-
-    con = [{"input": {"process": "__init__", "lane": 1},
-            "output": {"process": "integrity_coverage", "lane": 1}},
-           {"input": {"process": "integrity_coverage", "lane": 1},
-            "output": {"process": "fastqc={'cpu':'2'}", "lane": 1}}]
-
-    with pytest.raises(eh.ProcessError):
-        eg.NextflowGenerator(con, "teste.nf")
-
-
 def test_not_automatic_dependency():
 
     con = [{"input": {"process": "__init__", "lane": 1},
@@ -757,3 +746,44 @@ def test_automatic_dependency_non_raw():
     nf = eg.NextflowGenerator(con, "teste.nf")
 
     assert nf.processes[2].parent_lane == 1
+
+
+def test_patlas_compiler_channels():
+
+    con = [{"input": {"process": "__init__", "lane": 0},
+            "output": {"process": "mash_screen", "lane": 1}},
+           {"input": {"process": "__init__", "lane": 0},
+            "output": {"process": "mapping_patlas", "lane": 2}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    nf._set_channels()
+    nf._set_compiler_channels()
+
+    assert len(nf.compilers["patlas_consensus"]["channels"]) == 2
+
+
+def test_patlas_compiler_channels_2():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "mash_screen", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    nf._set_channels()
+    nf._set_compiler_channels()
+
+    assert len(nf.compilers["patlas_consensus"]["channels"]) == 1
+
+
+def test_patlas_compiler_channels_empty():
+
+    con = [{"input": {"process": "__init__", "lane": 1},
+            "output": {"process": "trimmomatic", "lane": 1}}]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+
+    nf._set_channels()
+    nf._set_compiler_channels()
+
+    assert len(nf.compilers["patlas_consensus"]["channels"]) == 0

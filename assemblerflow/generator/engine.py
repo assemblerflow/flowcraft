@@ -12,12 +12,27 @@ logger = logging.getLogger("main.{}".format(__name__))
 
 try:
     import generator.process as pc
+    import generator.market.assembly as assembly
+    import generator.market.annotation as annotation
+    import generator.market.assembly_processing as ap
+    import generator.market.downloads as downloads
+    import generator.market.distance_estimation as distest
+    import generator.market.mapping as mapping_patlas
+    import generator.market.reads_quality_control as readsqc
     import generator.error_handling as eh
     from __init__ import __version__
     from generator import header_skeleton as hs
     from generator import footer_skeleton as fs
     from generator.process_details import colored_print
 except ImportError as e:
+    import assemblerflow.generator.process as pc
+    import assemblerflow.generator.market.assembly as assembly
+    import assemblerflow.generator.market.annotation as annotation
+    import assemblerflow.generator.market.assembly_processing as ap
+    import assemblerflow.generator.market.downloads as downloads
+    import assemblerflow.generator.market.distance_estimation as distest
+    import assemblerflow.generator.market.mapping as mapping_patlas
+    import assemblerflow.generator.market.reads_quality_control as readsqc
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
     from assemblerflow import __version__
@@ -27,34 +42,35 @@ except ImportError as e:
 
 
 process_map = {
-        "reads_download": pc.DownloadReads,
-        "integrity_coverage": pc.IntegrityCoverage,
+        "reads_download": downloads.DownloadReads,
+        "integrity_coverage": readsqc.IntegrityCoverage,
         "seq_typing": pc.SeqTyping,
         "patho_typing": pc.PathoTyping,
-        "check_coverage": pc.CheckCoverage,
-        "true_coverage": pc.TrueCoverage,
-        "fastqc": pc.FastQC,
-        "trimmomatic": pc.Trimmomatic,
-        "fastqc_trimmomatic": pc.FastqcTrimmomatic,
-        "skesa": pc.Skesa,
-        "spades": pc.Spades,
-        "process_spades": pc.ProcessSpades,
-        "process_skesa": pc.ProcessSkesa,
-        "assembly_mapping": pc.AssemblyMapping,
-        "pilon": pc.Pilon,
+        "check_coverage": readsqc.CheckCoverage,
+        "true_coverage": readsqc.TrueCoverage,
+        "fastqc": readsqc.FastQC,
+        "trimmomatic": readsqc.Trimmomatic,
+        "fastqc_trimmomatic": readsqc.FastqcTrimmomatic,
+        "skesa": assembly.Skesa,
+        "spades": assembly.Spades,
+        "process_spades": ap.ProcessSpades,
+        "process_skesa": ap.ProcessSkesa,
+        "assembly_mapping": ap.AssemblyMapping,
+        "pilon": ap.Pilon,
         "mlst": pc.Mlst,
-        "abricate": pc.Abricate,
-        "prokka": pc.Prokka,
+        "abricate": annotation.Abricate,
+        "prokka": annotation.Prokka,
         "chewbbaca": pc.Chewbbaca,
-        # "status_compiler": pc.StatusCompiler,
-        # "trace_compiler": pc.TraceCompiler
+        "mash_dist": distest.PatlasMashDist,
+        "mash_screen": distest.PatlasMashScreen,
+        "mapping_patlas": mapping_patlas.PatlasMapping
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
 the format::
 
     {
-        "<template_string>": pc.TemplateClass
+        "<template_string>": module.TemplateClass
     }
 """
 
@@ -172,6 +188,22 @@ class NextflowGenerator:
         project directory. If the file already exists, it will not overwrite
         it.
         """
+
+        self.compilers = {
+            "patlas_consensus": {
+                "cls": pc.PatlasConsensus,
+                "template": "patlas_consensus"
+            }
+        }
+        """
+        dict: Maps the information about each available compiler process in
+        assemblerflow. The key of each entry is the name/signature of the
+        compiler process. The value is a json/dict object that contains two
+        key:pair values:
+            - ``cls``: The reference to the compiler class object.
+            - ``template``: The nextflow template file of the process.
+        """
+
 
     @staticmethod
     def _parse_process_name(name_str):
@@ -879,8 +911,43 @@ class NextflowGenerator:
                 vals["p"].set_secondary_channel(source, vals["end"])
 
     def _set_compiler_channels(self):
+        """Wrapper method that calls functions related to compiler channels
+        """
 
         self._set_status_channels()
+        self._set_general_compilers()
+
+    def _set_general_compilers(self):
+        """Adds compiler channels to the :attr:`processes` attribute.
+
+        This method will iterate over the pipeline's processes and check
+        if any process is feeding channels to a compiler process. If so, that
+        compiler process is added to the pipeline and those channels are
+        linked to the compiler via some operator.
+        """
+
+        for c, c_info in self.compilers.items():
+
+            # Instantiate compiler class object and set empty channel list
+            compiler_cls = c_info["cls"](template=c_info["template"])
+            c_info["channels"] = []
+
+            for p in self.processes:
+                if not any([isinstance(p, x) for x in self.skip_class]):
+                    # Check if process has channels to feed to a compiler
+                    if c in p.compiler:
+                        # Correct channel names according to the pid of the
+                        # process
+                        channels = ["{}_{}".format(i, p.pid) for i in
+                                    p.compiler[c]]
+                        c_info["channels"].extend(channels)
+
+            # If one ore more channels were detected, establish connections
+            # and append compiler to the process list.
+            if c_info["channels"]:
+                compiler_cls.set_compiler_channels(c_info["channels"],
+                                                   operator="join")
+                self.processes.append(compiler_cls)
 
     def _set_status_channels(self):
         """Compiles all status channels for the status compiler process
@@ -893,6 +960,7 @@ class NextflowGenerator:
         status_channels = []
         for p in [p for p in self.processes]:
             if not any([isinstance(p, x) for x in self.skip_class]):
+
                 status_channels.extend(p.status_strs)
 
         if not status_channels:
@@ -1282,7 +1350,6 @@ class NextflowGenerator:
         # Write pipeline file
         with open(self.nf_file, "w") as fh:
             fh.write(self.template)
-
 
         logger.info(colored_print(
             "\tPipeline written into {} \u2713".format(self.nf_file)))

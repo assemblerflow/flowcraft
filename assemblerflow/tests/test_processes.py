@@ -2,6 +2,9 @@ import os
 import pytest
 
 import assemblerflow.generator.process as pc
+import assemblerflow.generator.market.assembly as assembly
+import assemblerflow.generator.market.assembly_processing as ap
+import assemblerflow.generator.market.reads_quality_control as readsqc
 import assemblerflow.generator.error_handling as eh
 
 from assemblerflow.generator.engine import process_map
@@ -28,6 +31,11 @@ def process_wchannels():
 def mock_status():
 
     return pc.StatusCompiler(template="status_compiler")
+
+@pytest.fixture
+def mock_patlas_compiler():
+
+    return pc.StatusCompiler(template="patlas_consensus")
 
 
 @pytest.fixture
@@ -182,7 +190,7 @@ def test_channels_setup_status(process_wchannels):
     process_wchannels.lane = 3
     process_wchannels.set_channels(pid=1)
 
-    assert process_wchannels.status_strs == ["A_3_1", "B_3_1"]
+    assert process_wchannels.status_strs == ["STATUS_A_3_1", "STATUS_B_3_1"]
 
 
 def test_update_main_fork_noprevious(process_wchannels):
@@ -319,7 +327,7 @@ def test_init_multi_secondary_inputs(mock_init):
 
 def test_directive_update():
 
-    p = pc.Spades(template="spades")
+    p = assembly.Spades(template="spades")
 
     p.update_attributes({"version": "3.9.0"})
 
@@ -328,7 +336,7 @@ def test_directive_update():
 
 def test_directive_update2():
 
-    p = pc.FastQC(template="fastqc")
+    p = readsqc.FastQC(template="fastqc")
 
     p.update_attributes({"cpus": "3", "memory": "4GB"})
 
@@ -339,7 +347,7 @@ def test_directive_update2():
 
 def test_directive_update3():
 
-    p = pc.Pilon(template="pilon")
+    p = ap.Pilon(template="pilon")
 
     p.update_attributes({"cpus": "3", "memory": "4GB",
                          "container": "another", "version": "1.0"})
@@ -353,7 +361,7 @@ def test_directive_update3():
 
 def test_directive_update4():
 
-    p = pc.Trimmomatic(template="trimmomatic")
+    p = readsqc.Trimmomatic(template="trimmomatic")
 
     p.update_attributes({"cpus": "3", "memory": "{4.GB*task.attempt}",
                          "container": "another", "version": "1.0"})
@@ -365,12 +373,17 @@ def test_directive_update4():
            ["3", "{4.GB*task.attempt}", "another", "1.0"]
 
 
-def test_directive_update_invalid():
+def test_join_compiler(mock_patlas_compiler):
 
-    p = pc.Trimmomatic(template="trimmomatic")
+    mock_patlas_compiler.set_compiler_channels(["A", "B"], operator="join")
 
-    with pytest.raises(eh.ProcessError):
-        p.update_attributes({"cpu": "3", "memory": "{4.GB*task.attempt}",
-                             "container": "another", "version": "1.0"})
+    assert mock_patlas_compiler._context == \
+        {"compile_channels": "A.join(B).map{ ot -> [ ot[0], ot[1..-1] ] }"}
 
 
+def test_join_compiler_one_channel(mock_patlas_compiler):
+
+    mock_patlas_compiler.set_compiler_channels(["A"], operator="join")
+
+    assert mock_patlas_compiler._context == \
+        {"compile_channels": "A"}
