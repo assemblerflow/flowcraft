@@ -128,8 +128,11 @@ Create Process class
 
 The process class will contain the information that assemblerflow
 will use to build the pipeline and assess potential conflicts/dependencies
-between process. This class should be created in the
-:mod:`assemblerflow.generator.process` module and inherit from the
+between process. This class should be created in one the category files in the
+:mod:`assemblerflow.generator.components` module (e.g.: ``assembly.py``). If
+the new component does not fit in any of the existing categories, create a
+new one that imports :mod:`assemblerflow.generator.process.Process` and add
+your new class. This class should inherit from the
 :class:`~assemblerflow.generator.process.Process` base
 class::
 
