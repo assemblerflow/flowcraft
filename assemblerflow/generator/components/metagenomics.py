@@ -31,7 +31,9 @@ class bowtie_host(Process):
         self.directives = {
             "bowtie_host": {
                 "container": "cimendes/bowtie2_hg19",
-                "version": "2.0"
+                "version": "2.0",
+                "memory": "{10.Gb*task.attempt}",
+                "cpus": 3
             }
         }
 
