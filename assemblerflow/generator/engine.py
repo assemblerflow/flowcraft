@@ -192,7 +192,8 @@ class NextflowGenerator:
         self.compilers = {
             "patlas_consensus": {
                 "cls": pc.PatlasConsensus,
-                "template": "patlas_consensus"
+                "template": "patlas_consensus",
+                "operator": "join"
             }
         }
         """
@@ -946,7 +947,7 @@ class NextflowGenerator:
             # and append compiler to the process list.
             if c_info["channels"]:
                 compiler_cls.set_compiler_channels(c_info["channels"],
-                                                   operator="join")
+                                                   operator=c_info["operator"])
                 self.processes.append(compiler_cls)
 
     def _set_status_channels(self):

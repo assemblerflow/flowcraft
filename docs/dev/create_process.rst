@@ -331,6 +331,23 @@ provided via the extra input parameter does not have to wait for the
 ``main_channel``, which means that they can run in parallel, if there are
 enough resources.
 
+Compiler
+::::::::
+
+The :attr:`~assemblerflow.generator.process.Process.compiler` attribute
+allows one or more channels of the process to be fed into a compiler process
+(See `Compiler processes`_). These are special processes that collect
+information from one or more processes to execute a given task. Therefore,
+this parameter can only be used when there is an appropriate compiler process
+available (the available compiler processes are set in the
+:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` dictionary). In order to
+provide one or more channels to a compiler process, simply add a key:value to the
+attribute, where the key is the id of the compiler process present in the
+:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` dictionary and the value
+is the list of channels::
+
+    self.compiler["patlas_consensus"] = ["mappingOutputChannel"]
+
 Link start
 ::::::::::
 
@@ -495,6 +512,104 @@ would need to be changed to::
 
 Advanced use cases
 ------------------
+
+Compiler processes
+::::::::::::::::::
+
+Compilers are special processes that collect data from one or more processes
+and perform a given task with that compiled data. They are automatically
+included in the pipeline when at least one of the source channels is present.
+In the case there are multiple source channels, they are merged according
+to a specified operator.
+
+Creating a compiler process
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The creation of the compiler process is simpler than that of a regular process
+but follows the same three steps.
+
+1. Create a nextflow template file in ``assemblerflow.generator.templates``::
+
+    process fullConsensus {
+
+        input:
+        set id, file(infile_list) from {{ compile_channels }}
+
+        output:
+        <output channels>
+
+        script:
+        """
+        <commands/code/template>
+        """
+
+    }
+
+The only requirement is the inclusion of a ``compiler_channels`` jinja
+placeholder in the main input channel.
+
+2. Create a Compiler class in the :mod:`assemblerflow.generator.process`
+   module::
+
+    class PatlasConsensus(Compiler):
+
+        def __init__(self, **kwargs):
+
+            super().__init__(**kwargs)
+
+This class must inherit from
+:mod:`~assemblerflow.generator.process.Compiler` and does not require any
+more changes.
+
+3. Map the compiler template file to the class in
+:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` attribute::
+
+        self.compilers = {
+        "patlas_consensus": {
+            "cls": pc.PatlasConsensus,
+            "template": "patlas_consensus",
+            "operator": "join"
+            }
+        }
+
+Each compiler should contain a key:value entry. The key is the compiler
+id that is then specified in the :attr:`~assemblerflow.generator.process.Process.compiler`
+attribute of the component classes. The value is a json/dict object that
+species the compiler class in the ``cls`` key, the template string in the
+``template`` string and the operator used to join the channels into the
+compiler via the ``operator`` key.
+
+How a compiler process works
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Consider the case where you have a compiler process named ``compiler_1`` and
+two processes, ``process_1`` and ``process_2``, both of which feed a single
+channel to ``compiler_1``. This means that the class definition of these
+processes include::
+
+    class Process_1(Process):
+        (...)
+        self.compiler["compiler_1"] = ["channel1"]
+
+    class Process_2(Process):
+        (...)
+        self.compiler["compiler_1"] = ["channel2"]
+
+If a pipeline is built with at least one of these process, the ``compiler_1``
+process will be automatically included in the pipeline. If more than one
+channel is provided to the compiler, they will be merged with the specified
+operator::
+
+    process compiler_1 {
+
+        input:
+        set sample_id, file(infile_list) from channel2.join(channel1)
+
+    }
+
+This will allow the output of multiple separate process to be processed by
+a single process in the pipeline, and it automatically adjusts according
+to the channels provided to the compiler.
 
 Secondary links between process
 :::::::::::::::::::::::::::::::

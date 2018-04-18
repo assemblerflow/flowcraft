@@ -587,6 +587,9 @@ class Compiler(Process):
 
         super().__init__(**kwargs)
 
+        self.ignore_type = True
+        self.link_start = None
+
     def set_compiler_channels(self, channel_list, operator="mix"):
         """General method for setting the input channels for the status process
 
@@ -1041,9 +1044,6 @@ class StatusCompiler(Compiler):
 
         super().__init__(**kwargs)
 
-        self.ignore_type = True
-        self.link_start = None
-
 
 class ReportCompiler(Compiler):
 
@@ -1051,15 +1051,9 @@ class ReportCompiler(Compiler):
 
         super().__init__(**kwargs)
 
-        self.ignore_type = True
-        self.link_start = None
-
 
 class PatlasConsensus(Compiler):
 
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-
-        self.ignore_type = True
-        self.link_start = None
