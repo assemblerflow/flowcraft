@@ -9,6 +9,7 @@ import shutil
 import logging
 import argparse
 import logging.config
+#import jinja
 
 from distutils.dir_util import copy_tree
 
@@ -20,7 +21,8 @@ try:
     from generator.recipe import brew_recipe
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
-except ImportError:
+except ImportError as e:
+    print(e)
     from assemblerflow import __version__, __build__
     from assemblerflow.generator.engine import NextflowGenerator, process_map
     from assemblerflow.generator.recipe import brew_recipe

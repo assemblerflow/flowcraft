@@ -17,7 +17,8 @@ try:
     import generator.components.assembly_processing as ap
     import generator.components.downloads as downloads
     import generator.components.distance_estimation as distest
-    import generator.components.mapping as mapping_patlas
+    import generator.components.metagenomics as meta
+    import generator.components.plasmids as mapping_patlas
     import generator.components.reads_quality_control as readsqc
     import generator.error_handling as eh
     from __init__ import __version__
@@ -31,7 +32,8 @@ except ImportError:
     import assemblerflow.generator.components.assembly_processing as ap
     import assemblerflow.generator.components.downloads as downloads
     import assemblerflow.generator.components.distance_estimation as distest
-    import assemblerflow.generator.components.mapping as mapping_patlas
+    import assemblerflow.generator.components.metagenomics as meta
+    import assemblerflow.generator.components.plasmids as mapping_patlas
     import assemblerflow.generator.components.reads_quality_control as readsqc
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
@@ -63,7 +65,8 @@ process_map = {
         "chewbbaca": pc.Chewbbaca,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
-        "mapping_patlas": mapping_patlas.PatlasMapping
+        "mapping_patlas": mapping_patlas.PatlasMapping,
+        "bowtie_host": meta.bowtie_host
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
