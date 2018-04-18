@@ -224,7 +224,7 @@ class AssemblyMapping(Process):
                 "version": "1.0.0-2"
             },
             "process_assembly_mapping": {
-                "cpus": 4,
+                "cpus": 1,
                 "memory": "{ 5.GB * task.attempt }",
                 "container": "ummidock/bowtie2_samtools",
                 "version": "1.0.0-2"
@@ -268,7 +268,7 @@ class Pilon(Process):
                 "version": "1.22.0-2"
             },
             "pilon_report": {
-                "cpus": 4,
+                "cpus": 1,
                 "memory": "{ 7.GB * task.attempt }",
                 "container": "ummidock/pilon",
                 "version": "1.22.0-2"

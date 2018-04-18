@@ -13,63 +13,56 @@ Read Quality Control
   based on the expected assembly coverage and provides information about
   the maximum read length and sequence encoding.
 
-- :mod:`~assemblerflow.templates.fastqc`: Runs FastQC on paired-end FastQ
-  files. It has the option of filtering FastQ files based on quality control
-  checks.
+- :doc:`components/fastqc`: Runs FastQC on paired-end FastQ files.
 
-- :mod:`~assemblerflow.templates.trimmomatic`: Runs Trimmomatic on paired-end
-  FastQ files.
+- :doc:`components/trimmomatic`: Runs Trimmomatic on paired-end FastQ files.
 
-- :mod:`~assemblerflow.templates.fastqc_trimmomatic`: Runs Trimmomatic on
-  paired-end FastQ files informed by FastQC metrics.
+- :doc:`components/fastqc_trimmomatic`: Runs Trimmomatic on
+  paired-end FastQ files informed by the FastQC report.
 
-- :mod:`~assemblerflow.templates.check_coverage`: Filters FastQ files based
-  on the expected assembly coverage.
-
-Annotation
-----------
-
-- : Performs assembly annotation using
-  prokka.
-
-- :mod:`~assemblerflow.templates.abricate`: Performs anti-microbial gene
-  screening using abricate.
+- :doc:`components/check_coverage`: Estimates the coverage for each sample and
+  filters FastQ files according to a specified minimum coverage threshold.
 
 Assembly
 --------
 
-- :mod:`~assemblerflow.templates.spades`: Assembles paired-end FastQ files
+- :doc:`components/spades`: Assembles paired-end FastQ files
   using SPAdes.
 
-- :mod:`~assemblerflow.templates.skesa`: Assembles paired-end FastQ files using
+- :doc:`components/skesa`: Assembles paired-end FastQ files using
   skesa.
-
-Distance estimation
--------------------
-
-
-Mapping
--------
-
-MLST
-----
-
-- :mod:`~assemblerflow.templates.mlst`: Checks the ST of an assembly using
-  mlst.
-
-- :mod:`~assemblerflow.templates.chewbbaca`: Performs a cg/wgMLST analysis
-  using ChewBBACA.
 
 Post-assembly
 -------------
 
-- :mod:`~assemblerflow.templates.process_spades`: Processes the assembly output
-  from spades and performs filtering base on quality criteria of GC content
+- :doc:`components/process_spades`: Processes the assembly output
+  from Spades and performs filtering base on quality criteria of GC content
   k-mer coverage and read length.
 
-- :mod:`~assemblerflow.templates.assembly_mapping`: Performs a mapping
+- :doc:`components/process_skesa`: Processes the assembly output
+  from Skesa and performs filtering base on quality criteria of GC content
+  k-mer coverage and read length.
+
+- :doc:`components/assembly_mapping`: Performs a mapping
   procedure of FastQ files into a their assembly and performs filtering
   based on quality criteria of read coverage and genome size.
 
-- :mod:`~assemblerflow.templates.pilon`: Corrects and filters assemblies
-  using Pilon.
+- :doc:`components/pilon`: Corrects and filters assemblies using Pilon.
+
+Annotation
+----------
+
+- :doc:`components/prokka`: Performs assembly annotation using prokka.
+
+- :doc:`components/abricate`: Performs anti-microbial gene screening using
+  abricate.
+
+MLST
+----
+
+- :doc:`components/mlst`: Checks the ST of an assembly using
+  mlst.
+
+- :doc:`components/chewbbaca`: Performs a cg/wgMLST analysis using ChewBBACA.
+
+

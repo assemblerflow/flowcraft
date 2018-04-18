@@ -130,6 +130,7 @@ class CheckCoverage(Process):
 
         self.link_start.extend(["SIDE_max_len"])
 
+
 class TrueCoverage(Process):
     """TrueCoverage process template interface
     """

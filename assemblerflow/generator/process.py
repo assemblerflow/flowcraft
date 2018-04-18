@@ -864,12 +864,6 @@ class PathoTyping(Process):
         }}
 
 
-
-
-
-
-
-
 class Mlst(Process):
     """Mlst mapping process template interface
 
@@ -897,8 +891,11 @@ class Mlst(Process):
         }}
 
         self.params = {
-            "mlstRun": "true",
-            "mlstSpecies": "null"
+            "mlstSpecies": {
+                "default": "null",
+                "description":
+                    "Specify the expected species for MLST checking."
+            }
         }
 
 
