@@ -8,22 +8,22 @@ process mashScreen_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "running mash screen for sample: " + id }
+    tag { "running mash screen for sample: " + sample_id }
 
     input:
-    set id, file(reads) from {{ input_channel }}
+    set sample_id, file(reads) from {{ input_channel }}
     val refFile from IN_reference_file
 
     output:
-    set id, file("sortedMashScreenResults_${id}.txt") into mashScreenResults_{{ pid }}
-    {% with task_name="mashScreen", sample_id="id" %}
+    set sample_id, file("sortedMashScreenResults_${id}.txt") into mashScreenResults_{{ pid }}
+    {% with task_name="mashScreen", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
     """
     mash screen -i ${params.identity} -v ${params.pValue} -p \
-    ${task.cpus} ${winnerVar} ${refFile} ${reads} > mashScreenResults_${id}.txt
-    sort -gr mashScreenResults_${id}.txt > sortedMashScreenResults_${id}.txt
+    ${task.cpus} ${winnerVar} ${refFile} ${reads} > mashScreenResults_${sample_id}.txt
+    sort -gr mashScreenResults_${sample_id}.txt > sortedMashScreenResults_${sample_id}.txt
     """
 }
 
@@ -37,11 +37,11 @@ process mashOutputJson_{{ pid }} {
     publishDir 'results/mashscreen/'
 
     input:
-    set id, file(mashtxt) from mashScreenResults_{{ pid }}
+    set sample_id, file(mashtxt) from mashScreenResults_{{ pid }}
 
     output:
-    set id, file("sortedMashScreenResults_${id}.json") optional true into mashScreenOutputChannel_{{ pid }}
-    {% with task_name="mashOutputJson", sample_id="id" %}
+    set sample_id, file("sortedMashScreenResults_${sample_id}.json") optional true into mashScreenOutputChannel_{{ pid }}
+    {% with task_name="mashOutputJson", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
