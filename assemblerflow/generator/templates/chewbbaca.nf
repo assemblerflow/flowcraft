@@ -107,7 +107,7 @@ if (params.chewbbacaBatch) {
             fi
 
             echo $assembly >> input_file.txt
-            chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results_${sample_id} $jsonOpt --cpu $task.cpus $training
+            chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results_${sample_id} $jsonOpt --cpu $task.cpus $training --fc
             if [ "$jsonOpt" = "--json" ]; then
                 merge_json.py ${params.schemaCore} chew_results_*/*/results*
             else
