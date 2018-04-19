@@ -22,7 +22,7 @@ What Assemblerflow does
 :::::::::::::::::::::::
 
 Assemblerflow is a python engine that automatically builds nextflow pipelines
-by assembling pre-made ready-to-use components. These components are modular
+by assembling pre-made ready-to-use :ref:`components <components>`. These components are modular
 pieces of software or scripts, such as ``fastqc``, ``trimmomatic``, ``spades``,
 etc, that are written for nextflow and have a set of attributes, such as
 input and output types, parameters, directives, etc. This modular nature
@@ -84,9 +84,9 @@ This pipeline can be executed by providing a file with accession numbers
 Who is Assemblerflow for
 ::::::::::::::::::::::::
 
-Assemblerflow can be useful for bioinformaticians of varied levels of expertise
+Assemblerflow can be useful for bioinformaticians with varied levels of expertise
 that need to executed genomic pipelines often and potentially in different
-platforms. Building and executing pipelines requires no programming knowledge
+platforms. Building and executing pipelines requires no programming knowledge,
 but familiarization with nextflow is highly recommended to take full advantage
 of the generated pipelines.
 
