@@ -1,8 +1,12 @@
+..    include:: <isonum.txt>
+
 Overview
 ========
 
 Assemblerflow is an assembler of pipelines written in  nextflow_ for
-analyses of genomic data.
+analyses of genomic data. The premisse is simple:
+
+Software are container blocks |rarr| Build your lego-like pipeline |rarr| Execute it (almost) anywhere.
 
 What is Nextflow
 ::::::::::::::::
