@@ -7,12 +7,12 @@ process runMashDist_{{ pid }} {
     tag { "running mash dist for fasta file: " + fasta }
 
     input:
-    set id, file(fasta) from {{ input_channel }}
+    set sample_id, file(fasta) from {{ input_channel }}
     val refFile from IN_reference_file
 
     output:
-    set id, fasta, file("${fasta}_mashdist.txt") into mashDistOutChannel_{{ pid }}
-    {% with task_name="runMashDist", sample_id="id" %}
+    set sample_id, fasta, file("${fasta}_mashdist.txt") into mashDistOutChannel_{{ pid }}
+    {% with task_name="runMashDist", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
@@ -33,11 +33,11 @@ process mashDistOutputJson_{{ pid }} {
     publishDir 'results/mashdist/'
 
     input:
-    set id, fasta, file(mashtxt) from mashDistOutChannel_{{ pid }}
+    set sample_id, fasta, file(mashtxt) from mashDistOutChannel_{{ pid }}
 
     output:
-    set id, file("*.json") optional true into {{ output_channel }}
-    {% with task_name="mashDistOutputJson", sample_id="id" %}
+    set sample_id, file("*.json") optional true into {{ output_channel }}
+    {% with task_name="mashDistOutputJson", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
