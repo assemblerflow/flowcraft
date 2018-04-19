@@ -36,11 +36,11 @@ A minimal example created as a ``my_process.nf`` file is as follows::
     {% include "post.txt" ignore missing %}
 
     input:
-    <input variables> from {{ input_channel }}
+    set sample_id, <data> from {{ input_channel }}
 
     // The output is optional
     output:
-    <output variables> into {{ output_channel }}
+    set sample_id, <data> into {{ output_channel }}
     {% with task_name="abricate" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -72,12 +72,16 @@ assemblerflow:
   more information). It also includes scripts for sending requests to
   REST APIs (only when certain pipeline parameters are used).
 
-- ``input_channel`` (**Mandatory**): All process must include **one and only
-  one** input channel.
+- ``input_channel`` (**Mandatory**): All processes must include **one and only
+  one** input channel. In most cases, this channel should be defined with
+  a two element tuple that contains the sample ID (``sample_id``) and then
+  the actual data file/stream.
 
 - ``output_channel`` (**Optional**): Terminal processes may skip the output
   channel entirely. However, if you want to link the main output of this
   process with subsequent ones, this placeholder must be used **only once**.
+  Like in the input channel, this channel sould be defined with a two element
+  tuple with the sample ID and the data.
 
 - ``include "compiler_channels.txt"`` (**Mandatory**): This will include the
   special channels that will compile the status/logging of the processes
