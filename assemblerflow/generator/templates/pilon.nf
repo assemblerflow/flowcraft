@@ -4,15 +4,15 @@ process pilon_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
     echo false
     publishDir 'results/assembly/pilon_{{ pid }}/', mode: 'copy', pattern: "*.fasta"
 
     input:
-    set fastq_id, file(assembly), file(bam_file), file(bam_index) from {{ input_channel }}
+    set sample_id, file(assembly), file(bam_file), file(bam_index) from {{ input_channel }}
 
     output:
-    set fastq_id, '*_polished.fasta' into {{ output_channel }}, pilon_report_{{ pid }}
+    set sample_id, '*_polished.fasta' into {{ output_channel }}, pilon_report_{{ pid }}
     {% with task_name="pilon" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -36,10 +36,10 @@ process pilon_report_{{ pid }} {
     {% include "report_post.txt" ignore missing %}
     {% endwith %}
 
-    tag { fastq_id }
+    tag { sample_id }
 
     input:
-    set fastq_id, file(assembly), file(coverage_bp) from pilon_report_{{ pid }}.join(SIDE_BpCoverage_{{ pid }})
+    set sample_id, file(assembly), file(coverage_bp) from pilon_report_{{ pid }}.join(SIDE_BpCoverage_{{ pid }})
 
     output:
     file "*_assembly_report.csv" into pilon_report_out_{{ pid }}

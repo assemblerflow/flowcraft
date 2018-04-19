@@ -4,15 +4,15 @@ process fastqc_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
     publishDir "reports/fastqc_{{ pid }}/", pattern: "*.html"
 
     input:
-    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    set sample_id, file(fastq_pair) from {{ input_channel }}
     val ad from Channel.value('None')
 
     output:
-    set fastq_id, file(fastq_pair), file('pair_1*'), file('pair_2*') into MAIN_fastqc_out_{{ pid }}
+    set sample_id, file(fastq_pair), file('pair_1*'), file('pair_2*') into MAIN_fastqc_out_{{ pid }}
     file "*html"
     {% with task_name="fastqc" %}
     {%- include "compiler_channels.txt" ignore missing -%}
@@ -36,20 +36,20 @@ process fastqc_report_{{ pid }} {
     {% include "post.txt" ignore missing %}
     {% endwith %}
 
-    tag { fastq_id }
+    tag { sample_id }
     // This process can only use a single CPU
     cpus 1
     publishDir 'reports/fastqc_{{ pid }}/run_1/', pattern: '*summary.txt', mode: 'copy'
 
     input:
-    set fastq_id, file(fastq_pair), file(result_p1), file(result_p2) from MAIN_fastqc_out_{{ pid }}
+    set sample_id, file(fastq_pair), file(result_p1), file(result_p2) from MAIN_fastqc_out_{{ pid }}
     val opts from Channel.value("--ignore-tests")
 
     output:
-    set fastq_id, file(fastq_pair), 'optimal_trim', ".status" into MAIN_fastqc_trim
+    set sample_id, file(fastq_pair), 'optimal_trim', ".status" into MAIN_fastqc_trim
     file '*_trim_report' into LOG_trim_{{ pid }}
     file "*_status_report" into LOG_fastqc_report_{{ pid }}
-    file "${fastq_id}_*_summary.txt" optional true
+    file "${sample_id}_*_summary.txt" optional true
     {% with task_name="fastqc_report" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -116,16 +116,16 @@ process trimmomatic_{{ pid }} {
     {% include "post.txt" ignore missing %}
     {% endwith %}
 
-    tag { fastq_id }
+    tag { sample_id }
     publishDir "results/trimmomatic_{{ pid }}", pattern: "*.gz"
 
     input:
-    set fastq_id, file(fastq_pair), trim_range, phred from MAIN_fastqc_trim_{{ pid }}.join(SIDE_phred_{{ pid }})
+    set sample_id, file(fastq_pair), trim_range, phred from MAIN_fastqc_trim_{{ pid }}.join(SIDE_phred_{{ pid }})
     val opts from IN_trimmomatic_opts
     val ad from IN_adapters
 
     output:
-    set fastq_id, "${fastq_id}_*trim.fastq.gz" into {{ output_channel }}
+    set sample_id, "${sample_id}_*trim.fastq.gz" into {{ output_channel }}
     file 'trimmomatic_report.csv'
     {% with task_name="trimmomatic" %}
     {%- include "compiler_channels.txt" ignore missing -%}

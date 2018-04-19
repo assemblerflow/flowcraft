@@ -5,11 +5,11 @@ process seq_typing_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
     errorStrategy "ignore"
 
     input:
-    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    set sample_id, file(fastq_pair) from {{ input_channel }}
     file refO from IN_refO
     file refH from IN_refH
 

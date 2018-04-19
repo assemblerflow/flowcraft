@@ -4,18 +4,18 @@ process integrity_coverage_2_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
     cpus 1
 
     input:
-    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    set sample_id, file(fastq_pair) from {{ input_channel }}
     val gsize from IN_genome_size
     val cov from IN_min_coverage
     // Use -e option for skipping encoding guess
     val opts from Channel.value('-e')
 
     output:
-    set fastq_id,
+    set sample_id,
         file(fastq_pair),
         file('*_coverage'),
         file('*_max_len') optional true into MAIN_integrity_{{ pid }}

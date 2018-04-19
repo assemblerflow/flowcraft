@@ -6,16 +6,16 @@ process trimmomatic_{{ pid }} {
 
     publishDir "results/trimmomatic_{{ pid }}", pattern: "*.gz"
 
-    tag { fastq_id }
+    tag { sample_id }
 
     input:
-    set fastq_id, file(fastq_pair), phred from {{ input_channel }}.join(SIDE_phred_{{ pid }})
+    set sample_id, file(fastq_pair), phred from {{ input_channel }}.join(SIDE_phred_{{ pid }})
     val trim_range from Channel.value("None")
     val opts from IN_trimmomatic_opts
     val ad from IN_adapters
 
     output:
-    set fastq_id, "${fastq_id}_*trim.fastq.gz" into {{ output_channel }}
+    set sample_id, "${sample_id}_*trim.fastq.gz" into {{ output_channel }}
     file 'trimmomatic_report.csv'
     {% with task_name="trimmomatic" %}
     {%- include "compiler_channels.txt" ignore missing -%}
