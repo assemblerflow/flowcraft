@@ -105,7 +105,9 @@ def validate_build_arguments(args):
         sys.exit(1)
 
     if args.output_nf:
-        opath = args.output_nf
+        parsed_output_nf = (args.output_nf if args.output_nf.endswith(".nf")
+                            else "{}.nf".format(args.output_nf))
+        opath = parsed_output_nf
         if os.path.dirname(opath):
             parent_dir = os.path.dirname(opath)
             if not os.path.exists(parent_dir):
@@ -113,6 +115,8 @@ def validate_build_arguments(args):
                     "The provided directory '{}' does not exist.".format(
                         parent_dir), "red_bold"))
                 sys.exit(1)
+
+        return  parsed_output_nf
 
 
 def copy_project(path):
@@ -161,7 +165,7 @@ def build(args):
         "============================================="
     ]
 
-    validate_build_arguments(args)
+    parsed_output_nf = validate_build_arguments(args)
 
     logger.info(colored_print("\n".join(welcome), "green_bold"))
 
@@ -192,7 +196,7 @@ def build(args):
         sys.exit()
 
     nfg = NextflowGenerator(process_connections=pipeline_list,
-                            nextflow_file=args.output_nf,
+                            nextflow_file=parsed_output_nf,
                             pipeline_name=args.pipeline_name,
                             auto_dependency=args.no_dep)
 
@@ -203,7 +207,7 @@ def build(args):
 
     # copy template to cwd, to allow for immediate execution
     if not args.pipeline_only:
-        copy_project(args.output_nf)
+        copy_project(parsed_output_nf)
 
     logger.info(colored_print("DONE!", "green_bold"))
 
