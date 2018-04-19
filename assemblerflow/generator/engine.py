@@ -98,7 +98,7 @@ class NextflowGenerator:
         sinks is represented as: {1: [2,3]}. Subsequent forks are then added
         sequentially: {1:[2,3], 2:[3,4,5]}. This allows the path upstream
         of a process in a given lane to be traversed until the start of the
-        pipeline. 
+        pipeline.
         """
 
         self.lanes = 0

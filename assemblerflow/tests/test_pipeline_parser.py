@@ -1,5 +1,4 @@
 import os
-import pytest
 
 import assemblerflow.generator.pipeline_parser as ps
 from assemblerflow.tests.data_pipelines import pipelines as pipes

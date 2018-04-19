@@ -102,7 +102,8 @@ class Recipe:
                 if len(process_descriptions[task][1].split("|")) > 1:
                     local_forks = process_descriptions[task][1].split("|")
 
-                    # Produces a new pipeline fragment for each forkable process
+                    # Produces a new pipeline fragment for each forkable
+                    #  process
                     for local_fork in local_forks:
                         if local_fork in total_tasks:
                             count_forks += 1

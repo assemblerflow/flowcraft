@@ -268,8 +268,8 @@ class Process:
         nextflow process in the template. If specified, this directives
         will be added to the nextflow configuration file. Otherwise,
         the default values for cpus and memory will be used. In the case
-        of containers, they will not run inside any container. 
-        
+        of containers, they will not run inside any container.
+
         The current supported directives are:
             - cpus
             - memory
@@ -289,7 +289,7 @@ class Process:
         """
         dict: Specifies channels from the current process that are received
         by a compiler process. Each key in this dictionary should match
-        a compiler process key in 
+        a compiler process key in
         :attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers`.
         The value should be a list of the channels that will be fed to the
         compiler process::
