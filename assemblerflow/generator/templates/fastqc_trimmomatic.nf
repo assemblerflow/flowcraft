@@ -18,9 +18,6 @@ process fastqc_{{ pid }} {
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
-    when:
-    params.stopAt != "fastqc"
-
     script:
     template "fastqc.py"
 }
