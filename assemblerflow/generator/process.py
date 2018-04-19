@@ -328,7 +328,7 @@ class Process:
         input_suffix : str
             Suffix added to the input channel. Should be based on the lane
             and an arbitrary unique id
-        output_suffix : int
+        output_suffix : str
             Suffix added to the output channel. Should be based on the lane
             and an arbitrary unique id
         """

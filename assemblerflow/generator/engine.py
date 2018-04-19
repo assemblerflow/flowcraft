@@ -209,7 +209,6 @@ class NextflowGenerator:
             - ``template``: The nextflow template file of the process.
         """
 
-
     @staticmethod
     def _parse_process_name(name_str):
         """Parses the process string and returns the process name and its

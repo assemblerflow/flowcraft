@@ -117,7 +117,8 @@ class Recipe:
                                 False,
                                 True,
                                 count_forks,
-                                total_tasks
+                                total_tasks,
+                                forks
                             )
 
                     return task_pipeline
