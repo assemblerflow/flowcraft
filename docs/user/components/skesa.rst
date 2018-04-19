@@ -40,3 +40,11 @@ Default directives
 - ``container``: ummidock/skesa
 - ``version``: 0.2.0-3
 - ``scratch``: true
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.skesa`

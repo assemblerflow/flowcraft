@@ -47,3 +47,20 @@ Default directives
     - ``memory``: 7GB (dynamically increased on retry)
     - ``container``: ummidock/pilon
     - ``version``: 1.22.0-2
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.assembly_report`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``tableRow``:
+    ``Trimmed (%)``: Percentage of trimmed nucleotides
+``plotData``:
+    ``sparkline``: Number of nucleotides after trimming
+``badReads``: Number of discarded reads

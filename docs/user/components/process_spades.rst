@@ -44,3 +44,20 @@ Default directives
 
 - ``container``: ummidock/spades
 - ``version``: 3.11.1-1
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.process_assembly`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``tableRow``:
+    - ``Contigs (<assembler>)``: Number of contigs
+    - ``Assembled BP (<assembler>)``: Number of assembled base pairs
+``warnings``:
+    - ``process_assembly``: Failure messages

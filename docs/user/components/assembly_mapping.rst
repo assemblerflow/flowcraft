@@ -51,3 +51,17 @@ Default directives
     - ``memory``: 5GB (dynamically increased on retry)
     - ``container``: ummidock/bowtie2_samtools
     - ``version``: 1.0.0-2
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.process_assembly_mapping`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``warnings``: Message with execution warnings
+``fail``: Messages with execution failures

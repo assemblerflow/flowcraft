@@ -61,3 +61,23 @@ Default directives
     - ``memory``: 4GB (dynamically increased on retry)
     - ``container``: ummidock/trimmomatic
     - ``version``: 0.36-2
+
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.fastqc_report`
+:mod:`assemblerflow.templates.trimmomatic`
+:mod:`assemblerflow.templates.trimmomatic_report`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``tableRow``:
+    ``Trimmed (%)``: Percentage of trimmed nucleotides
+``plotData``:
+    ``sparkline``: Number of nucleotides after trimming
+``badReads``: Number of discarded reads

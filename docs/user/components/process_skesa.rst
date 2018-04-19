@@ -43,3 +43,20 @@ Default directives
 
 - ``container``: ummidock/skesa
 - ``version``: 0.2.0-3
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.process_assembly`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``tableRow``:
+    - ``Contigs (<assembler>)``: Number of contigs
+    - ``Assembled BP (<assembler>)``: Number of assembled base pairs
+``warnings``:
+    - ``process_assembly``: Failure messages

@@ -42,3 +42,22 @@ Default directives
 - ``memory``: 4GB
 - ``container``: ummidock/fastqc
 - ``version``: 0.11.7-1
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.fastqc_report`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``tableRow``:
+    - ``Contigs``: Number of contigs
+    - ``Assembled BP``: Number of assembled base pairs
+``plotData``:
+    - ``size_dist``: Distribution of contig size.
+    - ``gcSliding``: Sliding window of the GC content along the genome
+    - ``covSliding``: Sliding window of the coverage along the genome

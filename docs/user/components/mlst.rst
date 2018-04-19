@@ -34,3 +34,13 @@ Default directives
 ------------------
 
 - ``container``: ummidock/mlst
+
+
+Advanced
+--------
+
+Reports JSON
+^^^^^^^^^^^^
+
+``expectedSpecies``: Name of the expected species
+``species``: Name of inferred species

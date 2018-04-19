@@ -46,3 +46,11 @@ Default directives
 - ``container``: ummidock/spades
 - ``version``: 3.11.1-1
 - ``scratch``: true
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.spades`

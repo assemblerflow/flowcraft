@@ -41,3 +41,26 @@ Default directives
 - ``process_assembly_mapping``:
     - ``container``: ummidock/abricate
     - ``version``: 0.8.0-1
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.process_abricate`
+
+
+Reports JSON
+^^^^^^^^^^^^
+
+``tableRow``:
+    - ``<database>``: List of gene names
+``plotData``:
+    - ``<database>``:
+        - ``contig``: Contig ID
+        - ``seqRange``: Genomic range of the contig
+        - ``gene``: Gene name
+        - ``accession``: Accession number
+        - ``coverage``: Coverage of the match
+        - ``identity``: Identity of the match

@@ -69,3 +69,22 @@ Default directives
 
 None.
 
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.integrity_coverage`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``tableRow``:
+    - ``Raw BP``: Number of nucleotides
+    - ``Reads``: Number of reads
+    - ``Coverage (1st)``: Estimated coverage
+``plotData``:
+    - ``sparkline``: Number of nucleotides
+``minCoverage``: Minimum coverage specified for the module

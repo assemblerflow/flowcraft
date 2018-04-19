@@ -49,3 +49,18 @@ Default directives
 ------------------
 
 None.
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.integrity_coverage`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``tableRow``:
+    - ``Coverage (2nd)``: Estimated coverage
+``minCoverage``: Minimum coverage specified for the module
