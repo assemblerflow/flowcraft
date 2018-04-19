@@ -33,6 +33,7 @@ A NextFlow pipeline assembler for genomics.
    :maxdepth: 1
    :caption: Developer Guide
 
+   dev/general_orientation
    dev/create_process
    dev/create_template
    dev/process_dotfiles
