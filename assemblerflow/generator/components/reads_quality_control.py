@@ -440,4 +440,3 @@ class FastqcTrimmomatic(Process):
                 "version": "0.36-2"
             }
         }
-
