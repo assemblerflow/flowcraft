@@ -74,14 +74,18 @@ assemblerflow:
 
 - ``input_channel`` (**Mandatory**): All processes must include **one and only
   one** input channel. In most cases, this channel should be defined with
-  a two element tuple that contains the sample ID (``sample_id``) and then
-  the actual data file/stream.
+  a two element tuple that contains the sample ID and then
+  the actual data file/stream. We suggest the sample ID variable to be named
+  ``sample_id`` as a standard. If other name variable name is specified and
+  you include the ``compiler_channels.txt`` in the process, you'll need to
+  change the sample ID variable (see `Sample ID variable`_).
 
 - ``output_channel`` (**Optional**): Terminal processes may skip the output
   channel entirely. However, if you want to link the main output of this
   process with subsequent ones, this placeholder must be used **only once**.
-  Like in the input channel, this channel sould be defined with a two element
-  tuple with the sample ID and the data.
+  Like in the input channel, this channel should be defined with a two element
+  tuple with the sample ID and the data. The sample ID must match the one
+  specified in the ``input_channel``.
 
 - ``include "compiler_channels.txt"`` (**Mandatory**): This will include the
   special channels that will compile the status/logging of the processes
@@ -513,6 +517,25 @@ In this case, the
 would need to be changed to::
 
     self.status_channels = ["A", "B"]
+
+Sample ID variable
+^^^^^^^^^^^^^^^^^^
+
+In case you change the standard nextflow variable that stores the sample ID
+in the input of the process (``sample_id``), you also need to change it for
+the ``compiler_channels`` placeholder::
+
+    process A {
+
+    input:
+    set other_id, data from {{ input_channel }}
+
+    output:
+    {% with task_name="B", sample_id="other_id" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    }
 
 Advanced use cases
 ------------------
