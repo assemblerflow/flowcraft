@@ -434,9 +434,13 @@ The information in this attribute will then be used to build the
 ``containers.config`` (containing the container images) files. Whenever a
 directive is missing, such as the ``container`` and ``version`` from ``proc_A``
 and ``memory`` from ``proc_B``, nothing about them will be written into the
-config files and they will use the default pipeline values. In the case
-cpus, the default is ``1``, for RAM is ``1GB`` and if no container is
-specified, the process will run locally.
+config files and they will use the **default pipeline values**:
+
+- ``cpus``: ``1``
+- ``memory``: ``1GB``
+- ``container``: `assemblerflow_base`_ image
+
+.. _assemblerflow_base: https://hub.docker.com/r/ummidock/assemblerflow_base/~/dockerfile/
 
 Ignore type
 :::::::::::
