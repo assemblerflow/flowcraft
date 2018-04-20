@@ -13,7 +13,7 @@ Pick your modules. Assemble them. Run the pipeline.
 
 ## The premisse
 
-#### Build
+#### Build a pipeline
 
 What if building your own genomics pipeline would be as simple as:
 
@@ -25,7 +25,7 @@ Seems pretty simple right? What if we could run this pipeline with a single comm
 the awesomeness of [nextflow](https://www.nextflow.io/) and [docker](https://www.docker.com/)/[singularity](http://singularity.lbl.gov/)
 containers without having to install any of the pipeline dependencies?
 
-#### Run
+#### Run the pipeline
 
 ```
 nextflow run my_pipeline.nf --fastq path/to/fastq
@@ -90,7 +90,7 @@ For a quick and dirty demonstration, see below.
 
 #### Building a pipeline
 
-Assemblerflow comes with a number of [ready-to-use components](http://assemblerflow.readthedocs.io/en/latest/available_processes.html) to build your
+Assemblerflow comes with a number of [ready-to-use components](http://assemblerflow.readthedocs.io/en/latest/user/available_components.html) to build your
 own pipeline. Following some basic rules, such as the output type of one process
 must match the input type of the next process, assembling a pipeline is done
 using the `build` mode and the `-t` option:
