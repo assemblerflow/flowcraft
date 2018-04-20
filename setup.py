@@ -21,7 +21,8 @@ setup(
         "argparse",
         "jinja2",
     ],
-    description="Nextflow assembler of bacterial genomic pipelines",
+    description="A Nextflow pipeline assembler for genomics. Pick your "
+                "modules. Assemble them. Run the pipeline.",
     url="https://github.com/ODiogoSilva/assemblerflow",
     author="Diogo N Silva",
     author_email="o.diogosilva@gmail.com",
