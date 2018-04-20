@@ -5,16 +5,17 @@ process seq_typing_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
     errorStrategy "ignore"
+    publishDir "results/seqtyping/${sample_id}/"
 
     input:
-    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    set sample_id, file(fastq_pair) from {{ input_channel }}
     file refO from IN_refO
     file refH from IN_refH
 
     output:
-    file "seq_typing.report.txt"
+    file "seq_typing*"
     {% with task_name="seq_typing" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

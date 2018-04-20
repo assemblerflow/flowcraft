@@ -1,0 +1,67 @@
+Assembly_mapping
+================
+
+Purpose
+-------
+
+This components Performs a mapping procedure of FastQ files into a their
+assembly and performs filtering based on quality criteria of read coverage
+and genome size.
+
+Input/Output type
+------------------
+
+- Input type: ``Fasta`` and ``FastQ``
+- Output type: ``Fasta``
+
+.. note::
+    The default input parameter for fasta data is ``--fasta``.
+
+Parameters
+----------
+
+- ``minAssemblyCoverage``: In auto, the default minimum coverage for each
+  assembled contig is 1/3 of the assembly mean coverage or 10x, if the mean
+  coverage is below 10x.
+- ``AMaxContigs``: A warning is issues if the number of contigs is over
+  this threshold.
+- ``genomeSize``: Genome size estimate for the samples. It is used to check
+  the ratio of contig number per genome MB.
+
+Published results
+-----------------
+
+None.
+
+Published reports
+-----------------
+
+None.
+
+Default directives
+------------------
+
+- ``assembly_mapping``:
+    - ``cpus``: 4
+    - ``memory``: 5GB (dynamically increased on retry)
+    - ``container``: ummidock/bowtie2_samtools
+    - ``version``: 1.0.0-2
+- ``process_assembly_mapping``:
+    - ``cpus``: 1
+    - ``memory``: 5GB (dynamically increased on retry)
+    - ``container``: ummidock/bowtie2_samtools
+    - ``version``: 1.0.0-2
+
+Advanced
+--------
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.process_assembly_mapping`
+
+Reports JSON
+^^^^^^^^^^^^
+
+``warnings``: Message with execution warnings
+``fail``: Messages with execution failures

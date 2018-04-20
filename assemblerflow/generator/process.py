@@ -34,8 +34,6 @@ class Process:
 
     Parameters
     ----------
-    ptype : str
-        Process type. See :py:attr:`Process.accepted_types`.
     template : str
         Name of the jinja2 template with the nextflow code for that process.
         Templates are stored in ``generator/templates``.
@@ -96,7 +94,8 @@ class Process:
     }
     """
     dict: Contains the mapping between the :attr:`Process.input_type` attribute
-    and the corresponding nextflow parameter and main channel definition, e.g.::
+    and the corresponding nextflow parameter and main channel definition,
+    e.g.::
 
         "fastq" : {
             "params": "fastq",
@@ -236,7 +235,8 @@ class Process:
 
             {
                 "params": "pathoSpecies",
-                "channel": "IN_pathoSpecies = Channel.value(params.pathoSpecies)"
+                "channel": "IN_pathoSpecies = Channel
+                                                .value(params.pathoSpecies)"
             }
         """
         self.secondary_input_str = ""
@@ -268,8 +268,8 @@ class Process:
         nextflow process in the template. If specified, this directives
         will be added to the nextflow configuration file. Otherwise,
         the default values for cpus and memory will be used. In the case
-        of containers, they will not run inside any container. 
-        
+        of containers, they will not run inside any container.
+
         The current supported directives are:
             - cpus
             - memory
@@ -289,7 +289,7 @@ class Process:
         """
         dict: Specifies channels from the current process that are received
         by a compiler process. Each key in this dictionary should match
-        a compiler process key in 
+        a compiler process key in
         :attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers`.
         The value should be a list of the channels that will be fed to the
         compiler process::
@@ -328,9 +328,11 @@ class Process:
         input_suffix : str
             Suffix added to the input channel. Should be based on the lane
             and an arbitrary unique id
-        output_suffix : int
+        output_suffix : str
             Suffix added to the output channel. Should be based on the lane
             and an arbitrary unique id
+        lane : int
+            Sets the lane of the process.
         """
 
         self.input_channel = "{}_in_{}".format(self.template, input_suffix)
@@ -587,6 +589,9 @@ class Compiler(Process):
 
         super().__init__(**kwargs)
 
+        self.ignore_type = True
+        self.link_start = None
+
     def set_compiler_channels(self, channel_list, operator="mix"):
         """General method for setting the input channels for the status process
 
@@ -604,6 +609,9 @@ class Compiler(Process):
         ----------
         channel_list : list
             List of strings with the final name of the status channels
+        operator : str
+            Specifies the operator used to join the compiler channels.
+            Available options are 'mix'and 'join'.
         """
 
         if not channel_list:
@@ -650,15 +658,27 @@ class Init(Process):
         self.status_channels = []
 
     def set_raw_inputs(self, raw_input):
-        """
+        """Sets the main input channels of the pipeline and their forks.
+
+        The ``raw_input`` dictionary input should contain one entry for each
+        input type (fastq, fasta, etc). The corresponding value should be a
+        dictionary/json with the following key:values:
+
+        - ``channel``: Name of the raw input channel (e.g.: channel1)
+        - ``channel_str``: The nextflow definition of the channel and
+           eventual checks (e.g.: channel1 = Channel.fromPath(param))
+        - ``raw_forks``: A list of channels to which the channel name will
+          for to.
+
+        Each new type of input parameter is automatically added to the
+        :attr:`params` attribute, so that they are automatically collected
+        for the pipeline description and help.
 
         Parameters
         ----------
-        raw_input_list
-
-        Returns
-        -------
-
+        raw_input : dict
+            Contains an entry for each input type with the channel name,
+            channel string and forks.
         """
 
         logger.debug("Setting raw inputs using raw input dict: {}".format(
@@ -690,6 +710,16 @@ class Init(Process):
                             "main_inputs": "\n".join(primary_inputs)}}
 
     def set_secondary_inputs(self, channel_dict):
+        """ Adds secondary inputs to the start of the pipeline.
+
+        This channels are inserted into the pipeline file as they are
+        provided in the values of the argument.
+
+        Parameters
+        ----------
+        channel_dict : dict
+            Each entry should be <parameter>: <channel string>.
+        """
 
         logger.debug("Setting secondary inputs: {}".format(channel_dict))
 
@@ -743,323 +773,37 @@ class Init(Process):
         }
 
 
-class SeqTyping(Process):
-    """
-
-    """
-
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.input_type = "fastq"
-        self.output_type = None
-
-        self.status_channels = []
-
-        self.link_start = None
-
-        self.directives = {"seq_typing": {
-            "cpus": 4,
-            "memory": "'4GB'",
-            "container": "ummidock/seq_typing",
-            "version": "0.1.0-1"
-        }}
-
-        self.params = {
-            "referenceFileO": {
-                "default": "null",
-                "description":
-                    "Fasta file containing reference sequences. If more"
-                    "than one file is passed via the 'referenceFileH parameter"
-                    ", a reference sequence for each file will be determined. "
-                    "(default: $params.referenceFileO)"
-            },
-            "referenceFileH": {
-                "default": "null",
-                "description":
-                    "Fasta file containing reference sequences. If more"
-                    "than one file is passed via the 'referenceFileO parameter"
-                    ", a reference sequence for each file will be determined. "
-                    "(default: $params.referenceFileH)"
-            }
-        }
-
-        self.secondary_inputs = [
-            {
-                "params": "referenceFileO",
-                "channel":
-                    "file(params.referenceFileO) ? params.referenceFileO : "
-                    "exit(1, \"'referenceFileO' parameter missing\")\n"
-                    "IN_refO = Channel"
-                    ".fromPath(params.referenceFileO)"
-                    "map{ it -> it.exists() ? it : exit(1, \"referenceFileO"
-                    " file was not found: '${params.referenceFileO}'\")}"
-            },
-            {
-                "params": "referenceFileH",
-                "channel":
-                    "file(params.referenceFileH) ? params.referenceFileH : "
-                    "exit(1, \"'referenceFileH' parameter missing\")\n"
-                    "IN_refH = Channel"
-                    ".fromPath(params.referenceFileH)"
-                    "map{ it -> it.exists() ? it : exit(1, \"referenceFileH"
-                    " file was not found: '${params.referenceFileH}'\")}"
-            }
-        ]
-
-
-class PathoTyping(Process):
-    """
-
-    """
-
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.input_type = "fastq"
-        self.output_type = None
-
-        self.ignore_type = True
-
-        self.status_channels = []
-
-        self.params = {
-            "species": {
-                "default": "null",
-                "description":
-                    "Species name. Must be the complete species name with"
-                    "genus and species, e.g.: 'Yersinia enterocolitica'. "
-                    "(default: $params.species)"
-            }
-        }
-
-        self.secondary_inputs = [
-            {
-                "params": "species",
-                "channel":
-                    "if ( !params.species){ exit 1, \"'species' parameter "
-                    "missing\" }\n"
-                    "if ( params.species.toString().split(\" \").size() != 2 )"
-                    "{ exit 1, \"'species' parameter must contain two "
-                    "values (e.g.: 'escherichia coli'). Provided value: "
-                    "${params.species}\"}\n"
-                    "IN_pathoSpecies = Channel.value(params.species)"
-            }
-        ]
-
-        self.link_start = None
-        self.link_end.append({"link": "MAIN_raw",
-                              "alias": "SIDE_PathoType_raw"})
-
-        self.directives = {"patho_typing": {
-            "cpus": 4,
-            "memory": "'4GB'",
-            "container": "ummidock/patho_typing",
-            "version": "0.3.0-1"
-        }}
-
-
-
-
-
-
-
-
-class Mlst(Process):
-    """Mlst mapping process template interface
-
-    This process is set with:
-
-        - ``input_type``: assembly
-        - ``output_type``: None
-        - ``ptype``: post_assembly
-
-    It contains one **secondary channel link end**:
-
-        - ``MAIN_assembly`` (alias: ``MAIN_assembly``): Receives the last
-        assembly.
-    """
-
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.input_type = "fasta"
-        self.output_type = "fasta"
-
-        self.directives = {"mlst": {
-            "container": "ummidock/mlst",
-        }}
-
-        self.params = {
-            "mlstRun": "true",
-            "mlstSpecies": "null"
-        }
-
-
-class Chewbbaca(Process):
-    """Prokka mapping process template interface
-
-    This process is set with:
-
-        - ``input_type``: assembly
-        - ``output_type``: None
-        - ``ptype``: post_assembly
-
-    It contains one **secondary channel link end**:
-
-        - ``MAIN_assembly`` (alias: ``MAIN_assembly``): Receives the last
-        assembly.
-    """
-
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.input_type = "fasta"
-        self.output_type = None
-
-        self.ignore_type = True
-
-        self.link_start = None
-        self.link_end.append({"link": "MAIN_assembly",
-                              "alias": "MAIN_assembly"})
-
-        self.directives = {
-            "chewbbaca": {
-                "cpus": 4,
-                "container": "mickaelsilva/chewbbaca_py3",
-                "version": "latest",
-            },
-            "chewbbaca_batch": {
-                "cpus": 4,
-                "container": "mickaelsilva/chewbbaca_py3",
-                "version": "latest",
-            },
-            "chewbbacaExtractMLST": {
-                "container": "mickaelsilva/chewbbaca_py3",
-                "version": "latest"
-            }
-        }
-
-        self.params = {
-            "chewbbacaQueue": {
-                "default": "null",
-                "description":
-                    "Specifiy a queue/partition for chewbbaca. This option"
-                    " is only used for grid schedulers. (default: "
-                    "$params.chewbbacaQueue)"
-            },
-            "chewbbacaTraining": {
-                "default": "null",
-                "description":
-                    "Specify the full path to the prodigal training file "
-                    "of the corresponding species. (default: "
-                    "$params.chewbbacaTraining)"
-            },
-            "schemaPath": {
-                "default": "null",
-                "description":
-                    "The path to the chewbbaca schema directory. (default: "
-                    "$params.schemaPath)"
-            },
-            "schemaSelectedLoci": {
-                "default": "null",
-                "description":
-                    "The path to the selection of loci in the schema "
-                    "directory to be used. If not specified, all loci in the"
-                    " schema will be used. (default: "
-                    "$params.schemaSelectedLoci)"
-            },
-            "schemaCore": {
-                "default": "null",
-                "description": ""
-            },
-            "chewbbacaJson": {
-                "default": "false",
-                "description":
-                    "If set to True, chewbbaca's allele call output will be "
-                    "set to JSON format. (default: $params.chewbbacaJson)"
-            },
-            "chewbbacaToPhyloviz": {
-                "default": "false",
-                "description":
-                    "If set to True, the ExtractCgMLST module of chewbbaca"
-                    " will be executed after the allele calling (default: "
-                    "$params.chewbbacaToPhyloviz)",
-            },
-            "chewbbacaProfilePercentage": {
-                "default": 0.95,
-                "description":
-                    "Specifies the proportion of samples that must be "
-                    "present in a locus to save the profile. (default: "
-                    "$params.chewbbacaProfilePercentage)"
-            },
-            "chewbbacaBatch": {
-                "default": "false",
-                "description":
-                    "Specifies whther a chewbbaca run will be performed on the"
-                    " complete input batch (all at the same time) or one by "
-                    "one."
-            }
-        }
-
-        self.secondary_inputs = [
-            {
-                "params": "schemaPath",
-                "channel":
-                    "if ( !params.schemaPath ){ exit 1, \"'schemaPath' "
-                    "parameter missing\"}\n"
-                    "if ( params.chewbbacaTraining){"
-                    "if (!file(params.chewbbacaTraining).exists()) {"
-                    "exit 1, \"'chewbbacaTraining' file was not found: "
-                    "'${params.chewbbacaTraining}'\"}}\n"
-                    "if ( params.schemaSelectedLoci){"
-                    "if (!file(params.schemaSelectedLoci).exists()) {"
-                    "exit 1, \"'schemaSelectedLoci' file was not found: "
-                    "'${params.schemaSelectedLoci}'\"}}\n"
-                    "if ( params.schemaCore){"
-                    "if (!file(params.schemaCore).exists()) {"
-                    "exit 1, \"'schemaCore' file was not found: "
-                    "'${params.schemaCore}'\"}}\n"
-                    "IN_schema = Channel.fromPath(params.schemaPath)"
-            }
-        ]
-
-
 class StatusCompiler(Compiler):
     """Status compiler process template interface
 
     This special process receives the status channels from all processes
     in the generated pipeline.
-
     """
 
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
 
-        self.ignore_type = True
-        self.link_start = None
-
 
 class ReportCompiler(Compiler):
+    """Reports compiler process template interface
+
+    This special process receives the report channels from all processes
+    in the generated pipeline.
+    """
 
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-
-        self.ignore_type = True
-        self.link_start = None
 
 
 class PatlasConsensus(Compiler):
+    """Patlas consensus compiler process template interface
+
+    This special process receives the channels associated with the
+    ``patlas_consensus`` key.
+    """
 
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
-
-        self.ignore_type = True
-        self.link_start = None

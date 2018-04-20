@@ -90,4 +90,3 @@ class Prokka(Process):
                 "version": "1.12.0-2"
             }
         }
-

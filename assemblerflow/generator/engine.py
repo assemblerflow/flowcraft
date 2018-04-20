@@ -18,7 +18,9 @@ try:
     import generator.components.downloads as downloads
     import generator.components.distance_estimation as distest
     import generator.components.mapping as mapping_patlas
+    import generator.components.mlst as mlst
     import generator.components.reads_quality_control as readsqc
+    import generator.components.typing as typing
     import generator.error_handling as eh
     from __init__ import __version__
     from generator import header_skeleton as hs
@@ -32,7 +34,9 @@ except ImportError:
     import assemblerflow.generator.components.downloads as downloads
     import assemblerflow.generator.components.distance_estimation as distest
     import assemblerflow.generator.components.mapping as mapping_patlas
+    import assemblerflow.generator.components.mlst as mlst
     import assemblerflow.generator.components.reads_quality_control as readsqc
+    import assemblerflow.generator.components.typing as typing
     import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
     from assemblerflow import __version__
@@ -44,8 +48,8 @@ except ImportError:
 process_map = {
         "reads_download": downloads.DownloadReads,
         "integrity_coverage": readsqc.IntegrityCoverage,
-        "seq_typing": pc.SeqTyping,
-        "patho_typing": pc.PathoTyping,
+        "seq_typing": typing.SeqTyping,
+        "patho_typing": typing.PathoTyping,
         "check_coverage": readsqc.CheckCoverage,
         "true_coverage": readsqc.TrueCoverage,
         "fastqc": readsqc.FastQC,
@@ -57,10 +61,10 @@ process_map = {
         "process_skesa": ap.ProcessSkesa,
         "assembly_mapping": ap.AssemblyMapping,
         "pilon": ap.Pilon,
-        "mlst": pc.Mlst,
+        "mlst": mlst.Mlst,
         "abricate": annotation.Abricate,
         "prokka": annotation.Prokka,
-        "chewbbaca": pc.Chewbbaca,
+        "chewbbaca": mlst.Chewbbaca,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
         "mapping_patlas": mapping_patlas.PatlasMapping
@@ -98,7 +102,7 @@ class NextflowGenerator:
         sinks is represented as: {1: [2,3]}. Subsequent forks are then added
         sequentially: {1:[2,3], 2:[3,4,5]}. This allows the path upstream
         of a process in a given lane to be traversed until the start of the
-        pipeline. 
+        pipeline.
         """
 
         self.lanes = 0
@@ -192,7 +196,8 @@ class NextflowGenerator:
         self.compilers = {
             "patlas_consensus": {
                 "cls": pc.PatlasConsensus,
-                "template": "patlas_consensus"
+                "template": "patlas_consensus",
+                "operator": "join"
             }
         }
         """
@@ -203,7 +208,6 @@ class NextflowGenerator:
             - ``cls``: The reference to the compiler class object.
             - ``template``: The nextflow template file of the process.
         """
-
 
     @staticmethod
     def _parse_process_name(name_str):
@@ -400,6 +404,8 @@ class NextflowGenerator:
         ----------
         con : dict
             Dictionary with the connection information between two processes.
+        pid : int
+            Arbitrary and unique process ID.
 
         Returns
         -------
@@ -514,9 +520,9 @@ class NextflowGenerator:
 
         Parameters
         ----------
-        parent_process : assemblerflow.Process.Process
+        parent_process : assemblerflow.generator.process.Process
             Process that will be sending output.
-        child_process : assemblerflow.Process.Process
+        child_process : assemblerflow.generator.process.Process
             Process that will receive output.
 
         """
@@ -562,7 +568,7 @@ class NextflowGenerator:
 
         Parameters
         ----------
-        p : assemblerflow.Process.Process
+        p : assemblerflow.generator.Process.Process
             Process instance whose raw input will be modified
         sink_channel: str
             Sets the channel where the raw input will fork into. It overrides
@@ -675,14 +681,17 @@ class NextflowGenerator:
             )
 
     def _get_fork_tree(self, lane):
-        """
+        """Returns a list with the parent lanes from the provided lane
 
         Parameters
         ----------
-        p
+        lane : int
+            Target lage
 
         Returns
         -------
+        list
+            List of the lanes preceding the provided lane.
         """
 
         parent_lanes = [lane]
@@ -946,7 +955,7 @@ class NextflowGenerator:
             # and append compiler to the process list.
             if c_info["channels"]:
                 compiler_cls.set_compiler_channels(c_info["channels"],
-                                                   operator="join")
+                                                   operator=c_info["operator"])
                 self.processes.append(compiler_cls)
 
     def _set_status_channels(self):

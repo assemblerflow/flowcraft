@@ -30,7 +30,7 @@ process compile_reports {
     file "pipeline_report.json"
 
     """
-    #!/usr/bin/env python
+    #!/usr/bin/env python3
     import json
 
     reports = '${report}'.split()

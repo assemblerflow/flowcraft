@@ -4,11 +4,11 @@ Reports the status of a sample in any given process.
 */
 process status {
 
-    tag { fastq_id }
+    tag { sample_id }
     publishDir "pipeline_status/$task_name"
 
     input:
-    set fastq_id, task_name, status, warning, fail, file(log) from {{ compile_channels }}
+    set sample_id, task_name, status, warning, fail, file(log) from {{ compile_channels }}
 
     output:
     file '*.status' into master_status
@@ -17,10 +17,10 @@ process status {
     file '*.log'
 
     """
-    echo $fastq_id, $task_name, \$(cat $status) > ${fastq_id}_${task_name}.status
-    echo $fastq_id, $task_name, \$(cat $warning) > ${fastq_id}_${task_name}.warning
-    echo $fastq_id, $task_name, \$(cat $fail) > ${fastq_id}_${task_name}.fail
-    echo "\$(cat .command.log)" > ${fastq_id}_${task_name}.log
+    echo $sample_id, $task_name, \$(cat $status) > ${sample_id}_${task_name}.status
+    echo $sample_id, $task_name, \$(cat $warning) > ${sample_id}_${task_name}.warning
+    echo $sample_id, $task_name, \$(cat $fail) > ${sample_id}_${task_name}.fail
+    echo "\$(cat .command.log)" > ${sample_id}_${task_name}.log
     """
 }
 

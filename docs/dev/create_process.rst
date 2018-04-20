@@ -36,11 +36,11 @@ A minimal example created as a ``my_process.nf`` file is as follows::
     {% include "post.txt" ignore missing %}
 
     input:
-    <input variables> from {{ input_channel }}
+    set sample_id, <data> from {{ input_channel }}
 
     // The output is optional
     output:
-    <output variables> into {{ output_channel }}
+    set sample_id, <data> into {{ output_channel }}
     {% with task_name="abricate" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -72,12 +72,20 @@ assemblerflow:
   more information). It also includes scripts for sending requests to
   REST APIs (only when certain pipeline parameters are used).
 
-- ``input_channel`` (**Mandatory**): All process must include **one and only
-  one** input channel.
+- ``input_channel`` (**Mandatory**): All processes must include **one and only
+  one** input channel. In most cases, this channel should be defined with
+  a two element tuple that contains the sample ID and then
+  the actual data file/stream. We suggest the sample ID variable to be named
+  ``sample_id`` as a standard. If other name variable name is specified and
+  you include the ``compiler_channels.txt`` in the process, you'll need to
+  change the sample ID variable (see `Sample ID variable`_).
 
 - ``output_channel`` (**Optional**): Terminal processes may skip the output
   channel entirely. However, if you want to link the main output of this
   process with subsequent ones, this placeholder must be used **only once**.
+  Like in the input channel, this channel should be defined with a two element
+  tuple with the sample ID and the data. The sample ID must match the one
+  specified in the ``input_channel``.
 
 - ``include "compiler_channels.txt"`` (**Mandatory**): This will include the
   special channels that will compile the status/logging of the processes
@@ -128,8 +136,11 @@ Create Process class
 
 The process class will contain the information that assemblerflow
 will use to build the pipeline and assess potential conflicts/dependencies
-between process. This class should be created in the
-:mod:`assemblerflow.generator.process` module and inherit from the
+between process. This class should be created in one the category files in the
+:mod:`assemblerflow.generator.components` module (e.g.: ``assembly.py``). If
+the new component does not fit in any of the existing categories, create a
+new one that imports :mod:`assemblerflow.generator.process.Process` and add
+your new class. This class should inherit from the
 :class:`~assemblerflow.generator.process.Process` base
 class::
 
@@ -328,6 +339,23 @@ provided via the extra input parameter does not have to wait for the
 ``main_channel``, which means that they can run in parallel, if there are
 enough resources.
 
+Compiler
+::::::::
+
+The :attr:`~assemblerflow.generator.process.Process.compiler` attribute
+allows one or more channels of the process to be fed into a compiler process
+(See `Compiler processes`_). These are special processes that collect
+information from one or more processes to execute a given task. Therefore,
+this parameter can only be used when there is an appropriate compiler process
+available (the available compiler processes are set in the
+:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` dictionary). In order to
+provide one or more channels to a compiler process, simply add a key:value to the
+attribute, where the key is the id of the compiler process present in the
+:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` dictionary and the value
+is the list of channels::
+
+    self.compiler["patlas_consensus"] = ["mappingOutputChannel"]
+
 Link start
 ::::::::::
 
@@ -406,9 +434,13 @@ The information in this attribute will then be used to build the
 ``containers.config`` (containing the container images) files. Whenever a
 directive is missing, such as the ``container`` and ``version`` from ``proc_A``
 and ``memory`` from ``proc_B``, nothing about them will be written into the
-config files and they will use the default pipeline values. In the case
-cpus, the default is ``1``, for RAM is ``1GB`` and if no container is
-specified, the process will run locally.
+config files and they will use the **default pipeline values**:
+
+- ``cpus``: ``1``
+- ``memory``: ``1GB``
+- ``container``: `assemblerflow_base`_ image
+
+.. _assemblerflow_base: https://hub.docker.com/r/ummidock/assemblerflow_base/~/dockerfile/
 
 Ignore type
 :::::::::::
@@ -490,8 +522,125 @@ would need to be changed to::
 
     self.status_channels = ["A", "B"]
 
+Sample ID variable
+^^^^^^^^^^^^^^^^^^
+
+In case you change the standard nextflow variable that stores the sample ID
+in the input of the process (``sample_id``), you also need to change it for
+the ``compiler_channels`` placeholder::
+
+    process A {
+
+    input:
+    set other_id, data from {{ input_channel }}
+
+    output:
+    {% with task_name="B", sample_id="other_id" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    }
+
 Advanced use cases
 ------------------
+
+Compiler processes
+::::::::::::::::::
+
+Compilers are special processes that collect data from one or more processes
+and perform a given task with that compiled data. They are automatically
+included in the pipeline when at least one of the source channels is present.
+In the case there are multiple source channels, they are merged according
+to a specified operator.
+
+Creating a compiler process
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The creation of the compiler process is simpler than that of a regular process
+but follows the same three steps.
+
+1. Create a nextflow template file in ``assemblerflow.generator.templates``::
+
+    process fullConsensus {
+
+        input:
+        set id, file(infile_list) from {{ compile_channels }}
+
+        output:
+        <output channels>
+
+        script:
+        """
+        <commands/code/template>
+        """
+
+    }
+
+The only requirement is the inclusion of a ``compiler_channels`` jinja
+placeholder in the main input channel.
+
+2. Create a Compiler class in the :mod:`assemblerflow.generator.process`
+   module::
+
+    class PatlasConsensus(Compiler):
+
+        def __init__(self, **kwargs):
+
+            super().__init__(**kwargs)
+
+This class must inherit from
+:mod:`~assemblerflow.generator.process.Compiler` and does not require any
+more changes.
+
+3. Map the compiler template file to the class in
+:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` attribute::
+
+        self.compilers = {
+        "patlas_consensus": {
+            "cls": pc.PatlasConsensus,
+            "template": "patlas_consensus",
+            "operator": "join"
+            }
+        }
+
+Each compiler should contain a key:value entry. The key is the compiler
+id that is then specified in the :attr:`~assemblerflow.generator.process.Process.compiler`
+attribute of the component classes. The value is a json/dict object that
+species the compiler class in the ``cls`` key, the template string in the
+``template`` string and the operator used to join the channels into the
+compiler via the ``operator`` key.
+
+How a compiler process works
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Consider the case where you have a compiler process named ``compiler_1`` and
+two processes, ``process_1`` and ``process_2``, both of which feed a single
+channel to ``compiler_1``. This means that the class definition of these
+processes include::
+
+    class Process_1(Process):
+        (...)
+        self.compiler["compiler_1"] = ["channel1"]
+
+    class Process_2(Process):
+        (...)
+        self.compiler["compiler_1"] = ["channel2"]
+
+If a pipeline is built with at least one of these process, the ``compiler_1``
+process will be automatically included in the pipeline. If more than one
+channel is provided to the compiler, they will be merged with the specified
+operator::
+
+    process compiler_1 {
+
+        input:
+        set sample_id, file(infile_list) from channel2.join(channel1)
+
+    }
+
+This will allow the output of multiple separate process to be processed by
+a single process in the pipeline, and it automatically adjusts according
+to the channels provided to the compiler.
 
 Secondary links between process
 :::::::::::::::::::::::::::::::

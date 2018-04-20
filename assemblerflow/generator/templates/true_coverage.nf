@@ -4,13 +4,13 @@ process true_coverage_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
 
     input:
-    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    set sample_id, file(fastq_pair) from {{ input_channel }}
 
     output:
-    set fastq_id, file(fastq_pair) into {{ output_channel }}
+    set sample_id, file(fastq_pair) into {{ output_channel }}
     {% with task_name="true_coverage" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
