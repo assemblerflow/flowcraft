@@ -566,7 +566,7 @@ class NextflowGenerator:
 
         Parameters
         ----------
-        p : assemblerflow.Process.Process
+        p : assemblerflow.generator.Process.Process
             Process instance whose raw input will be modified
         sink_channel: str
             Sets the channel where the raw input will fork into. It overrides

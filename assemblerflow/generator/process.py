@@ -34,8 +34,6 @@ class Process:
 
     Parameters
     ----------
-    ptype : str
-        Process type. See :py:attr:`Process.accepted_types`.
     template : str
         Name of the jinja2 template with the nextflow code for that process.
         Templates are stored in ``generator/templates``.
@@ -96,7 +94,8 @@ class Process:
     }
     """
     dict: Contains the mapping between the :attr:`Process.input_type` attribute
-    and the corresponding nextflow parameter and main channel definition, e.g.::
+    and the corresponding nextflow parameter and main channel definition, 
+    e.g.::
 
         "fastq" : {
             "params": "fastq",
@@ -236,7 +235,8 @@ class Process:
 
             {
                 "params": "pathoSpecies",
-                "channel": "IN_pathoSpecies = Channel.value(params.pathoSpecies)"
+                "channel": "IN_pathoSpecies = Channel
+                                                .value(params.pathoSpecies)"
             }
         """
         self.secondary_input_str = ""
@@ -331,6 +331,8 @@ class Process:
         output_suffix : str
             Suffix added to the output channel. Should be based on the lane
             and an arbitrary unique id
+        lane : int
+            Sets the lane of the process.
         """
 
         self.input_channel = "{}_in_{}".format(self.template, input_suffix)
@@ -607,6 +609,9 @@ class Compiler(Process):
         ----------
         channel_list : list
             List of strings with the final name of the status channels
+        operator : str
+            Specifies the operator used to join the compiler channels.
+            Available options are 'mix'and 'join'.
         """
 
         if not channel_list:
@@ -653,15 +658,27 @@ class Init(Process):
         self.status_channels = []
 
     def set_raw_inputs(self, raw_input):
-        """
+        """Sets the main input channels of the pipeline and their forks.
+
+        The ``raw_input`` dictionary input should contain one entry for each
+        input type (fastq, fasta, etc). The corresponding value should be a
+        dictionary/json with the following key:values:
+
+        - ``channel``: Name of the raw input channel (e.g.: channel1)
+        - ``channel_str``: The nextflow definition of the channel and
+           eventual checks (e.g.: channel1 = Channel.fromPath(param))
+        - ``raw_forks``: A list of channels to which the channel name will
+          for to.
+
+        Each new type of input parameter is automatically added to the
+        :attr:`params` attribute, so that they are automatically collected
+        for the pipeline description and help.
 
         Parameters
         ----------
-        raw_input_list
-
-        Returns
-        -------
-
+        raw_input : dict
+            Contains an entry for each input type with the channel name,
+            channel string and forks.
         """
 
         logger.debug("Setting raw inputs using raw input dict: {}".format(
@@ -693,6 +710,16 @@ class Init(Process):
                             "main_inputs": "\n".join(primary_inputs)}}
 
     def set_secondary_inputs(self, channel_dict):
+        """ Adds secondary inputs to the start of the pipeline.
+
+        This channels are inserted into the pipeline file as they are
+        provided in the values of the argument.
+
+        Parameters
+        ----------
+        channel_dict : dict
+            Each entry should be <parameter>: <channel string>.
+        """
 
         logger.debug("Setting secondary inputs: {}".format(channel_dict))
 
@@ -751,7 +778,6 @@ class StatusCompiler(Compiler):
 
     This special process receives the status channels from all processes
     in the generated pipeline.
-
     """
 
     def __init__(self, **kwargs):
@@ -760,6 +786,11 @@ class StatusCompiler(Compiler):
 
 
 class ReportCompiler(Compiler):
+    """Reports compiler process template interface
+
+    This special process receives the report channels from all processes
+    in the generated pipeline.
+    """
 
     def __init__(self, **kwargs):
 
@@ -767,6 +798,11 @@ class ReportCompiler(Compiler):
 
 
 class PatlasConsensus(Compiler):
+    """Patlas consensus compiler process template interface
+
+    This special process receives the channels associated with the
+    ``patlas_consensus`` key.
+    """
 
     def __init__(self, **kwargs):
 
