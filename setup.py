@@ -9,7 +9,7 @@ with open("README.md") as fh:
 
 setup(
     name="assemblerflow",
-    version="{}".format(VERSION),
+    version="{}-1".format(VERSION),
     packages=["assemblerflow",
               "assemblerflow.templates",
               "assemblerflow.generator",
@@ -20,6 +20,7 @@ setup(
                                     "bin/*",
                                     "lib/*",
                                     "generator/templates/*"]},
+    data_files=[("", ["LICENSE"])],
     install_requires=[
         "argparse",
         "jinja2",
