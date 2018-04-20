@@ -50,9 +50,6 @@ process compile_mlst_{{ pid }} {
     output:
     file "mlst_report.tsv"
 
-    when:
-    params.mlstRun == true && params.annotationRun
-
     script:
     """
     cat $res >> mlst_report.tsv
