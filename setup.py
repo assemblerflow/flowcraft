@@ -4,6 +4,9 @@ from setuptools import setup
 
 VERSION = assemblerflow.__version__
 
+with open("README.md") as fh:
+    README = fh.read()
+
 setup(
     name="assemblerflow",
     version="{}".format(VERSION),
@@ -23,6 +26,8 @@ setup(
     ],
     description="A Nextflow pipeline assembler for genomics. Pick your "
                 "modules. Assemble them. Run the pipeline.",
+    long_description=README,
+    long_description_content_type="text/markdown",
     url="https://github.com/ODiogoSilva/assemblerflow",
     author="Diogo N Silva",
     author_email="o.diogosilva@gmail.com",
