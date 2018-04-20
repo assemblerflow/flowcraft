@@ -6,13 +6,14 @@ VERSION = assemblerflow.__version__
 
 setup(
     name="assemblerflow",
-    version=VERSION,
+    version="{}".format(VERSION),
     packages=["assemblerflow",
               "assemblerflow.templates",
               "assemblerflow.generator",
               "assemblerflow.generator.components"],
     package_dir={"assemblerflow": "assemblerflow"},
     package_data={"assemblerflow": ["nextflow.config",
+                                    "profiles.config",
                                     "bin/*",
                                     "lib/*",
                                     "generator/templates/*"]},
