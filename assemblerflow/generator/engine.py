@@ -404,6 +404,8 @@ class NextflowGenerator:
         ----------
         con : dict
             Dictionary with the connection information between two processes.
+        pid : int
+            Arbitrary and unique process ID.
 
         Returns
         -------
@@ -518,9 +520,9 @@ class NextflowGenerator:
 
         Parameters
         ----------
-        parent_process : assemblerflow.Process.Process
+        parent_process : assemblerflow.generator.process.Process
             Process that will be sending output.
-        child_process : assemblerflow.Process.Process
+        child_process : assemblerflow.generator.process.Process
             Process that will receive output.
 
         """
@@ -679,14 +681,17 @@ class NextflowGenerator:
             )
 
     def _get_fork_tree(self, lane):
-        """
+        """Returns a list with the parent lanes from the provided lane
 
         Parameters
         ----------
-        p
+        lane : int
+            Target lage
 
         Returns
         -------
+        list
+            List of the lanes preceding the provided lane.
         """
 
         parent_lanes = [lane]

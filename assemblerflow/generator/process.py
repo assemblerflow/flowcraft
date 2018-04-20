@@ -94,7 +94,7 @@ class Process:
     }
     """
     dict: Contains the mapping between the :attr:`Process.input_type` attribute
-    and the corresponding nextflow parameter and main channel definition, 
+    and the corresponding nextflow parameter and main channel definition,
     e.g.::
 
         "fastq" : {
