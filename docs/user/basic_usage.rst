@@ -121,7 +121,7 @@ paired::
 
     nextflow run my_pipe.nf --fastq "data/*_{1,2}.*"
 
-In this case, the pattern is given by the "_1." or "_2." substring, which leads
+In this case, the pairs are separated by the "_1." or "_2." substring, which leads
 to the pattern ``*_{1,2}.*``. Another common nomenclature for paired fastq
 files is something like ``sample_R1_L001.fastq.gz``. In this case, an
 acceptable pattern would be ``*_R{1,2}_*``.
