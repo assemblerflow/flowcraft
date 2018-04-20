@@ -30,6 +30,17 @@ component has an ``output_type``, it will feed the processed data into the
 next component (or components) and this will repeated until the end of the
 pipeline.
 
+If you are interesting in checking the pipeline DAG tree, open the
+``my_pipe.html`` file (same name as the pipeline with the html extension)
+in any browser.
+
+.. image:: ../resources/fork_4.png
+   :scale: 80 %
+   :align: center
+
+The ``integrity_coverage`` component is a dependency of ``trimmomatic``, so
+it was automatically added to the pipeline.
+
 .. note::
     Not all pipeline variations will work. **You always need to ensure
     that the output type of a component matches the input type of the next
@@ -165,7 +176,7 @@ Other container engines are:
 Docker images
 :::::::::::::
 
-Most components of assemblerflow are executed in containers, which means that
+All components of assemblerflow are executed in containers, which means that
 the first time they are executed in a machine, **the corresponding image will have
 to be downloaded**. In the case of docker, images are pulled and stored in
 ``var/lib/docker`` by default. In the case of singularity, the
