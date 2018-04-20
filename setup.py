@@ -9,7 +9,7 @@ with open("README.md") as fh:
 
 setup(
     name="assemblerflow",
-    version="{}-1".format(VERSION),
+    version="{}-2".format(VERSION),
     packages=["assemblerflow",
               "assemblerflow.templates",
               "assemblerflow.generator",
