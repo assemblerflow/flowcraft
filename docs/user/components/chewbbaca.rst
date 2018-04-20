@@ -7,6 +7,9 @@ Purpose
 This components runs the allele calling operation of ChewBBACA on a set
 of fasta samples to perform a cg/wgMLST analysis
 
+.. note::
+    Software page: https://github.com/B-UMMI/chewBBACA
+
 Input/Output type
 ------------------
 

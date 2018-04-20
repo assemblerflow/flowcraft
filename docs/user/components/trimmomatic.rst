@@ -6,6 +6,9 @@ Purpose
 
 This component runs Trimmomatic on paired-end FastQ files.
 
+.. note::
+    Software page: http://www.usadellab.org/cms/?page=trimmomatic
+
 Input/Output type
 ------------------
 

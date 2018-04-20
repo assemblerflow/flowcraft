@@ -6,6 +6,9 @@ Purpose
 
 Checks the ST of an assembly using mlst.
 
+.. note::
+    Software page: https://github.com/tseemann/mlst
+
 Input/Output type
 ------------------
 

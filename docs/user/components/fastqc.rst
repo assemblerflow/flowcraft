@@ -6,6 +6,9 @@ Purpose
 
 This components runs FastQC on paired-end FastQ files.
 
+.. note::
+    Software page: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+
 Input/Output type
 ------------------
 

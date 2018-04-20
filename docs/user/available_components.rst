@@ -68,3 +68,11 @@ MLST
 - :doc:`components/chewbbaca`: Performs a cg/wgMLST analysis using ChewBBACA.
 
 
+Reads typing
+------------
+
+- :doc:`components/seq_typing`: Determines the type of a given sample frm a set
+  of reference sequences.
+- :doc:`components/patho_typing`: *In silico* pathogenic typing from raw
+  illumina reads.
+

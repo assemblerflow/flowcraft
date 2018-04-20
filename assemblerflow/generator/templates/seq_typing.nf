@@ -7,6 +7,7 @@ process seq_typing_{{ pid }} {
 
     tag { sample_id }
     errorStrategy "ignore"
+    publishDir "results/seqtyping/${sample_id}/"
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
@@ -14,7 +15,7 @@ process seq_typing_{{ pid }} {
     file refH from IN_refH
 
     output:
-    file "seq_typing.report.txt"
+    file "seq_typing*"
     {% with task_name="seq_typing" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

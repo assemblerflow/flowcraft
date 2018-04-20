@@ -8,6 +8,10 @@ This component runs Trimmomatic on paired-end FastQ files but uses information
 on the per-base GC content variation reported by FastQC to guide the trimming
 of the FastQ reads.
 
+.. note::
+    Software pages: FastQC (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/);
+    Trimmoatic (http://www.usadellab.org/cms/?page=trimmomatic)
+
 Input/Output type
 ------------------
 

@@ -7,6 +7,9 @@ Purpose
 This components performs anti-microbial gene screening using abricate. It
 includes the default databases plus the ``virulencefinder`` database.
 
+.. note::
+    Software page: https://github.com/tseemann/abricate
+
 Input/Output type
 ------------------
 

@@ -6,6 +6,9 @@ Purpose
 
 This components assembles paired-end FastQ files using the Spades assembler.
 
+.. note::
+    Software page: http://bioinf.spbau.ru/spades
+
 Input/Output type
 ------------------
 

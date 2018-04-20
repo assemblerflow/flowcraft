@@ -8,6 +8,9 @@ This components Performs a mapping procedure of FastQ files into a their
 assembly and performs filtering based on quality criteria of read coverage
 and genome size.
 
+.. note::
+    Software page: https://github.com/broadinstitute/pilon
+
 Input/Output type
 ------------------
 
