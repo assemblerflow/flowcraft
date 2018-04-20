@@ -9,18 +9,18 @@ Assembling a pipeline
 ---------------------
 
 Pipelines can be generated using the ``build`` execution mode of assemblerflow
-and the ``-t`` parameter to specify the components inside quotes::
+and the ``-t`` parameter to specify the :ref:`components <components>` inside quotes::
 
     assemblerflow build -t "trimmomatic fastqc spades" -o my_pipe.nf
 
 All components should be written inside quotes and be space separated.
 This command will generate a linear pipeline with three components on the
 current working directory (for more features and tips on how pipelines can be
-built, see the :doc:`pipeline_building` section). A linear pipeline means that
+built, see the :doc:`pipeline building <pipeline_building>` section). A linear pipeline means that
 there are no bifurcations between components, and the input data will flow
 linearly. In this particular case, the input data of the
 pipeline will be paired-end fastq files, since that is the input data type
-of the first component, ``trimmomatic``.
+of the first component, :doc:`trimmomatic <components/trimmomatic>`.
 
 The rationale of how the data flows across the pipeline is simple and intuitive.
 Data enters a component and is processed in some way, which may result on the
@@ -31,7 +31,7 @@ next component (or components) and this will repeated until the end of the
 pipeline.
 
 .. note::
-    Not all pipeline build variations will work. **You always need to ensure
+    Not all pipeline variations will work. **You always need to ensure
     that the output type of a component matches the input type of the next
     component**, otherwise assemblerflow will exit with an error.
 
@@ -132,20 +132,35 @@ acceptable pattern would be ``*_R{1,2}_*``.
     to allow nextflow to resolve the pattern, otherwise your shell might try
     to resolve it and provide the wrong input to nextflow.
 
-Changing profiles
-:::::::::::::::::
+Changing executor and container engine
+::::::::::::::::::::::::::::::::::::::
 
-The default run mode of an assemblerflow pipeline is to be executed localy
+The default run mode of an assemblerflow pipeline is to be executed locally
 and using the singularity container engine. In nextflow terms, this is
 equivalent to have ``executor = "local"`` and ``singularity.enabled = true``.
 If you want to change these settings, you can modify the
 ``nextflow.config`` file, or use one of the available profiles in the
 ``profiles.config`` file. These profiles provide a combination of common
-``<executor>_<container_engine>`` that are supported by nextflow. Therefore,
+``<executor>_<container_engine>`` that are `supported by nextflow`_. Therefore,
 if you want to run the pipeline on a cluster with SLURM and shifter, you'll
 just need to specify the `` slurm_shifter`` profile::
 
     nextflow run my_pipe.nf --fastq "data/*_{1,2}.*" -profile slurm_shifter
+
+Common executors include:
+
+- ``slurm``
+- ``sge``
+- ``lsf``
+- ``pbs``
+
+Other container engines are:
+
+- ``docker``
+- ``singularity``
+- ``shifter``
+
+.. _supported by nextflow: https://www.nextflow.io/docs/latest/executor.html
 
 Docker images
 :::::::::::::
