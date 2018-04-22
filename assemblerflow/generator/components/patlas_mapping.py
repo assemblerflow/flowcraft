@@ -34,13 +34,6 @@ class PatlasMapping(Process):
                                " of the query reference sequence that is "
                                "covered by reads (in absolute lenght)."
             },
-            "plasmid_length_dict": {
-                "default": "'jsons/*_length.json'",
-                "description": "Stores a dictionary of lengths to be added to "
-                               "jsonDumpingMapping process so that it can "
-                               "easily get the size of each plasmid sequence "
-                               "to be queried."
-            },
             "refIndex": {
                 "default": "'/ngstools/data/indexes/bowtie2idx/bowtie2.idx'",
                 "description": "Specifies the reference indexes to be provided"

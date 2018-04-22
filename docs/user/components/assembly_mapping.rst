@@ -4,9 +4,14 @@ Assembly_mapping
 Purpose
 -------
 
-This components Performs a mapping procedure of FastQ files into a their
-assembly and performs filtering based on quality criteria of read coverage
-and genome size.
+This component performs a mapping procedure of FastQ files using their assembly
+as reference. The procedure is carried out with bowtie2 and samtools and aims
+to filter the assembly based on quality criteria of read coverage
+and expected genome size.
+
+.. note::
+    - bowtie2 documentation can be found `here <http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml>`_.
+    - samtools documentation can be found `here <http://www.htslib.org/doc/samtools-1.2.html>`_.
 
 Input/Output type
 ------------------

@@ -17,7 +17,7 @@ try:
     import generator.components.assembly_processing as ap
     import generator.components.downloads as downloads
     import generator.components.distance_estimation as distest
-    import generator.components.mapping as mapping_patlas
+    import generator.components.patlas_mapping as mapping_patlas
     import generator.components.mlst as mlst
     import generator.components.reads_quality_control as readsqc
     import generator.components.typing as typing
@@ -33,7 +33,7 @@ except ImportError:
     import assemblerflow.generator.components.assembly_processing as ap
     import assemblerflow.generator.components.downloads as downloads
     import assemblerflow.generator.components.distance_estimation as distest
-    import assemblerflow.generator.components.mapping as mapping_patlas
+    import assemblerflow.generator.components.patlas_mapping as mapping_patlas
     import assemblerflow.generator.components.mlst as mlst
     import assemblerflow.generator.components.reads_quality_control as readsqc
     import assemblerflow.generator.components.typing as typing
