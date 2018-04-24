@@ -41,3 +41,99 @@ class bowtie_host(Process):
             "bowtie_host"
         ]
 
+class metaspades(Process):
+    """Metaspades process template interface
+
+        This process is set with:
+
+            - ``input_type``: fastq
+            - ``output_type``: assembly
+            - ``ptype``: assembly
+
+        It contains one **secondary channel link end**:
+
+            - ``SIDE_max_len`` (alias: ``SIDE_max_len``): Receives max read length
+        """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
+
+        self.dependencies = ["integrity_coverage"]
+
+        self.params = {
+            "metaspadesKmers": {
+                "default": "'auto'",
+                "description":
+                    "If 'auto' the metaSPAdes k-mer lengths will be determined "
+                    "from the maximum read length of each assembly. If "
+                    "'default', metaSPAdes will use the default k-mer lengths. "
+                    "(default: $params.metaspadesKmers)"
+            }
+        }
+
+        self.secondary_inputs = [
+            {
+                "params": "metaspadesKmers",
+                "channel":
+                    "if ( params.metaspadesKmers.toString().split(\" \").size() "
+                    "<= 1 )"
+                    "{ if (params.metaspadesKmers.toString() != 'auto'){"
+                    "exit 1, \"'metaspadesKmers' parameter must be a sequence "
+                    "of space separated numbers or 'auto'. Provided "
+                    "value: ${params.metaspadesKmers}\"} }\n"
+                    "IN_metaspades_kmers = Channel.value(params.metaspadesKmers)"
+            }
+        ]
+
+        self.directives = {"metaspades": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "ummidock/spades",
+            "version": "3.11.1-1",
+            "scratch": "true"
+        }}
+
+
+class card_rgi(Process):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "txt"
+
+        self.params = {
+            "alignmentTool": {
+                "default": "'DIAMOND'",
+                "description": "Specifies the alignment tool."
+                               "Options: DIAMOND or BLAST"
+            }
+        }
+
+        self.secondary_inputs = [
+            {
+                "params": "alignmentTool",
+                "channel": "IN_alignment_tool = Channel.value(params.alignmentTool)"
+            }
+        ]
+
+        self.directives = {
+            "card_rgi": {
+                "container": "cimendes/card_rgi",
+                "version": "4.0.2",
+                "memory": "{10.Gb*task.attempt}",
+            }
+        }
+
+        self.status_channels = [
+            "card_rgi"
+        ]
+
+
+

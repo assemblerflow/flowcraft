@@ -66,7 +66,9 @@ process_map = {
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
         "mapping_patlas": mapping_patlas.PatlasMapping,
-        "bowtie_host": meta.bowtie_host
+        "bowtie_host": meta.bowtie_host,
+        "card_rgi": meta.card_rgi,
+        "metaspades": meta.metaspades
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
