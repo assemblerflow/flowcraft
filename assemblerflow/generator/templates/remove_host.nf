@@ -1,4 +1,4 @@
-process bowtie_host_{{ pid }} {
+process remove_host_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}

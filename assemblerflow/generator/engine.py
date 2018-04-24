@@ -66,7 +66,7 @@ process_map = {
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
         "mapping_patlas": mapping_patlas.PatlasMapping,
-        "bowtie_host": meta.bowtie_host,
+        "remove_host": meta.remove_host,
         "card_rgi": meta.card_rgi,
         "metaspades": meta.metaspades
 }

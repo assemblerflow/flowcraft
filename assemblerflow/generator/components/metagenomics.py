@@ -4,7 +4,7 @@ try:
 except ImportError:
     from assemblerflow.generator.process import Process
 
-class bowtie_host(Process):
+class remove_host(Process):
 
     def __init__(self, **kwargs):
 
@@ -29,7 +29,7 @@ class bowtie_host(Process):
         ]
 
         self.directives = {
-            "bowtie_host": {
+            "remove_host": {
                 "container": "cimendes/bowtie2_hg19",
                 "version": "2.0",
                 "memory": "{10.Gb*task.attempt}",
@@ -38,7 +38,7 @@ class bowtie_host(Process):
         }
 
         self.status_channels = [
-            "bowtie_host"
+            "remove_host"
         ]
 
 class metaspades(Process):
