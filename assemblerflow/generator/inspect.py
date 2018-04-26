@@ -33,8 +33,21 @@ class NextflowInspector:
 
         self.skip_processes = ["status", "compile_status", "report",
                                "compile_reports"]
+        """
+        list: List of special processes that should be skipped for inspection
+        purposes.
+        """
+
+        self.log_file = ".nextflow.log"
+
+        self.run_status = ""
+        """
+        str: Status of the pipeline. Can be either 'running', 'aborted',
+        'error', 'complete'.
+        """
 
         self._parser_pipeline_processes()
+        self._get_pipeline_status()
 
     def _parser_pipeline_processes(self):
         """Parses the .nextflow.log file and retrieves the complete list
@@ -51,9 +64,7 @@ class NextflowInspector:
         process name is retrieved and populates the :attr:`processes` attribute
         """
 
-        nf_file = ".nextflow.log"
-
-        with open(nf_file) as fh:
+        with open(self.log_file) as fh:
 
             for line in fh:
                 if re.match(".*Creating operator.*", line):
@@ -61,6 +72,23 @@ class NextflowInspector:
                     process = match.group(1)
                     if process not in self.skip_processes:
                         self.processes.append(match.group(1))
+
+    def _get_pipeline_status(self):
+        """Parses the .nextflow.log file for signatures of pipeline status.
+        It sets the :attr:`status_info` attribute.
+        """
+
+        with open(self.log_file) as fh:
+
+            for line in fh:
+                if "Session aborted" in line:
+                    self.run_status = "aborted"
+                    return
+                if "Execution complete -- Goodbye" in line:
+                    self.run_status = "complete"
+                    return
+
+        self.run_status = "running"
 
     @staticmethod
     def _header_mapping(header):
@@ -157,3 +185,4 @@ class NextflowInspector:
 
                 # Parse trace entry and update status_info attribute
                 self._update_status(fields, hm)
+
