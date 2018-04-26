@@ -32,7 +32,7 @@ Parameters
 Published results
 -----------------
 
-- ``reads/<accesion>``: Stores the reads for each provided accession.
+- ``reads/<accession>``: Stores the reads for each provided accession.
 
 Published reports
 -----------------
@@ -42,11 +42,7 @@ None.
 Default directives
 ------------------
 
-
-
-Advanced
---------
-
-Template
-^^^^^^^^
-
+- ``cpus``: 1
+- ``memory``: 1GB
+- ``container``: ummidock/getseqena
+- ``version``: 0.4.0-2
