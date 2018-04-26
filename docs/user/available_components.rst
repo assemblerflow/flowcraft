@@ -7,7 +7,14 @@ These are the currently available assemblerflow components with a short
 description of their tasks. For a more detailed information, follow the
 links of each component.
 
-Read Quality Control
+
+Downloads
+---------
+
+- :doc:`components/reads_download`: Downloads reads from the SRA/ENA public
+  databases from a list of accessions.
+
+Reads Quality Control
 --------------------
 
 - :doc:`components/integrity_coverage`: Tests the integrity
