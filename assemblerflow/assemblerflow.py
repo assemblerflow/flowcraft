@@ -17,12 +17,14 @@ from os.path import join, dirname
 try:
     from __init__ import __version__, __build__
     from generator.engine import NextflowGenerator, process_map
+    from generator.inspect import NextflowInspector
     from generator.recipe import brew_recipe
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
 except ImportError:
     from assemblerflow import __version__, __build__
     from assemblerflow.generator.engine import NextflowGenerator, process_map
+    from assemblerflow.generator.inspect import NextflowInspector
     from assemblerflow.generator.recipe import brew_recipe
     from assemblerflow.generator.pipeline_parser import parse_pipeline, \
         SanityError
@@ -81,6 +83,15 @@ def get_args(args=None):
     parser.add_argument(
         "--debug", dest="debug", action="store_const", const=True,
         help="Set log to debug mode")
+
+    # INSPECT MODE
+    inspect_parser = subparsers.add_parser("inspect",
+                                           help="Inspect the progress of a "
+                                                "pipeline execution")
+    inspect_parser.add_argument(
+        "-i", dest="trace_file", default="pipeline_stats.txt",
+        help="Specify the nextflow trace file."
+    )
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -212,6 +223,11 @@ def build(args):
     logger.info(colored_print("DONE!", "green_bold"))
 
 
+def inspect(args):
+
+    nf_inspect = NextflowInspector(args.trace_file)
+
+
 def main():
 
     args = get_args()
@@ -239,6 +255,10 @@ def main():
 
     if args.main_op == "build":
         build(args)
+
+    if args.main_op == "inspect":
+        inspect(args)
+
 
 
 if __name__ == '__main__':
