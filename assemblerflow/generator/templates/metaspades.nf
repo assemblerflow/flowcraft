@@ -4,7 +4,7 @@ process metaspades_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { fastq_id }
-    publishDir 'results/assembly/spades_{{ pid }}/', pattern: '*_spades*.fasta', mode: 'copy'
+    publishDir 'results/assembly/spades_{{ pid }}/', pattern: '*_metaspades*.fasta', mode: 'copy'
 
     input:
     set fastq_id, file(fastq_pair), max_len from {{ input_channel }}.join(SIDE_max_len_{{ pid }})
