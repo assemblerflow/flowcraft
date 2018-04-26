@@ -1,3 +1,5 @@
+import os
+from os.path import join, abspath
 
 
 class NextflowInspector:
@@ -38,6 +40,29 @@ class NextflowInspector:
 
         return dict((x, pos) for pos, x in enumerate(header.split("\t")))
 
+    @staticmethod
+    def _expand_path(hash_str):
+        """Expands the hash string of a process (ae/1dasjdm) into a full
+        working directory
+
+        Parameters
+        ----------
+        hash_str : str
+            Nextflow process hash with the beggining of the work directory
+
+        Returns
+        -------
+        str
+            Path to working directory of the hash string
+        """
+
+        first_hash, second_hash = hash_str.split("/")
+        first_hash_path = join(abspath("work"), first_hash)
+
+        for l in os.listdir(first_hash_path):
+            if l.startswith(second_hash):
+                return join(first_hash_path, l)
+
     def _update_status(self, fields, hm):
         """Parses a trace line and updates the :attr:`status_info` attribute.
 
@@ -58,6 +83,12 @@ class NextflowInspector:
 
         self.status_info[process] = \
             dict((column, fields[pos]) for column, pos in hm.items())
+
+        # If the task hash code is provided, expand it to the work directory
+        # and add a new entry
+        if self.status_info[process]["hash"]:
+            hs = self.status_info[process]["hash"]
+            self.status_info[process]["work_dir"] = self._expand_path(hs)
 
     def static_parser(self):
         """Method that parses the trace file once and updates the
