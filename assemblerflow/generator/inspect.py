@@ -1,4 +1,6 @@
+import re
 import os
+
 from os.path import join, abspath
 
 
@@ -21,6 +23,44 @@ class NextflowInspector:
         dict: Main object that stores the status information for each process
         name in the trace file.
         """
+
+        self.processes = []
+        """
+        list: List of processes from the pipeline. This information is 
+        retrieved from the .nextflow.log file in the 
+        :func:`_parser_pipeline_processes` method.
+        """
+
+        self.skip_processes = ["status", "compile_status", "report",
+                               "compile_reports"]
+
+        self._parser_pipeline_processes()
+
+    def _parser_pipeline_processes(self):
+        """Parses the .nextflow.log file and retrieves the complete list
+        of processes
+
+        This method searches for specific signatures at the beginning of the
+        .nextflow.log file::
+
+             Apr-19 19:07:32.660 [main] DEBUG nextflow.processor
+             TaskProcessor - Creating operator > report_corrupt_1_1 --
+             maxForks: 4
+
+        When a line with the .*Creating operator.* signature is found, the
+        process name is retrieved and populates the :attr:`processes` attribute
+        """
+
+        nf_file = ".nextflow.log"
+
+        with open(nf_file) as fh:
+
+            for line in fh:
+                if re.match(".*Creating operator.*", line):
+                    match = re.match(".*Creating operator > (.*) --", line)
+                    process = match.group(1)
+                    if process not in self.skip_processes:
+                        self.processes.append(match.group(1))
 
     @staticmethod
     def _header_mapping(header):
@@ -75,10 +115,8 @@ class NextflowInspector:
             This dictionary object is retrieve from :func:`_header_mapping`.
         """
 
-        skip_processes = ["status", "report"]
-
         process = fields[hm["process"]]
-        if process in skip_processes:
+        if process in self.skip_processes:
             return
 
         self.status_info[process] = \
