@@ -92,6 +92,14 @@ def get_args(args=None):
         "-i", dest="trace_file", default="pipeline_stats.txt",
         help="Specify the nextflow trace file."
     )
+    inspect_parser.add_argument(
+        "-r", dest="refresh_rate", default=5,
+        help="Set the refresh frequency for the continuous inspect functions"
+    )
+    inspect_parser.add_argument(
+        "-m", "--mode", dest="mode", default="overview", choices=["overview"],
+        help="Specify the inspection run mode."
+    )
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -225,7 +233,10 @@ def build(args):
 
 def inspect(args):
 
-    nf_inspect = NextflowInspector(args.trace_file)
+    nf_inspect = NextflowInspector(args.trace_file, args.refresh_rate)
+
+    if args.mode == "overview":
+        nf_inspect.display_overview()
 
 
 def main():
