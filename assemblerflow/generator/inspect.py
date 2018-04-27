@@ -11,9 +11,10 @@ from collections import defaultdict
 # Init curses screen
 screen = curses.initscr()
 
+
 def signal_handler():
     """This function is bound to the SIGINT signal (like ctrl+c) to graciously
-    exit the program.
+    exit the program and reset the curses options.
     """
 
     screen.clear()
@@ -47,6 +48,9 @@ class NextflowInspector:
         """
 
         self.refresh_rate = refresh_rate
+        """
+        float: Frequency (in seconds) that the curses screen will be refreshed.
+        """
 
         self.stored_ids = []
         """
@@ -84,6 +88,9 @@ class NextflowInspector:
         """
 
         self.log_file = ".nextflow.log"
+        """
+        str: Name of the nextflow log file.
+        """
 
         self.pipeline_name = ""
         """
@@ -103,6 +110,10 @@ class NextflowInspector:
 
         self._parser_pipeline_processes()
         self._get_pipeline_status()
+
+    #################
+    # UTILITY METHODS
+    #################
 
     def _parser_pipeline_processes(self):
         """Parses the .nextflow.log file and retrieves the complete list
@@ -209,6 +220,19 @@ class NextflowInspector:
         else:
             return fields[0]
 
+    @staticmethod
+    def size_coverter(s):
+
+        if s.endswith("MB"):
+            return float(s.rstrip("MB"))
+
+        elif s.endswith("GB"):
+            return float(s.rstrip("GB")) * 1024
+
+    #################
+    # PARSE METHODS
+    #################
+
     def _update_status(self, fields, hm):
         """Parses a trace line and updates the :attr:`status_info` attribute.
 
@@ -282,22 +306,53 @@ class NextflowInspector:
         self._update_process_stats()
 
     def _update_process_stats(self):
+        """Updates the process stats with the information from the processes
+
+        This method is called at the end of each static parsing of the nextflow
+        trace file. It re-populates the :attr:`process_stats` dictionary
+        with the new stat metrics.
+        """
+
+        good_status = ["COMPLETED", "CACHED"]
 
         for process, vals in self.process_info.items():
 
             self.process_stats[process] = {}
 
-            # Get number of samples
-            self.process_stats[process]["samples"] = "{}/{}".format(
-                len(vals), len(self.samples))
+            inst = self.process_stats[process]
+
+            # Get number of completed samples
+            inst["completed"] = "{}".format(
+                len([x for x in vals if x["status"] in good_status]))
+
+            # Get number of bad samples
+            inst["bad_samples"] = "{}".format(
+                len([x for x in vals if x["status"] not in good_status]))
 
             # Get average time
             time_array = [self.hms(x["realtime"]) for x in vals]
             mean_time = round(sum(time_array) / len(time_array), 1)
-            self.process_stats[process]["realtime"] = mean_time
+            inst["realtime"] = mean_time
 
             # Get cumulated time
-            self.process_stats[process]["cumtime"] = sum(time_array)
+            inst["cumtime"] = round(sum(time_array), 1)
+
+            # Get maximum memory
+            rss_values = [self.size_coverter(x["rss"]) for x in vals
+                          if x["rss"] != "-"]
+            if rss_values:
+                max_rss = round(max(rss_values))
+                if max_rss / 1024 > 1:
+                    rss_str = "{}GB".format(max_rss / 1024)
+                else:
+                    rss_str = "{}MB".format(max_rss)
+            else:
+                rss_str = "-"
+            inst["maxmem"] = rss_str
+
+    #################
+    # CURSES METHODS
+    #################
 
     def display_overview(self):
         """Displays the default pipeline inspection overview
@@ -358,32 +413,40 @@ class NextflowInspector:
         screen.addstr(1, 0, "Pipeline [{}] inspection. Status: {}".format(
             self.pipeline_name, self.run_status
         ))
-        screen.addstr(2, 0, "Last updated: {}".format(
+        screen.addstr(2, 0, "Inferred number of samples: {}".format(
+            len(self.samples)))
+        screen.addstr(3, 0, "Last updated: {}".format(
             strftime("%Y-%m-%d %H:%M:%S", gmtime())))
-        headers = ["Process", "Samples", "Avg Time", "Total Time"]
-        screen.addstr(4, 0, "{0: <25} "
-                            "{1: ^11} "
-                            "{2: ^11} "
-                            "{3: ^11} ".format(*headers))
+        headers = ["Process", "Completed", "Errored", "Avg Time", "Total Time",
+                   "Max Mem"]
+        screen.addstr(5, 0, "{0: <25} "
+                            "{1: ^10} "
+                            "{2: ^10} "
+                            "{3: ^10} "
+                            "{4: ^10} "
+                            "{5: ^10} ".format(*headers))
 
         # Get display size
         top = self.top_line
-        bottom = self.screen_lines - 5 + self.top_line
+        bottom = self.screen_lines - 6 + self.top_line
 
         # Fetch process information
         for p, process in enumerate(self.processes[top:bottom]):
 
             if process not in self.process_stats:
-                vals = ["-"] * 3
+                vals = ["-"] * 6
             else:
                 ref = self.process_stats[process]
-                vals = [ref["samples"], ref["realtime"], ref["cumtime"]]
+                vals = [ref["completed"], ref["bad_samples"], ref["realtime"],
+                        ref["cumtime"], ref["maxmem"]]
 
             screen.addstr(
-                5 + p, 0, "{0: <25} "
-                          "{1: ^11} "
-                          "{2: ^11} "
-                          "{3: ^11} ".format(
+                6 + p, 0, "{0: <25} "
+                          "{1: ^10} "
+                          "{2: ^10} "
+                          "{3: ^10} "
+                          "{4: ^10} "
+                          "{5: ^10} ".format(
                                 process,
                                 *vals
             ))
