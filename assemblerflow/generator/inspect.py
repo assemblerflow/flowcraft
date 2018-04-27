@@ -235,7 +235,8 @@ class NextflowInspector:
 
         if "tag" in info:
             tag = info["tag"]
-            if tag != "-" and tag not in self.samples:
+            if tag != "-" and tag not in self.samples and \
+                    tag.split()[0] not in self.samples:
                 self.samples.append(tag)
 
         self.process_info[process].append(info)
