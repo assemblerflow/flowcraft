@@ -419,7 +419,7 @@ class NextflowInspector:
             strftime("%Y-%m-%d %H:%M:%S", gmtime())))
         headers = ["Process", "Completed", "Errored", "Avg Time", "Total Time",
                    "Max Mem"]
-        screen.addstr(5, 0, "{0: <25} "
+        screen.addstr(5, 0, "{0: <25}  "
                             "{1: ^10} "
                             "{2: ^10} "
                             "{3: ^10} "
@@ -441,7 +441,7 @@ class NextflowInspector:
                         ref["cumtime"], ref["maxmem"]]
 
             screen.addstr(
-                6 + p, 0, "{0: <25} "
+                6 + p, 0, "{0:25.25}  "
                           "{1: ^10} "
                           "{2: ^10} "
                           "{3: ^10} "
