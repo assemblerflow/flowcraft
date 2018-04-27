@@ -351,10 +351,13 @@ class NextflowInspector:
             # Get average time
             time_array = [self.hms(x["realtime"]) for x in vals]
             mean_time = round(sum(time_array) / len(time_array), 1)
-            inst["realtime"] = mean_time
+            mean_time_str = strftime('%H:%M:%S', gmtime(mean_time))
+            inst["realtime"] = mean_time_str
 
             # Get cumulated time
-            inst["cumtime"] = round(sum(time_array), 1)
+            cum_time_str = strftime('%H:%M:%S', gmtime(
+                round(sum(time_array), 1)))
+            inst["cumtime"] = cum_time_str
 
             # Get maximum memory
             rss_values = [self.size_coverter(x["rss"]) for x in vals
