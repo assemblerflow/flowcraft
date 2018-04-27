@@ -6,7 +6,7 @@ import signal
 
 from os.path import join, abspath
 from time import gmtime, strftime, sleep
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 
 def signal_handler(screen):
@@ -61,7 +61,7 @@ class NextflowInspector:
         dict: Contains some statistics for each process.
         """
 
-        self.processes = {}
+        self.processes = OrderedDict()
         """
         dict: Dictionary of processes from the pipeline with the status of the
         channel as the value. This information is retrieved from the 
