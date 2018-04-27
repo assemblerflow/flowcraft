@@ -99,6 +99,64 @@ class metaspades(Process):
         }}
 
 
+class megahit(Process):
+    """megahit process template interface
+
+        This process is set with:
+
+            - ``input_type``: fastq
+            - ``output_type``: assembly
+            - ``ptype``: assembly
+
+        It contains one **secondary channel link end**:
+
+            - ``SIDE_max_len`` (alias: ``SIDE_max_len``): Receives max read length
+        """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
+
+        self.dependencies = ["integrity_coverage"]
+
+        self.params = {
+            "megahitKmers": {
+                "default": "'auto'",
+                "description":
+                    "If 'auto' the megahit k-mer lengths will be determined "
+                    "from the maximum read length of each assembly. If "
+                    "'default', megahit will use the default k-mer lengths. "
+                    "(default: $params.megahitKmers)"
+            }
+        }
+
+        self.secondary_inputs = [
+            {
+                "params": "megahitKmers",
+                "channel":
+                    "if ( params.megahitKmers.toString().split(\" \").size() "
+                    "<= 1 )"
+                    "{ if (params.megahitKmers.toString() != 'auto'){"
+                    "exit 1, \"'megahitKmers' parameter must be a sequence "
+                    "of space separated numbers or 'auto'. Provided "
+                    "value: ${params.megahitKmers}\"} }\n"
+                    "IN_megahit_kmers = Channel.value(params.megahitKmers)"
+            }
+        ]
+
+        self.directives = {"megahit": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "cimendes/megahit",
+            "version": "v1.1.3-0.1",
+            "scratch": "true"
+        }}
+
+
 class card_rgi(Process):
 
     def __init__(self, **kwargs):

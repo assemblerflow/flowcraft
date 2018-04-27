@@ -68,7 +68,8 @@ process_map = {
         "mapping_patlas": mapping_patlas.PatlasMapping,
         "remove_host": meta.remove_host,
         "card_rgi": meta.card_rgi,
-        "metaspades": meta.metaspades
+        "metaspades": meta.metaspades,
+        "megahit": meta.megahit
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
