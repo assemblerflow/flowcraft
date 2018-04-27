@@ -323,6 +323,7 @@ class NextflowInspector:
                 self._update_status(fields, hm)
 
         self._update_process_stats()
+        self._get_pipeline_status()
 
     def _update_process_stats(self):
         """Updates the process stats with the information from the processes
