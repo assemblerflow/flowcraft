@@ -249,6 +249,9 @@ class NextflowInspector:
 
         info = dict((column, fields[pos]) for column, pos in hm.items())
 
+        if info["task_id"] in self.stored_ids:
+            return
+
         # If the task hash code is provided, expand it to the work directory
         # and add a new entry
         if "hash" in info:
@@ -262,6 +265,7 @@ class NextflowInspector:
                 self.samples.append(tag)
 
         self.process_info[process].append(info)
+        self.stored_ids.append(info["task_id"])
 
     def static_parser(self):
         """Method that parses the trace file once and updates the
