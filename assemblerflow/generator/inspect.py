@@ -224,7 +224,10 @@ class NextflowInspector:
         if s.endswith("KB"):
             return float(s.rstrip("KB")) / 1024
 
-        if s.endswith("MB"):
+        elif s.endswith(" B"):
+            return float(s.rstrip("B")) / 1024 / 1024
+
+        elif s.endswith("MB"):
             return float(s.rstrip("MB"))
 
         elif s.endswith("GB"):
@@ -382,7 +385,6 @@ class NextflowInspector:
             else:
                 wchar_str = "-"
             inst["avgwrite"] = wchar_str
-
 
     #################
     # CURSES METHODS
