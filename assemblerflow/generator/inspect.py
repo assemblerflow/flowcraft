@@ -8,11 +8,8 @@ from os.path import join, abspath
 from time import gmtime, strftime, sleep
 from collections import defaultdict
 
-# Init curses screen
-screen = curses.initscr()
 
-
-def signal_handler():
+def signal_handler(screen):
     """This function is bound to the SIGINT signal (like ctrl+c) to graciously
     exit the program and reset the curses options.
     """
@@ -26,10 +23,6 @@ def signal_handler():
     curses.endwin()
     print("Exiting assemblerflow inspection... Bye")
     sys.exit(0)
-
-
-# Bind SIGINT to singal_handler function
-signal.signal(signal.SIGINT, lambda *x: signal_handler())
 
 
 class NextflowInspector:
@@ -104,12 +97,17 @@ class NextflowInspector:
         """
 
         # CURSES ATTRIBUTES
+        # Init curses screen
+        self.screen = None
         self.top_line = 0
-        self.screen_lines = curses.LINES
+        self.screen_lines = None
         self.content_lines = 0
 
         self._parser_pipeline_processes()
         self._get_pipeline_status()
+
+        # Bind SIGINT to singal_handler function
+        signal.signal(signal.SIGINT, lambda *x: signal_handler(self.screen))
 
     #################
     # UTILITY METHODS
@@ -360,23 +358,25 @@ class NextflowInspector:
 
         stay_alive = True
 
-        screen.keypad(True)
-        screen.nodelay(-1)
+        self.screen = curses.initscr()
+
+        self.screen.keypad(True)
+        self.screen.nodelay(-1)
         curses.cbreak()
         curses.noecho()
 
-        self.screen_lines = screen.getmaxyx()[0]
+        self.screen_lines = self.screen.getmaxyx()[0]
 
         try:
             while stay_alive:
 
-                c = screen.getch()
+                c = self.screen.getch()
                 if c == curses.KEY_UP:
                     self.updown("up")
                 elif c == curses.KEY_DOWN:
                     self.updown("down")
                 elif c == curses.KEY_RESIZE:
-                    self.screen_lines = screen.getmaxyx()[0]
+                    self.screen_lines = self.screen.getmaxyx()[0]
 
                 self.static_parser()
                 self.flush_overview()
@@ -387,7 +387,7 @@ class NextflowInspector:
         finally:
             sys.stderr.write("here")
             curses.nocbreak()
-            screen.keypad(0)
+            self.screen.keypad(0)
             curses.echo()
             curses.endwin()
 
@@ -398,7 +398,7 @@ class NextflowInspector:
         if direction == "up" and self.top_line != 0:
             self.top_line -= 1
         elif direction == "down" and \
-                screen.getmaxyx()[0] + self.top_line <= self.content_lines + 5:
+                self.screen.getmaxyx()[0] + self.top_line <= self.content_lines + 5:
             self.top_line += 1
 
     def flush_overview(self):
@@ -407,19 +407,19 @@ class NextflowInspector:
         attributes into stdout.
         """
 
-        screen.erase()
+        self.screen.erase()
 
         # Add static header
-        screen.addstr(1, 0, "Pipeline [{}] inspection. Status: {}".format(
+        self.screen.addstr(1, 0, "Pipeline [{}] inspection. Status: {}".format(
             self.pipeline_name, self.run_status
         ))
-        screen.addstr(2, 0, "Inferred number of samples: {}".format(
+        self.screen.addstr(2, 0, "Inferred number of samples: {}".format(
             len(self.samples)))
-        screen.addstr(3, 0, "Last updated: {}".format(
+        self.screen.addstr(3, 0, "Last updated: {}".format(
             strftime("%Y-%m-%d %H:%M:%S", gmtime())))
         headers = ["Process", "Completed", "Errored", "Avg Time", "Total Time",
                    "Max Mem"]
-        screen.addstr(5, 0, "{0: <25}  "
+        self.screen.addstr(5, 0, "{0: <25}  "
                             "{1: ^10} "
                             "{2: ^10} "
                             "{3: ^10} "
@@ -440,7 +440,7 @@ class NextflowInspector:
                 vals = [ref["completed"], ref["bad_samples"], ref["realtime"],
                         ref["cumtime"], ref["maxmem"]]
 
-            screen.addstr(
+            self.screen.addstr(
                 6 + p, 0, "{0:25.25}  "
                           "{1: ^10} "
                           "{2: ^10} "
@@ -451,4 +451,4 @@ class NextflowInspector:
                                 *vals
             ))
 
-        screen.refresh()
+        self.screen.refresh()
