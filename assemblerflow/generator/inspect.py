@@ -10,11 +10,6 @@ from collections import defaultdict
 
 # Init curses screen
 screen = curses.initscr()
-screen.keypad(True)
-screen.nodelay(-1)
-curses.cbreak()
-curses.noecho()
-
 
 def signal_handler():
     """This function is bound to the SIGINT signal (like ctrl+c) to graciously
@@ -308,6 +303,11 @@ class NextflowInspector:
         """
 
         stay_alive = True
+
+        screen.keypad(True)
+        screen.nodelay(-1)
+        curses.cbreak()
+        curses.noecho()
 
         self.screen_lines = screen.getmaxyx()[0]
 
