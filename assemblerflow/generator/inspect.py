@@ -174,7 +174,8 @@ class NextflowInspector:
                     process_m = re.match(".*process: (.*)\)", line)
                     if process_m:
                         process = process_m.group(1)
-                    self.processes[process] = "C"
+                    if process not in self.skip_processes:
+                        self.processes[process] = "C"
 
     @staticmethod
     def _header_mapping(header):
@@ -501,7 +502,7 @@ class NextflowInspector:
                                  "{5: ^10} "
                                  "{6: ^10} "
                                  "{7: ^10} ".format(*headers),
-                           curses.A_STANDOUT)
+                           curses.A_UNDERLINE | curses.A_STANDOUT)
 
         # Get display size
         top = self.top_line
