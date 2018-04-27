@@ -5,13 +5,15 @@ import curses
 import signal
 
 from os.path import join, abspath
-from time import gmtime, strftime
+from time import gmtime, strftime, sleep
 from collections import defaultdict
 
 # Init curses screen
 screen = curses.initscr()
 screen.keypad(True)
 screen.nodelay(-1)
+curses.cbreak()
+curses.noecho()
 
 
 def signal_handler():
@@ -22,6 +24,10 @@ def signal_handler():
     screen.clear()
     screen.refresh()
 
+    curses.nocbreak()
+    screen.keypad(0)
+    curses.echo()
+    curses.endwin()
     print("Exiting assemblerflow inspection... Bye")
     sys.exit(0)
 
@@ -303,18 +309,31 @@ class NextflowInspector:
 
         stay_alive = True
 
-        while stay_alive:
+        self.screen_lines = screen.getmaxyx()[0]
 
-            c = screen.getch()
-            if c == curses.KEY_UP:
-                self.updown("up")
-            elif c == curses.KEY_DOWN:
-                self.updown("down")
-            elif c == curses.KEY_RESIZE:
-                self.screen_lines = screen.getmaxyx()[0]
+        try:
+            while stay_alive:
 
-            self.static_parser()
-            self.flush_overview()
+                c = screen.getch()
+                if c == curses.KEY_UP:
+                    self.updown("up")
+                elif c == curses.KEY_DOWN:
+                    self.updown("down")
+                elif c == curses.KEY_RESIZE:
+                    self.screen_lines = screen.getmaxyx()[0]
+
+                self.static_parser()
+                self.flush_overview()
+
+                sleep(0.1)
+        except Exception as e:
+            sys.stderr.write(e)
+        finally:
+            sys.stderr.write("here")
+            curses.nocbreak()
+            screen.keypad(0)
+            curses.echo()
+            curses.endwin()
 
     def updown(self, direction):
         """Provides curses scroll functionality.
@@ -348,7 +367,7 @@ class NextflowInspector:
 
         # Get display size
         top = self.top_line
-        bottom = self.screen_lines - 4 + self.top_line
+        bottom = self.screen_lines - 5 + self.top_line
 
         # Fetch process information
         for p, process in enumerate(self.processes[top:bottom]):

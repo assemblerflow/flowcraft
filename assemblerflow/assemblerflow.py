@@ -93,7 +93,7 @@ def get_args(args=None):
         help="Specify the nextflow trace file."
     )
     inspect_parser.add_argument(
-        "-r", dest="refresh_rate", default=5,
+        "-r", dest="refresh_rate", default=0.1,
         help="Set the refresh frequency for the continuous inspect functions"
     )
     inspect_parser.add_argument(
