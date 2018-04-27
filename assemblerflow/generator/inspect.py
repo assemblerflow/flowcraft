@@ -343,7 +343,7 @@ class NextflowInspector:
             if rss_values:
                 max_rss = round(max(rss_values))
                 if max_rss / 1024 > 1:
-                    rss_str = "{}GB".format(max_rss / 1024)
+                    rss_str = "{}GB".format(round(max_rss / 1024, 1))
                 else:
                     rss_str = "{}MB".format(max_rss)
             else:
