@@ -61,11 +61,13 @@ class NextflowInspector:
         dict: Contains some statistics for each process.
         """
 
-        self.processes = []
+        self.processes = {}
         """
-        list: List of processes from the pipeline. This information is 
-        retrieved from the .nextflow.log file in the 
-        :func:`_parser_pipeline_processes` method.
+        dict: Dictionary of processes from the pipeline with the status of the
+        channel as the value. This information is retrieved from the 
+        .nextflow.log file in the :func:`_parser_pipeline_processes` method
+        and updated in the :func:`_update_barrier_status` and 
+        :func:`_update_process_stats`.
         """
 
         self.samples = []
@@ -135,7 +137,7 @@ class NextflowInspector:
                     match = re.match(".*Creating operator > (.*) --", line)
                     process = match.group(1)
                     if process not in self.skip_processes:
-                        self.processes.append(match.group(1))
+                        self.processes[match.group(1)] = "W"
 
                 if re.match(".*Launching `.*` \[.*\] ", line):
                     match = re.match(".*Launching `.*` \[(.*)\] ", line)
@@ -159,6 +161,20 @@ class NextflowInspector:
                     return
 
         self.run_status = "running"
+
+    def _update_barrier_status(self):
+        """Updates the run_status key of the :attr:`process_stats` from the
+        config.
+        """
+
+        with open(self.log_file) as fh:
+
+            for line in fh:
+                if "<<< barrier arrive" in line:
+                    process_m = re.match(".*process: (.*)\)", line)
+                    if process_m:
+                        process = process_m.group(1)
+                    self.processes[process] = "C"
 
     @staticmethod
     def _header_mapping(header):
@@ -261,10 +277,15 @@ class NextflowInspector:
         """
 
         process = fields[hm["process"]]
+
+        # Skip usual processes that do not requrie tracking
         if process in self.skip_processes:
             return
 
+        # Get information from a single line of trace file
         info = dict((column, fields[pos]) for column, pos in hm.items())
+
+        self.processes[process] = "W"
 
         if info["hash"] in self.stored_ids:
             return
@@ -324,6 +345,7 @@ class NextflowInspector:
 
         self._update_process_stats()
         self._get_pipeline_status()
+        self._update_barrier_status()
 
     def _update_process_stats(self):
         """Updates the process stats with the information from the processes
@@ -406,6 +428,7 @@ class NextflowInspector:
         self.screen.nodelay(-1)
         curses.cbreak()
         curses.noecho()
+        curses.start_color()
 
         self.screen_lines = self.screen.getmaxyx()[0]
 
@@ -427,7 +450,6 @@ class NextflowInspector:
         except Exception as e:
             sys.stderr.write(e)
         finally:
-            sys.stderr.write("here")
             curses.nocbreak()
             self.screen.keypad(0)
             curses.echo()
@@ -449,6 +471,16 @@ class NextflowInspector:
         attributes into stdout.
         """
 
+        colors = {
+            "W": 1,
+            "R": 2,
+            "C": 3
+        }
+
+        curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+
         self.screen.erase()
 
         # Add static header
@@ -468,17 +500,19 @@ class NextflowInspector:
                                  "{4: ^10} "
                                  "{5: ^10} "
                                  "{6: ^10} "
-                                 "{7: ^10} ".format(*headers))
+                                 "{7: ^10} ".format(*headers),
+                           curses.A_STANDOUT)
 
         # Get display size
         top = self.top_line
         bottom = self.screen_lines - 6 + self.top_line
 
         # Fetch process information
-        for p, process in enumerate(self.processes[top:bottom]):
+        for p, process in enumerate(
+                list(self.processes.keys())[top:bottom]):
 
             if process not in self.process_stats:
-                vals = ["-"] * 8
+                vals = ["-"] * 9
             else:
                 ref = self.process_stats[process]
                 vals = [ref["completed"], ref["bad_samples"], ref["realtime"],
@@ -496,6 +530,6 @@ class NextflowInspector:
                           "{7: ^10} ".format(
                                 process,
                                 *vals
-            ))
+            ), curses.color_pair(colors[self.processes[process]]))
 
         self.screen.refresh()
