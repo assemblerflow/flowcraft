@@ -285,7 +285,7 @@ class NextflowInspector:
         # Get information from a single line of trace file
         info = dict((column, fields[pos]) for column, pos in hm.items())
 
-        self.processes[process] = "W"
+        self.processes[process] = "R"
 
         if info["hash"] in self.stored_ids:
             return
