@@ -221,11 +221,25 @@ class NextflowInspector:
     @staticmethod
     def size_coverter(s):
 
+        if s.endswith("KB"):
+            return float(s.rstrip("KB")) / 1024
+
         if s.endswith("MB"):
             return float(s.rstrip("MB"))
 
         elif s.endswith("GB"):
             return float(s.rstrip("GB")) * 1024
+
+        else:
+            return float(s)
+
+    @staticmethod
+    def size_compress(s):
+
+        if s / 1024 > 1:
+            return "{}GB".format(round(s / 1024), 1)
+        else:
+            return "{}MB".format(s)
 
     #################
     # PARSE METHODS
@@ -249,7 +263,7 @@ class NextflowInspector:
 
         info = dict((column, fields[pos]) for column, pos in hm.items())
 
-        if info["task_id"] in self.stored_ids:
+        if info["hash"] in self.stored_ids:
             return
 
         # If the task hash code is provided, expand it to the work directory
@@ -265,7 +279,7 @@ class NextflowInspector:
                 self.samples.append(tag)
 
         self.process_info[process].append(info)
-        self.stored_ids.append(info["task_id"])
+        self.stored_ids.append(info["hash"])
 
     def static_parser(self):
         """Method that parses the trace file once and updates the
@@ -344,13 +358,31 @@ class NextflowInspector:
                           if x["rss"] != "-"]
             if rss_values:
                 max_rss = round(max(rss_values))
-                if max_rss / 1024 > 1:
-                    rss_str = "{}GB".format(round(max_rss / 1024, 1))
-                else:
-                    rss_str = "{}MB".format(max_rss)
+                rss_str = self.size_compress(max_rss)
             else:
                 rss_str = "-"
             inst["maxmem"] = rss_str
+
+            # Get read size
+            rchar_values = [self.size_coverter(x["rchar"]) for x in vals
+                            if x["rchar"] != "-"]
+            if rchar_values:
+                avg_rchar = round(sum(rchar_values) / len(rchar_values))
+                rchar_str = self.size_compress(avg_rchar)
+            else:
+                rchar_str = "-"
+            inst["avgread"] = rchar_str
+
+            # Get write size
+            wchar_values = [self.size_coverter(x["wchar"]) for x in vals
+                            if x["wchar"] != "-"]
+            if wchar_values:
+                avg_wchar = round(sum(wchar_values) / len(wchar_values))
+                wchar_str = self.size_compress(avg_wchar)
+            else:
+                wchar_str = "-"
+            inst["avgwrite"] = wchar_str
+
 
     #################
     # CURSES METHODS
@@ -422,13 +454,15 @@ class NextflowInspector:
         self.screen.addstr(3, 0, "Last updated: {}".format(
             strftime("%Y-%m-%d %H:%M:%S", gmtime())))
         headers = ["Process", "Completed", "Errored", "Avg Time", "Total Time",
-                   "Max Mem"]
+                   "Max Mem", "Avg Read", "Avg Write"]
         self.screen.addstr(5, 0, "{0: <25}  "
-                            "{1: ^10} "
-                            "{2: ^10} "
-                            "{3: ^10} "
-                            "{4: ^10} "
-                            "{5: ^10} ".format(*headers))
+                                 "{1: ^10} "
+                                 "{2: ^10} "
+                                 "{3: ^10} "
+                                 "{4: ^10} "
+                                 "{5: ^10} "
+                                 "{6: ^10} "
+                                 "{7: ^10} ".format(*headers))
 
         # Get display size
         top = self.top_line
@@ -438,11 +472,12 @@ class NextflowInspector:
         for p, process in enumerate(self.processes[top:bottom]):
 
             if process not in self.process_stats:
-                vals = ["-"] * 6
+                vals = ["-"] * 8
             else:
                 ref = self.process_stats[process]
                 vals = [ref["completed"], ref["bad_samples"], ref["realtime"],
-                        ref["cumtime"], ref["maxmem"]]
+                        ref["cumtime"], ref["maxmem"], ref["avgread"],
+                        ref["avgwrite"]]
 
             self.screen.addstr(
                 6 + p, 0, "{0:25.25}  "
@@ -450,7 +485,9 @@ class NextflowInspector:
                           "{2: ^10} "
                           "{3: ^10} "
                           "{4: ^10} "
-                          "{5: ^10} ".format(
+                          "{5: ^10} "
+                          "{6: ^10} "
+                          "{7: ^10} ".format(
                                 process,
                                 *vals
             ))
