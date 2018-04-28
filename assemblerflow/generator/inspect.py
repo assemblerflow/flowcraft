@@ -393,6 +393,8 @@ class NextflowInspector:
                         continue
                     if sample in self.processes[process]["finished"]:
                         continue
+                    if sample in self.processes[process]["submitted"]:
+                        continue
 
                     self.processes[process]["submitted"].append(sample)
 
