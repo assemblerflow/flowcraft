@@ -387,7 +387,8 @@ class NextflowInspector:
                     m = re.match(".*Submitted process > (.*) \((.*)\).*", line)
                     process = m.group(1)
                     sample = m.group(2)
-                    self.processes[process]["submitted"].append(sample)
+                    if process not in self.skip_processes:
+                        self.processes[process]["submitted"].append(sample)
 
     def _update_process_stats(self):
         """Updates the process stats with the information from the processes
