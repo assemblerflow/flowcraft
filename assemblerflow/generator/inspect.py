@@ -418,9 +418,13 @@ class NextflowInspector:
 
             # Remove from the submitted samples
             for v in vals:
-                if v["tag"] in self.processes[process]["submitted"]:
-                    self.processes[process]["submitted"].remove(v["tag"])
-                    self.processes[process]["finished"].append(v["tag"])
+                if vals["status"] not in good_status:
+                    if v["tag"] in self.processes[process]["submitted"]:
+                        self.processes[process]["submitted"].remove(v["tag"])
+                        self.processes[process]["finished"].append(v["tag"])
+                        vals.remove(v)
+                    elif v["tag"] in self.processes[process]["finished"]:
+                        vals.remove(v)
 
             # Get number of completed samples
             inst["completed"] = "{}".format(
@@ -605,7 +609,7 @@ class NextflowInspector:
                 txt_fmt = curses.A_BOLD
 
             self.screen.addstr(
-                6 + p, 0, "{0:1} "
+                6 + p, 0, "{0: ^1} "
                           "{1:25.25}  "
                           "{2: ^7} "
                           "{3: ^7} "
