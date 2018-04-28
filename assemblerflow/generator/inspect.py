@@ -3,10 +3,14 @@ import os
 import sys
 import curses
 import signal
+import locale
 
 from os.path import join, abspath
 from time import gmtime, strftime, sleep
 from collections import defaultdict, OrderedDict
+
+locale.setlocale(locale.LC_ALL, '')
+code = locale.getpreferredencoding()
 
 
 def signal_handler(screen):
@@ -87,6 +91,12 @@ class NextflowInspector:
         str: Name of the nextflow log file.
         """
 
+        self.log_stamp = None
+        """
+        str: Stores the timestamp of the last modification of the nextflow 
+        log file. This is used to parse the file only when it has changed.
+        """
+
         self.pipeline_name = ""
         """
         str: Name of the pipeline, parsed from .nextflow.log
@@ -137,7 +147,10 @@ class NextflowInspector:
                     match = re.match(".*Creating operator > (.*) --", line)
                     process = match.group(1)
                     if process not in self.skip_processes:
-                        self.processes[match.group(1)] = "W"
+                        self.processes[match.group(1)] = {
+                            "barrier": "W",
+                            "submitted": []
+                        }
 
                 if re.match(".*Launching `.*` \[.*\] ", line):
                     match = re.match(".*Launching `.*` \[(.*)\] ", line)
@@ -170,12 +183,17 @@ class NextflowInspector:
         with open(self.log_file) as fh:
 
             for line in fh:
+
+                # Exit barrier update after session abort signal
+                if "Session aborted" in line:
+                    return
+
                 if "<<< barrier arrive" in line:
                     process_m = re.match(".*process: (.*)\)", line)
                     if process_m:
                         process = process_m.group(1)
-                    if process not in self.skip_processes:
-                        self.processes[process] = "C"
+                        if process not in self.skip_processes:
+                            self.processes[process]["barrier"] =  "C"
 
     @staticmethod
     def _header_mapping(header):
@@ -286,7 +304,7 @@ class NextflowInspector:
         # Get information from a single line of trace file
         info = dict((column, fields[pos]) for column, pos in hm.items())
 
-        self.processes[process] = "R"
+        self.processes[process]["barrier"] = "R"
 
         if info["hash"] in self.stored_ids:
             return
@@ -348,6 +366,30 @@ class NextflowInspector:
         self._get_pipeline_status()
         self._update_barrier_status()
 
+    def static_log_parser(self):
+        """Method that parses the nextflow log file once and updates the
+        submitted number of samples for each process
+        """
+
+        # Check the timestamp of the log file. Only proceed with the parsing
+        # if it changed from the previous time.
+        timestamp = os.stat(self.log_file)[8]
+        if timestamp and timestamp == self.log_stamp:
+            return
+        else:
+            self.log_stamp = timestamp
+
+        with open(self.log_file) as fh:
+
+            for line in fh:
+
+                if "Submitted process >" in line or \
+                        "Re-submitted process >" in line:
+                    m = re.match(".*Submitted process > (.*) \((.*)\).*", line)
+                    process = m.group(1)
+                    sample = m.group(2)
+                    self.processes[process]["submitted"].append(sample)
+
     def _update_process_stats(self):
         """Updates the process stats with the information from the processes
 
@@ -364,6 +406,11 @@ class NextflowInspector:
 
             inst = self.process_stats[process]
 
+            # Remove from the submitted samples
+            for v in vals:
+                if v["tag"] in self.processes[process]["submitted"]:
+                    self.processes[process]["submitted"].remove(v["tag"])
+
             # Get number of completed samples
             inst["completed"] = "{}".format(
                 len([x for x in vals if x["status"] in good_status]))
@@ -379,9 +426,9 @@ class NextflowInspector:
             inst["realtime"] = mean_time_str
 
             # Get cumulated time
-            cum_time_str = strftime('%H:%M:%S', gmtime(
-                round(sum(time_array), 1)))
-            inst["cumtime"] = cum_time_str
+            # cum_time_str = strftime('%H:%M:%S', gmtime(
+            #     round(sum(time_array), 1)))
+            # inst["cumtime"] = cum_time_str
 
             # Get maximum memory
             rss_values = [self.size_coverter(x["rss"]) for x in vals
@@ -478,31 +525,41 @@ class NextflowInspector:
             "C": 3
         }
 
+        pc = {
+            "running": 3,
+            "aborted": 4,
+            "error": 4
+        }
+
         curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
         curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
         curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(4, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
 
         self.screen.erase()
 
         # Add static header
-        self.screen.addstr(1, 0, "Pipeline [{}] inspection. Status: {}".format(
-            self.pipeline_name, self.run_status
-        ))
+        header = "Pipeline [{}] inspection. Status: ".format(
+            self.pipeline_name)
+        self.screen.addstr(1, 0, header)
+        self.screen.addstr(1, len(header), self.run_status,
+                           curses.color_pair(pc[self.run_status]))
         self.screen.addstr(2, 0, "Inferred number of samples: {}".format(
             len(self.samples)))
         self.screen.addstr(3, 0, "Last updated: {}".format(
             strftime("%Y-%m-%d %H:%M:%S", gmtime())))
-        headers = ["Process", "Completed", "Errored", "Avg Time", "Total Time",
-                   "Max Mem", "Avg Read", "Avg Write"]
-        self.screen.addstr(5, 0, "{0: <25}  "
-                                 "{1: ^10} "
+        headers = ["", "Process", "Submitted", "Completed", "Errored",
+                   "Avg Time", "Max Mem", "Avg Read", "Avg Write"]
+        self.screen.addstr(5, 0, "{0: ^1} "
+                                 "{1: ^25}  "
                                  "{2: ^10} "
                                  "{3: ^10} "
                                  "{4: ^10} "
                                  "{5: ^10} "
                                  "{6: ^10} "
-                                 "{7: ^10} ".format(*headers),
-                           curses.A_UNDERLINE | curses.A_STANDOUT)
+                                 "{7: ^10} "
+                                 "{8: ^10} ".format(*headers),
+                           curses.A_UNDERLINE | curses.A_REVERSE)
 
         # Get display size
         top = self.top_line
@@ -513,24 +570,30 @@ class NextflowInspector:
                 list(self.processes.keys())[top:bottom]):
 
             if process not in self.process_stats:
-                vals = ["-"] * 9
+                vals = ["-"] * 8
+                txt_fmt = curses.A_DIM
             else:
                 ref = self.process_stats[process]
                 vals = [ref["completed"], ref["bad_samples"], ref["realtime"],
-                        ref["cumtime"], ref["maxmem"], ref["avgread"],
+                        ref["maxmem"], ref["avgread"],
                         ref["avgwrite"]]
+                txt_fmt = curses.A_BOLD
 
             self.screen.addstr(
-                6 + p, 0, "{0:25.25}  "
-                          "{1: ^10} "
+                6 + p, 0, "{0:1} "
+                          "{1:25.25}  "
                           "{2: ^10} "
                           "{3: ^10} "
                           "{4: ^10} "
                           "{5: ^10} "
                           "{6: ^10} "
-                          "{7: ^10} ".format(
+                          "{7: ^10} "
+                          "{8: ^10} ".format(
+                                self.processes[process]["barrier"],
                                 process,
+                                len(self.processes[process]["submitted"]),
                                 *vals
-            ), curses.color_pair(colors[self.processes[process]]))
+            ), curses.color_pair(colors[self.processes[process]["barrier"]]) |
+               txt_fmt)
 
         self.screen.refresh()
