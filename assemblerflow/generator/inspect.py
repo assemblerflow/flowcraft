@@ -125,40 +125,6 @@ class NextflowInspector:
     # UTILITY METHODS
     #################
 
-    def _parser_pipeline_processes(self):
-        """Parses the .nextflow.log file and retrieves the complete list
-        of processes
-
-        This method searches for specific signatures at the beginning of the
-        .nextflow.log file::
-
-             Apr-19 19:07:32.660 [main] DEBUG nextflow.processor
-             TaskProcessor - Creating operator > report_corrupt_1_1 --
-             maxForks: 4
-
-        When a line with the .*Creating operator.* signature is found, the
-        process name is retrieved and populates the :attr:`processes` attribute
-        """
-
-        with open(self.log_file) as fh:
-
-            for line in fh:
-                if re.match(".*Creating operator.*", line):
-                    match = re.match(".*Creating operator > (.*) --", line)
-                    process = match.group(1)
-                    if process not in self.skip_processes:
-                        self.processes[match.group(1)] = {
-                            "barrier": "W",
-                            "submitted": [],
-                            "finished": []
-                        }
-
-                if re.match(".*Launching `.*` \[.*\] ", line):
-                    match = re.match(".*Launching `.*` \[(.*)\] ", line)
-                    self.pipeline_name = match.group(1)
-
-        self.content_lines = len(self.processes)
-
     def _get_pipeline_status(self):
         """Parses the .nextflow.log file for signatures of pipeline status.
         It sets the :attr:`status_info` attribute.
@@ -175,26 +141,6 @@ class NextflowInspector:
                     return
 
         self.run_status = "running"
-
-    def _update_barrier_status(self):
-        """Updates the run_status key of the :attr:`process_stats` from the
-        config.
-        """
-
-        with open(self.log_file) as fh:
-
-            for line in fh:
-
-                # Exit barrier update after session abort signal
-                if "Session aborted" in line:
-                    return
-
-                if "<<< barrier arrive" in line:
-                    process_m = re.match(".*process: (.*)\)", line)
-                    if process_m:
-                        process = process_m.group(1)
-                        if process not in self.skip_processes:
-                            self.processes[process]["barrier"] =  "C"
 
     @staticmethod
     def _header_mapping(header):
@@ -283,6 +229,60 @@ class NextflowInspector:
     #################
     # PARSE METHODS
     #################
+
+    def _parser_pipeline_processes(self):
+        """Parses the .nextflow.log file and retrieves the complete list
+        of processes
+
+        This method searches for specific signatures at the beginning of the
+        .nextflow.log file::
+
+             Apr-19 19:07:32.660 [main] DEBUG nextflow.processor
+             TaskProcessor - Creating operator > report_corrupt_1_1 --
+             maxForks: 4
+
+        When a line with the .*Creating operator.* signature is found, the
+        process name is retrieved and populates the :attr:`processes` attribute
+        """
+
+        with open(self.log_file) as fh:
+
+            for line in fh:
+                if re.match(".*Creating operator.*", line):
+                    match = re.match(".*Creating operator > (.*) --", line)
+                    process = match.group(1)
+                    if process not in self.skip_processes:
+                        self.processes[match.group(1)] = {
+                            "barrier": "W",
+                            "submitted": [],
+                            "finished": []
+                        }
+
+                if re.match(".*Launching `.*` \[.*\] ", line):
+                    match = re.match(".*Launching `.*` \[(.*)\] ", line)
+                    self.pipeline_name = match.group(1)
+
+        self.content_lines = len(self.processes)
+
+    def _update_barrier_status(self):
+        """Updates the run_status key of the :attr:`process_stats` from the
+        config.
+        """
+
+        with open(self.log_file) as fh:
+
+            for line in fh:
+
+                # Exit barrier update after session abort signal
+                if "Session aborted" in line:
+                    return
+
+                if "<<< barrier arrive" in line:
+                    process_m = re.match(".*process: (.*)\)", line)
+                    if process_m:
+                        process = process_m.group(1)
+                        if process not in self.skip_processes:
+                            self.processes[process]["barrier"] = "C"
 
     def _update_status(self, fields, hm):
         """Parses a trace line and updates the :attr:`status_info` attribute.
