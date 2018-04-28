@@ -382,7 +382,6 @@ class NextflowInspector:
         with open(self.log_file) as fh:
 
             for line in fh:
-
                 if "Submitted process >" in line or \
                         "Re-submitted process >" in line:
                     m = re.match(".*Submitted process > (.*) \((.*)\).*", line)
@@ -492,6 +491,7 @@ class NextflowInspector:
                     self.screen_lines = self.screen.getmaxyx()[0]
 
                 self.static_parser()
+                self.static_log_parser()
                 self.flush_overview()
 
                 sleep(0.1)
