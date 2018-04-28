@@ -564,9 +564,14 @@ class NextflowInspector:
         self.screen.addstr(1, len(header), self.run_status,
                            curses.color_pair(pc[self.run_status]))
         self.screen.addstr(
-            2, 0, "Running processes: {}\tFinished processes: {}".format(
-                sum([len(x["submitted"]) for x in self.processes.values()]),
-                sum([len(x["finished"]) for x in self.processes.values()]))
+            2, 0, "Running processes: {}".format(
+                sum([len(x["submitted"]) for x in self.processes.values()])),
+            curses.color_pair(2)
+        )
+        self.screen.addstr(
+            3, 0, "Complete processes: {}".format(
+                sum([len(x["finished"]) for x in self.processes.values()])),
+            curses.color_pair(3)
         )
         headers = ["", "Process", "Running", "Complete", "Error",
                    "Avg Time", "Max Mem", "Avg Read", "Avg Write"]
