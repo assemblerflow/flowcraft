@@ -418,12 +418,12 @@ class NextflowInspector:
 
             # Remove from the submitted samples
             for v in vals:
+                p = self.processes[process]
+                if v["tag"] in p["submitted"]:
+                    p["submitted"].remove(v["tag"])
+                    p["finished"].append(v["tag"])
                 if v["status"] not in good_status:
-                    if v["tag"] in self.processes[process]["submitted"]:
-                        self.processes[process]["submitted"].remove(v["tag"])
-                        self.processes[process]["finished"].append(v["tag"])
-                        vals.remove(v)
-                    elif v["tag"] in self.processes[process]["finished"]:
+                    if v["tag"] in p["submitted"] + p["finished"]:
                         vals.remove(v)
 
             # Get number of completed samples
