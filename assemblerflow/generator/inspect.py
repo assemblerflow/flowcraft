@@ -452,22 +452,28 @@ class NextflowInspector:
             inst["maxmem"] = rss_str
 
             # Get read size
-            rchar_values = [self.size_coverter(x["rchar"]) for x in vals
-                            if x["rchar"] != "-"]
-            if rchar_values:
-                avg_rchar = round(sum(rchar_values) / len(rchar_values))
-                rchar_str = self.size_compress(avg_rchar)
-            else:
+            try:
+                rchar_values = [self.size_coverter(x["rchar"]) for x in vals
+                                if x["rchar"] != "-"]
+                if rchar_values:
+                    avg_rchar = round(sum(rchar_values) / len(rchar_values))
+                    rchar_str = self.size_compress(avg_rchar)
+                else:
+                    rchar_str = "-"
+            except KeyError:
                 rchar_str = "-"
             inst["avgread"] = rchar_str
 
             # Get write size
-            wchar_values = [self.size_coverter(x["wchar"]) for x in vals
-                            if x["wchar"] != "-"]
-            if wchar_values:
-                avg_wchar = round(sum(wchar_values) / len(wchar_values))
-                wchar_str = self.size_compress(avg_wchar)
-            else:
+            try:
+                wchar_values = [self.size_coverter(x["wchar"]) for x in vals
+                                if x["wchar"] != "-"]
+                if wchar_values:
+                    avg_wchar = round(sum(wchar_values) / len(wchar_values))
+                    wchar_str = self.size_compress(avg_wchar)
+                else:
+                    wchar_str = "-"
+            except KeyError:
                 wchar_str = "-"
             inst["avgwrite"] = wchar_str
 
@@ -502,8 +508,8 @@ class NextflowInspector:
                 elif c == curses.KEY_RESIZE:
                     self.screen_lines = self.screen.getmaxyx()[0]
 
-                self.static_parser()
                 self.static_log_parser()
+                self.static_parser()
                 self.flush_overview()
 
                 sleep(0.1)
@@ -539,6 +545,7 @@ class NextflowInspector:
 
         pc = {
             "running": 3,
+            "complete": 3,
             "aborted": 4,
             "error": 4
         }
@@ -556,19 +563,18 @@ class NextflowInspector:
         self.screen.addstr(1, 0, header)
         self.screen.addstr(1, len(header), self.run_status,
                            curses.color_pair(pc[self.run_status]))
-        self.screen.addstr(2, 0, "Running processes: {}".format(
-            sum([len(x["submitted"]) for x in self.processes.values()])
-        ))
-        self.screen.addstr(3, 0, "Finished processes: {}".format(
-            sum([len(x["finished"]) for x in self.processes.values()])
-        ))
-        headers = ["", "Process", "Submitted", "Completed", "Errored",
+        self.screen.addstr(
+            2, 0, "Running processes: {}\tFinished processes: {}".format(
+                sum([len(x["submitted"]) for x in self.processes.values()]),
+                sum([len(x["finished"]) for x in self.processes.values()]))
+        )
+        headers = ["", "Process", "Running", "Complete", "Error",
                    "Avg Time", "Max Mem", "Avg Read", "Avg Write"]
         self.screen.addstr(5, 0, "{0: ^1} "
                                  "{1: ^25}  "
-                                 "{2: ^10} "
-                                 "{3: ^10} "
-                                 "{4: ^10} "
+                                 "{2: ^7} "
+                                 "{3: ^7} "
+                                 "{4: ^7} "
                                  "{5: ^10} "
                                  "{6: ^10} "
                                  "{7: ^10} "
@@ -596,9 +602,9 @@ class NextflowInspector:
             self.screen.addstr(
                 6 + p, 0, "{0:1} "
                           "{1:25.25}  "
-                          "{2: ^10} "
-                          "{3: ^10} "
-                          "{4: ^10} "
+                          "{2: ^7} "
+                          "{3: ^7} "
+                          "{4: ^7} "
                           "{5: ^10} "
                           "{6: ^10} "
                           "{7: ^10} "
