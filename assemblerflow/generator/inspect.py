@@ -384,6 +384,9 @@ class NextflowInspector:
                 if "Submitted process >" in line or \
                         "Re-submitted process >" in line:
                     m = re.match(".*process > (.*) \((.*)\).*", line)
+                    if not m:
+                        continue
+
                     process = m.group(1)
                     sample = m.group(2)
 
