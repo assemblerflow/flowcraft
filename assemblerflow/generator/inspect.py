@@ -551,15 +551,17 @@ class NextflowInspector:
         self.screen.erase()
 
         # Add static header
-        header = "Pipeline [{}] inspection. Status: ".format(
-            self.pipeline_name)
+        header = "Pipeline [{}] inspection at {}. Status: ".format(
+            self.pipeline_name, strftime("%Y-%m-%d %H:%M:%S", gmtime()))
         self.screen.addstr(1, 0, header)
         self.screen.addstr(1, len(header), self.run_status,
                            curses.color_pair(pc[self.run_status]))
-        self.screen.addstr(2, 0, "Inferred number of samples: {}".format(
-            len(self.samples)))
-        self.screen.addstr(3, 0, "Last updated: {}".format(
-            strftime("%Y-%m-%d %H:%M:%S", gmtime())))
+        self.screen.addstr(2, 0, "Running processes: {}".format(
+            sum([len(x["submitted"]) for x in self.processes.values()])
+        ))
+        self.screen.addstr(3, 0, "Finished processes: {}".format(
+            sum([len(x["finished"]) for x in self.processes.values()])
+        ))
         headers = ["", "Process", "Submitted", "Completed", "Errored",
                    "Avg Time", "Max Mem", "Avg Read", "Avg Write"]
         self.screen.addstr(5, 0, "{0: ^1} "
