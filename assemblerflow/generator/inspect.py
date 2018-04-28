@@ -418,7 +418,7 @@ class NextflowInspector:
 
             # Remove from the submitted samples
             for v in vals:
-                if vals["status"] not in good_status:
+                if v["status"] not in good_status:
                     if v["tag"] in self.processes[process]["submitted"]:
                         self.processes[process]["submitted"].remove(v["tag"])
                         self.processes[process]["finished"].append(v["tag"])
