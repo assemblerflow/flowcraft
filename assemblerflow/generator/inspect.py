@@ -149,7 +149,8 @@ class NextflowInspector:
                     if process not in self.skip_processes:
                         self.processes[match.group(1)] = {
                             "barrier": "W",
-                            "submitted": []
+                            "submitted": [],
+                            "finished": []
                         }
 
                 if re.match(".*Launching `.*` \[.*\] ", line):
@@ -387,8 +388,13 @@ class NextflowInspector:
                     m = re.match(".*Submitted process > (.*) \((.*)\).*", line)
                     process = m.group(1)
                     sample = m.group(2)
-                    if process not in self.skip_processes:
-                        self.processes[process]["submitted"].append(sample)
+
+                    if process in self.skip_processes:
+                        continue
+                    if sample in self.processes[process]["finished"]:
+                        continue
+
+                    self.processes[process]["submitted"].append(sample)
 
     def _update_process_stats(self):
         """Updates the process stats with the information from the processes
@@ -410,6 +416,7 @@ class NextflowInspector:
             for v in vals:
                 if v["tag"] in self.processes[process]["submitted"]:
                     self.processes[process]["submitted"].remove(v["tag"])
+                    self.processes[process]["finished"].append(v["tag"])
 
             # Get number of completed samples
             inst["completed"] = "{}".format(
