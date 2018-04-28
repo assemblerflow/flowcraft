@@ -305,8 +305,6 @@ class NextflowInspector:
         # Get information from a single line of trace file
         info = dict((column, fields[pos]) for column, pos in hm.items())
 
-        self.processes[process]["barrier"] = "R"
-
         if info["hash"] in self.stored_ids:
             return
 
@@ -396,6 +394,7 @@ class NextflowInspector:
                     if sample in self.processes[process]["submitted"]:
                         continue
 
+                    self.processes[process]["barrier"] = "R"
                     self.processes[process]["submitted"].append(sample)
 
     def _update_process_stats(self):
