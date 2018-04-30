@@ -5,7 +5,7 @@ except ImportError:
     from assemblerflow.generator.process import Process
 
 
-class card_rgi(Process):
+class CardRgi(Process):
     """card's rgi process template interface
 
         This process is set with:
@@ -50,7 +50,7 @@ class card_rgi(Process):
         ]
 
 
-class kraken(Process):
+class Kraken(Process):
     """kraken process template interface
 
             This process is set with:
@@ -94,7 +94,7 @@ class kraken(Process):
         ]
 
 
-class megahit(Process):
+class Megahit(Process):
     """megahit process template interface
 
         This process is set with:
@@ -152,7 +152,7 @@ class megahit(Process):
         }}
 
 
-class metaspades(Process):
+class Metaspades(Process):
     """Metaspades process template interface
 
         This process is set with:
@@ -210,7 +210,7 @@ class metaspades(Process):
         }}
 
 
-class remove_host(Process):
+class RemoveHost(Process):
     """bowtie2 to remove host reads process template interface
 
         This process is set with:

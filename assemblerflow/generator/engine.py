@@ -68,7 +68,12 @@ process_map = {
         "chewbbaca": mlst.Chewbbaca,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
-        "mapping_patlas": mapping_patlas.PatlasMapping
+        "mapping_patlas": mapping_patlas.PatlasMapping,
+        "remove_host": meta.RemoveHost,
+        "card_rgi": meta.CardRgi,
+        "metaspades": meta.Metaspades,
+        "megahit": meta.Megahit,
+        "kraken": meta.Kraken
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
