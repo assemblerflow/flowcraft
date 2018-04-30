@@ -38,7 +38,7 @@ except ImportError:
     import assemblerflow.generator.components.metagenomics as meta
     import assemblerflow.generator.components.plasmids as mapping_patlas
     import assemblerflow.generator.components.reads_quality_control as readsqc
-    import assemblerflow.generator.process as pc
+    import assemblerflow.generator.components.typing as typing
     import assemblerflow.generator.error_handling as eh
     from assemblerflow import __version__
     from assemblerflow.generator import header_skeleton as hs
@@ -49,8 +49,8 @@ except ImportError:
 process_map = {
         "reads_download": downloads.DownloadReads,
         "integrity_coverage": readsqc.IntegrityCoverage,
-        "seq_typing": pc.SeqTyping,
-        "patho_typing": pc.PathoTyping,
+        "seq_typing": typing.SeqTyping,
+        "patho_typing": typing.PathoTyping,
         "check_coverage": readsqc.CheckCoverage,
         "true_coverage": readsqc.TrueCoverage,
         "fastqc": readsqc.FastQC,
@@ -62,10 +62,10 @@ process_map = {
         "process_skesa": ap.ProcessSkesa,
         "assembly_mapping": ap.AssemblyMapping,
         "pilon": ap.Pilon,
-        "mlst": pc.Mlst,
+        "mlst": mlst.Mlst,
         "abricate": annotation.Abricate,
         "prokka": annotation.Prokka,
-        "chewbbaca": pc.Chewbbaca,
+        "chewbbaca": mlst.Chewbbaca,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
         "mapping_patlas": mapping_patlas.PatlasMapping
