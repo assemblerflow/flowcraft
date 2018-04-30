@@ -4,12 +4,12 @@ process integrity_coverage_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
     // This process can only use a single CPU
     cpus 1
 
     input:
-    set fastq_id, file(fastq_pair) from {{ input_channel }}
+    set sample_id, file(fastq_pair) from {{ input_channel }}
     val gsize from IN_genome_size
     val cov from IN_min_coverage
     // This channel is for the custom options of the integrity_coverage.py
@@ -17,7 +17,7 @@ process integrity_coverage_{{ pid }} {
     val opts from Channel.value('')
 
     output:
-    set fastq_id,
+    set sample_id,
         file(fastq_pair),
         file('*_encoding'),
         file('*_phred'),
@@ -88,13 +88,13 @@ process report_corrupt_{{ pid }} {
     publishDir 'reports/corrupted_{{ pid }}/'
 
     input:
-    val fastq_id from LOG_corrupted.collect{it[0]}
+    val sample_id from LOG_corrupted.collect{it[0]}
 
     output:
     file 'corrupted_samples.txt'
 
     """
-    echo ${fastq_id.join(",")} | tr "," "\n" >> corrupted_samples.txt
+    echo ${sample_id.join(",")} | tr "," "\n" >> corrupted_samples.txt
     """
 
 }

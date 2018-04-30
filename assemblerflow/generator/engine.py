@@ -19,7 +19,9 @@ try:
     import generator.components.distance_estimation as distest
     import generator.components.metagenomics as meta
     import generator.components.plasmids as mapping_patlas
+    import generator.components.mlst as mlst
     import generator.components.reads_quality_control as readsqc
+    import generator.components.typing as typing
     import generator.error_handling as eh
     from __init__ import __version__
     from generator import header_skeleton as hs
@@ -32,6 +34,7 @@ except ImportError:
     import assemblerflow.generator.components.assembly_processing as ap
     import assemblerflow.generator.components.downloads as downloads
     import assemblerflow.generator.components.distance_estimation as distest
+    import assemblerflow.generator.components.mlst as mlst
     import assemblerflow.generator.components.metagenomics as meta
     import assemblerflow.generator.components.plasmids as mapping_patlas
     import assemblerflow.generator.components.reads_quality_control as readsqc
@@ -65,12 +68,7 @@ process_map = {
         "chewbbaca": pc.Chewbbaca,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
-        "mapping_patlas": mapping_patlas.PatlasMapping,
-        "remove_host": meta.remove_host,
-        "card_rgi": meta.card_rgi,
-        "metaspades": meta.metaspades,
-        "megahit": meta.megahit,
-        "kraken": meta.kraken
+        "mapping_patlas": mapping_patlas.PatlasMapping
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit

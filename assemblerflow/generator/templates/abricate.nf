@@ -4,11 +4,11 @@ process abricate_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { "${fastq_id} ${db}" }
-    publishDir "results/annotation/abricate_{{ pid }}/${fastq_id}"
+    tag { "${sample_id} ${db}" }
+    publishDir "results/annotation/abricate_{{ pid }}/${sample_id}"
 
     input:
-    set fastq_id, file(assembly) from {{ input_channel }}
+    set sample_id, file(assembly) from {{ input_channel }}
     each db from params.abricateDatabases
 
     output:
@@ -21,7 +21,7 @@ process abricate_{{ pid }} {
     """
     {
         # Run abricate
-        abricate --db $db $assembly > ${fastq_id}_abr_${db}.tsv
+        abricate --db $db $assembly > ${sample_id}_abr_${db}.tsv
         echo pass > .status
     } || {
         echo fail > .status

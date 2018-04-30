@@ -72,7 +72,7 @@ if (params.chewbbacaBatch) {
         {% include "post.txt" ignore missing %}
 
         maxForks 1
-        tag { fastq_id }
+        tag { sample_id }
         scratch true
         if (params.chewbbacaQueue != null) {
             queue "${params.chewbbacaQueue}"
@@ -80,7 +80,7 @@ if (params.chewbbacaBatch) {
         publishDir "results/chewbbaca_alleleCall_{{ pid }}/", mode: "copy"
 
         input:
-        set fastq_id, file(assembly) from {{ input_channel }}
+        set sample_id, file(assembly) from {{ input_channel }}
         each file(schema) from IN_schema
 
         output:
@@ -107,11 +107,11 @@ if (params.chewbbacaBatch) {
             fi
 
             echo $assembly >> input_file.txt
-            chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results_${fastq_id} $jsonOpt --cpu $task.cpus $training
+            chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results_${sample_id} $jsonOpt --cpu $task.cpus $training --fc
             if [ "$jsonOpt" = "--json" ]; then
                 merge_json.py ${params.schemaCore} chew_results_*/*/results*
             else
-                mv chew_results_*/*/results_alleles.tsv ${fastq_id}_cgMLST.tsv
+                mv chew_results_*/*/results_alleles.tsv ${sample_id}_cgMLST.tsv
             fi
         } || {
             echo fail > .status

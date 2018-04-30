@@ -4,14 +4,14 @@ process prokka_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
-    publishDir "results/annotation/prokka_{{ pid }}/${fastq_id}"
+    tag { sample_id }
+    publishDir "results/annotation/prokka_{{ pid }}/${sample_id}"
 
     input:
-    set fastq_id, file(assembly) from {{ input_channel }}
+    set sample_id, file(assembly) from {{ input_channel }}
 
     output:
-    file "${fastq_id}/*"
+    file "${sample_id}/*"
     {% with task_name="prokka" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -19,7 +19,7 @@ process prokka_{{ pid }} {
     script:
     """
     {
-        prokka --outdir $fastq_id --cpus $task.cpus --centre UMMI --compliant \
+        prokka --outdir $sample_id --cpus $task.cpus --centre UMMI --compliant \
                --increment 10 $assembly >> .command.log 2>&1
         echo pass > .status
     } || {

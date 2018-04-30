@@ -4,15 +4,15 @@
 */
 process fullConsensus {
 
-    tag { "Creating consensus json file for: " + id}
+    tag { "Creating consensus json file for: " + sample_id}
 
     publishDir 'results/consensus/'
 
     input:
-    set id, file(infile_list) from {{ compile_channels }}
+    set sample_id, file(infile_list) from {{ compile_channels }}
 
     output:
-    file "consensus_${id}.json"
+    file "consensus_${sample_id}.json"
 
     script:
     template "pATLAS_consensus_json.py"

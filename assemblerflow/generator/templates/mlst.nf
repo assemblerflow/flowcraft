@@ -4,16 +4,16 @@ process mlst_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
     // This process can only use a single CPU
     cpus 1
 
     input:
-    set fastq_id, file(assembly) from {{ input_channel }}
+    set sample_id, file(assembly) from {{ input_channel }}
 
     output:
     file '*.mlst.txt' into LOG_mlst_{{ pid }}
-    set fastq_id, file(assembly), file(".status") into MAIN_mlst_out_{{ pid }}
+    set sample_id, file(assembly), file(".status") into MAIN_mlst_out_{{ pid }}
     {% with task_name="mlst" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -22,7 +22,7 @@ process mlst_{{ pid }} {
     """
     {
         expectedSpecies=${params.mlstSpecies}
-        mlst $assembly >> ${fastq_id}.mlst.txt
+        mlst $assembly >> ${sample_id}.mlst.txt
         mlstSpecies=\$(cat *.mlst.txt | cut -f2)
         json_str="{'expectedSpecies':\'\$expectedSpecies\','species':'\$mlstSpecies','st':'\$(cat *.mlst.txt | cut -f3)'}"
         echo \$json_str > .report.json
@@ -49,9 +49,6 @@ process compile_mlst_{{ pid }} {
 
     output:
     file "mlst_report.tsv"
-
-    when:
-    params.mlstRun == true && params.annotationRun
 
     script:
     """

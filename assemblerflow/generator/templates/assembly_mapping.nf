@@ -4,14 +4,14 @@ process assembly_mapping_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
-    tag { fastq_id }
+    tag { sample_id }
 
     input:
-    set fastq_id, file(assembly), file(fastq) from {{ input_channel }}.join(_LAST_fastq_{{ pid }})
+    set sample_id, file(assembly), file(fastq) from {{ input_channel }}.join(_LAST_fastq_{{ pid }})
 
     output:
-    set fastq_id, file(assembly), 'coverages.tsv', 'coverage_per_bp.tsv', 'sorted.bam', 'sorted.bam.bai' into MAIN_am_out_{{ pid }}
-    set fastq_id, file("coverage_per_bp.tsv") optional true into SIDE_BpCoverage_{{ pid }}
+    set sample_id, file(assembly), 'coverages.tsv', 'coverage_per_bp.tsv', 'sorted.bam', 'sorted.bam.bai' into MAIN_am_out_{{ pid }}
+    set sample_id, file("coverage_per_bp.tsv") optional true into SIDE_BpCoverage_{{ pid }}
     {% with task_name="assembly_mapping" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -62,17 +62,17 @@ process process_assembly_mapping_{{ pid }} {
     {% include "post.txt" ignore missing %}
     {% endwith %}
 
-    tag { fastq_id }
+    tag { sample_id }
     // This process can only use a single CPU
     cpus 1
 
     input:
-    set fastq_id, file(assembly), file(coverage), file(coverage_bp), file(bam_file), file(bam_index) from MAIN_am_out_{{ pid }}
+    set sample_id, file(assembly), file(coverage), file(coverage_bp), file(bam_file), file(bam_index) from MAIN_am_out_{{ pid }}
     val opts from IN_assembly_mapping_opts
     val gsize from IN_genome_size
 
     output:
-    set fastq_id, '*_filt.fasta', 'filtered.bam', 'filtered.bam.bai' into {{ output_channel }}
+    set sample_id, '*_filt.fasta', 'filtered.bam', 'filtered.bam.bai' into {{ output_channel }}
     {% with task_name="process_am" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

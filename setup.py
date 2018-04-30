@@ -4,22 +4,32 @@ from setuptools import setup
 
 VERSION = assemblerflow.__version__
 
+with open("README.md") as fh:
+    README = fh.read()
+
 setup(
     name="assemblerflow",
-    version=VERSION,
+    version="{}-3".format(VERSION),
     packages=["assemblerflow",
               "assemblerflow.templates",
-              "assemblerflow.generator"],
+              "assemblerflow.templates.assemblerflow_utils",
+              "assemblerflow.generator",
+              "assemblerflow.generator.components"],
     package_dir={"assemblerflow": "assemblerflow"},
     package_data={"assemblerflow": ["nextflow.config",
+                                    "profiles.config",
                                     "bin/*",
                                     "lib/*",
                                     "generator/templates/*"]},
+    data_files=[("", ["LICENSE"])],
     install_requires=[
         "argparse",
         "jinja2",
     ],
-    description="Nextflow assembler of bacterial genomic pipelines",
+    description="A Nextflow pipeline assembler for genomics. Pick your "
+                "modules. Assemble them. Run the pipeline.",
+    long_description=README,
+    long_description_content_type="text/markdown",
     url="https://github.com/ODiogoSilva/assemblerflow",
     author="Diogo N Silva",
     author_email="o.diogosilva@gmail.com",

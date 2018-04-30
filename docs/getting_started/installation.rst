@@ -18,7 +18,7 @@ You will also need a container engine (see `Container engine`_ below)
 Container engine
 ----------------
 
-Most components of assemblerflow are executed in docker containers, which
+All components of assemblerflow are executed in docker containers, which
 means that you'll need to have a container engine installed. The container
 engines available are the ones supported by Nextflow:
 
