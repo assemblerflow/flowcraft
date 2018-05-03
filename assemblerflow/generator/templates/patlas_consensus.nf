@@ -12,7 +12,7 @@ process fullConsensus {
     set sample_id, file(infile_list) from {{ compile_channels }}
 
     output:
-    file "consensus_${sample_id}.json"
+    file "consensus_*.json"
 
     script:
     template "pATLAS_consensus_json.py"
