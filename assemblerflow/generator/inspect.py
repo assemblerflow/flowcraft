@@ -296,6 +296,11 @@ class NextflowInspector:
                     process_m = re.match(".*process: (.*)\)", line)
                     if process_m:
                         process = process_m.group(1)
+
+                        if any([process.startswith(x) for x in
+                                self._blacklist]):
+                            continue
+
                         if process not in self.skip_processes:
                             self.processes[process]["barrier"] = "C"
 
