@@ -410,6 +410,8 @@ class NextflowInspector:
 
                     if process in self.skip_processes:
                         continue
+                    if any([process.startswith(x) for x in self._blacklist]):
+                        continue
                     if sample in self.processes[process]["finished"]:
                         continue
                     if sample in self.processes[process]["submitted"]:
