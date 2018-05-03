@@ -31,7 +31,7 @@ def signal_handler(screen):
 
 class NextflowInspector:
 
-    def __init__(self, trace_file, refresh_rate):
+    def __init__(self, trace_file, refresh_rate, pretty=False):
 
         self.trace_file = trace_file
         """
@@ -80,7 +80,7 @@ class NextflowInspector:
         """
 
         self.skip_processes = ["status", "compile_status", "report",
-                               "compile_reports"]
+                               "compile_reports", "fullConsensus"]
         """
         list: List of special processes that should be skipped for inspection
         purposes.
@@ -107,6 +107,17 @@ class NextflowInspector:
         str: Status of the pipeline. Can be either 'running', 'aborted',
         'error', 'complete'.
         """
+
+        if pretty:
+            self._blacklist = [
+                "report_coverage_", "fastqc2_report", "compile_fastqc_status2",
+                "fastqc_report", "trim_report", "compile_fastqc_status",
+                "report_corrupt_", "jsonDumpingMapping", "compile_mlst_",
+                "mashOutputJson_", "mashDistOutputJson_", "pilon_report_",
+                "compile_pilon_report"
+            ]
+        else:
+            self._blacklist = []
 
         # CURSES ATTRIBUTES
         # Init curses screen
@@ -251,6 +262,10 @@ class NextflowInspector:
                 if re.match(".*Creating operator.*", line):
                     match = re.match(".*Creating operator > (.*) --", line)
                     process = match.group(1)
+
+                    if any([process.startswith(x) for x in self._blacklist]):
+                        continue
+
                     if process not in self.skip_processes:
                         self.processes[match.group(1)] = {
                             "barrier": "W",
@@ -300,6 +315,9 @@ class NextflowInspector:
 
         # Skip usual processes that do not requrie tracking
         if process in self.skip_processes:
+            return
+
+        if any([process.startswith(x) for x in self._blacklist]):
             return
 
         # Get information from a single line of trace file

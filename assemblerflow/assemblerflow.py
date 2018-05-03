@@ -100,6 +100,10 @@ def get_args(args=None):
         "-m", "--mode", dest="mode", default="overview", choices=["overview"],
         help="Specify the inspection run mode."
     )
+    inspect_parser.add_argument(
+        "--pretty", dest="pretty", action="store_const", const=True,
+        help="Pretty inspection mode that removes usual reporting processes."
+    )
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -233,7 +237,8 @@ def build(args):
 
 def inspect(args):
 
-    nf_inspect = NextflowInspector(args.trace_file, args.refresh_rate)
+    nf_inspect = NextflowInspector(args.trace_file, args.refresh_rate,
+                                   args.pretty)
 
     if args.mode == "overview":
         nf_inspect.display_overview()
