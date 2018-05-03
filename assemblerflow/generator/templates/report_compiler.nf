@@ -4,16 +4,16 @@ Compiles the reports from every process
 */
 process report {
 
-    tag { $fastq_id }
+    tag { $sample_id }
 
     input:
-    set fastq_id, task_name, pid, report_json from {{ compile_channels }}
+    set sample_id, task_name, pid, report_json from {{ compile_channels }}
 
     output:
     file "*.json" optional true into master_report
 
     """
-    prepare_reports.py $report_json $fastq_id $task_name 1 $pid
+    prepare_reports.py $report_json $sample_id $task_name 1 $pid
     """
 
 }
