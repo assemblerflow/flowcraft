@@ -38,7 +38,6 @@ from assemblerflow_utils.assemblerflow_base import get_logger, MainWrapper
 logger = get_logger(__file__)
 
 if __file__.endswith(".command.sh"):
-    # LIST_OF_FILES = ['$infile1', '$infile2']
     LIST_OF_FILES = '$infile_list'.split()
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
