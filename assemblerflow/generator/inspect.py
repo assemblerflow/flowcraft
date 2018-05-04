@@ -297,11 +297,7 @@ class NextflowInspector:
                     if process_m:
                         process = process_m.group(1)
 
-                        if any([process.startswith(x) for x in
-                                self._blacklist]):
-                            continue
-
-                        if process not in self.skip_processes:
+                        if process in self.processes:
                             self.processes[process]["barrier"] = "C"
 
     def _update_status(self, fields, hm):
@@ -318,11 +314,7 @@ class NextflowInspector:
 
         process = fields[hm["process"]]
 
-        # Skip usual processes that do not requrie tracking
-        if process in self.skip_processes:
-            return
-
-        if any([process.startswith(x) for x in self._blacklist]):
+        if process not in self.processes:
             return
 
         # Get information from a single line of trace file
@@ -413,9 +405,7 @@ class NextflowInspector:
                     process = m.group(1)
                     sample = m.group(2)
 
-                    if process in self.skip_processes:
-                        continue
-                    if any([process.startswith(x) for x in self._blacklist]):
+                    if process not in self.processes:
                         continue
                     if sample in self.processes[process]["finished"]:
                         continue
@@ -442,7 +432,7 @@ class NextflowInspector:
             inst = self.process_stats[process]
 
             # Remove from the submitted samples
-            for v in vals:
+            for v in list(vals):
                 p = self.processes[process]
                 if v["tag"] in p["submitted"]:
                     p["submitted"].remove(v["tag"])
