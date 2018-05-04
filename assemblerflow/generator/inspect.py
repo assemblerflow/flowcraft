@@ -428,7 +428,8 @@ class NextflowInspector:
                     p = self.processes[process]
                     if sample in list(p["finished"]) + list(p["submitted"]):
                         continue
-                    if sample in list(p["failed"]):
+                    if sample in list(p["failed"]) and \
+                            "Re-submitted process >" in line:
                         p["failed"].remove(sample)
 
                     p["barrier"] = "R"
