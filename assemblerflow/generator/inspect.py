@@ -149,7 +149,7 @@ class NextflowInspector:
                                      "opened: {}".format(self.trace_file))
 
         if not os.path.exists(self.log_file):
-            raise eh.InspectionError("The .nextflow.log files could not be"
+            raise eh.InspectionError("The .nextflow.log files could not be "
                                      "opened. Are you sure you are in a "
                                      "nextflow project directory?")
 
