@@ -474,8 +474,8 @@ class NextflowInspector:
                 len([x for x in vals if x["status"] in good_status]))
 
             # Get number of bad samples
-            inst["bad_samples"] = "{}".format(
-                len([x for x in vals if x["status"] not in good_status]))
+            # inst["bad_samples"] = "{}".format(
+            #     len([x for x in vals if x["status"] not in good_status]))
 
             # Get average time
             time_array = [self.hms(x["realtime"]) for x in vals]
@@ -646,7 +646,9 @@ class NextflowInspector:
                 txt_fmt = curses.A_DIM
             else:
                 ref = self.process_stats[process]
-                vals = [ref["completed"], ref["bad_samples"], ref["realtime"],
+                vals = [ref["completed"],
+                        len(self.processes[process]["failed"]),
+                        ref["realtime"],
                         ref["maxmem"], ref["avgread"],
                         ref["avgwrite"]]
                 txt_fmt = curses.A_BOLD
