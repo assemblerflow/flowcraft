@@ -426,12 +426,13 @@ class NextflowInspector:
                     if process not in self.processes:
                         continue
                     p = self.processes[process]
-                    if sample in list(p["finished"]) + list(p["submitted"]) +\
-                            list(p["failed"]):
+                    if sample in list(p["finished"]) + list(p["submitted"])
                         continue
+                    if sample in list(p["failed"]):
+                        p["failed"].remove(sample)
 
-                    self.processes[process]["barrier"] = "R"
-                    self.processes[process]["submitted"].add(sample)
+                    p["barrier"] = "R"
+                    p["submitted"].add(sample)
 
     def _update_process_stats(self):
         """Updates the process stats with the information from the processes
@@ -450,7 +451,7 @@ class NextflowInspector:
             inst = self.process_stats[process]
 
             # Update status of each process
-            for v in list(vals):
+            for v in list(vals)[::-1]:
                 p = self.processes[process]
                 # If the process/tag is in the submitted list, move it to the
                 # complete or failed list
