@@ -463,6 +463,7 @@ class NextflowInspector:
                     if sample in list(p["failed"]) and \
                             "Re-submitted process >" in line:
                         p["retry"].add(sample)
+                        continue
 
                     p["barrier"] = "R"
                     p["submitted"].add(sample)
