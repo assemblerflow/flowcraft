@@ -426,7 +426,8 @@ class NextflowInspector:
                     if process not in self.processes:
                         continue
                     p = self.processes[process]
-                    if sample in p["finished"] + p["submitted"] + p["failed"]:
+                    if sample in list(p["finished"]) + list(p["submitted"]) +\
+                            list(p["failed"]):
                         continue
 
                     self.processes[process]["barrier"] = "R"
