@@ -286,8 +286,9 @@ class NextflowInspector:
                     if process not in self.skip_processes:
                         self.processes[match.group(1)] = {
                             "barrier": "W",
-                            "submitted": [],
-                            "finished": []
+                            "submitted": set(),
+                            "finished": set(),
+                            "failed": set()
                         }
 
                 if re.match(".*Launching `.*` \[.*\] ", line):
@@ -424,13 +425,12 @@ class NextflowInspector:
 
                     if process not in self.processes:
                         continue
-                    if sample in self.processes[process]["finished"]:
-                        continue
-                    if sample in self.processes[process]["submitted"]:
+                    p = self.processes[process]
+                    if sample in p["finished"] + p["submitted"] + p["failed"]:
                         continue
 
                     self.processes[process]["barrier"] = "R"
-                    self.processes[process]["submitted"].append(sample)
+                    self.processes[process]["submitted"].add(sample)
 
     def _update_process_stats(self):
         """Updates the process stats with the information from the processes
@@ -448,12 +448,21 @@ class NextflowInspector:
 
             inst = self.process_stats[process]
 
-            # Remove from the submitted samples
+            # Update status of each process
             for v in list(vals):
                 p = self.processes[process]
+                # If the process/tag is in the submitted list, move it to the
+                # complete or failed list
                 if v["tag"] in p["submitted"]:
                     p["submitted"].remove(v["tag"])
-                    p["finished"].append(v["tag"])
+                    if v["status"] in good_status:
+                        p["finished"].add(v["tag"])
+                    else:
+                        p["failed"].add(v["tag"])
+                if v["tag"] in p["failed"]:
+                    if v["status"] in good_status:
+                        p["failed"].remove(v["tag"])
+
                 if v["status"] not in good_status:
                     if v["tag"] in p["submitted"] + p["finished"]:
                         vals.remove(v)
