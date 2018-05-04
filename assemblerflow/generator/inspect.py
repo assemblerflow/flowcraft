@@ -465,7 +465,7 @@ class NextflowInspector:
                         p["failed"].remove(v["tag"])
 
                 if v["status"] not in good_status:
-                    if v["tag"] in p["submitted"] + p["finished"]:
+                    if v["tag"] in list(p["submitted"]) + list(p["finished"]):
                         vals.remove(v)
 
             # Get number of completed samples
