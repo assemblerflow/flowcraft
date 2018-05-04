@@ -457,8 +457,7 @@ class NextflowInspector:
                     if process not in self.processes:
                         continue
                     p = self.processes[process]
-                    if sample in list(p["finished"]) + list(p["submitted"]) \
-                            + list(p["retry"]):
+                    if sample in list(p["finished"]) + list(p["retry"]):
                         continue
                     if sample in list(p["failed"]) and \
                             "Re-submitted process >" in line:
