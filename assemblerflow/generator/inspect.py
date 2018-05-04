@@ -43,7 +43,7 @@ class NextflowInspector:
         str: Path to nextflow trace file.
         """
 
-        self.trace_stamp = None
+        self.trace_sizestamp = None
         """
         str: Stores the timestamp of the last modification of the trace file.
         This is used to parse the file only when it has changed.
@@ -96,7 +96,7 @@ class NextflowInspector:
         str: Name of the nextflow log file.
         """
 
-        self.log_stamp = None
+        self.log_sizestamp = None
         """
         str: Stores the timestamp of the last modification of the nextflow 
         log file. This is used to parse the file only when it has changed.
@@ -362,11 +362,11 @@ class NextflowInspector:
 
         # Check the timestamp of the tracefile. Only proceed with the parsing
         # if it changed from the previous time.
-        timestamp = os.stat(self.trace_file)[8]
-        if timestamp and timestamp == self.trace_stamp:
+        size_stamp = os.path.getsize(self.trace_file)
+        if size_stamp and size_stamp == self.trace_sizestamp:
             return
         else:
-            self.trace_stamp = timestamp
+            self.trace_sizestamp = size_stamp
 
         with open(self.trace_file) as fh:
 
@@ -404,11 +404,11 @@ class NextflowInspector:
 
         # Check the timestamp of the log file. Only proceed with the parsing
         # if it changed from the previous time.
-        timestamp = os.stat(self.log_file)[8]
-        if timestamp and timestamp == self.log_stamp:
+        size_stamp = os.path.getsize(self.log_file)
+        if size_stamp and size_stamp == self.log_sizestamp:
             return
         else:
-            self.log_stamp = timestamp
+            self.log_sizestamp = size_stamp
 
         with open(self.log_file) as fh:
 
@@ -550,7 +550,7 @@ class NextflowInspector:
 
                 sleep(0.1)
         except Exception as e:
-            sys.stderr.write(e)
+            sys.stderr.write(e.msg)
         finally:
             curses.nocbreak()
             self.screen.keypad(0)
