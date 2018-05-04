@@ -426,7 +426,7 @@ class NextflowInspector:
                     if process not in self.processes:
                         continue
                     p = self.processes[process]
-                    if sample in list(p["finished"]) + list(p["submitted"])
+                    if sample in list(p["finished"]) + list(p["submitted"]):
                         continue
                     if sample in list(p["failed"]):
                         p["failed"].remove(sample)
