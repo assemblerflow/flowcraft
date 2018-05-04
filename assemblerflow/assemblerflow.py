@@ -21,6 +21,7 @@ try:
     from generator.recipe import brew_recipe
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
+    import generator.error_handling as eh
 except ImportError:
     from assemblerflow import __version__, __build__
     from assemblerflow.generator.engine import NextflowGenerator, process_map
@@ -30,6 +31,7 @@ except ImportError:
         SanityError
     from assemblerflow.generator.process_details import proc_collector, \
         colored_print
+    import assemblerflow.generator.error_handling as eh
 
 logger = logging.getLogger("main")
 
@@ -237,8 +239,12 @@ def build(args):
 
 def inspect(args):
 
-    nf_inspect = NextflowInspector(args.trace_file, args.refresh_rate,
-                                   args.pretty)
+    try:
+        nf_inspect = NextflowInspector(args.trace_file, args.refresh_rate,
+                                       args.pretty)
+    except eh.InspectionError as e:
+        logger.error(colored_print(e.value, "red_bold"))
+        sys.exit(1)
 
     if args.mode == "overview":
         nf_inspect.display_overview()

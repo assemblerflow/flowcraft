@@ -9,6 +9,11 @@ from os.path import join, abspath
 from time import gmtime, strftime, sleep
 from collections import defaultdict, OrderedDict
 
+try:
+    import generator.error_handling as eh
+except ImportError:
+    import assemblerflow.generator.error_handling as eh
+
 locale.setlocale(locale.LC_ALL, '')
 code = locale.getpreferredencoding()
 
@@ -126,6 +131,7 @@ class NextflowInspector:
         self.screen_lines = None
         self.content_lines = 0
 
+        self._check_required_files()
         self._parser_pipeline_processes()
         self._get_pipeline_status()
 
@@ -135,6 +141,17 @@ class NextflowInspector:
     #################
     # UTILITY METHODS
     #################
+
+    def _check_required_files(self):
+
+        if not os.path.exists(self.trace_file):
+            raise eh.InspectionError("The provided trace file could not be "
+                                     "opened: {}".format(self.trace_file))
+
+        if not os.path.exists(self.log_file):
+            raise eh.InspectionError("The .nextflow.log files could not be"
+                                     "opened. Are you sure you are in a "
+                                     "nextflow project directory?")
 
     def _get_pipeline_status(self):
         """Parses the .nextflow.log file for signatures of pipeline status.
