@@ -254,6 +254,36 @@ class NextflowInspector:
         else:
             return "{}MB".format(s)
 
+    def _update_submission_status(self, process, vals):
+
+        good_status = ["COMPLETED", "CACHED"]
+
+        # Update status of each process
+        for v in list(vals)[::-1]:
+            p = self.processes[process]
+            tag = v["tag"]
+            # If the process/tag is in the submitted list, move it to the
+            # complete or failed list
+            if tag in p["submitted"]:
+                p["submitted"].remove(tag)
+                if v["status"] in good_status:
+                    p["finished"].add(tag)
+                else:
+                    p["failed"].add(tag)
+
+            # It the process/tag is in the retry list and it completed
+            # successfully, remove it from the retry and fail lists
+            elif tag in p["retry"]:
+                if v["status"] in good_status:
+                    p["retry"].remove(tag)
+                    p["failed"].remove(tag)
+
+            if v["status"] not in good_status:
+                if v["tag"] in list(p["submitted"]) + list(p["finished"]):
+                    vals.remove(v)
+
+        return vals
+
     #################
     # PARSE METHODS
     #################
@@ -288,7 +318,8 @@ class NextflowInspector:
                             "barrier": "W",
                             "submitted": set(),
                             "finished": set(),
-                            "failed": set()
+                            "failed": set(),
+                            "retry": set()
                         }
 
                 if re.match(".*Launching `.*` \[.*\] ", line):
@@ -426,11 +457,13 @@ class NextflowInspector:
                     if process not in self.processes:
                         continue
                     p = self.processes[process]
-                    if sample in list(p["finished"]) + list(p["submitted"]):
+                    if sample in list(p["finished"]) + list(p["submitted"]) \
+                            + list(p["retry"]):
                         continue
                     if sample in list(p["failed"]) and \
                             "Re-submitted process >" in line:
                         p["failed"].remove(sample)
+                        p["retry"].add(sample)
 
                     p["barrier"] = "R"
                     p["submitted"].add(sample)
@@ -447,28 +480,11 @@ class NextflowInspector:
 
         for process, vals in self.process_info.items():
 
+            vals = self._update_submission_status(process, vals)
+
             self.process_stats[process] = {}
 
             inst = self.process_stats[process]
-
-            # Update status of each process
-            for v in list(vals)[::-1]:
-                p = self.processes[process]
-                # If the process/tag is in the submitted list, move it to the
-                # complete or failed list
-                if v["tag"] in p["submitted"]:
-                    p["submitted"].remove(v["tag"])
-                    if v["status"] in good_status:
-                        p["finished"].add(v["tag"])
-                    else:
-                        p["failed"].add(v["tag"])
-                if v["tag"] in p["failed"]:
-                    if v["status"] in good_status:
-                        p["failed"].remove(v["tag"])
-
-                if v["status"] not in good_status:
-                    if v["tag"] in list(p["submitted"]) + list(p["finished"]):
-                        vals.remove(v)
 
             # Get number of completed samples
             inst["completed"] = "{}".format(
@@ -654,6 +670,13 @@ class NextflowInspector:
                         ref["avgwrite"]]
                 txt_fmt = curses.A_BOLD
 
+            proc = self.processes[process]
+            if proc["retry"]:
+                completed = "{}({})".format(len(proc["submitted"]),
+                                            len(proc["retry"]))
+            else:
+                completed = "{}".format(len(proc["submitted"]))
+
             self.screen.addstr(
                 6 + p, 0, "{0: ^1} "
                           "{1:25.25}  "
@@ -664,11 +687,10 @@ class NextflowInspector:
                           "{6: ^10} "
                           "{7: ^10} "
                           "{8: ^10} ".format(
-                                self.processes[process]["barrier"],
+                                proc["barrier"],
                                 process,
-                                len(self.processes[process]["submitted"]),
+                                completed,
                                 *vals
-            ), curses.color_pair(colors[self.processes[process]["barrier"]]) |
-               txt_fmt)
+            ), curses.color_pair(colors[proc["barrier"]]) | txt_fmt)
 
         self.screen.refresh()
