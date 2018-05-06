@@ -327,6 +327,13 @@ class NextflowInspector:
 
         self.content_lines = len(self.processes)
 
+    def _clear_inspect(self):
+        """Clears inspect attributes when re-executing a pipeline"""
+
+        self.trace_info = defaultdict(list)
+        self.process_stats = {}
+        self.samples = []
+
     def _update_pipeline_status(self):
         """Parses the .nextflow.log file for signatures of pipeline status.
         It sets the :attr:`status_info` attribute.
@@ -341,6 +348,9 @@ class NextflowInspector:
                 if "Execution complete -- Goodbye" in line:
                     self.run_status = "complete"
                     return
+
+        if self.run_status not in ["running", ""]:
+            self._clear_inspect()
 
         self.run_status = "running"
 
