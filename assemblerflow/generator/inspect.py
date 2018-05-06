@@ -136,7 +136,9 @@ class NextflowInspector:
         # Init curses screen
         self.screen = None
         self.top_line = 0
+        self.padding = 0
         self.screen_lines = None
+        self.max_width = 0
         self.content_lines = 0
 
         # Checks if nextflow log and trace files are available
@@ -642,6 +644,7 @@ class NextflowInspector:
         curses.start_color()
 
         self.screen_lines = self.screen.getmaxyx()[0]
+        # self.screen_width = self.screen.getmaxyx()[1]
 
         try:
             while stay_alive:
@@ -674,6 +677,10 @@ class NextflowInspector:
             self._updown("up")
         elif c == curses.KEY_DOWN:
             self._updown("down")
+        elif c == curses.KEY_LEFT:
+            self._rightleft("left")
+        elif c == curses.KEY_RIGHT:
+            self._rightleft("right")
         # Trigger screen size update on resize
         elif c == curses.KEY_RESIZE:
             self.screen_lines = self.screen.getmaxyx()[0]
@@ -691,6 +698,16 @@ class NextflowInspector:
                 self.screen.getmaxyx()[0] + self.top_line\
                 <= self.content_lines + 5:
             self.top_line += 1
+
+    def _rightleft(self, direction):
+        """Provides curses horizontal padding"""
+
+        if direction == "left" and self.padding != 0:
+            self.padding -= 1
+
+        if direction == "right" and \
+                self.screen.getmaxyx()[1] + self.padding < self.max_width:
+            self.padding += 1
 
     def flush_overview(self):
         """Displays the default overview of the pipeline execution from the
@@ -716,36 +733,41 @@ class NextflowInspector:
         curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(4, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
 
-        self.screen.erase()
+        # self.screen.erase()
+
+        height, width = self.screen.getmaxyx()
+        win = curses.newpad(height, 5000)
 
         # Add static header
         header = "Pipeline [{}] inspection at {}. Status: ".format(
             self.pipeline_name, strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-        self.screen.addstr(1, 0, header)
-        self.screen.addstr(1, len(header), self.run_status,
-                           curses.color_pair(pc[self.run_status]))
-        self.screen.addstr(
+        win.addstr(0, 0, str(self.padding))
+        win.addstr(1, 0, header)
+        win.addstr(1, len(header), self.run_status,
+                   curses.color_pair(pc[self.run_status]))
+        win.addstr(
             2, 0, "Running processes: {}".format(
                 sum([len(x["submitted"]) for x in self.processes.values()])),
             curses.color_pair(2)
         )
-        self.screen.addstr(
+        win.addstr(
             3, 0, "Complete processes: {}".format(
                 sum([len(x["finished"]) for x in self.processes.values()])),
             curses.color_pair(3)
         )
         headers = ["", "Process", "Running", "Complete", "Error",
                    "Avg Time", "Max Mem", "Avg Read", "Avg Write"]
-        self.screen.addstr(5, 0, "{0: ^1} "
-                                 "{1: ^25}  "
-                                 "{2: ^7} "
-                                 "{3: ^7} "
-                                 "{4: ^7} "
-                                 "{5: ^10} "
-                                 "{6: ^10} "
-                                 "{7: ^10} "
-                                 "{8: ^10} ".format(*headers),
-                           curses.A_UNDERLINE | curses.A_REVERSE)
+        header_str = "{0: ^1} " \
+                     "{1: ^25}  " \
+                     "{2: ^7} " \
+                     "{3: ^7} " \
+                     "{4: ^7} " \
+                     "{5: ^10} " \
+                     "{6: ^10} " \
+                     "{7: ^10} " \
+                     "{8: ^10} ".format(*headers)
+        self.max_width = len(header_str)
+        win.addstr(5, 0, header_str, curses.A_UNDERLINE | curses.A_REVERSE)
 
         # Get display size
         top = self.top_line
@@ -774,7 +796,7 @@ class NextflowInspector:
             else:
                 completed = "{}".format(len(proc["submitted"]))
 
-            self.screen.addstr(
+            win.addstr(
                 6 + p, 0, "{0: ^1} "
                           "{1:25.25}  "
                           "{2: ^7} "
@@ -790,4 +812,6 @@ class NextflowInspector:
                                 *vals),
                 curses.color_pair(colors[proc["barrier"]]) | txt_fmt)
 
-        self.screen.refresh()
+        win.clrtoeol()
+        win.clearok(1)
+        win.refresh(0, self.padding, 0, 0, height-1, width-1)
