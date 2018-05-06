@@ -4,6 +4,7 @@ import sys
 import curses
 import signal
 import locale
+import logging
 
 from os.path import join, abspath
 from time import gmtime, strftime, sleep
@@ -11,11 +12,15 @@ from collections import defaultdict, OrderedDict
 
 try:
     import generator.error_handling as eh
+    from generator.process_details import colored_print
 except ImportError:
     import assemblerflow.generator.error_handling as eh
+    from assemblerflow.generator.process_details import colored_print
 
 locale.setlocale(locale.LC_ALL, '')
 code = locale.getpreferredencoding()
+
+logger = logging.getLogger("main.{}".format(__name__))
 
 
 def signal_handler(screen):
@@ -649,6 +654,10 @@ class NextflowInspector:
                 self.flush_overview()
 
                 sleep(self.refresh_rate)
+        except FileNotFoundError:
+            sys.stderr.write(colored_print(
+                "ERROR: nextflow log and/or trace files are no longer "
+                "reachable!", "red_bold"))
         except Exception as e:
             sys.stderr.write(str(e))
         finally:

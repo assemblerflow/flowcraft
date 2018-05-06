@@ -141,7 +141,7 @@ def validate_build_arguments(args):
                         parent_dir), "red_bold"))
                 sys.exit(1)
 
-        return  parsed_output_nf
+        return parsed_output_nf
 
 
 def copy_project(path):
