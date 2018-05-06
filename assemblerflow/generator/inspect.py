@@ -334,7 +334,7 @@ class NextflowInspector:
         self.process_stats = {}
         self.samples = []
         # Clean up of tag running status
-        for p in self.processes:
+        for p in self.processes.values():
             p["barrier"] = "W"
             for i in ["submitted", "finished", "failed", "retry"]:
                 p[i] = set()
