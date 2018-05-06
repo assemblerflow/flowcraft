@@ -715,7 +715,7 @@ class NextflowInspector:
             self.top_line -= 1
         elif direction == "down" and \
                 self.screen.getmaxyx()[0] + self.top_line\
-                <= self.content_lines + 5:
+                <= self.content_lines + 3:
             self.top_line += 1
 
     def _rightleft(self, direction):
@@ -761,19 +761,28 @@ class NextflowInspector:
         header = "Pipeline [{}] inspection at {}. Status: ".format(
             self.pipeline_name, strftime("%Y-%m-%d %H:%M:%S", gmtime()))
 
-        win.addstr(1, 0, header)
-        win.addstr(1, len(header), self.run_status,
+        win.addstr(0, 0, header)
+        win.addstr(0, len(header), self.run_status,
                    curses.color_pair(pc[self.run_status]))
-        win.addstr(
-            2, 0, "Running processes: {}".format(
-                sum([len(x["submitted"]) for x in self.processes.values()])),
-            curses.color_pair(2)
+        submission_str = "{0:23.23}  {1:23.23}  {2:23.23}  {3:23.23}".format(
+            "Running: {}".format(
+                sum([len(x["submitted"]) for x in self.processes.values()])
+            ),
+            "Failed: {}".format(
+                sum([len(x["failed"]) for x in self.processes.values()])
+            ),
+            "Retrying: {}".format(
+                sum([len(x["retry"]) for x in self.processes.values()])
+            ),
+            "Completed: {}".format(
+                sum([len(x["finished"]) for x in self.processes.values()])
+            )
         )
+
         win.addstr(
-            3, 0, "Complete processes: {}".format(
-                sum([len(x["finished"]) for x in self.processes.values()])),
-            curses.color_pair(3)
+            1, 0, submission_str, curses.color_pair(1)
         )
+
         headers = ["", "Process", "Running", "Complete", "Error",
                    "Avg Time", "Max Mem", "Avg Read", "Avg Write"]
         header_str = "{0: ^1} " \
@@ -786,11 +795,11 @@ class NextflowInspector:
                      "{7: ^10} " \
                      "{8: ^10} ".format(*headers)
         self.max_width = len(header_str)
-        win.addstr(5, 0, header_str, curses.A_UNDERLINE | curses.A_REVERSE)
+        win.addstr(3, 0, header_str, curses.A_UNDERLINE | curses.A_REVERSE )
 
         # Get display size
         top = self.top_line
-        bottom = self.screen_lines - 6 + self.top_line
+        bottom = self.screen_lines - 4 + self.top_line
 
         # Fetch process information
         for p, process in enumerate(
@@ -816,7 +825,7 @@ class NextflowInspector:
                 completed = "{}".format(len(proc["submitted"]))
 
             win.addstr(
-                6 + p, 0, "{0: ^1} "
+                4 + p, 0, "{0: ^1} "
                           "{1:25.25}  "
                           "{2: ^7} "
                           "{3: ^7} "
