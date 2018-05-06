@@ -333,6 +333,11 @@ class NextflowInspector:
         self.trace_info = defaultdict(list)
         self.process_stats = {}
         self.samples = []
+        # Clean up of tag running status
+        for p in self.processes:
+            p["barrier"] = "W"
+            for i in ["submitted", "finished", "failed", "retry"]:
+                p[i] = set()
 
     def _update_pipeline_status(self):
         """Parses the .nextflow.log file for signatures of pipeline status.
