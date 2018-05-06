@@ -404,6 +404,9 @@ class NextflowInspector:
                     p["retry"].remove(tag)
                     p["failed"].remove(tag)
 
+            elif v["status"] in good_status:
+                p["finished"].add(tag)
+
             # Filter tags without a successfull status.
             if v["status"] not in good_status:
                 if v["tag"] in list(p["submitted"]) + list(p["finished"]):
