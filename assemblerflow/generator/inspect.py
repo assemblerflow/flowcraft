@@ -333,6 +333,7 @@ class NextflowInspector:
         self.trace_info = defaultdict(list)
         self.process_stats = {}
         self.samples = []
+        self.stored_ids = []
         # Clean up of tag running status
         for p in self.processes.values():
             p["barrier"] = "W"
