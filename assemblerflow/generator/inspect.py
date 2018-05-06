@@ -736,12 +736,12 @@ class NextflowInspector:
         # self.screen.erase()
 
         height, width = self.screen.getmaxyx()
-        win = curses.newpad(height, 5000)
+        win = curses.newpad(height, 2000)
 
         # Add static header
         header = "Pipeline [{}] inspection at {}. Status: ".format(
             self.pipeline_name, strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-        win.addstr(0, 0, str(self.padding))
+
         win.addstr(1, 0, header)
         win.addstr(1, len(header), self.run_status,
                    curses.color_pair(pc[self.run_status]))
