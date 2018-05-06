@@ -45,7 +45,7 @@ class NextflowInspector:
 
         self.trace_sizestamp = None
         """
-        str: Stores the timestamp of the last modification of the trace file.
+        str: Stores the sizestamp of the last modification of the trace file.
         This is used to parse the file only when it has changed.
         """
 
@@ -56,10 +56,11 @@ class NextflowInspector:
 
         self.stored_ids = []
         """
-        list: Stores the task_ids that have already been parsed.
+        list: Stores the task_ids that have already been parsed. It is used
+        to skip them when parsing the trace files multiple times.
         """
 
-        self.process_info = defaultdict(list)
+        self.trace_info = defaultdict(list)
         """
         dict: Main object that stores the status information for each process
         name in the trace file.
@@ -76,7 +77,7 @@ class NextflowInspector:
         channel as the value. This information is retrieved from the 
         .nextflow.log file in the :func:`_parser_pipeline_processes` method
         and updated in the :func:`_update_barrier_status` and 
-        :func:`_update_process_stats`.
+        :func:`_update_process_stats` and :func:`_update_submission_status`.
         """
 
         self.samples = []
@@ -98,7 +99,7 @@ class NextflowInspector:
 
         self.log_sizestamp = None
         """
-        str: Stores the timestamp of the last modification of the nextflow 
+        str: Stores the sizestamp of the last modification of the nextflow 
         log file. This is used to parse the file only when it has changed.
         """
 
@@ -113,6 +114,8 @@ class NextflowInspector:
         'error', 'complete'.
         """
 
+        # Skip these process names (they are check with the startswith()
+        # method) when using the --pretty option
         if pretty:
             self._blacklist = [
                 "report_coverage_", "fastqc2_report", "compile_fastqc_status2",
@@ -131,11 +134,15 @@ class NextflowInspector:
         self.screen_lines = None
         self.content_lines = 0
 
+        # Checks if nextflow log and trace files are available
         self._check_required_files()
-        self._parser_pipeline_processes()
-        self._get_pipeline_status()
+        # Gathers the complete list of processes from the nextflow log
+        self._get_pipeline_processes()
+        # Fetches the pipeline status from the nextflow log
+        self._update_pipeline_status()
 
-        # Bind SIGINT to singal_handler function
+        # Bind SIGINT to singal_handler function. This makes a clean exit
+        # from the curses interface when exiting through ctrl+c.
         signal.signal(signal.SIGINT, lambda *x: signal_handler(self.screen))
 
     #################
@@ -143,6 +150,8 @@ class NextflowInspector:
     #################
 
     def _check_required_files(self):
+        """Checks whetner the trace and log files are available
+        """
 
         if not os.path.exists(self.trace_file):
             raise eh.InspectionError("The provided trace file could not be "
@@ -152,23 +161,6 @@ class NextflowInspector:
             raise eh.InspectionError("The .nextflow.log files could not be "
                                      "opened. Are you sure you are in a "
                                      "nextflow project directory?")
-
-    def _get_pipeline_status(self):
-        """Parses the .nextflow.log file for signatures of pipeline status.
-        It sets the :attr:`status_info` attribute.
-        """
-
-        with open(self.log_file) as fh:
-
-            for line in fh:
-                if "Session aborted" in line:
-                    self.run_status = "aborted"
-                    return
-                if "Execution complete -- Goodbye" in line:
-                    self.run_status = "complete"
-                    return
-
-        self.run_status = "running"
 
     @staticmethod
     def _header_mapping(header):
@@ -212,13 +204,26 @@ class NextflowInspector:
                 return join(first_hash_path, l)
 
     @staticmethod
-    def hms(s):
+    def _hms(s):
+        """Converts a hms string into seconds.
+
+        Parameters
+        ----------
+        s : str
+            The hms string can be something like '20s', '1m30s' or '300ms'.
+
+        Returns
+        -------
+        float
+            Time in seconds.
+
+        """
 
         if s == "-":
             return 0
 
         if s.endswith("ms"):
-            return int(s.rstrip("ms")) / 1000
+            return float(s.rstrip("ms")) / 1000
 
         fields = list(map(float, re.split("[hms]", s)[:-1]))
         if len(fields) == 3:
@@ -229,66 +234,51 @@ class NextflowInspector:
             return fields[0]
 
     @staticmethod
-    def size_coverter(s):
+    def _size_coverter(s):
+        """Converts size string into megabytes
 
-        if s.endswith("KB"):
+        Parameters
+        ----------
+        s : str
+            The size string can be '30KB', '20MB' or '1GB'
+
+        Returns
+        -------
+        float
+            With the size in bytes
+
+        """
+
+        if s.upper().endswith("KB"):
             return float(s.rstrip("KB")) / 1024
 
-        elif s.endswith(" B"):
+        elif s.upper().endswith(" B"):
             return float(s.rstrip("B")) / 1024 / 1024
 
-        elif s.endswith("MB"):
+        elif s.upper().endswith("MB"):
             return float(s.rstrip("MB"))
 
-        elif s.endswith("GB"):
+        elif s.upper().endswith("GB"):
             return float(s.rstrip("GB")) * 1024
 
         else:
             return float(s)
 
     @staticmethod
-    def size_compress(s):
+    def _size_compress(s):
+        """Shortens a megabytes string.
+        """
 
         if s / 1024 > 1:
             return "{}GB".format(round(s / 1024), 1)
         else:
             return "{}MB".format(s)
 
-    def _update_submission_status(self, process, vals):
+    #########################
+    # AUXILIARY PARSE METHODS
+    #########################
 
-        good_status = ["COMPLETED", "CACHED"]
-
-        # Update status of each process
-        for v in list(vals)[::-1]:
-            p = self.processes[process]
-            tag = v["tag"]
-            # If the process/tag is in the submitted list, move it to the
-            # complete or failed list
-            if tag in p["submitted"]:
-                p["submitted"].remove(tag)
-                if v["status"] in good_status:
-                    p["finished"].add(tag)
-                else:
-                    p["failed"].add(tag)
-
-            # It the process/tag is in the retry list and it completed
-            # successfully, remove it from the retry and fail lists
-            elif tag in p["retry"]:
-                if v["status"] in good_status:
-                    p["retry"].remove(tag)
-                    p["failed"].remove(tag)
-
-            if v["status"] not in good_status:
-                if v["tag"] in list(p["submitted"]) + list(p["finished"]):
-                    vals.remove(v)
-
-        return vals
-
-    #################
-    # PARSE METHODS
-    #################
-
-    def _parser_pipeline_processes(self):
+    def _get_pipeline_processes(self):
         """Parses the .nextflow.log file and retrieves the complete list
         of processes
 
@@ -307,6 +297,7 @@ class NextflowInspector:
 
             for line in fh:
                 if re.match(".*Creating operator.*", line):
+                    # Retrieves the process name from the string
                     match = re.match(".*Creating operator > (.*) --", line)
                     process = match.group(1)
 
@@ -322,15 +313,84 @@ class NextflowInspector:
                             "retry": set()
                         }
 
+                # Retrieves the pipeline name from the string
                 if re.match(".*Launching `.*` \[.*\] ", line):
                     match = re.match(".*Launching `.*` \[(.*)\] ", line)
                     self.pipeline_name = match.group(1)
 
         self.content_lines = len(self.processes)
 
+    def _update_pipeline_status(self):
+        """Parses the .nextflow.log file for signatures of pipeline status.
+        It sets the :attr:`status_info` attribute.
+        """
+
+        with open(self.log_file) as fh:
+
+            for line in fh:
+                if "Session aborted" in line:
+                    self.run_status = "aborted"
+                    return
+                if "Execution complete -- Goodbye" in line:
+                    self.run_status = "complete"
+                    return
+
+        self.run_status = "running"
+
+    def _update_tag_status(self, process, vals):
+        """ Updates the 'submitted', 'finished', 'failed' and 'retry' status
+        of each process/tag combination.
+
+        Process/tag combinations provided to this method already appear on
+        the trace file, so their submission status is updated based on their
+        execution status from nextflow.
+
+        For instance, if a tag is successfully
+        complete, it is moved from the 'submitted' to the 'finished' list.
+        If not, it is moved to the 'failed' list.
+
+        Parameters
+        ----------
+        process : str
+            Name of the current process. Must be present in attr:`processes`
+        vals : list
+            List of tags for this process that have been gathered in the
+            trace file.
+        """
+
+        good_status = ["COMPLETED", "CACHED"]
+
+        # Update status of each process
+        for v in list(vals)[::-1]:
+            p = self.processes[process]
+            tag = v["tag"]
+
+            # If the process/tag is in the submitted list, move it to the
+            # complete or failed list
+            if tag in p["submitted"]:
+                p["submitted"].remove(tag)
+                if v["status"] in good_status:
+                    p["finished"].add(tag)
+                else:
+                    p["failed"].add(tag)
+
+            # It the process/tag is in the retry list and it completed
+            # successfully, remove it from the retry and fail lists. Otherwise
+            # maintain it in the retry/failed lists
+            elif tag in p["retry"]:
+                if v["status"] in good_status:
+                    p["retry"].remove(tag)
+                    p["failed"].remove(tag)
+
+            # Filter tags without a successfull status.
+            if v["status"] not in good_status:
+                if v["tag"] in list(p["submitted"]) + list(p["finished"]):
+                    vals.remove(v)
+
+        return vals
+
     def _update_barrier_status(self):
-        """Updates the run_status key of the :attr:`process_stats` from the
-        config.
+        """Checks whether the channels to each process have been closed.
         """
 
         with open(self.log_file) as fh:
@@ -342,14 +402,15 @@ class NextflowInspector:
                     return
 
                 if "<<< barrier arrive" in line:
+                    # Retrieve process name from string
                     process_m = re.match(".*process: (.*)\)", line)
                     if process_m:
                         process = process_m.group(1)
-
+                        # Updates process channel to complete
                         if process in self.processes:
                             self.processes[process]["barrier"] = "C"
 
-    def _update_status(self, fields, hm):
+    def _update_trace_info(self, fields, hm):
         """Parses a trace line and updates the :attr:`status_info` attribute.
 
         Parameters
@@ -384,10 +445,87 @@ class NextflowInspector:
                     tag.split()[0] not in self.samples:
                 self.samples.append(tag)
 
-        self.process_info[process].append(info)
+        self.trace_info[process].append(info)
         self.stored_ids.append(info["hash"])
 
-    def static_parser(self):
+    def _update_process_stats(self):
+        """Updates the process stats with the information from the processes
+
+        This method is called at the end of each static parsing of the nextflow
+        trace file. It re-populates the :attr:`process_stats` dictionary
+        with the new stat metrics.
+        """
+
+        good_status = ["COMPLETED", "CACHED"]
+
+        for process, vals in self.trace_info.items():
+
+            vals = self._update_tag_status(process, vals)
+
+            self.process_stats[process] = {}
+
+            inst = self.process_stats[process]
+
+            # Get number of completed samples
+            inst["completed"] = "{}".format(
+                len([x for x in vals if x["status"] in good_status]))
+
+            # Get number of bad samples
+            # inst["bad_samples"] = "{}".format(
+            #     len([x for x in vals if x["status"] not in good_status]))
+
+            # Get average time
+            time_array = [self._hms(x["realtime"]) for x in vals]
+            mean_time = round(sum(time_array) / len(time_array), 1)
+            mean_time_str = strftime('%H:%M:%S', gmtime(mean_time))
+            inst["realtime"] = mean_time_str
+
+            # Get cumulated time
+            # cum_time_str = strftime('%H:%M:%S', gmtime(
+            #     round(sum(time_array), 1)))
+            # inst["cumtime"] = cum_time_str
+
+            # Get maximum memory
+            rss_values = [self._size_coverter(x["rss"]) for x in vals
+                          if x["rss"] != "-"]
+            if rss_values:
+                max_rss = round(max(rss_values))
+                rss_str = self._size_compress(max_rss)
+            else:
+                rss_str = "-"
+            inst["maxmem"] = rss_str
+
+            # Get read size
+            try:
+                rchar_values = [self._size_coverter(x["rchar"]) for x in vals
+                                if x["rchar"] != "-"]
+                if rchar_values:
+                    avg_rchar = round(sum(rchar_values) / len(rchar_values))
+                    rchar_str = self._size_compress(avg_rchar)
+                else:
+                    rchar_str = "-"
+            except KeyError:
+                rchar_str = "-"
+            inst["avgread"] = rchar_str
+
+            # Get write size
+            try:
+                wchar_values = [self._size_coverter(x["wchar"]) for x in vals
+                                if x["wchar"] != "-"]
+                if wchar_values:
+                    avg_wchar = round(sum(wchar_values) / len(wchar_values))
+                    wchar_str = self._size_compress(avg_wchar)
+                else:
+                    wchar_str = "-"
+            except KeyError:
+                wchar_str = "-"
+            inst["avgwrite"] = wchar_str
+
+    #################
+    # PARSING METHODS
+    #################
+
+    def trace_parser(self):
         """Method that parses the trace file once and updates the
         :attr:`status_info` attribute with the new entries.
         """
@@ -423,13 +561,13 @@ class NextflowInspector:
                     continue
 
                 # Parse trace entry and update status_info attribute
-                self._update_status(fields, hm)
+                self._update_trace_info(fields, hm)
 
         self._update_process_stats()
-        self._get_pipeline_status()
+        self._update_pipeline_status()
         self._update_barrier_status()
 
-    def static_log_parser(self):
+    def log_parser(self):
         """Method that parses the nextflow log file once and updates the
         submitted number of samples for each process
         """
@@ -467,78 +605,18 @@ class NextflowInspector:
                     p["barrier"] = "R"
                     p["submitted"].add(sample)
 
-    def _update_process_stats(self):
-        """Updates the process stats with the information from the processes
+    def update_inspection(self):
+        """Wrapper method that calls the appropriate main updating methods of
+        the inspection.
 
-        This method is called at the end of each static parsing of the nextflow
-        trace file. It re-populates the :attr:`process_stats` dictionary
-        with the new stat metrics.
+        It is meant to be used inside a loop (like while), so that it can
+        continuously update the class attributes from the trace and log files.
+        It already implements checks to parse these files only when they
+        change, and they ignore entries that have been previously processes.
         """
 
-        good_status = ["COMPLETED", "CACHED"]
-
-        for process, vals in self.process_info.items():
-
-            vals = self._update_submission_status(process, vals)
-
-            self.process_stats[process] = {}
-
-            inst = self.process_stats[process]
-
-            # Get number of completed samples
-            inst["completed"] = "{}".format(
-                len([x for x in vals if x["status"] in good_status]))
-
-            # Get number of bad samples
-            # inst["bad_samples"] = "{}".format(
-            #     len([x for x in vals if x["status"] not in good_status]))
-
-            # Get average time
-            time_array = [self.hms(x["realtime"]) for x in vals]
-            mean_time = round(sum(time_array) / len(time_array), 1)
-            mean_time_str = strftime('%H:%M:%S', gmtime(mean_time))
-            inst["realtime"] = mean_time_str
-
-            # Get cumulated time
-            # cum_time_str = strftime('%H:%M:%S', gmtime(
-            #     round(sum(time_array), 1)))
-            # inst["cumtime"] = cum_time_str
-
-            # Get maximum memory
-            rss_values = [self.size_coverter(x["rss"]) for x in vals
-                          if x["rss"] != "-"]
-            if rss_values:
-                max_rss = round(max(rss_values))
-                rss_str = self.size_compress(max_rss)
-            else:
-                rss_str = "-"
-            inst["maxmem"] = rss_str
-
-            # Get read size
-            try:
-                rchar_values = [self.size_coverter(x["rchar"]) for x in vals
-                                if x["rchar"] != "-"]
-                if rchar_values:
-                    avg_rchar = round(sum(rchar_values) / len(rchar_values))
-                    rchar_str = self.size_compress(avg_rchar)
-                else:
-                    rchar_str = "-"
-            except KeyError:
-                rchar_str = "-"
-            inst["avgread"] = rchar_str
-
-            # Get write size
-            try:
-                wchar_values = [self.size_coverter(x["wchar"]) for x in vals
-                                if x["wchar"] != "-"]
-                if wchar_values:
-                    avg_wchar = round(sum(wchar_values) / len(wchar_values))
-                    wchar_str = self.size_compress(avg_wchar)
-                else:
-                    wchar_str = "-"
-            except KeyError:
-                wchar_str = "-"
-            inst["avgwrite"] = wchar_str
+        self.log_parser()
+        self.trace_parser()
 
     #################
     # CURSES METHODS
@@ -563,35 +641,41 @@ class NextflowInspector:
         try:
             while stay_alive:
 
-                c = self.screen.getch()
-                if c == curses.KEY_UP:
-                    self.updown("up")
-                elif c == curses.KEY_DOWN:
-                    self.updown("down")
-                elif c == curses.KEY_RESIZE:
-                    self.screen_lines = self.screen.getmaxyx()[0]
-
-                self.static_log_parser()
-                self.static_parser()
+                # Provide functionality to certain keybindings
+                self._curses_keybindings()
+                # Updates main inspector attributes
+                self.update_inspection()
+                # Display curses interface
                 self.flush_overview()
 
-                sleep(0.1)
+                sleep(self.refresh_rate)
         except Exception as e:
-            sys.stderr.write(e.msg)
+            sys.stderr.write(str(e))
         finally:
             curses.nocbreak()
             self.screen.keypad(0)
             curses.echo()
             curses.endwin()
 
-    def updown(self, direction):
+    def _curses_keybindings(self):
+
+        c = self.screen.getch()
+        if c == curses.KEY_UP:
+            self._updown("up")
+        elif c == curses.KEY_DOWN:
+            self._updown("down")
+        elif c == curses.KEY_RESIZE:
+            self.screen_lines = self.screen.getmaxyx()[0]
+
+    def _updown(self, direction):
         """Provides curses scroll functionality.
         """
 
         if direction == "up" and self.top_line != 0:
             self.top_line -= 1
         elif direction == "down" and \
-                self.screen.getmaxyx()[0] + self.top_line <= self.content_lines + 5:
+                self.screen.getmaxyx()[0] + self.top_line\
+                <= self.content_lines + 5:
             self.top_line += 1
 
     def flush_overview(self):
@@ -689,7 +773,7 @@ class NextflowInspector:
                                 proc["barrier"],
                                 process,
                                 completed,
-                                *vals
-            ), curses.color_pair(colors[proc["barrier"]]) | txt_fmt)
+                                *vals),
+                curses.color_pair(colors[proc["barrier"]]) | txt_fmt)
 
         self.screen.refresh()
