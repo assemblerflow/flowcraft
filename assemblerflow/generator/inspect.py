@@ -669,12 +669,17 @@ class NextflowInspector:
     def _curses_keybindings(self):
 
         c = self.screen.getch()
+        # Provide scroll up/down with keys or mouse wheel
         if c == curses.KEY_UP:
             self._updown("up")
         elif c == curses.KEY_DOWN:
             self._updown("down")
+        # Trigger screen size update on resize
         elif c == curses.KEY_RESIZE:
             self.screen_lines = self.screen.getmaxyx()[0]
+        # Exit interface when pressing q
+        elif c == ord('q'):
+            raise Exception
 
     def _updown(self, direction):
         """Provides curses scroll functionality.
