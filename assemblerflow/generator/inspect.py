@@ -5,6 +5,8 @@ import curses
 import signal
 import locale
 import logging
+import hashlib
+import requests
 
 from os.path import join, abspath
 from time import gmtime, strftime, sleep
@@ -28,13 +30,15 @@ def signal_handler(screen):
     exit the program and reset the curses options.
     """
 
-    screen.clear()
-    screen.refresh()
+    if screen:
+        screen.clear()
+        screen.refresh()
 
-    curses.nocbreak()
-    screen.keypad(0)
-    curses.echo()
-    curses.endwin()
+        curses.nocbreak()
+        screen.keypad(0)
+        curses.echo()
+        curses.endwin()
+
     print("Exiting assemblerflow inspection... Bye")
     sys.exit(0)
 
@@ -117,6 +121,17 @@ class NextflowInspector:
         """
         str: Status of the pipeline. Can be either 'running', 'aborted',
         'error', 'complete'.
+        """
+
+        self.broadcast_address = "http://localhost:8000/inspect/api/status"
+        """
+        str: Address of the REST api where the information will be sent
+        """
+
+        self.send = True
+        """
+        boolean: This attribute will be set to False after sending a request
+        and set to True when there is a change in the inspection attributes.
         """
 
         # Skip these process names (they are check with the startswith()
@@ -562,6 +577,7 @@ class NextflowInspector:
         if size_stamp and size_stamp == self.trace_sizestamp:
             return
         else:
+            self.send = True
             self.trace_sizestamp = size_stamp
 
         with open(self.trace_file) as fh:
@@ -605,6 +621,7 @@ class NextflowInspector:
             return
         else:
             self.log_sizestamp = size_stamp
+            self.send = True
 
         with open(self.log_file) as fh:
 
@@ -795,7 +812,7 @@ class NextflowInspector:
                      "{7: ^10} " \
                      "{8: ^10} ".format(*headers)
         self.max_width = len(header_str)
-        win.addstr(3, 0, header_str, curses.A_UNDERLINE | curses.A_REVERSE )
+        win.addstr(3, 0, header_str, curses.A_UNDERLINE | curses.A_REVERSE)
 
         # Get display size
         top = self.top_line
@@ -843,3 +860,111 @@ class NextflowInspector:
         win.clrtoeol()
         win.clearok(1)
         win.refresh(0, self.padding, 0, 0, height-1, width-1)
+
+    ###################
+    # BROADCAST METHODS
+    ###################
+
+    def _convert_process_dict(self):
+
+        d = {}
+
+        for k, v in self.processes.items():
+            d[k] = {"barrier": v["barrier"]}
+            for i in ["submitted", "finished", "failed", "retry"]:
+                d[k][i] = list(v[i])
+
+        return d
+
+    def _send_status_info(self, run_id):
+
+        status_json = {
+            "processStats": self.process_stats,
+            "processInfo": self._convert_process_dict()
+        }
+
+        try:
+            requests.put(self.broadcast_address,
+                         json={"run_id": run_id, "status_json": status_json})
+        except requests.exceptions.ConnectionError:
+            logger.error(colored_print(
+                "ERROR: Could not establish connection with server. The server"
+                " may be down or there is a problem with your internet "
+                "connection.", "red_bold"))
+            sys.exit(1)
+
+    def _establish_connection(self, run_id):
+
+        try:
+            r = requests.post(self.broadcast_address, json={"run_id": run_id})
+            if r.status_code != 201:
+                logger.error(colored_print(
+                    "ERROR: There was a problem sending data to the server"
+                    "with reason: {}".format(r.reason)))
+        except requests.exceptions.ConnectionError:
+            logger.error(colored_print(
+                "ERROR: Could not establish connection with server. The server"
+                " may be down or there is a problem with your internet "
+                "connection.", "red_bold"))
+            sys.exit(1)
+
+    def _close_connection(self, run_id):
+
+        try:
+            r = requests.delete(self.broadcast_address,
+                                json={"run_id": run_id})
+            if r.status_code != 202:
+                logger.error(colored_print(
+                    "ERROR: There was a problem sending data to the server"
+                    "with reason: {}".format(r.reason)))
+        except requests.exceptions.ConnectionError:
+            logger.error(colored_print(
+                "ERROR: Could not establish connection with server. The server"
+                " may be down or there is a problem with your internet "
+                "connection.", "red_bold"))
+            sys.exit(1)
+
+    def _get_run_hash(self):
+        """Gets the hash of the nextflow file"""
+
+        # Get name of the pipeline from the log file
+        with open(self.log_file) as fh:
+            header = fh.readline()
+        pipeline_path = re.match(".*nextflow run ([^\s]+) .*", header).group(1)
+
+        # Get hash from the entire pipeline file
+        pipeline_hash = hashlib.md5()
+        with open(pipeline_path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(4096), b""):
+                pipeline_hash.update(chunk)
+        # Get hash from the pipeline start time stamp
+        t = header.split()[1]
+        time_hash = hashlib.md5(t.encode("utf8"))
+
+        return pipeline_hash.hexdigest() + time_hash.hexdigest()
+
+    def broadcast_status(self):
+
+        run_hash = self._get_run_hash()
+        self._establish_connection(run_hash)
+
+        stay_alive = True
+        try:
+            while stay_alive:
+
+                self.update_inspection()
+                if self.send:
+                    self._send_status_info(run_hash)
+                    self.send = False
+
+                sleep(self.refresh_rate)
+
+        except FileNotFoundError:
+            sys.stderr.write(colored_print(
+                "ERROR: nextflow log and/or trace files are no longer "
+                "reachable!", "red_bold"))
+        except Exception as e:
+            sys.stderr.write(str(e))
+        finally:
+            logger.info("Closing connection")
+            self._close_connection(run_hash)

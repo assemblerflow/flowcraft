@@ -99,7 +99,8 @@ def get_args(args=None):
         help="Set the refresh frequency for the continuous inspect functions"
     )
     inspect_parser.add_argument(
-        "-m", "--mode", dest="mode", default="overview", choices=["overview"],
+        "-m", "--mode", dest="mode", default="overview",
+        choices=["overview", "broadcast"],
         help="Specify the inspection run mode."
     )
     inspect_parser.add_argument(
@@ -248,6 +249,9 @@ def inspect(args):
 
     if args.mode == "overview":
         nf_inspect.display_overview()
+
+    if args.mode == "broadcast":
+        nf_inspect.broadcast_status()
 
 
 def main():
