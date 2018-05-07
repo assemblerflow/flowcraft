@@ -824,7 +824,7 @@ class NextflowInspector:
 
             if process not in self.process_stats:
                 vals = ["-"] * 8
-                txt_fmt = curses.A_DIM
+                txt_fmt = ""
             else:
                 ref = self.process_stats[process]
                 vals = [ref["completed"],
@@ -880,7 +880,9 @@ class NextflowInspector:
 
         status_json = {
             "processStats": self.process_stats,
-            "processInfo": self._convert_process_dict()
+            "processInfo": self._convert_process_dict(),
+            "pipelineName": self.pipeline_name,
+            "runStatus": self.run_status
         }
 
         try:
