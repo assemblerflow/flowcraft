@@ -146,7 +146,7 @@ def parse_coverage_table(coverage_file):
     """
 
     # Stores the correspondence between a contig and the corresponding coverage
-    # e.g.: {"contig_1": {"cov": 424, "len": 4231} }
+    # e.g.: {"contig_1": {"cov": 424} }
     coverage_dict = OrderedDict()
     # Stores the total coverage
     total_cov = 0
@@ -353,7 +353,8 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
                         if v["cov"] >= minimum_coverage]
     logger.debug("Filtered contigs for minimum coverage of "
                  "{}: {}".format(minimum_coverage, filtered_contigs))
-    total_assembled_bp = sum([sum(coverage_bp[x]) for x in filtered_contigs])
+    total_assembled_bp = sum([sum(coverage_bp[x]) for x in filtered_contigs
+                              if x in coverage_bp])
     logger.debug("Total number of assembled base pairs:"
                  "{}".format(total_assembled_bp))
 
@@ -401,7 +402,8 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
             fails = "Small_genome_size_({})".format(assembly_len)
             assembly_len = sum([v for v in contig_size.values()])
             total_assembled_bp = sum(
-                [sum(coverage_bp[x]) for x in coverage_info])
+                [sum(coverage_bp[x]) for x in coverage_info if x in
+                 coverage_bp])
             logger.debug("Assembly length without coverage filtering: "
                          "{}".format(assembly_len))
             logger.debug("Total number of assembled base pairs without"
