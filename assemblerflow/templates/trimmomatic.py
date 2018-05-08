@@ -359,7 +359,7 @@ def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file):
 
     logger.info("Finished trimmomatic subprocess with STDOUT:\\n"
                 "======================================\\n{}".format(stdout))
-    logger.info("Fished trimmomatic subprocesswith STDERR:\\n"
+    logger.info("Finished trimmomatic subprocesswith STDERR:\\n"
                 "======================================\\n{}".format(stderr))
     logger.info("Finished trimmomatic with return code: {}".format(
         p.returncode))
