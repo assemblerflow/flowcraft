@@ -11,7 +11,7 @@ process mappingBowtie_{{ pid }} {
     val bowtie2Index from IN_index_files
 
     output:
-    set sample_id, file("mappingBowtie_${sample_id}.sam") into bowtieResults
+    set sample_id, file("mappingBowtie*.sam") into bowtieResults
     {% with task_name="mappingBowtie", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -46,7 +46,7 @@ process samtoolsView_{{ pid }} {
     val samtoolsIdx from IN_samtools_indexes
 
     output:
-    set sample_id, file("samtoolsDepthOutput_${sample_id}.txt") into samtoolsResults
+    set sample_id, file("samtoolsDepthOutput*.txt") into samtoolsResults
     {% with task_name="samtoolsView", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -76,7 +76,7 @@ process jsonDumpingMapping_{{ pid }} {
     val lengthJson from IN_length_json
 
     output:
-    set sample_id, file("samtoolsDepthOutput_${id}.txt_mapping.json") optional true into mappingOutputChannel_{{ pid }}
+    set sample_id, file("samtoolsDepthOutput*.txt_mapping.json") optional true into mappingOutputChannel_{{ pid }}
     {% with task_name="jsonDumpingMapping", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

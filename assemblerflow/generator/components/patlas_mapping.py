@@ -70,15 +70,21 @@ class PatlasMapping(Process):
         self.directives = {
             "mappingBowtie": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.2"
+                "version": "1.1.2",
+                "cpus": 1,
+                "memory": "{ 4.GB * task.attempt }"
             },
             "samtoolsView": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.2"
+                "version": "1.1.2",
+                "cpus": 1,
+                "memory": "{ 4.GB * task.attempt }"
             },
             "jsonDumpingMapping": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.2"
+                "version": "1.1.2",
+                "cpus": 1,
+                "memory": "'4GB'"
             }
         }
 
