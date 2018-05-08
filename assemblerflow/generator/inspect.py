@@ -824,7 +824,7 @@ class NextflowInspector:
 
             if process not in self.process_stats:
                 vals = ["-"] * 8
-                txt_fmt = ""
+                txt_fmt = curses.A_NORMAL
             else:
                 ref = self.process_stats[process]
                 vals = [ref["completed"],
