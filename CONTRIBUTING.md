@@ -12,6 +12,8 @@ and enhancement requests.
 
 Contributions with new code (not documentation), should follow this standard procedure:
 
+    <new_branch> >> dev >> master
+
 1. Create a new branch for the new feature/bug fix.
 2. One the new code is finished and **passes all automated tests**, it will be 
 merged into the `dev` branch. This branch is where all the new code lives and 
