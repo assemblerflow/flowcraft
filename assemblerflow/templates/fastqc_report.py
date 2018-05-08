@@ -49,8 +49,8 @@ Code documentation
 
 """
 
-__version__ = "1.0.0"
-__build__ = "16012018"
+__version__ = "1.0.1"
+__build__ = "08052018"
 __template__ = "fastqc_report-nf"
 
 import os
@@ -201,6 +201,10 @@ def get_trim_index(biased_list):
 
     # Return index 0 if there are no biased positions
     if set(biased_list) == {False}:
+        return 0
+
+    # Return index 0 if there are no biased positions in the first 20 bp
+    if set(biased_list[:20]) == {False}:
         return 0
 
     # Iterate over the biased_list array. Keep the iteration going until
