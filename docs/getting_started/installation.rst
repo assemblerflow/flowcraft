@@ -56,7 +56,6 @@ setup.py::
 
     git clone https://github.com/ODiogoSilva/assemblerflow.git
     cd assemblerflow
-    git submodule update --init --recursive
     python3 setup.py install
 
 
