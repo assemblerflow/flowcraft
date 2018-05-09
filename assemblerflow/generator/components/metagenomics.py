@@ -210,6 +210,50 @@ class Metaspades(Process):
         }}
 
 
+class Midas_species(Process):
+    """Midas species process template interface
+
+            This process is set with:
+
+                - ``input_type``: fastq
+                - ``output_type``: txt
+                - ``ptype``: taxonomic classification (species)
+    """
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "txt"
+
+        self.params = {
+            "midasDB": {
+                "default": "'/MidasDB/midas_db_v1.2'",
+                "description": "Specifies Midas database."
+            }
+        }
+
+        self.secondary_inputs = [
+            {
+                "params": "midasDB",
+                "channel": "IN_midas_DB = Channel.value(params.MidasDB)"
+            }
+        ]
+
+        self.directives = {
+            "midas_species": {
+                "container": "cimendes/midas",
+                "version": "1.3.2-0.1",
+                "memory": "{2.Gb*task.attempt}",
+                "cpus": 3
+            }
+        }
+
+        self.status_channels = [
+            "midas_species"
+        ]
+
+
 class RemoveHost(Process):
     """bowtie2 to remove host reads process template interface
 

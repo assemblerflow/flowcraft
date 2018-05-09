@@ -73,7 +73,8 @@ process_map = {
         "card_rgi": meta.CardRgi,
         "metaspades": meta.Metaspades,
         "megahit": meta.Megahit,
-        "kraken": meta.Kraken
+        "kraken": meta.Kraken,
+        "midas_species": meta.Midas_species
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
