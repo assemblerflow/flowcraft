@@ -35,7 +35,7 @@ class PatlasMapping(Process):
                                "covered by reads (in absolute lenght)."
             },
             "refIndex": {
-                "default": "'/ngstools/data/indexes/bowtie2idx/bowtie2.idx'",
+                "default": "'/ngstools/data/indexes/bowtie2idx/bowtie2'",
                 "description": "Specifies the reference indexes to be provided"
                                " to bowtie2."
             },
@@ -70,19 +70,19 @@ class PatlasMapping(Process):
         self.directives = {
             "mappingBowtie": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.2",
+                "version": "1.1.4",
                 "cpus": 1,
                 "memory": "{ 4.GB * task.attempt }"
             },
             "samtoolsView": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.2",
+                "version": "1.1.4",
                 "cpus": 1,
                 "memory": "{ 4.GB * task.attempt }"
             },
             "jsonDumpingMapping": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.2",
+                "version": "1.1.4",
                 "cpus": 1,
                 "memory": "'4GB'"
             }
