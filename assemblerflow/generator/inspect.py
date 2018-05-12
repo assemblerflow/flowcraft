@@ -858,7 +858,6 @@ class NextflowInspector:
                 curses.color_pair(colors[proc["barrier"]]) | txt_fmt)
 
         win.clrtoeol()
-        win.clearok(1)
         win.refresh(0, self.padding, 0, 0, height-1, width-1)
 
     ###################
