@@ -1,6 +1,6 @@
 # Changelog
 
-## New in upcoming 1.2.0 release
+## New in upcoming 1.2.0 release (`dev` branch)
 
 ### Features
 
@@ -11,3 +11,7 @@
 
 - Changed `mapping_patlas` docker container tag and variable
 (PR [#76](https://github.com/assemblerflow/assemblerflow/pull/76)).
+
+# Bug Fixes
+
+- **Template: fastqc_report.py**: Added fix to trim range evaluation.
