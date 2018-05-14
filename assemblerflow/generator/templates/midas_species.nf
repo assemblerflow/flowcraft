@@ -12,16 +12,16 @@ process midas_species_{{ pid }} {
     val midasDB from IN_midas_DB
 
     output:
-    file("${sample_id}_midas.txt")
-    {% with task_name="midas" %}
+    file("${sample_id}_midas_species_profile.txt")
+    {% with task_name="midas_species" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
     script:
     """
-    python2 /NGStools/MIDAS-1.3.2/scripts/run_midas.py species midas/ -d ${midasDB} -t $task.cpus -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} --remove_temp
+    run_midas.py species midas/ -d ${midasDB} -t $task.cpus -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} --remove_temp
 
-    python2 /NGStools/MIDAS-1.3.2/scripts/merge_midas.py species . -i midas/ -d ${MidasDB} -t dir
+    mv midas/species_profile.txt ./${sample_id}_midas_species_profile.txt
     """
 }
 

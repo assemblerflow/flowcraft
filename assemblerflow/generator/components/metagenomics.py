@@ -236,7 +236,7 @@ class Midas_species(Process):
         self.secondary_inputs = [
             {
                 "params": "midasDB",
-                "channel": "IN_midas_DB = Channel.value(params.MidasDB)"
+                "channel": "IN_midas_DB = Channel.value(params.midasDB)"
             }
         ]
 
