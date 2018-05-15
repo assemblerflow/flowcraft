@@ -17,7 +17,8 @@ try:
     import generator.components.assembly_processing as ap
     import generator.components.downloads as downloads
     import generator.components.distance_estimation as distest
-    import generator.components.patlas_mapping as mapping_patlas
+    import generator.components.metagenomics as meta
+    import generator.components.plasmids as mapping_patlas
     import generator.components.mlst as mlst
     import generator.components.reads_quality_control as readsqc
     import generator.components.typing as typing
@@ -33,11 +34,11 @@ except ImportError:
     import assemblerflow.generator.components.assembly_processing as ap
     import assemblerflow.generator.components.downloads as downloads
     import assemblerflow.generator.components.distance_estimation as distest
-    import assemblerflow.generator.components.patlas_mapping as mapping_patlas
     import assemblerflow.generator.components.mlst as mlst
+    import assemblerflow.generator.components.metagenomics as meta
+    import assemblerflow.generator.components.plasmids as mapping_patlas
     import assemblerflow.generator.components.reads_quality_control as readsqc
     import assemblerflow.generator.components.typing as typing
-    import assemblerflow.generator.process as pc
     import assemblerflow.generator.error_handling as eh
     from assemblerflow import __version__
     from assemblerflow.generator import header_skeleton as hs
@@ -67,7 +68,13 @@ process_map = {
         "chewbbaca": mlst.Chewbbaca,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
-        "mapping_patlas": mapping_patlas.PatlasMapping
+        "mapping_patlas": mapping_patlas.PatlasMapping,
+        "remove_host": meta.RemoveHost,
+        "card_rgi": meta.CardRgi,
+        "metaspades": meta.Metaspades,
+        "megahit": meta.Megahit,
+        "kraken": meta.Kraken,
+        "midas_species": meta.Midas_species
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
@@ -102,7 +109,7 @@ class NextflowGenerator:
         sinks is represented as: {1: [2,3]}. Subsequent forks are then added
         sequentially: {1:[2,3], 2:[3,4,5]}. This allows the path upstream
         of a process in a given lane to be traversed until the start of the
-        pipeline.
+        pipeline. 
         """
 
         self.lanes = 0
@@ -196,8 +203,7 @@ class NextflowGenerator:
         self.compilers = {
             "patlas_consensus": {
                 "cls": pc.PatlasConsensus,
-                "template": "patlas_consensus",
-                "operator": "join"
+                "template": "patlas_consensus"
             }
         }
         """
@@ -208,6 +214,7 @@ class NextflowGenerator:
             - ``cls``: The reference to the compiler class object.
             - ``template``: The nextflow template file of the process.
         """
+
 
     @staticmethod
     def _parse_process_name(name_str):
@@ -404,8 +411,6 @@ class NextflowGenerator:
         ----------
         con : dict
             Dictionary with the connection information between two processes.
-        pid : int
-            Arbitrary and unique process ID.
 
         Returns
         -------
@@ -520,9 +525,9 @@ class NextflowGenerator:
 
         Parameters
         ----------
-        parent_process : assemblerflow.generator.process.Process
+        parent_process : assemblerflow.Process.Process
             Process that will be sending output.
-        child_process : assemblerflow.generator.process.Process
+        child_process : assemblerflow.Process.Process
             Process that will receive output.
 
         """
@@ -568,7 +573,7 @@ class NextflowGenerator:
 
         Parameters
         ----------
-        p : assemblerflow.generator.Process.Process
+        p : assemblerflow.Process.Process
             Process instance whose raw input will be modified
         sink_channel: str
             Sets the channel where the raw input will fork into. It overrides
@@ -681,17 +686,14 @@ class NextflowGenerator:
             )
 
     def _get_fork_tree(self, lane):
-        """Returns a list with the parent lanes from the provided lane
+        """
 
         Parameters
         ----------
-        lane : int
-            Target lage
+        p
 
         Returns
         -------
-        list
-            List of the lanes preceding the provided lane.
         """
 
         parent_lanes = [lane]
@@ -955,7 +957,7 @@ class NextflowGenerator:
             # and append compiler to the process list.
             if c_info["channels"]:
                 compiler_cls.set_compiler_channels(c_info["channels"],
-                                                   operator=c_info["operator"])
+                                                   operator="join")
                 self.processes.append(compiler_cls)
 
     def _set_status_channels(self):

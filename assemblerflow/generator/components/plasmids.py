@@ -17,8 +17,8 @@ class PatlasMapping(Process):
             "max_k": {
                 "default": 10949,
                 "description": "Sets the k parameter for bowtie2 allowing to "
-                               "make multiple mappings of the same read "
-                               "against several hits on the query sequence or "
+                               "make multiple mappings of the same read against"
+                               "several hits on the query sequence or "
                                "sequences."
             },
             "trim5": {
@@ -30,19 +30,26 @@ class PatlasMapping(Process):
             },
             "cov_cutoff": {
                 "default": 0.6,
-                "description": "This variable sets a cutoff for the percentage"
-                               " of the query reference sequence that is "
-                               "covered by reads (in absolute lenght)."
+                "description": "This variable sets a cutoff for the percentage of "
+                               "the query reference sequence that is covered by "
+                               "reads (in absolute lenght)."
+            },
+            "plasmid_length_dict": {
+                "default": "'jsons/*_length.json'",
+                "description": "Stores a dictionary of lengths to be added to "
+                               "jsonDumpingMapping process so that it can "
+                               "easily get the size of each plasmid sequence to"
+                               " be queried."
             },
             "refIndex": {
-                "default": "'/ngstools/data/indexes/bowtie2idx/bowtie2'",
-                "description": "Specifies the reference indexes to be provided"
-                               " to bowtie2."
+                "default": "'/ngstools/data/indexes/bowtie2idx/bowtie2.idx'",
+                "description": "Specifies the reference indexes to be provided "
+                               "to bowtie2."
             },
             "samtoolsIndex": {
                 "default": "'/ngstools/data/indexes/fasta/samtools.fasta.fai'",
-                "description": "Specifies the reference indexes to be provided"
-                               " to samtools."
+                "description": "Specifies the reference indexes to be provided "
+                               "to samtools."
             },
             "lengthJson": {
                 "default": "'/ngstools/data/reads_sample_result_length.json'",
@@ -58,8 +65,7 @@ class PatlasMapping(Process):
             },
             {
                 "params": "samtoolsIndex",
-                "channel": "IN_samtools_indexes = Channel"
-                           ".value(params.samtoolsIndex)"
+                "channel": "IN_samtools_indexes = Channel.value(params.samtoolsIndex)"
             },
             {
                 "params": "lengthJson",
@@ -70,21 +76,15 @@ class PatlasMapping(Process):
         self.directives = {
             "mappingBowtie": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.4",
-                "cpus": 1,
-                "memory": "{ 4.GB * task.attempt }"
+                "version": "1.1.2"
             },
             "samtoolsView": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.4",
-                "cpus": 1,
-                "memory": "{ 4.GB * task.attempt }"
+                "version": "1.1.2"
             },
             "jsonDumpingMapping": {
                 "container": "tiagofilipe12/patlasflow_mapping",
-                "version": "1.1.4",
-                "cpus": 1,
-                "memory": "'4GB'"
+                "version": "1.1.2"
             }
         }
 
@@ -95,4 +95,3 @@ class PatlasMapping(Process):
         ]
 
         self.compiler["patlas_consensus"] = ["mappingOutputChannel"]
-        
