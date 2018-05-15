@@ -208,8 +208,8 @@ def main(sample_id, fastq_pair, max_len, kmer):
     # Get spades version for output name
     info = __get_version_spades()
 
-    assembly_file = "{}_metaspades{}.fasta".format(
-        sample_id, info["version"].replace(".", ""))
+    assembly_file = "{}_metaspades.fasta".format(
+        sample_id)
     os.rename("contigs.fasta", assembly_file)
     logger.info("Setting main assembly file to: {}".format(assembly_file))
 
