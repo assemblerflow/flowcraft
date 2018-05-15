@@ -18,7 +18,7 @@ try:
     import generator.components.downloads as downloads
     import generator.components.distance_estimation as distest
     import generator.components.metagenomics as meta
-    import generator.components.plasmids as mapping_patlas
+    import generator.components.patlas_mapping as mapping_patlas
     import generator.components.mlst as mlst
     import generator.components.reads_quality_control as readsqc
     import generator.components.typing as typing
@@ -36,7 +36,7 @@ except ImportError:
     import assemblerflow.generator.components.distance_estimation as distest
     import assemblerflow.generator.components.mlst as mlst
     import assemblerflow.generator.components.metagenomics as meta
-    import assemblerflow.generator.components.plasmids as mapping_patlas
+    import assemblerflow.generator.components.patlas_mapping as mapping_patlas
     import assemblerflow.generator.components.reads_quality_control as readsqc
     import assemblerflow.generator.components.typing as typing
     import assemblerflow.generator.error_handling as eh
@@ -109,7 +109,7 @@ class NextflowGenerator:
         sinks is represented as: {1: [2,3]}. Subsequent forks are then added
         sequentially: {1:[2,3], 2:[3,4,5]}. This allows the path upstream
         of a process in a given lane to be traversed until the start of the
-        pipeline. 
+        pipeline.
         """
 
         self.lanes = 0
