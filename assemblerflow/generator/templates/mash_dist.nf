@@ -11,7 +11,7 @@ process runMashDist_{{ pid }} {
     val refFile from IN_reference_file
 
     output:
-    set sample_id, fasta, file("${fasta}_mashdist.txt") into mashDistOutChannel_{{ pid }}
+    set sample_id, fasta, file("*_mashdist.txt") into mashDistOutChannel_{{ pid }}
     {% with task_name="runMashDist", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

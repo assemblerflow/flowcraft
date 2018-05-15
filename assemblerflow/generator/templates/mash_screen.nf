@@ -15,7 +15,7 @@ process mashScreen_{{ pid }} {
     val refFile from IN_reference_file
 
     output:
-    set sample_id, file("sortedMashScreenResults_${id}.txt") into mashScreenResults_{{ pid }}
+    set sample_id, file("sortedMashScreenResults*.txt") into mashScreenResults_{{ pid }}
     {% with task_name="mashScreen", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -40,7 +40,7 @@ process mashOutputJson_{{ pid }} {
     set sample_id, file(mashtxt) from mashScreenResults_{{ pid }}
 
     output:
-    set sample_id, file("sortedMashScreenResults_${sample_id}.json") optional true into mashScreenOutputChannel_{{ pid }}
+    set sample_id, file("sortedMashScreenResults*.json") optional true into mashScreenOutputChannel_{{ pid }}
     {% with task_name="mashOutputJson", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

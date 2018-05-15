@@ -17,17 +17,21 @@ from os.path import join, dirname
 try:
     from __init__ import __version__, __build__
     from generator.engine import NextflowGenerator, process_map
+    from generator.inspect import NextflowInspector
     from generator.recipe import brew_recipe
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
+    import generator.error_handling as eh
 except ImportError:
     from assemblerflow import __version__, __build__
     from assemblerflow.generator.engine import NextflowGenerator, process_map
+    from assemblerflow.generator.inspect import NextflowInspector
     from assemblerflow.generator.recipe import brew_recipe
     from assemblerflow.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from assemblerflow.generator.process_details import proc_collector, \
         colored_print
+    import assemblerflow.generator.error_handling as eh
 
 logger = logging.getLogger("main")
 
@@ -82,6 +86,28 @@ def get_args(args=None):
         "--debug", dest="debug", action="store_const", const=True,
         help="Set log to debug mode")
 
+    # INSPECT MODE
+    inspect_parser = subparsers.add_parser("inspect",
+                                           help="Inspect the progress of a "
+                                                "pipeline execution")
+    inspect_parser.add_argument(
+        "-i", dest="trace_file", default="pipeline_stats.txt",
+        help="Specify the nextflow trace file."
+    )
+    inspect_parser.add_argument(
+        "-r", dest="refresh_rate", default=0.02,
+        help="Set the refresh frequency for the continuous inspect functions"
+    )
+    inspect_parser.add_argument(
+        "-m", "--mode", dest="mode", default="overview",
+        choices=["overview", "broadcast"],
+        help="Specify the inspection run mode."
+    )
+    inspect_parser.add_argument(
+        "--pretty", dest="pretty", action="store_const", const=True,
+        help="Pretty inspection mode that removes usual reporting processes."
+    )
+
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -116,7 +142,7 @@ def validate_build_arguments(args):
                         parent_dir), "red_bold"))
                 sys.exit(1)
 
-        return  parsed_output_nf
+        return parsed_output_nf
 
 
 def copy_project(path):
@@ -212,6 +238,22 @@ def build(args):
     logger.info(colored_print("DONE!", "green_bold"))
 
 
+def inspect(args):
+
+    try:
+        nf_inspect = NextflowInspector(args.trace_file, args.refresh_rate,
+                                       args.pretty)
+    except eh.InspectionError as e:
+        logger.error(colored_print(e.value, "red_bold"))
+        sys.exit(1)
+
+    if args.mode == "overview":
+        nf_inspect.display_overview()
+
+    if args.mode == "broadcast":
+        nf_inspect.broadcast_status()
+
+
 def main():
 
     args = get_args()
@@ -239,6 +281,9 @@ def main():
 
     if args.main_op == "build":
         build(args)
+
+    if args.main_op == "inspect":
+        inspect(args)
 
 
 if __name__ == '__main__':

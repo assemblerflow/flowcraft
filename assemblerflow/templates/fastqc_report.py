@@ -49,8 +49,8 @@ Code documentation
 
 """
 
-__version__ = "1.0.0"
-__build__ = "16012018"
+__version__ = "1.0.2"
+__build__ = "12052018"
 __template__ = "fastqc_report-nf"
 
 import os
@@ -203,6 +203,9 @@ def get_trim_index(biased_list):
     if set(biased_list) == {False}:
         return 0
 
+    if set(biased_list[:5]) == {False}:
+        return 0
+
     # Iterate over the biased_list array. Keep the iteration going until
     # we find a biased position with the two following positions unbiased
     # (e.g.: True, False, False).
@@ -283,8 +286,8 @@ def trim_range(data_file):
     logger.debug("Finished bias assessment with result: {}".format(biased))
 
     # Split biased list in half to get the 5' and 3' ends
-    biased_5end, biased_3end = biased[:int(len(biased))],\
-        biased[int(len(biased)):][::-1]
+    biased_5end, biased_3end = biased[:int(len(biased)/2)],\
+        biased[int(len(biased)/2):][::-1]
 
     logger.debug("Getting optimal trim range from biased list")
     trim_nt = [0, 0]

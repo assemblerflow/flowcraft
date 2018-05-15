@@ -25,6 +25,7 @@ setup(
     install_requires=[
         "argparse",
         "jinja2",
+        "requests"
     ],
     description="A Nextflow pipeline assembler for genomics. Pick your "
                 "modules. Assemble them. Run the pipeline.",
