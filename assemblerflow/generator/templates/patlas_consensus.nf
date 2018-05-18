@@ -6,7 +6,7 @@ process fullConsensus {
 
     tag { "Creating consensus json file for: " + sample_id}
 
-    publishDir 'results/consensus/'
+    publishDir 'results/consensus_{{ pid }}/'
 
     input:
     set sample_id, file(infile_list) from {{ compile_channels }}

@@ -6,6 +6,8 @@ process mappingBowtie_{{ pid }} {
 
     tag { "mapping sample: " + sample_id}
 
+    publishDir 'results/mapping/bowtie2_{{ pid }}/'
+
     input:
     set sample_id, file(reads) from {{ input_channel }}
     val bowtie2Index from IN_index_files
@@ -41,6 +43,8 @@ process samtoolsView_{{ pid }} {
 
     tag { "samtools commands: " +  sample_id }
 
+    publishDir 'results/mapping/samtools_{{ pid }}/'
+
     input:
     set sample_id, file(samtoolsFile) from bowtieResults
     val samtoolsIdx from IN_samtools_indexes
@@ -69,7 +73,7 @@ process jsonDumpingMapping_{{ pid }} {
 
     tag { "Dumping json: " +  sample_id }
 
-    publishDir 'results/mapping/'
+    publishDir 'results/mapping/mapping_json_{{ pid }}/'
 
     input:
     set sample_id, file(depthFile) from samtoolsResults
