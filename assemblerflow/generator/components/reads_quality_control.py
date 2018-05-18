@@ -29,17 +29,17 @@ class IntegrityCoverage(Process):
 
         self.params = {
             "genomeSize": {
-                "default": 2.1,
+                "default": 1,
                 "description":
-                    "Genome size estimate for the samples. It is used to "
+                    "Genome size estimate for the samples in Mb. It is used to "
                     "estimate the coverage and other assembly parameters and"
                     "checks (default: $params.genomeSize)"
             },
             "minCoverage": {
-                "default": 15,
+                "default": 0,
                 "description":
-                    "Minimum coverage for a sample to proceed. Can be set to"
-                    "0 to allow any coverage (default: $params.minCoverage)"
+                    "Minimum coverage for a sample to proceed. By default it's set"
+                    "to 0 to allow any coverage (default: $params.minCoverage)"
             }
         }
 
