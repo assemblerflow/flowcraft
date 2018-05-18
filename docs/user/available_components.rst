@@ -102,3 +102,10 @@ Plasmids
   sequence). However if a
   different database is provided it can use mash dist for other purposes.
 
+
+Metagenomics
+--------
+
+- :doc:`components/remove_host`: Performs read mapping with bowtie2
+  against the host genome (default hg19) and removes the mapping reads
+

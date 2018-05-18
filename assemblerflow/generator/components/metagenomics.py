@@ -291,7 +291,7 @@ class RemoveHost(Process):
             "remove_host": {
                 "container": "cimendes/bowtie2_hg19",
                 "version": "2.0",
-                "memory": "{10.Gb*task.attempt}",
+                "memory": "{5.Gb*task.attempt}",
                 "cpus": 3
             }
         }
