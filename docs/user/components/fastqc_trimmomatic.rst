@@ -1,4 +1,4 @@
-Fastqc_trimmomatic
+fastqc_trimmomatic
 ==================
 
 Purpose

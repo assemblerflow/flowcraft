@@ -1,4 +1,4 @@
-Trimmomatic
+trimmomatic
 ===========
 
 Purpose

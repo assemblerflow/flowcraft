@@ -1,4 +1,4 @@
-FastQC
+fastqc
 ======
 
 Purpose

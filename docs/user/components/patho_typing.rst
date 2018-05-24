@@ -1,4 +1,4 @@
-Patho_typing
+patho_typing
 ==========
 
 Purpose

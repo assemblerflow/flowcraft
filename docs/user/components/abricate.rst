@@ -1,4 +1,4 @@
-Abricate
+abricate
 ========
 
 Purpose

@@ -1,4 +1,4 @@
-metaSPAdes
+metaspades
 ==========
 
 Purpose

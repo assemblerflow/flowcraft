@@ -1,4 +1,4 @@
-Spades
+spades
 ======
 
 Purpose

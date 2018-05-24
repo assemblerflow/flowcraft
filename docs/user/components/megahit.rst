@@ -1,4 +1,4 @@
-MEGAHIT
+megahit
 =======
 
 Purpose

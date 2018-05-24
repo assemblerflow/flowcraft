@@ -1,4 +1,4 @@
-Integrity_coverage
+integrity_coverage
 ==================
 
 Purpose

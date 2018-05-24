@@ -1,4 +1,4 @@
-Check_coverage
+check_coverage
 ==============
 
 Purpose

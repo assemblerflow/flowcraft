@@ -1,4 +1,4 @@
-Remove_host
+remove_host
 ===========
 
 Purpose
