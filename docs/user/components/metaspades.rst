@@ -4,7 +4,7 @@ metaSPAdes
 Purpose
 -------
 
-This components assembles metagenomic paired-end FastQ files using the metaSpades assembler.
+This components assembles metagenomic paired-end FastQ files using the metaSPAdes assembler.
 
 .. note::
     Software page: http://bioinf.spbau.ru/spades
