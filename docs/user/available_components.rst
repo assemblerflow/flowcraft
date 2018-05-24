@@ -112,3 +112,7 @@ Metagenomics
 
 - :doc:`components/metaspades`: Assembles metagenomic paired-end FastQ files
   using metaSPAdes.
+
+
+- :doc:`components/megahit`: Assembles metagenomic paired-end FastQ files
+  using megahit.
