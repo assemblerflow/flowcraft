@@ -3,7 +3,7 @@
 Components
 ==========
 
-These are the currently available assemblerflow components with a short
+These are the currently available FlowCraft components with a short
 description of their tasks. For a more detailed information, follow the
 links of each component.
 

@@ -4,21 +4,21 @@ Installation
 User installation
 -----------------
 
-Assemblerflow is available as a bioconda package, which already comes with
+FlowCraft is available as a bioconda package, which already comes with
 nextflow::
 
-    conda install assemblerflow
+    conda install flowcraft
 
-Alternatively, you can install only Assemblerflow, via pip::
+Alternatively, you can install only FlowCraft, via pip::
 
-    pip install assemblerflow
+    pip install flowcraft
 
 You will also need a container engine (see `Container engine`_ below)
 
 Container engine
 ----------------
 
-All components of assemblerflow are executed in docker containers, which
+All components of FlowCraft are executed in docker containers, which
 means that you'll need to have a container engine installed. The container
 engines available are the ones supported by Nextflow:
 
@@ -50,12 +50,12 @@ on the website: https://docs.docker.com/install/linux/linux-postinstall/#manage-
 Developer installation
 ----------------------
 
-If you are looking to contribute to assemblerflow or simply interested in
+If you are looking to contribute to FlowCraft or simply interested in
 tweaking it, clone the github repository and its submodule and then run
 setup.py::
 
-    git clone https://github.com/ODiogoSilva/assemblerflow.git
-    cd assemblerflow
+    git clone https://github.com/flowcraft/flowcraft.git
+    cd flowcraft
     git submodule update --init --recursive
     python3 setup.py install
 

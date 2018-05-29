@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-AssemblerFlow
-=============
+FlowCraft
+=========
 
 A NextFlow pipeline assembler for genomics.
 
@@ -45,5 +45,5 @@ A NextFlow pipeline assembler for genomics.
    :maxdepth: 2
    :caption: Source API
 
-   assemblerflow
+   flowcraft
 

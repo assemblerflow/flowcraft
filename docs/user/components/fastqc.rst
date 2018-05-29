@@ -52,7 +52,7 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.fastqc_report`
+:mod:`flowcraft.templates.fastqc_report`
 
 Reports JSON
 ^^^^^^^^^^^^
