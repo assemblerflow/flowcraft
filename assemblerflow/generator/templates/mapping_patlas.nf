@@ -4,7 +4,7 @@ process mappingBowtie_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "mapping sample: " + sample_id}
+    tag { sample_id }
 
     publishDir 'results/mapping/bowtie2_{{ pid }}/'
 
@@ -41,7 +41,7 @@ process samtoolsView_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "samtools commands: " +  sample_id }
+    tag { sample_id }
 
     publishDir 'results/mapping/samtools_{{ pid }}/'
 
@@ -71,7 +71,7 @@ process jsonDumpingMapping_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "Dumping json: " +  sample_id }
+    tag { sample_id }
 
     publishDir 'results/mapping/mapping_json_{{ pid }}/'
 

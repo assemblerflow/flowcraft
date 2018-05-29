@@ -8,7 +8,7 @@ process mashScreen_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "running mash screen for sample: " + sample_id }
+    tag { sample_id }
 
     publishDir 'results/mashscreen/mashscreen_{{ pid }}/'
 
@@ -34,7 +34,7 @@ process mashOutputJson_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "dumping json file from: " + mashtxt }
+    tag { sample_id }
 
     publishDir 'results/mashscreen/mashscreen_json_{{ pid }}'
 

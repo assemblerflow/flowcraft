@@ -4,7 +4,7 @@
 */
 process fullConsensus {
 
-    tag { "Creating consensus json file for: " + sample_id}
+    tag { sample_id }
 
     publishDir 'results/consensus_{{ pid }}/'
 

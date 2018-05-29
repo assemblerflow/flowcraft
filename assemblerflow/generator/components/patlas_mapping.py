@@ -35,12 +35,12 @@ class PatlasMapping(Process):
                                "covered by reads (in absolute lenght)."
             },
             "refIndex": {
-                "default": "'/ngstools/data/indexes/bowtie2idx/bowtie2'",
+                "default": "'/ngstools/data/indexes/patlas_bowtie_index'",
                 "description": "Specifies the reference indexes to be provided"
                                " to bowtie2."
             },
             "samtoolsIndex": {
-                "default": "'/ngstools/data/indexes/fasta/samtools.fasta.fai'",
+                "default": "'/ngstools/data/indexes/master_fasta_patlas_version_18042018.fas.fai'",
                 "description": "Specifies the reference indexes to be provided"
                                " to samtools."
             },
