@@ -15,7 +15,9 @@
 
 - Changed `mapping_patlas` docker container tag and variable
 (PR [#76](https://github.com/assemblerflow/assemblerflow/pull/76)).
-- The `env` scope of nextflow.config now extends the `PYTHONPATH` environmental variable
+- The `env` scope of nextflow.config now extends the `PYTHONPATH`
+environmental variable.
+- Updated indexes for both `mapping_patlas` and `mash` based processes.
 
 # Bug Fixes
 
