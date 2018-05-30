@@ -74,7 +74,8 @@ process_map = {
         "metaspades": meta.Metaspades,
         "megahit": meta.Megahit,
         "kraken": meta.Kraken,
-        "midas_species": meta.Midas_species
+        "midas_species": meta.Midas_species,
+        "sistr": typing.Sistr
 }
 """
 dict: Maps the process ids to the corresponding template interface class wit
