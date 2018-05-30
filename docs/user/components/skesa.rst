@@ -47,4 +47,4 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.skesa`
+:mod:`flowcraft.templates.skesa`

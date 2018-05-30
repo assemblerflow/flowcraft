@@ -8,7 +8,7 @@
 
 ### Features
 
-- Added `inspect` run mode to assemblerflow for displaying the progress overview
+- Added `inspect` run mode to flowcraft for displaying the progress overview
   during a nextflow run.
 
 ### Minor/Other changes

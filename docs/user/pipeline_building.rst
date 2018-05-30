@@ -1,7 +1,7 @@
 Pipeline building
 =================
 
-Assemblerflow offers a few extra features when building pipelines using the
+FlowCraft offers a few extra features when building pipelines using the
 ``build`` execution mode.
 
 Raw input types
@@ -22,7 +22,7 @@ respective parameters:
 Forks
 -----
 
-The output of any component in an assemblerflow pipeline can be forked into
+The output of any component in an FlowCraft pipeline can be forked into
 two or more components, using the following fork syntax::
 
     trimmomatic fastqc (spades | skesa)
@@ -68,12 +68,12 @@ via the ``--fastq`` parameter will be forked and provided to both processes.
     Some components have dependencies which need to be included previously
     in the pipeline. For instance, ``trimmomatic`` requires
     ``integrity_coverage`` and ``pilon`` requires ``assembly_mapping``. By
-    default, assemblerflow will insert any missing dependencies right before
+    default, FlowCraft will insert any missing dependencies right before
     the process, which is why these components appear in the figures above.
 
 .. warning::
     Pay special attention to the syntax of the pipeline string when using
-    forks. However, when unable to parse it, assemblerflow will do its best
+    forks. However, when unable to parse it, FlowCraft will do its best
     to inform you where the parsing error occurred.
 
 Directives
@@ -92,13 +92,13 @@ but the most commonly used include:
     - ``queue``
 
 In addition, you can also pass the ``container`` and ``version`` directives
-which are parsed by assemblerflow to dynamically change the container and/or
+which are parsed by FlowCraft to dynamically change the container and/or
 version tag of any process.
 
 Here is an example where we specify cpu usage, allocated memory and container
 version in the pipeline string::
 
-    assemblerflow build -t "fastqc={'version':'0.11.5'} \
+    flowcraft build -t "fastqc={'version':'0.11.5'} \
                             trimmomatic={'cpus':'2'} \
                             spades={'memory':'\'10GB\''}" -o my_pipeline.nf
 
@@ -171,7 +171,7 @@ specify them in a text file::
 
 And then provide the pipeline file to the ``-t`` parameter::
 
-    assemblerflow build -t my_pipe.txt -o my_pipe.nf
+    flowcraft build -t my_pipe.txt -o my_pipe.nf
 
 Pipeline files are usually more readable, particularly when they become more
 complex. Consider the following example::

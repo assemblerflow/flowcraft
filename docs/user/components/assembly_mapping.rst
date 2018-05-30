@@ -63,7 +63,7 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.process_assembly_mapping`
+:mod:`flowcraft.templates.process_assembly_mapping`
 
 Reports JSON
 ^^^^^^^^^^^^

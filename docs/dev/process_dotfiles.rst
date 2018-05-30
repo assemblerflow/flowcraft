@@ -13,7 +13,7 @@ placeholder (see :ref:`create-process`): ::
     }
 
 The actual script that creates the dotfiles is found in
-``assemblerflow/bin``, is called ``set_dotfiles.sh`` and executes the
+``flowcraft/bin``, is called ``set_dotfiles.sh`` and executes the
 following command::
 
     touch .status .warning .fail .report.json .versions

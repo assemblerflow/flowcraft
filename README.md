@@ -1,4 +1,5 @@
-# Assemblerflow :whale2::package:
+# FlowCraft :whale2::package:
+(Previously Assemblerflow)
 
 ![Nextflow version](https://img.shields.io/badge/nextflow->0.26.0-brightgreen.svg)
 ![Python version](https://img.shields.io/badge/python-3.6-brightgreen.svg)
@@ -18,7 +19,7 @@ Pick your modules. Assemble them. Run the pipeline.
 What if building your own genomics pipeline would be as simple as:
 
 ```
-assemblerflow.py build -t "trimmomatic fastqc skesa pilon" -o my_pipeline.nf
+flowcraft.py build -t "trimmomatic fastqc skesa pilon" -o my_pipeline.nf
 ```
 
 Seems pretty simple right? What if we could run this pipeline with a single command on any linux machine or cluster by leveraging
@@ -36,7 +37,7 @@ Launching `my_pipeline` [prickly_mcnulty] - revision: 041b7b793f
 ============================================================
                 M Y   P I P E L I N E
 ============================================================
-Built using assemblerflow v1.0.2
+Built using flowcraft v1.0.2
 
  Input FastQ                 : 2
  Input samples               : 1
@@ -62,16 +63,16 @@ only two commands! :tada:
 
 ## Installation
 
-Assemblerflow is available as a bioconda package, which already brings
+FlowCraft is available as a bioconda package, which already brings
 nextflow:
 
 ```
-conda install assemblerflow
+conda install flowcraft
 ```
 
 #### Container engines
 
-Pipelines built with assemblerflow require at least one container
+Pipelines built with FlowCraft require at least one container
 engine to be installed, among `docker`, `singularity` or `shifter`.
 If you already have any one of these installed, you're good to go.
 If not, we recommend installing singularity, which also has a bioconda
@@ -83,20 +84,20 @@ conda install singularity
 
 ## How to use it
 
-The complete user guide of assemblerflow can be found on [readthedocs.org](http://assemblerflow.readthedocs.io/en/latest/?badge=latest).
+The complete user guide of FlowCraft can be found on [readthedocs.org](http://assemblerflow.readthedocs.io/en/latest/?badge=latest).
 For a quick and dirty demonstration, see below.
 
 ### Quick guide
 
 #### Building a pipeline
 
-Assemblerflow comes with a number of [ready-to-use components](http://assemblerflow.readthedocs.io/en/latest/user/available_components.html) to build your
+FlowCraft comes with a number of [ready-to-use components](http://assemblerflow.readthedocs.io/en/latest/user/available_components.html) to build your
 own pipeline. Following some basic rules, such as the output type of one process
 must match the input type of the next process, assembling a pipeline is done
 using the `build` mode and the `-t` option:
 
 ```
-assemblerflow build -t "trimmomatic spades abricate" -o my_pipeline.nf -n "assembly pipe"
+flowcraft build -t "trimmomatic spades abricate" -o my_pipeline.nf -n "assembly pipe"
 ```
 
 This command will generate everything that is necessary to run the
@@ -121,7 +122,7 @@ Launching `my_pipeline.nf` [prickly_keller] - revision: 1b3fec5658
 ============================================================
                 A S S E M B L Y   P I P E
 ============================================================
-Built using assemblerflow v1.0.2
+Built using flowcraft v1.0.2
 
 
 Usage:
@@ -149,9 +150,9 @@ Since this pipeline starts with `trimmomatic`, which receives fastq files as inp
 #### Running a pipeline
 
 Now that we have our nextflow pipeline built, we are ready to executed it by
-providing input data. By default, assemblerflow pipelines will run locally and use
+providing input data. By default, FlowCraft pipelines will run locally and use
 `singularity` to run the containers of each component. This can be
-changed in multiple ways, but for convenience assemblerflow has already defined
+changed in multiple ways, but for convenience FlowCraft has already defined
 profiles for most configurations of `executors` and `container` engines.
 
 Running a pipeline locally with `singularity` can be done with:
@@ -177,7 +178,7 @@ In many cases, building a static nextflow pipeline is sufficient for our goals.
 However, when building our own pipelines, we often felt the need to add dynamism
 to this process, particularly if we take into account how fast new tools arise
 and existing ones change. Our biological goals also change over time and we
-might need different pipelines to answer different questions. Assemblerflow makes
+might need different pipelines to answer different questions. FlowCraft makes
 this very easy, by having a set of pre-made and ready-to-use components that can
 be freely assembled.
 
@@ -191,7 +192,7 @@ trimmomatic spades pilon
 trimmomatic skesa pilon
 ```
 
-![example1](https://github.com/ODiogoSilva/assemblerflow/raw/master/docs/resources/example_3.png)
+![example1](https://github.com/ODiogoSilva/flowcraft/raw/master/docs/resources/example_3.png)
 
 If you are interested in having some sort of genome annotation, simply add those
 components at the end, using a fork syntax:
@@ -201,7 +202,7 @@ components at the end, using a fork syntax:
 trimmomatic spades pilon (prokka | abricate)
 ```
 
-![example2](https://github.com/ODiogoSilva/assemblerflow/raw/master/docs/resources/example_1.png)
+![example2](https://github.com/ODiogoSilva/flowcraft/raw/master/docs/resources/example_1.png)
 
 On the other hand, if you are interest in just perform allele calling for wgMLST,
 simply add `chewbbaca`:
@@ -210,7 +211,7 @@ simply add `chewbbaca`:
 trimmomatic spades pilon chewbbaca
 ```
 
-![example3](https://github.com/ODiogoSilva/assemblerflow/raw/master/docs/resources/example_2.png)
+![example3](https://github.com/ODiogoSilva/flowcraft/raw/master/docs/resources/example_2.png)
 
 Since nextflow handles parallelism of large sets of data so well, simple pipelines
 of two components are also useful to build:
@@ -227,9 +228,9 @@ As the number of existing components grow, so does your freedom to build pipelin
 
 Is there a missing component that you would like to see included? We would love
 to expand! You could make a component request in our
-[issue tracker](https://github.com/ODiogoSilva/assemblerflow/issues).
+[issue tracker](https://github.com/ODiogoSilva/flowcraft/issues).
 
 If you want to be part of the team, you can contribute with the code as well. Each component
-in assemblerflow can be independently added without having to worry about
+in FlowCraft can be independently added without having to worry about
 the rest of the code base. You'll just need to have some knowledge of python
 and nextflow. [Check the developer documentation for how-to guides](http://assemblerflow.readthedocs.io/en/latest/)

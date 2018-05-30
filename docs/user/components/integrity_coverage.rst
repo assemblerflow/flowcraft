@@ -76,7 +76,7 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.integrity_coverage`
+:mod:`flowcraft.templates.integrity_coverage`
 
 Reports JSON
 ^^^^^^^^^^^^

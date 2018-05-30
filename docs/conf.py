@@ -20,7 +20,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath(".."))
-sys.path.insert(0, os.path.abspath("../assemblerflow/templates"))
+sys.path.insert(0, os.path.abspath("../flowcraft/templates"))
 
 
 # -- General configuration ------------------------------------------------
@@ -57,9 +57,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Assemblerflow'
-copyright = '2018, Assemblerflow team'
-author = 'Diogo N. Silva, Tiago F. Jesus'
+project = 'FlowCraft'
+copyright = '2018, FlowCraft team'
+author = 'Diogo N. Silva, Tiago F. Jesus, Ines Mendes'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
