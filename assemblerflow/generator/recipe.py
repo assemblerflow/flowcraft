@@ -499,7 +499,8 @@ class Innuendo(Recipe):
             "process_spades": [False, "spades", "assembly_mapping"],
             "assembly_mapping": [False, "skesa|process_spades", "pilon"],
             "pilon": [False, "assembly_mapping", "mlst"],
-            "mlst": [False, "pilon", "abricate|prokka|chewbbaca"],
+            "mlst": [False, "pilon", "abricate|prokka|chewbbaca|sistr"],
+            "sistr": [True, "mlst", None],
             "abricate": [True, "mlst", None],
             "prokka": [True, "mlst", None],
             "chewbbaca": [True, "mlst", None]
