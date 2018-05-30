@@ -4,7 +4,9 @@ process mappingBowtie_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "mapping sample: " + sample_id}
+    tag { sample_id }
+
+    publishDir 'results/mapping/bowtie2_{{ pid }}/'
 
     input:
     set sample_id, file(reads) from {{ input_channel }}
@@ -39,7 +41,9 @@ process samtoolsView_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "samtools commands: " +  sample_id }
+    tag { sample_id }
+
+    publishDir 'results/mapping/samtools_{{ pid }}/'
 
     input:
     set sample_id, file(samtoolsFile) from bowtieResults
@@ -67,9 +71,9 @@ process jsonDumpingMapping_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "Dumping json: " +  sample_id }
+    tag { sample_id }
 
-    publishDir 'results/mapping/'
+    publishDir 'results/mapping/mapping_json_{{ pid }}/'
 
     input:
     set sample_id, file(depthFile) from samtoolsResults

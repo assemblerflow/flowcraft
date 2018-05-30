@@ -4,7 +4,9 @@ process runMashDist_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "running mash dist for fasta file: " + fasta }
+    tag { sample_id }
+
+    publishDir 'results/mashdist/mashdist_{{ pid }}/'
 
     input:
     set sample_id, file(fasta) from {{ input_channel }}
@@ -28,9 +30,9 @@ process mashDistOutputJson_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    tag { "dumping json file from: " + mashtxt }
+    tag { sample_id }
 
-    publishDir 'results/mashdist/'
+    publishDir 'results/mashdist/mashdist_json_{{ pid }}/'
 
     input:
     set sample_id, fasta, file(mashtxt) from mashDistOutChannel_{{ pid }}

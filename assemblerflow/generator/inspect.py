@@ -606,7 +606,6 @@ class NextflowInspector:
                 self._update_trace_info(fields, hm)
 
         self._update_process_stats()
-        self._update_pipeline_status()
         self._update_barrier_status()
 
     def log_parser(self):
@@ -647,6 +646,8 @@ class NextflowInspector:
 
                     p["barrier"] = "R"
                     p["submitted"].add(sample)
+
+        self._update_pipeline_status()
 
     def update_inspection(self):
         """Wrapper method that calls the appropriate main updating methods of
