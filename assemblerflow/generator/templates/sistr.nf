@@ -27,6 +27,7 @@ process sistr_{{ pid }} {
             echo pass > .status
         else
             echo fail > .status
+        fi
 
     } || {
         echo fail > .status
