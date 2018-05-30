@@ -12,7 +12,7 @@ Expected input
 The following variables are expected whether using NextFlow or the
 :py:func:`main` executor.
 
-- ``fastq_id`` : Sample Identification string.
+- ``sample_id`` : Sample Identification string.
     - e.g.: ``'SampleA'``
 - ``fastq_pair`` : Pair of FastQ file paths.
     - e.g.: ``'SampleA_1.fastq.gz SampleA_2.fastq.gz'``
@@ -70,13 +70,13 @@ def __get_version_spades():
 
 
 if __file__.endswith(".command.sh"):
-    FASTQ_ID = '$fastq_id'
+    SAMPLE_ID = '$sample_id'
     FASTQ_PAIR = '$fastq_pair'.split()
     MAX_LEN = int('$max_len'.strip())
     KMERS = '$kmers'.strip()
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
-    logger.debug("FASTQ_ID: {}".format(FASTQ_ID))
+    logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))
     logger.debug("FASTQ_PAIR: {}".format(FASTQ_PAIR))
     logger.debug("MAX_LEN: {}".format(MAX_LEN))
     logger.debug("KMERS: {}".format(KMERS))
@@ -129,12 +129,12 @@ def set_kmers(kmer_opt, max_read_len):
 
 
 @MainWrapper
-def main(fastq_id, fastq_pair, max_len, kmer):
+def main(sample_id, fastq_pair, max_len, kmer):
     """Main executor of the spades template.
 
     Parameters
     ----------
-    fastq_id : str
+    sample_id : str
         Sample Identification string.
     fastq_pair : list
         Two element list containing the paired FastQ files.
@@ -204,16 +204,16 @@ def main(fastq_id, fastq_pair, max_len, kmer):
 
     # Change the default contigs.fasta assembly name to a more informative one
     if "_trim." in fastq_pair[0]:
-        fastq_id += "_trim"
+        sample_id += "_trim"
     # Get spades version for output name
     info = __get_version_spades()
 
-    assembly_file = "{}_metaspades{}.fasta".format(
-        fastq_id, info["version"].replace(".", ""))
+    assembly_file = "{}_metaspades.fasta".format(
+        sample_id)
     os.rename("contigs.fasta", assembly_file)
     logger.info("Setting main assembly file to: {}".format(assembly_file))
 
 
 if __name__ == '__main__':
 
-    main(FASTQ_ID, FASTQ_PAIR, MAX_LEN, KMERS)
+    main(SAMPLE_ID, FASTQ_PAIR, MAX_LEN, KMERS)

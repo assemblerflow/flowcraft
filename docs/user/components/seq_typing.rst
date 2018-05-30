@@ -1,4 +1,4 @@
-Seq_typing
+seq_typing
 ==========
 
 Purpose

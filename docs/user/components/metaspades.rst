@@ -1,10 +1,10 @@
-spades
-======
+metaspades
+==========
 
 Purpose
 -------
 
-This components assembles paired-end FastQ files using the Spades assembler.
+This components assembles metagenomic paired-end FastQ files using the metaSPAdes assembler.
 
 .. note::
     Software page: http://bioinf.spbau.ru/spades
@@ -23,18 +23,14 @@ Input/Output type
 Parameters
 ----------
 
-- ``spadesMinCoverage``: The minimum number of reads to consider an edge in
-  the de Bruijn graph during the assembly
-- ``spadesMinKmerCoverage``: Minimum contigs K-mer coverage. After assembly
-  only keep contigs with reported k-mer coverage equal or above this value
-- ``spadesKmers``: If 'auto' the SPAdes k-mer lengths will be determined
-  from the maximum read length of each assembly. If 'default', SPAdes will
+- ``metaspadesKmers``: If 'auto' the metaSPAdes k-mer lengths will be determined
+  from the maximum read length of each assembly. If 'default', metaSPAdes will
   use the default k-mer lengths.
 
 Published results
 -----------------
 
-- ``results/assembly/spades``: Stores the fasta assemblies for each sample.
+- ``results/assembly/metaspades``: Stores the fasta assemblies for each sample.
 
 Published reports
 -----------------
@@ -56,4 +52,4 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.spades`
+:mod:`assemblerflow.templates.metaspades`

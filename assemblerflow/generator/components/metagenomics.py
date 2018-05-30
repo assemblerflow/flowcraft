@@ -291,7 +291,7 @@ class RemoveHost(Process):
             "remove_host": {
                 "container": "cimendes/bowtie2_hg19",
                 "version": "2.0",
-                "memory": "{10.Gb*task.attempt}",
+                "memory": "{5.Gb*task.attempt}",
                 "cpus": 3
             }
         }
@@ -300,6 +300,44 @@ class RemoveHost(Process):
             "remove_host"
         ]
 
+class MetaProb(Process):
 
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "csv"
+
+        self.params = {
+            "feature": {
+                "default": 1,
+                "description": "Feature used to compute. Default: 1"
+            },
+            "metaProbQMer": {
+                "default": 5,
+                "description": "Threshold of shared q-mer to create graph "
+                               "adiacences. Default: 5"
+            }
+        }
+
+        self.directives = {
+            "mashScreen": {
+                "container": "",
+                "version": "1.0.0",
+                "cpus": 1,
+                "memory": "{ 4.GB * task.attempt }"
+            },
+            "mashOutputJson": {
+                "container": "",
+                "version": "1.0.0",
+                "cpus": 1,
+                "memory": "'4GB'"
+            }
+        }
+
+        self.status_channels = [
+            "metaProb"
+        ]
 
 

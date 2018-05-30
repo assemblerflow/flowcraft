@@ -1,4 +1,4 @@
-Assembly_mapping
+assembly_mapping
 ================
 
 Purpose

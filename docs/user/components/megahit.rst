@@ -1,10 +1,13 @@
-skesa
-=====
+megahit
+=======
 
 Purpose
 -------
 
-This components assembles paired-end FastQ files using the Skesa assembler.
+This components assembles metagenomic paired-end FastQ files using the megahit assembler.
+
+.. note::
+    Software page: https://github.com/voutcn/megahit
 
 Input/Output type
 ------------------
@@ -20,12 +23,14 @@ Input/Output type
 Parameters
 ----------
 
-None.
+- ``megahitKmers``: If 'auto' the megahit k-mer lengths will be determined
+  from the maximum read length of each assembly. If 'default', megahit will
+  use the default k-mer lengths.
 
 Published results
 -----------------
 
-- ``results/assembly/skesa``: Stores the fasta assemblies for each sample.
+- ``results/assembly/megahit``: Stores the fasta assemblies for each sample.
 
 Published reports
 -----------------
@@ -37,8 +42,8 @@ Default directives
 
 - ``cpus``: 4
 - ``memory``: 5GB (dynamically increased on retry)
-- ``container``: ummidock/skesa
-- ``version``: 0.2.0-3
+- ``container``: cimendes/megahit
+- ``version``: v1.1.3-0.1
 - ``scratch``: true
 
 Advanced
@@ -47,4 +52,4 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.skesa`
+:mod:`assemblerflow.templates.megahit`
