@@ -120,3 +120,20 @@ class PathoTyping(Process):
             "container": "ummidock/patho_typing",
             "version": "0.3.0-1"
         }}
+
+
+class Sistr(Process):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = None
+
+        self.directives = {"sistr": {
+            "cpus": 4,
+            "memory": "'4GB'",
+            "container": "ummidock/sistr_cmd",
+            "version": "1.0.2"
+        }}

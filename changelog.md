@@ -2,6 +2,10 @@
 
 ## New in upcoming 1.2.0 release (`dev` branch)
 
+### New components
+
+- `sistr`: Salmonella *in silico* typing component for assemblies. 
+
 ### Features
 
 - Added `inspect` run mode to assemblerflow for displaying the progress overview

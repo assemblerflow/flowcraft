@@ -72,6 +72,7 @@ process_map = {
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
         "seq_typing": typing.SeqTyping,
+        "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
         "spades": assembly.Spades,
         "trimmomatic": readsqc.Trimmomatic,
