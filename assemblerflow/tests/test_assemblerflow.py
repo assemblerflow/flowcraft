@@ -69,6 +69,7 @@ def test_build_file_2(tmp):
                         "{}".format(p), "--pipeline-only"])
     af.build(args)
 
-    assert sorted(os.listdir(tmp)) == ["containers.config", "lib",
-                                       "params.config", "resources.config",
-                                       "teste.html", "teste.nf", "user.config"]
+    assert sorted(os.listdir(tmp)) == [".treeDag.json", "containers.config",
+                                       "lib", "params.config",
+                                       "resources.config", "teste.html",
+                                       "teste.nf", "user.config"]

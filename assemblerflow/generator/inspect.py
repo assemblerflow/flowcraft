@@ -6,8 +6,12 @@ import signal
 import locale
 import logging
 import hashlib
+import datetime
 import requests
+import json
 
+from dateutil import parser
+from pympler import asizeof
 from os.path import join, abspath
 from time import gmtime, strftime, sleep
 from collections import defaultdict, OrderedDict
@@ -45,7 +49,9 @@ def signal_handler(screen):
 
 class NextflowInspector:
 
-    def __init__(self, trace_file, refresh_rate, pretty=False):
+    MAX_RETRIES = 1000
+
+    def __init__(self, trace_file, refresh_rate, pretty=False, ip_addr=None):
 
         self.trace_file = trace_file
         """
@@ -69,6 +75,12 @@ class NextflowInspector:
         to skip them when parsing the trace files multiple times.
         """
 
+        self.stored_log_ids = []
+        """
+        list: Stores the time stamps of the log file lines that were already
+        parsed. It is used to skip parsing the log files multilpe times
+        """
+
         self.trace_info = defaultdict(list)
         """
         dict: Main object that stores the status information for each process
@@ -87,6 +99,12 @@ class NextflowInspector:
         .nextflow.log file in the :func:`_parser_pipeline_processes` method
         and updated in the :func:`_update_barrier_status` and 
         :func:`_update_process_stats` and :func:`_update_submission_status`.
+        """
+
+        self.process_tags = {}
+        """
+        dict: Dictionary of processes with summary information for each tag
+        it processes
         """
 
         self.samples = []
@@ -112,9 +130,54 @@ class NextflowInspector:
         log file. This is used to parse the file only when it has changed.
         """
 
+        self.pipeline_tag = ""
+        """
+        str: Tag of the pipeline, parsed from .nextflow.log
+        """
+
+        self.log_retry = 0
+        """
+        int: Each time the log file is not found, this counter is 
+        increased. Only when it matches the :attr:`MAX_RETRIES` attribute
+        does it raises a FileNotFoundError.
+        """
+
+        self.trace_retry = 0
+        """
+        int: Each time the log file is not found, this counter is 
+        increased. Only when it matches the :attr:`MAX_RETRIES` attribute
+        does it raises a FileNotFoundError.
+        """
+
         self.pipeline_name = ""
         """
-        str: Name of the pipeline, parsed from .nextflow.log
+        str: Name of the nextflow pipeline file.
+        """
+
+        self.time_start = None
+        """
+        datetime.time object with the starting time of the pipeline.
+        """
+
+        self.time_stop = None
+        """
+        datetime.time object with the finish time of the pipeline. This 
+        attribute is only set when the pipeline is not running.
+        """
+
+        self.workdir = os.getcwd()
+        """
+        str: Path to the pipeline work directory
+        """
+
+        self.execution_command = None
+        """
+        str: The command used to execute the pipeline
+        """
+
+        self.nextflow_version = None
+        """
+        str: Nextflow's version string, as retrieved from the log file.
         """
 
         self.run_status = ""
@@ -123,9 +186,31 @@ class NextflowInspector:
         'error', 'complete'.
         """
 
-        self.broadcast_address = "http://localhost:8000/inspect/api/status"
+        self.abort_cause = None
+        """
+        str or None: When :attr:`run_status` is "aborted", this attribute
+        will contain the reason provided in the nextflow log. When this
+        attribute is not None, it will also trigger the sending of the
+        final lines of the nextflow log to broadcast.
+        """
+
+        if not ip_addr:
+            self.app_address = "http://localhost:8000/"
+        else:
+            self.app_address = ip_addr
+            """
+            str: Address of assemblerflow web app
+            """
+
+        self.broadcast_address = "{}inspect/api/status".format(
+            self.app_address)
         """
         str: Address of the REST api where the information will be sent
+        """
+
+        self._c = 0
+        """
+        Counter of payloads sent, for debug purposes
         """
 
         self.send = True
@@ -200,7 +285,9 @@ class NextflowInspector:
             Mapping the column ID to its position (e.g.: {"tag":2})
         """
 
-        return dict((x, pos) for pos, x in enumerate(header.split("\t")))
+        return dict(
+            (x.strip(), pos) for pos, x in enumerate(header.split("\t"))
+        )
 
     @staticmethod
     def _expand_path(hash_str):
@@ -218,12 +305,15 @@ class NextflowInspector:
             Path to working directory of the hash string
         """
 
-        first_hash, second_hash = hash_str.split("/")
-        first_hash_path = join(abspath("work"), first_hash)
+        try:
+            first_hash, second_hash = hash_str.split("/")
+            first_hash_path = join(abspath("work"), first_hash)
 
-        for l in os.listdir(first_hash_path):
-            if l.startswith(second_hash):
-                return join(first_hash_path, l)
+            for l in os.listdir(first_hash_path):
+                if l.startswith(second_hash):
+                    return join(first_hash_path, l)
+        except FileNotFoundError:
+            return None
 
     @staticmethod
     def _hms(s):
@@ -332,13 +422,20 @@ class NextflowInspector:
                             "submitted": set(),
                             "finished": set(),
                             "failed": set(),
-                            "retry": set()
+                            "retry": set(),
+                            "cpus": None,
+                            "memory": None
                         }
+                        self.process_tags[process] = {}
 
                 # Retrieves the pipeline name from the string
                 if re.match(".*Launching `.*` \[.*\] ", line):
-                    match = re.match(".*Launching `.*` \[(.*)\] ", line)
-                    self.pipeline_name = match.group(1)
+                    tag_match = re.match(".*Launching `.*` \[(.*)\] ", line)
+                    self.pipeline_tag = tag_match.group(1) if tag_match else \
+                        "?"
+                    name_match = re.match(".*Launching `(.*)` \[.*\] ", line)
+                    self.pipeline_name = name_match.group(1) if name_match \
+                        else "?"
 
         self.content_lines = len(self.processes)
 
@@ -346,9 +443,17 @@ class NextflowInspector:
         """Clears inspect attributes when re-executing a pipeline"""
 
         self.trace_info = defaultdict(list)
+        self.process_tags = {}
         self.process_stats = {}
         self.samples = []
         self.stored_ids = []
+        self.stored_log_ids = []
+        self.time_start = None
+        self.time_stop = None
+        self.execution_command = None
+        self.nextflow_version = None
+        self.abort_cause = None
+        self._c = 0
         # Clean up of tag running status
         for p in self.processes.values():
             p["barrier"] = "W"
@@ -362,16 +467,55 @@ class NextflowInspector:
 
         with open(self.log_file) as fh:
 
+            first_line = next(fh)
+            time_str = " ".join(first_line.split()[:2])
+            self.time_start = parser.parse(time_str)
+
+            if not self.execution_command:
+                try:
+                    self.execution_command = re.match(
+                        ".*nextflow run (.*)", first_line).group(1)
+                except AttributeError:
+                    self.execution_command = "Unknown"
+
             for line in fh:
+
+                if "DEBUG nextflow.cli.CmdRun" in line:
+                    if not self.nextflow_version:
+                        try:
+                            vline = next(fh)
+                            self.nextflow_version = re.match(
+                                ".*Version: (.*)", vline).group(1)
+                        except AttributeError:
+                            self.nextflow_version = "Unknown"
+
                 if "Session aborted" in line:
                     self.run_status = "aborted"
+                    # Get abort cause
+                    try:
+                        self.abort_cause = re.match(
+                            ".*Cause: (.*)", line).group(1)
+                    except AttributeError:
+                        self.abort_cause = "Unknown"
+                    # Get time of pipeline stop
+                    time_str = " ".join(line.split()[:2])
+                    self.time_stop = parser.parse(time_str)
+                    self.send = True
                     return
                 if "Execution complete -- Goodbye" in line:
                     self.run_status = "complete"
+                    # Get time of pipeline stop
+                    time_str = " ".join(line.split()[:2])
+                    self.time_stop = parser.parse(time_str)
+                    self.send = True
                     return
 
         if self.run_status not in ["running", ""]:
             self._clear_inspect()
+            # Take a break to allow nextflow to restart before refreshing
+            # pipeine processes
+            sleep(5)
+            self._get_pipeline_processes()
 
         self.run_status = "running"
 
@@ -409,7 +553,9 @@ class NextflowInspector:
                 p["submitted"].remove(tag)
                 if v["status"] in good_status:
                     p["finished"].add(tag)
-                else:
+                elif v["status"] == "FAILED":
+                    self.process_tags[process][tag]["log"] = \
+                        self._retrieve_log(join(v["work_dir"], ".command.log"))
                     p["failed"].add(tag)
 
             # It the process/tag is in the retry list and it completed
@@ -419,6 +565,9 @@ class NextflowInspector:
                 if v["status"] in good_status:
                     p["retry"].remove(tag)
                     p["failed"].remove(tag)
+                    del self.process_tags[process][tag]["log"]
+                elif self.run_status == "aborted":
+                    p["retry"].remove(tag)
 
             elif v["status"] in good_status:
                 p["finished"].add(tag)
@@ -451,6 +600,26 @@ class NextflowInspector:
                         if process in self.processes:
                             self.processes[process]["barrier"] = "C"
 
+    @staticmethod
+    def _retrieve_log(path):
+        """Method used to retrieve the contents of a log file into a list.
+
+        Parameters
+        ----------
+        path
+
+        Returns
+        -------
+        list or None
+            Contents of the provided file, each line as a list entry
+        """
+
+        if not os.path.exists(path):
+            return None
+
+        with open(path) as fh:
+            return fh.readlines()
+
     def _update_trace_info(self, fields, hm):
         """Parses a trace line and updates the :attr:`status_info` attribute.
 
@@ -471,6 +640,23 @@ class NextflowInspector:
         # Get information from a single line of trace file
         info = dict((column, fields[pos]) for column, pos in hm.items())
 
+        # The headers that will be used to populate the process
+        process_tag_headers = ["realtime", "rss", "rchar", "wchar"]
+        for h in process_tag_headers:
+            if h in info and info["tag"] != "-":
+                if h != "realtime" and info[h] != "-":
+                    self.process_tags[process][info["tag"]][h] = \
+                        round(self._size_coverter(info[h]), 2)
+                else:
+                    self.process_tags[process][info["tag"]][h] = info[h]
+
+        # Set allocated cpu and memory information to process
+        if "cpus" in info and not self.processes[process]["cpus"]:
+            self.processes[process]["cpus"] = info["cpus"]
+        if "memory" in info and not self.processes[process]["memory"]:
+            self.processes[process]["memory"] = self._size_coverter(
+                info["memory"])
+
         if info["hash"] in self.stored_ids:
             return
 
@@ -489,6 +675,88 @@ class NextflowInspector:
         self.trace_info[process].append(info)
         self.stored_ids.append(info["hash"])
 
+    def _update_process_resources(self, process, vals):
+        """Updates the resources info in :attr:`processes` dictionary.
+        """
+
+        resources = ["cpus"]
+
+        for r in resources:
+            if not self.processes[process][r]:
+                self.processes[process][r] = vals[0]["cpus"]
+
+    def _cpu_load_parser(self, cpus, cpu_per, t):
+        """Parses the cpu load from the number of cpus and its usage
+        percentage and returnsde cpu/hour measure
+
+        Parameters
+        ----------
+        cpus : str
+            Number of cpus allocated.
+        cpu_per : str
+            Percentage of cpu load measured (e.g.: 200,5%).
+        t : str
+            The time string can be something like '20s', '1m30s' or '300ms'.
+        """
+
+        try:
+            _cpus = float(cpus)
+            _cpu_per = float(cpu_per.replace(",", ".").replace("%", ""))
+            hours = self._hms(t) / 60 / 24
+
+            return ((_cpu_per / (100 * _cpus)) * _cpus) * hours
+
+        except ValueError:
+            return 0
+
+    def _assess_resource_warnings(self, process, vals):
+        """Assess whether the cpu load or memory usage is above the allocation
+
+        Parameters
+        ----------
+        process : str
+            Process name
+        vals : vals
+            List of trace information for each tag of that process
+
+        Returns
+        -------
+        cpu_warnings : dict
+            Keys are tags and values are the excessive cpu load
+        mem_warnings : dict
+            Keys are tags and values are the excessive rss
+        """
+
+        cpu_warnings = {}
+        mem_warnings = {}
+
+        for i in vals:
+            try:
+                expected_load = float(i["cpus"]) * 100
+                cpu_load = float(i["%cpu"].replace(",", ".").replace("%", ""))
+
+                if expected_load * 0.9 > cpu_load > expected_load * 1.10:
+                    cpu_warnings[i["tag"]] = {
+                        "expected":  expected_load,
+                        "value": cpu_load
+                    }
+            except ValueError:
+                pass
+
+            try:
+                rss = self._size_coverter(i["rss"])
+                mem_allocated = self._size_coverter(i["memory"])
+
+                if rss > mem_allocated * 1.10:
+                    mem_warnings[i["tag"]] = {
+                        "expected": mem_allocated,
+                        "value": rss
+                    }
+            except ValueError:
+                pass
+
+        return cpu_warnings, mem_warnings
+
     def _update_process_stats(self):
         """Updates the process stats with the information from the processes
 
@@ -501,7 +769,11 @@ class NextflowInspector:
 
         for process, vals in self.trace_info.items():
 
+            # Update submission status of tags for each process
             vals = self._update_tag_status(process, vals)
+
+            # Update process resources
+            self._update_process_resources(process, vals)
 
             self.process_stats[process] = {}
 
@@ -511,20 +783,21 @@ class NextflowInspector:
             inst["completed"] = "{}".format(
                 len([x for x in vals if x["status"] in good_status]))
 
-            # Get number of bad samples
-            # inst["bad_samples"] = "{}".format(
-            #     len([x for x in vals if x["status"] not in good_status]))
-
             # Get average time
             time_array = [self._hms(x["realtime"]) for x in vals]
             mean_time = round(sum(time_array) / len(time_array), 1)
             mean_time_str = strftime('%H:%M:%S', gmtime(mean_time))
             inst["realtime"] = mean_time_str
 
-            # Get cumulated time
-            # cum_time_str = strftime('%H:%M:%S', gmtime(
-            #     round(sum(time_array), 1)))
-            # inst["cumtime"] = cum_time_str
+            # Get cumulative cpu/hours
+            cpu_hours = [self._cpu_load_parser(x["cpus"], x["%cpu"],
+                                               x["realtime"])
+                         for x in vals]
+            inst["cpuhour"] = round(sum(cpu_hours), 2)
+
+            # Assess resource warnings
+            inst["cpu_warnings"], inst["mem_warnings"] = \
+                self._assess_resource_warnings(process, vals)
 
             # Get maximum memory
             rss_values = [self._size_coverter(x["rss"]) for x in vals
@@ -574,10 +847,10 @@ class NextflowInspector:
         # Check the timestamp of the tracefile. Only proceed with the parsing
         # if it changed from the previous time.
         size_stamp = os.path.getsize(self.trace_file)
+        self.trace_retry = 0
         if size_stamp and size_stamp == self.trace_sizestamp:
             return
         else:
-            self.send = True
             self.trace_sizestamp = size_stamp
 
         with open(self.trace_file) as fh:
@@ -604,6 +877,7 @@ class NextflowInspector:
 
                 # Parse trace entry and update status_info attribute
                 self._update_trace_info(fields, hm)
+                self.send = True
 
         self._update_process_stats()
         self._update_barrier_status()
@@ -616,36 +890,55 @@ class NextflowInspector:
         # Check the timestamp of the log file. Only proceed with the parsing
         # if it changed from the previous time.
         size_stamp = os.path.getsize(self.log_file)
+        self.log_retry = 0
         if size_stamp and size_stamp == self.log_sizestamp:
             return
         else:
             self.log_sizestamp = size_stamp
-            self.send = True
+
+        r = ".* (.*) \[.*\].*\[(.*)\].*process > (.*) \((.*)\).*"
 
         with open(self.log_file) as fh:
 
             for line in fh:
                 if "Submitted process >" in line or \
-                        "Re-submitted process >" in line:
-                    m = re.match(".*process > (.*) \((.*)\).*", line)
+                        "Re-submitted process >" in line or \
+                        "Cached process >" in line:
+                    m = re.match(r, line)
                     if not m:
                         continue
 
-                    process = m.group(1)
-                    sample = m.group(2)
+                    time_start = m.group(1)
+                    workdir = m.group(2)
+                    process = m.group(3)
+                    tag = m.group(4)
+
+                    if time_start + tag not in self.stored_log_ids:
+                        self.stored_log_ids.append(time_start + tag)
+                    else:
+                        continue
 
                     if process not in self.processes:
                         continue
                     p = self.processes[process]
-                    if sample in list(p["finished"]) + list(p["retry"]):
+                    if tag in list(p["finished"]) + list(p["retry"]):
                         continue
-                    if sample in list(p["failed"]) and \
+                    if tag in list(p["failed"]) and \
                             "Re-submitted process >" in line:
-                        p["retry"].add(sample)
+                        p["retry"].add(tag)
+                        self.send = True
                         continue
 
                     p["barrier"] = "R"
-                    p["submitted"].add(sample)
+                    if tag not in p["submitted"]:
+                        p["submitted"].add(tag)
+                        self.process_tags[process][tag] = {
+                            "workdir": self._expand_path(workdir),
+                            "start": time_start
+                        }
+                        self.send = True
+
+        self._update_pipeline_status()
 
         self._update_pipeline_status()
 
@@ -659,8 +952,20 @@ class NextflowInspector:
         change, and they ignore entries that have been previously processes.
         """
 
-        self.log_parser()
-        self.trace_parser()
+        try:
+            self.log_parser()
+        except (FileNotFoundError, StopIteration) as e:
+            logger.debug("ERROR: ", sys.exc_info()[0])
+            self.log_retry += 1
+            if self.log_retry == self.MAX_RETRIES:
+                raise e
+        try:
+            self.trace_parser()
+        except (FileNotFoundError, StopIteration) as e:
+            logger.debug("ERROR: ", sys.exc_info()[0])
+            self.trace_retry += 1
+            if self.trace_retry == self.MAX_RETRIES:
+                raise e
 
     #################
     # CURSES METHODS
@@ -777,7 +1082,7 @@ class NextflowInspector:
 
         # Add static header
         header = "Pipeline [{}] inspection at {}. Status: ".format(
-            self.pipeline_name, strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+            self.pipeline_tag, strftime("%Y-%m-%d %H:%M:%S", gmtime()))
 
         win.addstr(0, 0, header)
         win.addstr(0, len(header), self.run_status,
@@ -870,20 +1175,166 @@ class NextflowInspector:
         d = {}
 
         for k, v in self.processes.items():
-            d[k] = {"barrier": v["barrier"]}
+            d[k] = {
+                "barrier": v["barrier"],
+                "cpus": v["cpus"],
+                "memory": v["memory"]
+            }
             for i in ["submitted", "finished", "failed", "retry"]:
                 d[k][i] = list(v[i])
 
         return d
 
+    def _prepare_table_data(self):
+
+        # Set data mappings
+        mappings = {
+            "Barrier": "barrier",
+            "Process": "process",
+            "Running": "running",
+            "Complete": "complete",
+            "Error": "error",
+            "Avg Time": "avgTime",
+            "CPU/hour": "cpuhour",
+            "Max Mem": "maxMem",
+            "Avg Read": "avgRead",
+            "Avg Write": "avgWrite"
+        }
+
+        # Set table data
+        data = []
+        table_headers = ["avgTime", "cpuhour", "maxMem", "avgRead", "avgWrite"]
+        for p, process in enumerate(list(self.processes)):
+
+            proc = self.processes[process]
+            # Add general data that is always available for all processes
+            current_data = {
+                "process": process,
+                "barrier": proc["barrier"],
+                "complete": list(proc["finished"]),
+                "error": list(proc["failed"]),
+                "running": list(proc["submitted"])
+            }
+
+            # Add stats data that is only available for processes that have
+            # finished once.
+            if process not in self.process_stats:
+                current_data = {
+                    **current_data,
+                    **dict((x, "-") for x in table_headers),
+                    **{"cpuWarn": {}, "memWarn": {}}
+                }
+
+            else:
+                ref = self.process_stats[process]
+                current_data = {
+                    **current_data,
+                    **{"avgTime": ref["realtime"],
+                       "cpuhour": ref["cpuhour"],
+                       "maxMem": ref["maxmem"],
+                       "avgRead": ref["avgread"],
+                       "avgWrite": ref["avgwrite"],
+                       "cpuWarn": ref["cpu_warnings"],
+                       "memWarn": ref["mem_warnings"]}
+                }
+
+            data.append(current_data)
+
+        return mappings, data
+
+    def _prepare_overview_data(self):
+
+        return [
+            {
+                "header": "Pipeline name",
+                "value": self.pipeline_name
+            },
+            {
+                "header": "Pipeline tag",
+                "value": self.pipeline_tag
+            },
+            {
+                "header": "Number of processes",
+                "value": len(self.processes)
+            }]
+
+    def _prepare_general_details(self):
+        return [
+            {
+                "header": "Pipeline directory",
+                "value": self.workdir
+            },
+            {
+                "header": "Work directory",
+                "value": join(self.workdir, "work")
+            },
+            {
+                "header": "Nextflow command",
+                "value": self.execution_command
+            },
+            {
+                "header": "Nextflow version",
+                "value": self.nextflow_version
+            }
+        ]
+
+    def _get_log_lines(self, n=300):
+        """Returns a list with the last ``n`` lines of the nextflow log file
+
+        Parameters
+        ----------
+        n : int
+            Number of last lines from the log file
+
+        Returns
+        -------
+        list
+            List of strings with the nextflow log
+        """
+
+        with open(self.log_file) as fh:
+            last_lines = fh.readlines()[-n:]
+
+        return last_lines
+
+    def _prepare_run_status_data(self):
+
+        if self.run_status == "aborted":
+            log_lines = self._get_log_lines()
+        else:
+            log_lines = None
+
+        return {
+            "value": self.run_status,
+            "abortCause": self.abort_cause,
+            "logLines": log_lines
+        }
+
     def _send_status_info(self, run_id):
 
+        mappings, data = self._prepare_table_data()
+        overview_data = self._prepare_overview_data()
+        general_details = self._prepare_general_details()
+        status_data = self._prepare_run_status_data()
+
         status_json = {
-            "processStats": self.process_stats,
+            "generalOverview": overview_data,
+            "generalDetails": general_details,
+            "tableData": data,
+            "tableMappings": mappings,
             "processInfo": self._convert_process_dict(),
-            "pipelineName": self.pipeline_name,
-            "runStatus": self.run_status
+            "processTags": self.process_tags,
+            "runStatus": status_data,
+            "timeStart": str(self.time_start),
+            "timeStop": str(self.time_stop) if self.time_stop else "-",
+            "processes": list(self.processes)
         }
+
+        self._c += 1
+        logger.debug("Payload [{}] sent with size: {}".format(
+            self._c,
+            asizeof.asizeof(json.dumps(status_json))
+        ))
 
         try:
             requests.put(self.broadcast_address,
@@ -895,14 +1346,76 @@ class NextflowInspector:
                 "connection.", "red_bold"))
             sys.exit(1)
 
-    def _establish_connection(self, run_id):
+    def _prepare_static_info(self):
+        """Prepares the first batch of information, containing static
+        information such as the pipeline file, and configuration files
+
+        Returns
+        -------
+        dict
+            Dict with the static information for the first POST request
+        """
+
+        pipeline_files = {}
+
+        with open(join(self.workdir, self.pipeline_name)) as fh:
+            pipeline_files["pipelineFile"] = fh.readlines()
+
+        nf_config = join(self.workdir, "nextflow.config")
+        if os.path.exists(nf_config):
+            with open(nf_config) as fh:
+                pipeline_files["configFile"] = fh.readlines()
+
+        # Check for specific assemblerflow configurations files
+        configs = {
+            "params.config": "paramsFile",
+            "resources.config": "resourcesFile",
+            "containers.config": "containersFile",
+            "user.config": "userFile",
+        }
+        for config, key in configs.items():
+            cfile = join(self.workdir, config)
+            if os.path.exists(cfile):
+                with open(cfile) as fh:
+                    pipeline_files[key] = fh.readlines()
+
+        return pipeline_files
+
+    def _dag_file_to_dict(self):
+        """Function that opens the dotfile named .treeDag.json in the current
+        working directory
+
+        Returns
+        -------
+        Returns a dictionary with the dag object to be used in the post
+        instance available through the method _establish_connection
+
+        """
+        try:
+            dag_file = open(os.path.join(self.workdir, ".treeDag.json"))
+            dag_json = json.load(dag_file)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            logger.warning(colored_print(
+                "WARNING: dotfile named .treeDag.json not found or corrupted",
+                "red_bold"))
+            dag_json = {}
+
+        return dag_json
+
+    def _establish_connection(self, run_id, dict_dag):
 
         try:
-            r = requests.post(self.broadcast_address, json={"run_id": run_id})
+
+            static_info = self._prepare_static_info()
+
+            r = requests.post(self.broadcast_address,
+                              json={"run_id": run_id, "dag_json": dict_dag,
+                                    "pipeline_files": static_info})
             if r.status_code != 201:
                 logger.error(colored_print(
                     "ERROR: There was a problem sending data to the server"
                     "with reason: {}".format(r.reason)))
+                sys.exit(1)
         except requests.exceptions.ConnectionError:
             logger.error(colored_print(
                 "ERROR: Could not establish connection with server. The server"
@@ -932,27 +1445,42 @@ class NextflowInspector:
         # Get name of the pipeline from the log file
         with open(self.log_file) as fh:
             header = fh.readline()
-        pipeline_path = re.match(".*nextflow run ([^\s]+) .*", header).group(1)
+        pipeline_path = re.match(".*nextflow run ([^\s]+).*", header).group(1)
 
         # Get hash from the entire pipeline file
         pipeline_hash = hashlib.md5()
         with open(pipeline_path, "rb") as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
                 pipeline_hash.update(chunk)
-        # Get hash from the pipeline start time stamp
-        t = header.split()[1]
-        time_hash = hashlib.md5(t.encode("utf8"))
+        # Get hash from the current working dir
+        dir_hash = hashlib.md5(self.workdir.encode("utf8"))
 
-        return pipeline_hash.hexdigest() + time_hash.hexdigest()
+        return pipeline_hash.hexdigest() + dir_hash.hexdigest()
+
+    def _print_msg(self, run_id):
+
+        inspect_address = "{}inspect/{}".format(self.app_address, run_id)
+        logger.info(colored_print(
+            "Starting broadcast. You can see the pipeline progress on the "
+            "link below:", "green_bold"))
+        logger.info("{}".format(inspect_address))
 
     def broadcast_status(self):
 
+        logger.info(colored_print("Preparing broadcast data...", "green_bold"))
+
         run_hash = self._get_run_hash()
-        self._establish_connection(run_hash)
+        dict_dag = self._dag_file_to_dict()
+        _broadcast_sent = False
+        self._establish_connection(run_hash, dict_dag)
 
         stay_alive = True
         try:
             while stay_alive:
+
+                if not _broadcast_sent:
+                    self._print_msg(run_hash)
+                    _broadcast_sent = True
 
                 self.update_inspection()
                 if self.send:
@@ -962,11 +1490,11 @@ class NextflowInspector:
                 sleep(self.refresh_rate)
 
         except FileNotFoundError:
-            sys.stderr.write(colored_print(
+            logger.error(colored_print(
                 "ERROR: nextflow log and/or trace files are no longer "
                 "reachable!", "red_bold"))
         except Exception as e:
-            sys.stderr.write(str(e))
+            logger.error("ERROR: ", sys.exc_info()[0])
         finally:
             logger.info("Closing connection")
             self._close_connection(run_hash)

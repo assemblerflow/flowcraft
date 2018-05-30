@@ -23,6 +23,8 @@ setup(
                                     "generator/templates/*"]},
     data_files=[("", ["LICENSE"])],
     install_requires=[
+        "pympler",
+        "python-dateutil",
         "argparse",
         "jinja2",
         "requests"

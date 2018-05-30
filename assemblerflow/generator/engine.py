@@ -1211,6 +1211,22 @@ class NextflowGenerator:
         })
         self.user_config = self._render_config("user.config", {})
 
+    def dag_to_file(self, dict_viz):
+        """Writes dag to output file
+
+        Parameters
+        ----------
+        dict_viz: dict
+            Tree like dictionary that is used to export tree data of processes
+            to html file and here for the dotfile .treeDag.json
+
+        """
+
+        outfile_dag = open(os.path.join(dirname(self.nf_file), ".treeDag.json")
+                           , "w")
+        outfile_dag.write(json.dumps(dict_viz))
+        outfile_dag.close()
+
     def render_pipeline(self):
         """Write pipeline attributes to json
 
@@ -1271,6 +1287,9 @@ class NextflowGenerator:
                 lst.append(tooltip)
 
                 last_of_us[p.lane] = lst[-1]["children"]
+
+        # write to file dict_viz
+        self.dag_to_file(dict_viz)
 
         # send with jinja to html resource
         return self._render_config("pipeline_graph.html", {"data": dict_viz})

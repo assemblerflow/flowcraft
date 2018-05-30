@@ -104,6 +104,10 @@ def get_args(args=None):
         help="Specify the inspection run mode."
     )
     inspect_parser.add_argument(
+        "-u", "--url", dest="url", default="http://localhost:8000/",
+        help="Specify the URL to where the data should be broadcast"
+    )
+    inspect_parser.add_argument(
         "--pretty", dest="pretty", action="store_const", const=True,
         help="Pretty inspection mode that removes usual reporting processes."
     )
@@ -242,7 +246,7 @@ def inspect(args):
 
     try:
         nf_inspect = NextflowInspector(args.trace_file, args.refresh_rate,
-                                       args.pretty)
+                                       args.pretty, args.url)
     except eh.InspectionError as e:
         logger.error(colored_print(e.value, "red_bold"))
         sys.exit(1)
