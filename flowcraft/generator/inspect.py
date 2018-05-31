@@ -469,7 +469,7 @@ class NextflowInspector:
 
             first_line = next(fh)
             time_str = " ".join(first_line.split()[:2])
-            self.time_start = parser.parse(time_str)
+            self.time_start = time_str
 
             if not self.execution_command:
                 try:
@@ -499,14 +499,14 @@ class NextflowInspector:
                         self.abort_cause = "Unknown"
                     # Get time of pipeline stop
                     time_str = " ".join(line.split()[:2])
-                    self.time_stop = parser.parse(time_str)
+                    self.time_stop = time_str
                     self.send = True
                     return
                 if "Execution complete -- Goodbye" in line:
                     self.run_status = "complete"
                     # Get time of pipeline stop
                     time_str = " ".join(line.split()[:2])
-                    self.time_stop = parser.parse(time_str)
+                    self.time_stop = time_str
                     self.send = True
                     return
 
