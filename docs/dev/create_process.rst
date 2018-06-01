@@ -395,6 +395,8 @@ pipeline, these can be specific via the
 When building the pipeline if at least one of the dependencies is absent,
 FlowCraft will raise an exception informing of a missing dependency.
 
+.. _DirectivesAnchor:
+
 Directives
 ::::::::::
 

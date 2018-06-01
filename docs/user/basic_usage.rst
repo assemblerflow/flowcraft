@@ -1,12 +1,15 @@
 Basic Usage
 ===========
 
-FlowCraft has currently one execution mode, ``build``, that is used to
-build the nextflow pipeline. However, more execution modes are slated for
-release.
+FlowCraft has currently two execution mode, ``build`` and ``inspect``, that is
+used to build and inspect the nextflow pipeline, respectively. However, a
+``report`` mode is also being developed.
+
+Build
+-----
 
 Assembling a pipeline
----------------------
+:::::::::::::::::::::
 
 Pipelines can be generated using the ``build`` execution mode of FlowCraft
 and the ``-t`` parameter to specify the :ref:`components <components>` inside quotes::
@@ -47,7 +50,7 @@ it was automatically added to the pipeline.
     component**, otherwise FlowCraft will exit with an error.
 
 Pipeline directory
-------------------
+::::::::::::::::::
 
 In addition to the main nextflow pipeline file (``my_pipe.nf``),
 FlowCraft will write several auxiliary files that are necessary for
@@ -76,7 +79,7 @@ You do not have to worry about most of these files. However, the
   across different pipelines.
 
 Parameters
-----------
+::::::::::
 
 The parameters of the pipeline can be viewed by running the pipeline file
 with ``nextflow`` and using the ``--help`` option::
@@ -116,7 +119,7 @@ appear. These parameters can be provided on run-time or edited in the
 ``params.config`` file.
 
 Executing the pipeline
-----------------------
+::::::::::::::::::::::
 
 Most parameters in FlowCraft's components already come with sensible
 defaults, which means that usually you'll only need to provide a small number
@@ -144,7 +147,7 @@ acceptable pattern would be ``*_R{1,2}_*``.
     to resolve it and provide the wrong input to nextflow.
 
 Changing executor and container engine
-::::::::::::::::::::::::::::::::::::::
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The default run mode of an FlowCraft pipeline is to be executed locally
 and using the singularity container engine. In nextflow terms, this is
@@ -174,7 +177,7 @@ Other container engines are:
 .. _supported by nextflow: https://www.nextflow.io/docs/latest/executor.html
 
 Docker images
-:::::::::::::
+^^^^^^^^^^^^^
 
 All components of FlowCraft are executed in containers, which means that
 the first time they are executed in a machine, **the corresponding image will have
@@ -191,7 +194,7 @@ So, if a process seems to take too long to run the first time, it's probably
 because the image is being downloaded.
 
 Results and reports
--------------------
+:::::::::::::::::::
 
 As the pipeline runs, processes may write result and report files to the
 ``results`` and ``reports`` directories, respectively. For example, the
@@ -243,3 +246,59 @@ process. In the example below, the directory would be::
 
     work/7c/cae270*
 
+Inspect
+-------
+
+FlowCraft has two options (``overview`` and ``broadcast``) for inspecting the
+progress of a pipeline that is
+running locally, either it is a personal computer or a server machine.
+
+In a terminal
+:::::::::::::
+
+To open inspect in the terminal just write the following command on the folder
+that the pipeline is running.::
+
+    flowcraft inspect
+
+``overview`` is the default behavior of this module, but it can also be called
+like this::
+
+    flowcraft inspect -m overview
+
+`Note`: to cancel this command just do ``ctrl+c`` in the terminal
+flowcraft inspect is running.
+
+In a browser
+::::::::::::
+
+It is also possible to track the pipeline process by using a browser in any
+device. To do so, the following command should be run in the folder where the
+pipeline is running.::
+
+    flowcraft inspect -m broadcast
+
+
+This will output a url to the terminal that can be opened in a browser::
+
+    http://192.92.149.169/inspect/af7745b37280081ec48c925cd0d3550a7f68f2e405e23e0fb8dab2ad3ecac264
+
+
+This is the screen that is displayed once the url is opened:
+
+.. image:: ../resources/flowcraft_inspect_broadcast.png
+   :align: center
+
+`Note`: This will be available until the command is canceled as described for
+``overview``.
+
+Want to know more?
+::::::::::::::::::
+
+:doc:`pipeline_inspect` is the full documentation of the ``inspect`` mode.
+
+
+Reports
+-------
+
+Coming soon...
