@@ -444,7 +444,6 @@ def get_source_lane(fork_process, pipeline_list):
                              if x["output"]["lane"] == lane]
             logger.debug("Testing lane sequence '{}' against fork signature"
                          " '{}'".format(lane_sequence, fork_sig))
-            print(lane_sequence, fork_sig)
             if lane_sequence == fork_sig:
                 return p["output"]["lane"]
 
