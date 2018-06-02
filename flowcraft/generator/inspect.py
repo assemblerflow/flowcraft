@@ -683,7 +683,11 @@ class NextflowInspector:
 
         for r in resources:
             if not self.processes[process][r]:
-                self.processes[process][r] = vals[0]["cpus"]
+                try:
+                    self.processes[process][r] = vals[0]["cpus"]
+                # When the trace column is not present
+                except KeyError:
+                    pass
 
     def _cpu_load_parser(self, cpus, cpu_per, t):
         """Parses the cpu load from the number of cpus and its usage
@@ -740,7 +744,7 @@ class NextflowInspector:
                         "expected":  expected_load,
                         "value": cpu_load
                     }
-            except ValueError:
+            except (ValueError, KeyError):
                 pass
 
             try:
@@ -752,7 +756,7 @@ class NextflowInspector:
                         "expected": mem_allocated,
                         "value": rss
                     }
-            except ValueError:
+            except (ValueError, KeyError):
                 pass
 
         return cpu_warnings, mem_warnings
@@ -784,30 +788,40 @@ class NextflowInspector:
                 len([x for x in vals if x["status"] in good_status]))
 
             # Get average time
-            time_array = [self._hms(x["realtime"]) for x in vals]
-            mean_time = round(sum(time_array) / len(time_array), 1)
-            mean_time_str = strftime('%H:%M:%S', gmtime(mean_time))
-            inst["realtime"] = mean_time_str
+            try:
+                time_array = [self._hms(x["realtime"]) for x in vals]
+                mean_time = round(sum(time_array) / len(time_array), 1)
+                mean_time_str = strftime('%H:%M:%S', gmtime(mean_time))
+                inst["realtime"] = mean_time_str
+            # When the realtime column is not present
+            except KeyError:
+                inst["realtime"] = "-"
 
             # Get cumulative cpu/hours
-            cpu_hours = [self._cpu_load_parser(x["cpus"], x["%cpu"],
-                                               x["realtime"])
-                         for x in vals]
-            inst["cpuhour"] = round(sum(cpu_hours), 2)
+            try:
+                cpu_hours = [self._cpu_load_parser(
+                    x["cpus"], x["%cpu"], x["realtime"]) for x in vals]
+                inst["cpuhour"] = round(sum(cpu_hours), 2)
+            # When the realtime, cpus or %cpus column are not present
+            except KeyError:
+                inst["cpuhour"] = "-"
 
             # Assess resource warnings
             inst["cpu_warnings"], inst["mem_warnings"] = \
                 self._assess_resource_warnings(process, vals)
 
             # Get maximum memory
-            rss_values = [self._size_coverter(x["rss"]) for x in vals
-                          if x["rss"] != "-"]
-            if rss_values:
-                max_rss = round(max(rss_values))
-                rss_str = self._size_compress(max_rss)
-            else:
-                rss_str = "-"
-            inst["maxmem"] = rss_str
+            try:
+                rss_values = [self._size_coverter(x["rss"]) for x in vals
+                              if x["rss"] != "-"]
+                if rss_values:
+                    max_rss = round(max(rss_values))
+                    rss_str = self._size_compress(max_rss)
+                else:
+                    rss_str = "-"
+                inst["maxmem"] = rss_str
+            except KeyError:
+                inst["maxmem"] = "-"
 
             # Get read size
             try:
