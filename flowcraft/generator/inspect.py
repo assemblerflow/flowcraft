@@ -4,13 +4,12 @@ import sys
 import curses
 import signal
 import locale
+import socket
 import logging
 import hashlib
-import datetime
 import requests
 import json
 
-from dateutil import parser
 from pympler import asizeof
 from os.path import join, abspath
 from time import gmtime, strftime, sleep
@@ -1466,8 +1465,10 @@ class NextflowInspector:
         with open(pipeline_path, "rb") as fh:
             for chunk in iter(lambda: fh.read(4096), b""):
                 pipeline_hash.update(chunk)
-        # Get hash from the current working dir
-        dir_hash = hashlib.md5(self.workdir.encode("utf8"))
+        # Get hash from the current working dir and hostname
+        workdir = self.workdir.encode("utf8")
+        hostname = socket.gethostname().encode("utf8")
+        dir_hash = hashlib.md5(workdir + hostname)
 
         return pipeline_hash.hexdigest() + dir_hash.hexdigest()
 
