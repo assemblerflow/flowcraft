@@ -112,7 +112,8 @@ class NextflowInspector:
         """
 
         self.skip_processes = ["status", "compile_status", "report",
-                               "compile_reports", "fullConsensus"]
+                               "compile_reports", "fullConsensus",
+                               "compile_status_buffer"]
         """
         list: List of special processes that should be skipped for inspection
         purposes.

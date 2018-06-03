@@ -24,22 +24,42 @@ process status {
     """
 }
 
+process compile_status_buffer {
+
+    input:
+    file status from master_status.buffer( size: 5000, remainder: true)
+    file warning from master_warning.buffer( size: 5000, remainder: true)
+    file fail from master_fail.buffer( size: 5000, remainder: true)
+
+    output:
+    file 'master_status_*.csv' into compile_status_buffer
+    file 'master_warning_*.csv' into compile_warning_buffer
+    file 'master_fail_*.csv' into compile_fail_buffer
+
+    """
+    cat $status >> master_status_${task.index}.csv
+    cat $warning >> master_warning_${task.index}.csv
+    cat $fail >> master_fail_${task.index}.csv
+    """
+}
+
 process compile_status {
 
     publishDir 'reports/status'
 
     input:
-    file status from master_status.collect()
-    file warning from master_warning.collect()
-    file fail from master_fail.collect()
+    file status from compile_status_buffer.collect()
+    file warning from compile_warning_buffer.collect()
+    file fail from compile_fail_buffer.collect()
 
     output:
-    set 'master_status.csv', 'master_warning.csv', 'master_fail.csv' into mockChannel
+    file "*.csv"
 
     """
     cat $status >> master_status.csv
     cat $warning >> master_warning.csv
     cat $fail >> master_fail.csv
     """
+
 }
 
