@@ -282,7 +282,7 @@ class Recipe:
                     self.process_to_id[process_split[0]] = process_split[1]
 
             # Only uses the process if it is not already in the possible forks
-            if not bool([x for x in forks if task in x]):
+            if not bool([x for x in forks if task in x]) and not bool([y for y in forks if process_descriptions[task][2] in y]):
                 task_pipeline = []
 
                 if task in process_descriptions:
@@ -313,6 +313,16 @@ class Recipe:
 
                 # Adds the pipeline fragment to the list of possible forks
                 forks.append(list(OrderedDict.fromkeys(task_pipeline)))
+
+            # Checks for task in fork. Case order of input processes is reversed
+            elif bool([y for y in forks if process_descriptions[task][2] in y]):
+                for fork in forks:
+                    if task not in fork:
+                        try:
+                            dependent_index = fork.index(process_descriptions[task][2])
+                            fork.insert(dependent_index, task)
+                        except ValueError:
+                            continue
 
         for i in range(0, len(forks)):
             for j in range(0, len(forks[i])):
@@ -409,7 +419,6 @@ class Recipe:
                 final_forks.append(forks[i])
 
         if len(final_forks) == 1:
-            total_processes = len(final_forks[0])
             final_forks = str(final_forks[0])
 
         # parses the string array to the flowcraft nomenclature
@@ -488,16 +497,17 @@ class Innuendo(Recipe):
         self.process_descriptions = {
             "patho_typing": [True, None, None],
             "seq_typing": [True, None, None],
+            "reads_download": [True, None, "integrity_coverage"],
             "integrity_coverage": [True, None, "fastqc_trimmomatic"],
             "fastqc_trimmomatic": [False, "integrity_coverage",
                                    "true_coverage"],
             "true_coverage": [False, "fastqc_trimmomatic",
                               "fastqc"],
             "fastqc": [False, "true_coverage", "check_coverage"],
-            "check_coverage": [False, "fastqc", "skesa|spades"],
+            "check_coverage": [False, "fastqc", "spades"],
             "spades": [False, "fastqc_trimmomatic", "process_spades"],
             "process_spades": [False, "spades", "assembly_mapping"],
-            "assembly_mapping": [False, "skesa|process_spades", "pilon"],
+            "assembly_mapping": [False, "process_spades", "pilon"],
             "pilon": [False, "assembly_mapping", "mlst"],
             "mlst": [False, "pilon", "abricate|prokka|chewbbaca|sistr"],
             "sistr": [True, "mlst", None],
