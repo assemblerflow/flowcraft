@@ -33,7 +33,7 @@ setup(
                 "modules. Assemble them. Run the pipeline.",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/ODiogoSilva/assemblerflow",
+    url="https://github.com/assemblerflow/flowcraft",
     author="Diogo N Silva",
     author_email="o.diogosilva@gmail.com",
     license="GPL3",
