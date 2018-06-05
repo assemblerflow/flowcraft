@@ -322,17 +322,11 @@ class MetaProb(Process):
         }
 
         self.directives = {
-            "mashScreen": {
-                "container": "",
-                "version": "1.0.0",
+            "metaProb": {
+                "container": "flowcraft/metaprob",
+                "version": "2-1",
                 "cpus": 1,
-                "memory": "{ 4.GB * task.attempt }"
-            },
-            "mashOutputJson": {
-                "container": "",
-                "version": "1.0.0",
-                "cpus": 1,
-                "memory": "'4GB'"
+                "memory": "{ 30.GB * task.attempt }"
             }
         }
 

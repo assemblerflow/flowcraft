@@ -1,5 +1,5 @@
 
-// runs metaprob
+// runs metaProb
 process metaProb_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
@@ -9,7 +9,7 @@ process metaProb_{{ pid }} {
     publishDir 'results/metaprob/'
 
     input:
-    set sample_id, file(reads) from {{ input_channel }}
+    set sample_id, file(fastq_pair) from {{ input_channel }}
 
     output:
     set sample_id, file("*clusters.csv") into metaProbOutChannel_{{ pid }}
@@ -18,7 +18,10 @@ process metaProb_{{ pid }} {
     {% endwith %}
 
     """
-    MetaProb -pi ${reads} -feature ${params.feature} -m ${params.metaProbQMer}
+    gunzip -c ${fastq_pair[0]} > ${sample_id}_read1.fastq
+    gunzip -c ${fastq_pair[1]} > ${sample_id}_read2.fastq
+
+    MetaProb -pi ${sample_id}_read1.fastq ${sample_id}_read2.fastq -feature ${params.feature} -m ${params.metaProbQMer}
     """
 
 }
