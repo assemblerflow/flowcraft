@@ -39,8 +39,8 @@ class CardRgi(Process):
 
         self.directives = {
             "card_rgi": {
-                "container": "cimendes/card_rgi",
-                "version": "4.0.2",
+                "container": "flowcraft/card_rgi",
+                "version": "4.0.2-0.1",
                 "memory": "{10.Gb*task.attempt}"
             }
         }
@@ -68,7 +68,7 @@ class Kraken(Process):
 
         self.params = {
             "krakenDB": {
-                "default": "'minikraken_20141208'",
+                "default": "'minikraken_20171013_4GB'",
                 "description": "Specifies kraken database."
             }
         }
@@ -82,8 +82,8 @@ class Kraken(Process):
 
         self.directives = {
             "kraken": {
-                "container": "ummidock/kraken_metagenomics",
-                "version": "v0.10.6-unreleased",
+                "container": "flowcraft/kraken",
+                "version": "1.0-0.1",
                 "memory": "{2.Gb*task.attempt}",
                 "cpus": 3
             }
@@ -146,8 +146,8 @@ class Megahit(Process):
         self.directives = {"megahit": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
-            "container": "cimendes/megahit",
-            "version": "v1.1.3-0.1",
+            "container": "flowcraft/megahit",
+            "version": "1.1.3-0.1",
             "scratch": "true"
         }}
 
@@ -204,7 +204,7 @@ class Metaspades(Process):
         self.directives = {"metaspades": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
-            "container": "ummidock/spades",
+            "container": "flowcraft/spades",
             "version": "3.11.1-1",
             "scratch": "true"
         }}
@@ -242,7 +242,7 @@ class Midas_species(Process):
 
         self.directives = {
             "midas_species": {
-                "container": "cimendes/midas",
+                "container": "flowcraft/midas",
                 "version": "1.3.2-0.1",
                 "memory": "{2.Gb*task.attempt}",
                 "cpus": 3
@@ -289,8 +289,8 @@ class RemoveHost(Process):
 
         self.directives = {
             "remove_host": {
-                "container": "cimendes/bowtie2_hg19",
-                "version": "2.0",
+                "container": "flowcraft/remove_host",
+                "version": "2-0.1",
                 "memory": "{5.Gb*task.attempt}",
                 "cpus": 3
             }
