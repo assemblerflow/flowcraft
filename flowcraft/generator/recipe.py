@@ -495,6 +495,7 @@ class Innuendo(Recipe):
         # The description of the processes
         # [forkable, input_process, output_process]
         self.process_descriptions = {
+            "reads_download": [True, None,"integrity_coverage|seq_typing|patho_typing"],
             "patho_typing": [True, None, None],
             "seq_typing": [True, None, None],
             "reads_download": [True, None, "integrity_coverage"],
