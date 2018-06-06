@@ -55,6 +55,51 @@ class Abricate(Process):
         }
 
 
+class CardRgi(Process):
+    """card's rgi process template interface
+
+        This process is set with:
+
+            - ``input_type``: fasta
+            - ``output_type``: txt
+            - ``ptype``: resistance gene detection (assembly)
+        """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "txt"
+
+        self.params = {
+            "alignmentTool": {
+                "default": "'DIAMOND'",
+                "description": "Specifies the alignment tool."
+                               "Options: DIAMOND or BLAST"
+            }
+        }
+
+        self.secondary_inputs = [
+            {
+                "params": "alignmentTool",
+                "channel": "IN_alignment_tool = Channel.value(params.alignmentTool)"
+            }
+        ]
+
+        self.directives = {
+            "card_rgi": {
+                "container": "flowcraft/card_rgi",
+                "version": "4.0.2-0.1",
+                "memory": "{10.Gb*task.attempt}"
+            }
+        }
+
+        self.status_channels = [
+            "card_rgi"
+        ]
+
+
 class Prokka(Process):
     """Prokka mapping process template interface
 

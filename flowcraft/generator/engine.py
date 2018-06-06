@@ -49,7 +49,7 @@ except ImportError:
 process_map = {
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
-        "card_rgi": meta.CardRgi,
+        "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
         "chewbbaca": mlst.Chewbbaca,
         "fastqc": readsqc.FastQC,
