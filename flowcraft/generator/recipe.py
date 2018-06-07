@@ -498,7 +498,6 @@ class Innuendo(Recipe):
             "reads_download": [True, None,"integrity_coverage|seq_typing|patho_typing"],
             "patho_typing": [True, None, None],
             "seq_typing": [True, None, None],
-            "reads_download": [True, None, "integrity_coverage"],
             "integrity_coverage": [True, None, "fastqc_trimmomatic"],
             "fastqc_trimmomatic": [False, "integrity_coverage",
                                    "true_coverage"],
