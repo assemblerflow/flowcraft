@@ -25,6 +25,9 @@ Reads Quality Control
 - :doc:`components/fastqc_trimmomatic`: Runs Trimmomatic on
   paired-end FastQ files informed by the FastQC report.
 
+- :doc:`components/filter_poly`:  Runs PrinSeq on paired-end
+  FastQ files to remove low complexity sequences.
+
 - :doc:`components/integrity_coverage`: Tests the integrity
   of the provided FastQ files, provides the option to filter FastQ files
   based on the expected assembly coverage and provides information about

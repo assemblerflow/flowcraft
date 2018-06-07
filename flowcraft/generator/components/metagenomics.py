@@ -255,6 +255,15 @@ class RemoveHost(Process):
         ]
 
 class MetaProb(Process):
+    """bowtie2 to remove host reads process template interface
+
+            This process is set with:
+
+                - ``input_type``: fastq
+                - ``output_type``: fastq
+                - ``ptype``: removal os host reads
+
+            """
 
     def __init__(self, **kwargs):
 
@@ -289,3 +298,49 @@ class MetaProb(Process):
         ]
 
 
+class FilterPoly(Process):
+    """PrinSeq process to filter non-informative sequences from reads
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: fastq
+        - ``ptype``: pre_assembly
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fastq"
+
+        self.params = {
+            "adapter": {
+                "default": "'A 50%; T 50%; N 50%'",
+                "description":
+                    "Pattern to filter the reads. Please separate parameter"
+                    "values with a space and separate new parameter sets with semicolon (;)."
+                    "Parameters are defined by two values: the pattern (any combination of the"
+                    "letters ATCGN), and the number of repeats or percentage of occurence."
+            }
+        }
+
+        self.secondary_inputs = [
+            {
+                "params": "adapter",
+                "channel": "IN_adapter = Channel.value(params.adapter)"
+            }
+        ]
+
+        self.directives = {"filter_poly": {
+            "cpus": 1,
+            "memory": "{ 4.GB * task.attempt }",
+            "container": "flowcraft/prinseq",
+            "version": "0.20.4-1"
+        }}
+
+        self.status_channels = [
+            "filter_poly"
+        ]
