@@ -23,7 +23,7 @@ class SeqTyping(Process):
         self.directives = {"seq_typing": {
             "cpus": 4,
             "memory": "'4GB'",
-            "container": "ummidock/seq_typing",
+            "container": "flowcraft/seq_typing",
             "version": "0.1.0-1"
         }}
 
@@ -117,7 +117,7 @@ class PathoTyping(Process):
         self.directives = {"patho_typing": {
             "cpus": 4,
             "memory": "'4GB'",
-            "container": "ummidock/patho_typing",
+            "container": "flowcraft/patho_typing",
             "version": "0.3.0-1"
         }}
 

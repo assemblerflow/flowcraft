@@ -170,8 +170,8 @@ class TrueCoverage(Process):
             "true_coverage": {
                 "cpus": 4,
                 "memory": "'1GB'",
-                "container": "odiogosilva/true_coverage",
-                "version": "3.2"
+                "container": "flowcraft/true_coverage",
+                "version": "3.2-1"
             }
         }
 
@@ -223,7 +223,7 @@ class FastQC(Process):
         self.directives = {"fastqc2": {
             "cpus": 2,
             "memory": "'4GB'",
-            "container": "ummidock/fastqc",
+            "container": "flowcraft/fastqc",
             "version": "0.11.7-1"
         }}
 
@@ -320,8 +320,8 @@ class Trimmomatic(Process):
         self.directives = {"trimmomatic": {
             "cpus": 2,
             "memory": "{ 4.GB * task.attempt }",
-            "container": "ummidock/trimmomatic",
-            "version": "0.36-2"
+            "container": "flowcraft/trimmomatic",
+            "version": "0.36-1"
         }}
 
 
@@ -430,13 +430,13 @@ class FastqcTrimmomatic(Process):
             "fastqc": {
                 "cpus": 2,
                 "memory": "'4GB'",
-                "container": "ummidock/fastqc",
+                "container": "flowcraft/fastqc",
                 "version": "0.11.7-1"
             },
             "trimmomatic": {
                 "cpus": 2,
                 "memory": "{ 4.GB * task.attempt }",
-                "container": "ummidock/trimmomatic",
-                "version": "0.36-2"
+                "container": "flowcraft/trimmomatic",
+                "version": "0.36-1"
             }
         }

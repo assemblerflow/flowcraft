@@ -88,7 +88,7 @@ class Spades(Process):
         self.directives = {"spades": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
-            "container": "ummidock/spades",
+            "container": "flowcraft/spades",
             "version": "3.11.1-1",
             "scratch": "true"
         }}
@@ -108,7 +108,7 @@ class Skesa(Process):
         self.directives = {"skesa": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
-            "container": "ummidock/skesa",
-            "version": "0.2.0-3",
+            "container": "flowcraft/skesa",
+            "version": "2.1-1",
             "scratch": "true"
         }}

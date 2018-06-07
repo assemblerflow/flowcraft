@@ -37,6 +37,6 @@ class DownloadReads(Process):
         self.directives = {"reads_download": {
             "cpus": 1,
             "memory": "'1GB'",
-            "container": "ummidock/getseqena",
-            "version": "0.4.0-2"
+            "container": "flowcraft/getseqena",
+            "version": "0.4.0-1"
         }}

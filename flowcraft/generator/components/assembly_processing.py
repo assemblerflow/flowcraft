@@ -61,8 +61,8 @@ class ProcessSkesa(Process):
         self.directives = {"skesa": {
             "cpus": 1,
             "memory": "'2GB'",
-            "container": "ummidock/skesa",
-            "version": "0.2.0-3",
+            "container": "flowcraft/skesa",
+            "version": "2.1-1",
         }}
 
 
@@ -129,7 +129,7 @@ class ProcessSpades(Process):
         ]
 
         self.directives = {"process_spades": {
-            "container": "ummidock/spades",
+            "container": "flowcraft/spades",
             "version": "3.11.1-1"
         }}
 
@@ -220,14 +220,14 @@ class AssemblyMapping(Process):
             "assembly_mapping": {
                 "cpus": 4,
                 "memory": "{ 5.GB * task.attempt }",
-                "container": "ummidock/bowtie2_samtools",
-                "version": "1.0.0-2"
+                "container": "flowcraft/bowtie2_samtools",
+                "version": "1.0.0-1"
             },
             "process_assembly_mapping": {
                 "cpus": 1,
                 "memory": "{ 5.GB * task.attempt }",
-                "container": "ummidock/bowtie2_samtools",
-                "version": "1.0.0-2"
+                "container": "flowcraft/bowtie2_samtools",
+                "version": "1.0.0-1"
             }
         }
 
@@ -264,13 +264,13 @@ class Pilon(Process):
             "pilon": {
                 "cpus": 4,
                 "memory": "{ 7.GB * task.attempt }",
-                "container": "ummidock/pilon",
-                "version": "1.22.0-2"
+                "container": "flowcraft/pilon",
+                "version": "1.22.0-1"
             },
             "pilon_report": {
                 "cpus": 1,
                 "memory": "{ 7.GB * task.attempt }",
-                "container": "ummidock/pilon",
-                "version": "1.22.0-2"
+                "container": "flowcraft/pilon",
+                "version": "1.22.0-1"
             }
         }
