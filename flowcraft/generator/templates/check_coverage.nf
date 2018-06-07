@@ -1,5 +1,5 @@
 
-process integrity_coverage_2_{{ pid }} {
+process integrity_coverage2_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
