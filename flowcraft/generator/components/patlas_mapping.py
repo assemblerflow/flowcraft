@@ -95,4 +95,3 @@ class PatlasMapping(Process):
         ]
 
         self.compiler["patlas_consensus"] = ["mappingOutputChannel"]
-        
