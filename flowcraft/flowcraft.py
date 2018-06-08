@@ -82,6 +82,9 @@ def get_args(args=None):
     parser.add_argument(
         "--debug", dest="debug", action="store_const", const=True,
         help="Set log to debug mode")
+    parser.add_argument(
+        "-v, --version", dest="version", action="store_const", const=True,
+        help="Show version and exit.")
 
     # INSPECT MODE
     inspect_parser = subparsers.add_parser("inspect",
@@ -258,6 +261,9 @@ def inspect(args):
 def main():
 
     args = get_args()
+
+    if args.version:
+        print(__version__)
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
