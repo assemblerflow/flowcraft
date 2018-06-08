@@ -54,7 +54,7 @@ process_map = {
         "chewbbaca": mlst.Chewbbaca,
         "fastqc": readsqc.FastQC,
         "fastqc_trimmomatic": readsqc.FastqcTrimmomatic,
-        "filter_poly": meta.FilterPoly,
+        "filter_poly": readsqc.FilterPoly,
         "integrity_coverage": readsqc.IntegrityCoverage,
         "kraken": meta.Kraken,
         "mapping_patlas": mapping_patlas.PatlasMapping,
