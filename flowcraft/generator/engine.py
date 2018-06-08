@@ -61,6 +61,7 @@ process_map = {
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
         "megahit": meta.Megahit,
+        "metamlst": mlst.MetaMlst,
         "metaprob": meta.MetaProb,
         "metaspades": meta.Metaspades,
         "midas_species": meta.Midas_species,

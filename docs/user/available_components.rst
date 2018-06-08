@@ -119,6 +119,9 @@ Typing
 - :doc:`components/chewbbaca`: Performs a core-genome/whole-genome Multilocus
   Sequence Typing analysis on an assembly using ChewBBACA.
 
+- :doc:`components/metamlst`: Checks the Sequence Type of metagenomic reads using
+  Multilocus Sequence Typing.
+
 - :doc:`components/mlst`: Checks the Sequence Type of an assembly using
   Multilocus Sequence Typing.
 

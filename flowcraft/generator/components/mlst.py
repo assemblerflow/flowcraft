@@ -40,7 +40,7 @@ class Mlst(Process):
 
 
 class Chewbbaca(Process):
-    """Prokka mapping process template interface
+    """Chewbbaca process template interface
 
     This process is set with:
 
@@ -167,3 +167,44 @@ class Chewbbaca(Process):
                     "IN_schema = Channel.fromPath(params.schemaPath)"
             }
         ]
+
+
+class MetaMlst(Process):
+    """MetaMlst mapping process template interface
+
+    This process is set with:
+
+        - ``input_type``: reads
+        - ``output_type``: None
+        - ``ptype``: pre_assembly
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = None
+
+        self.directives = {"metamlst": {
+            "container": "flowcraft/metamlst",
+            "version": "1.1-1",
+            "memory": "{4.Gb*task.attempt}"
+            }
+        }
+
+        self.params = {
+            "metamlstDB": {
+                "default": "'/NGStools/metamlst/metamlstDB_2017.db'",
+                "description":
+                    "Specify the metamlstDB (full path) for MLST checking."
+            },
+            "metamlstDB_index": {
+                "default": "'/NGStools/index/metamlstDB_2017'",
+                "description":
+                    "Specify the Bowtie2 metamlstDB index (full path) for MLST checking."
+            }
+        }
+
+
