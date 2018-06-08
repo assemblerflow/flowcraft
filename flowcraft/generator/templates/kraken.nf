@@ -5,7 +5,7 @@ process kraken_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir "results/annotation/krakken/", pattern: "*.txt"
+    publishDir "results/annotation/kraken/", pattern: "*.txt"
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
