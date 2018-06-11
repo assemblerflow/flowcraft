@@ -41,4 +41,4 @@ Default directives
 - ``container``: flowcraft/midas
 - ``version``: 1.3.2-0.1
 - ``memory``: 2.Gb*task.attempt
-- ``cpus`: 3
+- ``cpus``: 3
