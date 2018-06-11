@@ -39,4 +39,6 @@ Default directives
 ------------------
 
 - ``container``: flowcraft/metamlst
+- ``version``: 1.1-1
+- ``memory``: 4.Gb * task.attempt
 
