@@ -18,7 +18,7 @@ process sistr_{{ pid }} {
     script:
     """
     {
-        sistr --qc -vv -t $task.cpus -f json -o ${sample_id}_sistr.tab ${assembly}
+        sistr --qc -vv -t $task.cpus -f tab -o ${sample_id}_sistr.tab ${assembly}
         json_str="{'typing':{'sistr':'\$(awk \"FNR == 2\" *.tab | cut -f14)'}}"
         echo \$json_str > .report.json
 
