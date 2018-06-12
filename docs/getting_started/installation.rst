@@ -61,7 +61,7 @@ If you are looking to contribute to FlowCraft or simply interested in
 tweaking it, clone the github repository and its submodule and then run
 setup.py::
 
-    git clone https://github.com/flowcraft/flowcraft.git
+    git clone https://github.com/assemblerflow/flowcraft.git
     cd flowcraft
     git submodule update --init --recursive
     python3 setup.py install
