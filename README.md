@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/assemblerflow/flowcraft/branch/master/graph/badge.svg)](https://codecov.io/gh/assemblerflow/flowcraft)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f518854f780b41a08ca2fb1c14e360f0)](https://www.codacy.com/app/o.diogosilva/assemblerflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ODiogoSilva/assemblerflow&amp;utm_campaign=Badge_Grade)
 [![Documentation Status](https://readthedocs.org/projects/flowcraft/badge/?version=latest)](http://flowcraft.readthedocs.io/en/latest/?badge=latest)
-[![PyPI](https://img.shields.io/pypi/v/assemblerflow.svg)](https://pypi.python.org/pypi/assemblerflow/1.0.0rc3)
+[![PyPI](https://img.shields.io/pypi/v/flowcraft.svg)](https://pypi.python.org/pypi/flowcraft)
 
 <p align="center">
   <img width="360" src="docs/resources/logo_large.png" alt="nextflow_logo"/>
