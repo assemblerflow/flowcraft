@@ -1,4 +1,4 @@
-Abricate
+abricate
 ========
 
 Purpose
@@ -51,7 +51,7 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.process_abricate`
+:mod:`flowcraft.templates.process_abricate`
 
 
 Reports JSON

@@ -15,7 +15,7 @@ Preface header
 
 After the script shebang, a header with a brief description of the purpose and
 expected inputs and outputs should be provided. A complete example of such
-description can be viewed in :mod:`assemblerflow.templates.integrity_coverage`.
+description can be viewed in :mod:`flowcraft.templates.integrity_coverage`.
 
 Purpose
 ^^^^^^^
@@ -82,14 +82,14 @@ These can then be passed to the output channel(s) in the nextflow process::
 Versioning and logging
 ----------------------
 
-Assemblerflow has a specific ``logger``
-(:func:`~assemblerflow.templates.utils.assemblerflow_base.get_logger`) and
+FlowCraft has a specific ``logger``
+(:func:`~flowcraft.templates.flowcraft_utils.flowcraft_base.get_logger`) and
 versioning system that can be imported from
-:mod:`assemblerflow.templates.utils`: ::
+:mod:`flowcraft.templates.flowcraft_utils`: ::
 
     # the module that imports the logger and the decorator class for versioning
     # of the script itself and other software used in the script
-    from utils.assemblerflow_base import get_logger, MainWrapper
+    from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
 
 
@@ -115,7 +115,7 @@ Then, it may be used at will, using the default `logging levels
 MainWrapper decorator
 ^^^^^^^^^^^^^^^^^^^^^
 
-This :class:`~assemblerflow.templates.utils.assemblerflow_base.MainWrapper`
+This :class:`~flowcraft.templates.flowcraft_utils.flowcraft_base.MainWrapper`
 class decorator allows the program to fetch information on the script version,
 build and template name. For example::
 
@@ -124,7 +124,7 @@ build and template name. For example::
     __build__ = "15012018"
     __template__ = "process_abricate-nf"
 
-The :class:`~assemblerflow.templates.utils.assemblerflow_base.MainWrapper`
+The :class:`~flowcraft.templates.flowcraft_utils.flowcraft_base.MainWrapper`
 should decorate the main function of the script.
 E.g.::
 
@@ -167,7 +167,7 @@ return a dictionary with **at least** two key:value pairs:
 - ``version``: String with the version of the program.
 
 For more information, refer to the
-:func:`~assemblerflow.templates.utils.assemblerflow_base.MainWrapper.build_versions`
+:func:`~flowcraft.templates.flowcraft_utils.flowcraft_base.MainWrapper.build_versions`
 method.
 
 Nextflow `.command.sh`
@@ -201,7 +201,7 @@ as is the case when the templates are used as standalone modules.
 Use numpy docstrings
 --------------------
 
-``Assemblerflow`` uses numpy docstrings to document code.
+``FlowCraft`` uses numpy docstrings to document code.
 Use
 `this link <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html>`_
 for reference.

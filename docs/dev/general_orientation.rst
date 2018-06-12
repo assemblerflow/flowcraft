@@ -4,12 +4,12 @@ General orientation
 Codebase structure
 ------------------
 
-The most important elements of assemblerflow's directory structure are:
+The most important elements of FlowCraft's directory structure are:
 
 - ``generator``:
     - ``components``: Contains the ``Process`` classes for each component
     - ``templates``: Contains the nextflow jinja template files for each component
-    - ``engine.py``: The engine of assemblerflow that builds the pipeline
+    - ``engine.py``: The engine of FlowCraft that builds the pipeline
     - ``process.py``: Contains the abstract ``Process`` class that is inherited
     - by all component classes
     - ``pipeline_parser.py``: Functions that parse and check the pipeline string
@@ -23,7 +23,7 @@ The most important elements of assemblerflow's directory structure are:
 Code style
 ----------
 
-- **Style**:  the code base of assemblerflow should adhere (the best it can) to
+- **Style**:  the code base of flowcraft should adhere (the best it can) to
   the `PEP8`_ style guidelines.
 - **Docstrings**: code should be generally well documented following the
   `numpy docstring`_ style.
@@ -36,7 +36,7 @@ Testing
 -------
 
 Tests are performed using `pytest`_ and the source files are stored in the
-``assemblerflow/tests`` directory. Tests must be executed on the root directory
+``flowcraft/tests`` directory. Tests must be executed on the root directory
 of the repository
 
 Documentation

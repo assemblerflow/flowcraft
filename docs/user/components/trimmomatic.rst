@@ -1,4 +1,4 @@
-Trimmomatic
+trimmomatic
 ===========
 
 Purpose
@@ -60,8 +60,8 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.trimmomatic`
-:mod:`assemblerflow.templates.trimmomatic_report`
+:mod:`flowcraft.templates.trimmomatic`
+:mod:`flowcraft.templates.trimmomatic_report`
 
 Reports JSON
 ^^^^^^^^^^^^

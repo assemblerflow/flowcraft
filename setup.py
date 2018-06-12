@@ -1,42 +1,45 @@
-import assemblerflow
+import flowcraft
 
 from setuptools import setup
 
-VERSION = assemblerflow.__version__
+VERSION = flowcraft.__version__
 
 with open("README.md") as fh:
     README = fh.read()
 
 setup(
-    name="assemblerflow",
-    version="{}-3".format(VERSION),
-    packages=["assemblerflow",
-              "assemblerflow.templates",
-              "assemblerflow.templates.assemblerflow_utils",
-              "assemblerflow.generator",
-              "assemblerflow.generator.components"],
-    package_dir={"assemblerflow": "assemblerflow"},
-    package_data={"assemblerflow": ["nextflow.config",
-                                    "profiles.config",
-                                    "bin/*",
-                                    "lib/*",
-                                    "generator/templates/*"]},
+    name="flowcraft",
+    version="{}".format(VERSION),
+    packages=["flowcraft",
+              "flowcraft.templates",
+              "flowcraft.templates.flowcraft_utils",
+              "flowcraft.generator",
+              "flowcraft.generator.components"],
+    package_dir={"flowcraft": "flowcraft"},
+    package_data={"flowcraft": ["nextflow.config",
+                                "profiles.config",
+                                "bin/*",
+                                "lib/*",
+                                "generator/templates/*"]},
     data_files=[("", ["LICENSE"])],
     install_requires=[
+        "pympler",
+        "python-dateutil",
         "argparse",
         "jinja2",
+        "requests"
     ],
     description="A Nextflow pipeline assembler for genomics. Pick your "
                 "modules. Assemble them. Run the pipeline.",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/ODiogoSilva/assemblerflow",
+    url="https://github.com/assemblerflow/flowcraft",
     author="Diogo N Silva",
     author_email="o.diogosilva@gmail.com",
     license="GPL3",
     entry_points={
         "console_scripts": [
-            "assemblerflow = assemblerflow.assemblerflow:main"
+            "flowcraft = flowcraft.flowcraft:main"
         ]
     }
 )

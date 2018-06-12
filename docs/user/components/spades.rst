@@ -1,4 +1,4 @@
-Spades
+spades
 ======
 
 Purpose
@@ -56,4 +56,4 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.spades`
+:mod:`flowcraft.templates.spades`

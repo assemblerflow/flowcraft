@@ -4,19 +4,19 @@ Process creation guidelines
 Basic process creation
 ----------------------
 
-The addition of a new process to assemblerflow requires three main steps:
+The addition of a new process to FlowCraft requires three main steps:
 
-#. `Create process template`_: Create a jinja2 template in ``assemblerflow.generator.templates`` with the
+#. `Create process template`_: Create a jinja2 template in ``flowcraft.generator.templates`` with the
    nextflow code.
 
-#. `Create Process class`_: Create a :class:`~assemblerflow.generator.process.Process` subclass in
-   :class:`assemblerflow.generator.process` with
+#. `Create Process class`_: Create a :class:`~flowcraft.generator.process.Process` subclass in
+   :class:`flowcraft.generator.process` with
    information about the process (e.g., expected input/output, secondary inputs,
    etc.).
 
-#. `Add to available processes`_: Add the :class:`~assemblerflow.generator.process` class to the
+#. `Add to available processes`_: Add the :class:`~flowcraft.generator.process` class to the
    dictionary of available process in
-   :attr:`assemblerflow.generator.engine.process_map`.
+   :attr:`flowcraft.generator.engine.process_map`.
 
 .. _create-process:
 
@@ -24,7 +24,7 @@ Create process template
 :::::::::::::::::::::::
 
 First, create the nextflow template that will be integrated into the pipeline
-as a process. This file must be placed in ``assemblerflow.generator.templates``
+as a process. This file must be placed in ``flowcraft.generator.templates``
 and have the ``.nf`` extension. In order to allow the template to be
 dynamically added to a pipeline file, we use the jinja2_ template language to
 substitute key variables in the process, such as input/output channels.
@@ -57,7 +57,7 @@ The fields surrounded by curly brackets are jinja placeholders that will be
 dynamically interpolated when building the pipeline, ensuring that the
 processes and potential forks correctly link with each other. This example
 contains all placeholder variables that are currently supported by
-assemblerflow:
+FlowCraft:
 
 
 - ``pid`` (**Mandatory**): This placeholder is used as a unique process
@@ -134,14 +134,14 @@ As an example of a complete process, this is the template of ``spades.nf``::
 Create Process class
 ::::::::::::::::::::
 
-The process class will contain the information that assemblerflow
+The process class will contain the information that FlowCraft
 will use to build the pipeline and assess potential conflicts/dependencies
 between process. This class should be created in one the category files in the
-:mod:`assemblerflow.generator.components` module (e.g.: ``assembly.py``). If
+:mod:`flowcraft.generator.components` module (e.g.: ``assembly.py``). If
 the new component does not fit in any of the existing categories, create a
-new one that imports :mod:`assemblerflow.generator.process.Process` and add
+new one that imports :mod:`flowcraft.generator.process.Process` and add
 your new class. This class should inherit from the
-:class:`~assemblerflow.generator.process.Process` base
+:class:`~flowcraft.generator.process.Process` base
 class::
 
     class MyProcess(Process):
@@ -177,7 +177,7 @@ Add to available processes
 ::::::::::::::::::::::::::
 
 The final step is to add your new process to the list of available processes.
-This list is defined in :attr:`assemblerflow.generator.engine.process_map`
+This list is defined in :attr:`flowcraft.generator.engine.process_map`
 module, which is a dictionary
 mapping the process template name to the corresponding template class::
 
@@ -192,20 +192,20 @@ Process attributes
 ------------------
 
 This section describes the main attributes of the
-:mod:`~assemblerflow.generator.process.Process` class: what they
+:mod:`~flowcraft.generator.process.Process` class: what they
 do and how do they impact the pipeline generation.
 
 Input/Output types
 ::::::::::::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.input_type` and
-:attr:`~assemblerflow.generator.process.Process.output_type` attributes
+The :attr:`~flowcraft.generator.process.Process.input_type` and
+:attr:`~flowcraft.generator.process.Process.output_type` attributes
 set the expected type of input and output of the process. There are no
 limitations to the type of input/output that are provided. However, processes
 will only link when the output of one process matches the input of the
 subsequent process (unless the
-:attr:`~assemblerflow.generator.process.Process.ignore_type` attribute is set
-to ``True``). Otherwise, assemblerflow will raise an exception stating that
+:attr:`~flowcraft.generator.process.Process.ignore_type` attribute is set
+to ``True``). Otherwise, FlowCraft will raise an exception stating that
 two processes could not be linked.
 
 .. note::
@@ -215,7 +215,7 @@ two processes could not be linked.
 Parameters
 ::::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.params` attribute sets
+The :attr:`~flowcraft.generator.process.Process.params` attribute sets
 the parameters that can be used by the process. For each parameter, a default
 value and a description should be provided. The default value will be set
 in the ``params.config`` file in the pipeline directory and the description
@@ -256,7 +256,7 @@ Any process can receive one or more input channels in addition to the main
 channel. These are particularly useful when the process needs to receive
 additional options from the ``parameters`` scope of nextflow.
 These additional inputs can be specified via the
-:attr:`~assemblerflow.generator.process.Process.secondary_inputs` attribute,
+:attr:`~flowcraft.generator.process.Process.secondary_inputs` attribute,
 which should store a list of dictionaries (a dictionary for each input). Each dictionary should
 contains a key:value pair with the name of the parameter (``params``) and the
 definition of the nextflow channel (``channel``). Consider the example below::
@@ -274,7 +274,7 @@ definition of the nextflow channel (``channel``). Consider the example below::
 
 This process will receive two secondary inputs that are given by the
 ``genomeSize`` and ``minCoverage`` parameters. These should be also specified
-in the :attr:`~assemblerflow.generator.process.Process.params` attribute
+in the :attr:`~flowcraft.generator.process.Process.params` attribute
 (See `Parameters`_ above).
 
 For each of these parameters, the dictionary
@@ -296,21 +296,21 @@ literally in the ``channel`` string::
 Extra input
 :::::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.extra_input` attribute
+The :attr:`~flowcraft.generator.process.Process.extra_input` attribute
 is mostly a user specified directive that allows the injection of additional
 input data from a parameter into the main input channel of the process.
 When a pipeline is defined as::
 
     process1 process2={'extra_input':'var'}
 
-assemblerflow will expose a new ``var`` parameter, setup an extra input
+FlowCraft will expose a new ``var`` parameter, setup an extra input
 channel and mix it with ``process2`` main input channel. A more detailed
 explanation follows below.
 
-First, assemblerflow will create a nextflow channel from the parameter name
+First, FlowCraft will create a nextflow channel from the parameter name
 provided via the ``extra_input`` directive. The channel string will depend
 on the input type of the process (this string is fetched from the
-:attr:`~assemblerflow.generator.process.Process.RAW_MAPPING` attribute).
+:attr:`~flowcraft.generator.process.Process.RAW_MAPPING` attribute).
 For instance, if the input type of
 ``process2`` is ``fastq``, the new extra channel will be::
 
@@ -342,16 +342,16 @@ enough resources.
 Compiler
 ::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.compiler` attribute
+The :attr:`~flowcraft.generator.process.Process.compiler` attribute
 allows one or more channels of the process to be fed into a compiler process
 (See `Compiler processes`_). These are special processes that collect
 information from one or more processes to execute a given task. Therefore,
 this parameter can only be used when there is an appropriate compiler process
 available (the available compiler processes are set in the
-:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` dictionary). In order to
+:attr:`~flowcraft.generator.engine.NextflowGenerator.compilers` dictionary). In order to
 provide one or more channels to a compiler process, simply add a key:value to the
 attribute, where the key is the id of the compiler process present in the
-:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` dictionary and the value
+:attr:`~flowcraft.generator.engine.NextflowGenerator.compilers` dictionary and the value
 is the list of channels::
 
     self.compiler["patlas_consensus"] = ["mappingOutputChannel"]
@@ -359,7 +359,7 @@ is the list of channels::
 Link start
 ::::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.link_start` attribute
+The :attr:`~flowcraft.generator.process.Process.link_start` attribute
 stores a list of strings of channel names that can be used as secondary
 channels in the pipeline (See the `Secondary links between process`_ section).
 By default, this attribute contains the main output channel, which means
@@ -369,7 +369,7 @@ processes.
 Link end
 ::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.link_end` attribute
+The :attr:`~flowcraft.generator.process.Process.link_end` attribute
 stores a list of dictionaries with channel names that are meant to be
 received by the process as secondary channel **if** the corresponding
 `Link start`_ exists in the pipeline. Each dictionary in this list will define
@@ -381,7 +381,7 @@ one secondary channel and requires two key:value pairs::
     })
 
 If another process exists in the pipeline with
-``self.link_start.extend(["SomeChannel"])``, assemblerflow will automatically
+``self.link_start.extend(["SomeChannel"])``, FlowCraft will automatically
 establish a secondary channel between the two processes. If there are multiple
 processes receiving from a single one, the channel from the later will
 for into any number of receiving processes.
@@ -391,14 +391,16 @@ Dependencies
 
 If a process depends on the presence of one or more processes upstream in the
 pipeline, these can be specific via the
-:attr:`~assemblerflow.generator.process.Process.dependencies` attribute.
+:attr:`~flowcraft.generator.process.Process.dependencies` attribute.
 When building the pipeline if at least one of the dependencies is absent,
-assemblerflow will raise an exception informing of a missing dependency.
+FlowCraft will raise an exception informing of a missing dependency.
+
+.. _DirectivesAnchor:
 
 Directives
 ::::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.directives` attribute
+The :attr:`~flowcraft.generator.process.Process.directives` attribute
 allows for information about cpu/RAM usage and container to be specified
 for each nextflow process in the template file. For instance, considering
 the case where a ``Process`` has a template with two nextflow processes::
@@ -412,7 +414,7 @@ the case where a ``Process`` has a template with two nextflow processes::
     }
 
 Then, information about each process can be specified individually in the
-:attr:`~assemblerflow.generator.process.Process.directives` attribute::
+:attr:`~flowcraft.generator.process.Process.directives` attribute::
 
 
     class myProcess(Process):
@@ -438,14 +440,14 @@ config files and they will use the **default pipeline values**:
 
 - ``cpus``: ``1``
 - ``memory``: ``1GB``
-- ``container``: `assemblerflow_base`_ image
+- ``container``: `flowcraft_base`_ image
 
-.. _assemblerflow_base: https://hub.docker.com/r/ummidock/assemblerflow_base/~/dockerfile/
+.. _flowcraft_base: https://hub.docker.com/r/ummidock/assemblerflow_base/~/dockerfile/
 
 Ignore type
 :::::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.ignore_type` attribute,
+The :attr:`~flowcraft.generator.process.Process.ignore_type` attribute,
 controls whether a match between the input of the current process and the
 output of the previous one is enforced or not. When there are multiple
 terminal processes that fork from the main channel, there is no need to
@@ -455,7 +457,7 @@ Process ID
 ::::::::::
 
 The process ID, set via the
-:attr:`~assemblerflow.generator.process.Process.pid` attribute, is an
+:attr:`~flowcraft.generator.process.Process.pid` attribute, is an
 arbitrarily and incremental number that is awarded to each process depending
 on its position in the pipeline. It is mainly used to ensure that there are
 no duplicated channels even when the same process is used multiple times
@@ -464,7 +466,7 @@ in the same pipeline.
 Template
 ::::::::
 
-The :attr:`~assemblerflow.generator.process.Process.template` attribute
+The :attr:`~flowcraft.generator.process.Process.template` attribute
 is used to fetch the jinja2 template file that corresponds to the current
 process. The path to the template file is determined as follows::
 
@@ -486,15 +488,15 @@ nextflow template file contains the appropriate jinja2 placeholder::
 
 By default,
 every ``Process`` class contains a
-:attr:`~assemblerflow.generator.process.Process.status_channels` list
+:attr:`~flowcraft.generator.process.Process.status_channels` list
 attribute that contains the
-:attr:`~assemblerflow.generator.process.Process.template` string::
+:attr:`~flowcraft.generator.process.Process.template` string::
 
     self.status_channels = ["STATUS_{}".format(template)]
 
 If there is only one nextflow process in the template and the ``task_name``
 variable in the template matches the
-:attr:`~assemblerflow.generator.process.Process.template` attribute, then
+:attr:`~flowcraft.generator.process.Process.template` attribute, then
 it's all automatically set up.
 
 If the template file contains **more than one nextflow process**
@@ -517,7 +519,7 @@ definition, multiple placeholders can be provided in the template::
     }
 
 In this case, the
-:attr:`~assemblerflow.generator.process.Process.status_channels` attribute
+:attr:`~flowcraft.generator.process.Process.status_channels` attribute
 would need to be changed to::
 
     self.status_channels = ["A", "B"]
@@ -559,7 +561,7 @@ Creating a compiler process
 The creation of the compiler process is simpler than that of a regular process
 but follows the same three steps.
 
-1. Create a nextflow template file in ``assemblerflow.generator.templates``::
+1. Create a nextflow template file in ``flowcraft.generator.templates``::
 
     process fullConsensus {
 
@@ -579,7 +581,7 @@ but follows the same three steps.
 The only requirement is the inclusion of a ``compiler_channels`` jinja
 placeholder in the main input channel.
 
-2. Create a Compiler class in the :mod:`assemblerflow.generator.process`
+2. Create a Compiler class in the :mod:`flowcraft.generator.process`
    module::
 
     class PatlasConsensus(Compiler):
@@ -589,11 +591,11 @@ placeholder in the main input channel.
             super().__init__(**kwargs)
 
 This class must inherit from
-:mod:`~assemblerflow.generator.process.Compiler` and does not require any
+:mod:`~flowcraft.generator.process.Compiler` and does not require any
 more changes.
 
 3. Map the compiler template file to the class in
-:attr:`~assemblerflow.generator.engine.NextflowGenerator.compilers` attribute::
+:attr:`~flowcraft.generator.engine.NextflowGenerator.compilers` attribute::
 
         self.compilers = {
         "patlas_consensus": {
@@ -604,7 +606,7 @@ more changes.
         }
 
 Each compiler should contain a key:value entry. The key is the compiler
-id that is then specified in the :attr:`~assemblerflow.generator.process.Process.compiler`
+id that is then specified in the :attr:`~flowcraft.generator.process.Process.compiler`
 attribute of the component classes. The value is a json/dict object that
 species the compiler class in the ``cls`` key, the template string in the
 ``template`` string and the operator used to join the channels into the
@@ -670,7 +672,7 @@ must be declared in the nextflow process that sends it::
 
 Then, we add the information that this process has a secondary channel start
 via the ``link_start`` list attribute in the corresponding
-``assemblerflow.generator.process.Process`` class::
+``flowcraft.generator.process.Process`` class::
 
     class MyProcess(Process):
 

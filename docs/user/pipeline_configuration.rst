@@ -1,7 +1,7 @@
 Pipeline configuration
 ======================
 
-When a nextflow pipeline is built with assemblerflow, a number of configuration
+When a nextflow pipeline is built with FlowCraft, a number of configuration
 files are automatically generated in the same directory. They are all imported
 at the end of the ``nextflow.config`` file and are sorted by their configuration
 role. All configuration files are overwritten if you build another pipeline

@@ -1,4 +1,4 @@
-Pilon
+pilon
 =====
 
 Purpose
@@ -57,7 +57,7 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.assembly_report`
+:mod:`flowcraft.templates.assembly_report`
 
 Reports JSON
 ^^^^^^^^^^^^

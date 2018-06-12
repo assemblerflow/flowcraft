@@ -1,4 +1,4 @@
-Prokka
+prokka
 ======
 
 **Building...**

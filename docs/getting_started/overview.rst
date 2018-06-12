@@ -3,7 +3,7 @@
 Overview
 ========
 
-Assemblerflow is an assembler of pipelines written in  nextflow_ for
+FlowCraft is an assembler of pipelines written in  nextflow_ for
 analyses of genomic data. The premisse is simple:
 
 Software are container blocks |rarr| Build your lego-like pipeline |rarr| Execute it (almost) anywhere.
@@ -22,10 +22,10 @@ increasingly executed on large computer clusters to handle large volumes
 of data and/or tasks. Moreover, portability and reproducibility are becoming
 central pillars in modern data science.
 
-What Assemblerflow does
-:::::::::::::::::::::::
+What FlowCraft does
+:::::::::::::::::::
 
-Assemblerflow is a python engine that automatically builds nextflow pipelines
+FlowCraft is a python engine that automatically builds nextflow pipelines
 by assembling pre-made ready-to-use :ref:`components <components>`. These components are modular
 pieces of software or scripts, such as ``fastqc``, ``trimmomatic``, ``spades``,
 etc, that are written for nextflow and have a set of attributes, such as
@@ -33,13 +33,13 @@ input and output types, parameters, directives, etc. This modular nature
 allows them to be freely connected as long as they respect some basic rules,
 such as the input type of a component must match with the output type of
 the preceding component. In this way, nextflow processes can be
-written only once, and assemblerflow is the magic glue that connects them,
+written only once, and FlowCraft is the magic glue that connects them,
 handling the linking and forking of channels automatically. Moreover, each
 component is associated with a docker image, which means that there is no
 need to install any dependencies at all and all software runs on a
 transparent and reliable box. To illustrate:
 
-- A linear genome assembly pipeline can be easily built using assemblerflow
+- A linear genome assembly pipeline can be easily built using FlowCraft
   with the following pipeline string::
 
     trimmomatic fastqc spades
@@ -85,10 +85,10 @@ This pipeline can be executed by providing a file with accession numbers
 ``--reads`` parameter defined with the ``extra_input`` directive.
 
 
-Who is Assemblerflow for
-::::::::::::::::::::::::
+Who is FlowCraft for
+::::::::::::::::::::
 
-Assemblerflow can be useful for bioinformaticians with varied levels of expertise
+FlowCraft can be useful for bioinformaticians with varied levels of expertise
 that need to executed genomic pipelines often and potentially in different
 platforms. Building and executing pipelines requires no programming knowledge,
 but familiarization with nextflow is highly recommended to take full advantage
@@ -98,7 +98,7 @@ At the moment, the available pre-made processes are mainly focused on
 bacterial genome assembly simply because that was how we started.
 However, our goal is to expand the library of existing components to other
 commonly used tools in the field of genomics and to widen the applicability
-and usefulness of assemblerflow pipelines.
+and usefulness of FlowCraft pipelines.
 
 Why not just write a Nextflow pipeline?
 :::::::::::::::::::::::::::::::::::::::
@@ -108,7 +108,7 @@ However, when building our own pipelines, we often felt the need to add
 dynamism to this process, particularly if we take into account how fast new
 tools arise and existing ones change. Our biological goals also change over
 time and we might need different pipelines to answer different questions.
-Assemblerflow makes this very easy by having a set of pre-made and ready-to-use
+FlowCraft makes this very easy by having a set of pre-made and ready-to-use
 components that can be freely assembled. By using components (``fastqc``,
 ``trimmomatic``) as its atomic elements, very complex pielines that take
 full advantage of nextflow can be built with little effort. Moreover,
@@ -120,7 +120,7 @@ from the process, to ensure that it can link with other components.
 
 **However, why not both?**
 
-Assemblerflow generates a complete Nextflow pipeline file, which ca be used
+FlowCraft generates a complete Nextflow pipeline file, which ca be used
 as a starting point for your customized processes!
 
 .. _nextflow: https://www.nextflow.io/

@@ -1,4 +1,4 @@
-Fastqc_trimmomatic
+fastqc_trimmomatic
 ==================
 
 Purpose
@@ -73,9 +73,9 @@ Advanced
 Template
 ^^^^^^^^
 
-:mod:`assemblerflow.templates.fastqc_report`
-:mod:`assemblerflow.templates.trimmomatic`
-:mod:`assemblerflow.templates.trimmomatic_report`
+:mod:`flowcraft.templates.fastqc_report`
+:mod:`flowcraft.templates.trimmomatic`
+:mod:`flowcraft.templates.trimmomatic_report`
 
 Reports JSON
 ^^^^^^^^^^^^
