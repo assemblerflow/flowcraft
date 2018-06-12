@@ -9,6 +9,8 @@
 [![Documentation Status](https://readthedocs.org/projects/flowcraft/badge/?version=latest)](http://flowcraft.readthedocs.io/en/latest/?badge=latest)
 [![PyPI](https://img.shields.io/pypi/v/assemblerflow.svg)](https://pypi.python.org/pypi/assemblerflow/1.0.0rc3)
 
+<div style="text-align:center"><img width="150" src="docs/resources/logo_large.png" alt="nextflow_logo"/></div>
+
 A [Nextflow](https://www.nextflow.io/) pipeline assembler for genomics.
 Pick your modules. Assemble them. Run the pipeline.
 
