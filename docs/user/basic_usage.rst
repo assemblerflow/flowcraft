@@ -283,11 +283,7 @@ should be run in the folder where the pipeline is running**::
     flowcraft inspect -m broadcast
 
 
-This will output a url to the terminal that can be opened in a browser::
-
-    http://192.92.149.169/inspect/af7745b37280081ec48c925cd0d3550a7f68f2e405e23e0fb8dab2ad3ecac264
-
-
+This will output a url to the terminal that can be opened in a browser.
 This is an example of the screen that is displayed once the url is opened:
 
 .. image:: ../resources/flowcraft_inspect_broadcast.png
