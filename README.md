@@ -1,5 +1,4 @@
 # FlowCraft :whale2::package:
-(Previously Assemblerflow)
 
 ![Nextflow version](https://img.shields.io/badge/nextflow->0.26.0-brightgreen.svg)
 ![Python version](https://img.shields.io/badge/python-3.6-brightgreen.svg)
@@ -9,10 +8,14 @@
 [![Documentation Status](https://readthedocs.org/projects/flowcraft/badge/?version=latest)](http://flowcraft.readthedocs.io/en/latest/?badge=latest)
 [![PyPI](https://img.shields.io/pypi/v/assemblerflow.svg)](https://pypi.python.org/pypi/assemblerflow/1.0.0rc3)
 
-<div style="text-align:center"><img width="150" src="docs/resources/logo_large.png" alt="nextflow_logo"/></div>
+<p align="center">
+  <img width="460" src="docs/resources/logo_large.png" alt="nextflow_logo"/>
+</p>
 
 A [Nextflow](https://www.nextflow.io/) pipeline assembler for genomics.
 Pick your modules. Assemble them. Run the pipeline.
+
+(Previously known as Assemblerflow)
 
 ## The premisse
 
