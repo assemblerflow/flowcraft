@@ -42,7 +42,7 @@ def signal_handler(screen):
         curses.echo()
         curses.endwin()
 
-    print("Exiting assemblerflow inspection... Bye")
+    print("Exiting flowcraft inspection... Bye")
     sys.exit(0)
 
 
@@ -195,11 +195,11 @@ class NextflowInspector:
         """
 
         if not ip_addr:
-            self.app_address = "http://localhost:8000/"
+            self.app_address = "http://192.92.149.169:80/"
         else:
             self.app_address = ip_addr
             """
-            str: Address of assemblerflow web app
+            str: Address of flowcraft web app
             """
 
         self.broadcast_address = "{}inspect/api/status".format(
@@ -1380,7 +1380,7 @@ class NextflowInspector:
             with open(nf_config) as fh:
                 pipeline_files["configFile"] = fh.readlines()
 
-        # Check for specific assemblerflow configurations files
+        # Check for specific flowcraft configurations files
         configs = {
             "params.config": "paramsFile",
             "resources.config": "resourcesFile",

@@ -9,7 +9,7 @@ with open("README.md") as fh:
 
 setup(
     name="flowcraft",
-    version="{}".format(VERSION),
+    version="{}-1".format(VERSION),
     packages=["flowcraft",
               "flowcraft.templates",
               "flowcraft.templates.flowcraft_utils",
