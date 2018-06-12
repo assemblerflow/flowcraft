@@ -1,6 +1,6 @@
 # FlowCraft :whale2::package:
 
-![Nextflow version](https://img.shields.io/badge/nextflow->0.26.0-brightgreen.svg)
+![Nextflow version](https://img.shields.io/badge/nextflow->0.27.0-brightgreen.svg)
 ![Python version](https://img.shields.io/badge/python-3.6-brightgreen.svg)
 [![Build Status](https://travis-ci.org/assemblerflow/flowcraft.svg?branch=master)](https://travis-ci.org/assemblerflow/flowcraft)
 [![codecov](https://codecov.io/gh/assemblerflow/flowcraft/branch/master/graph/badge.svg)](https://codecov.io/gh/assemblerflow/flowcraft)
