@@ -9,7 +9,7 @@
 [![PyPI](https://img.shields.io/pypi/v/assemblerflow.svg)](https://pypi.python.org/pypi/assemblerflow/1.0.0rc3)
 
 <p align="center">
-  <img width="460" src="docs/resources/logo_large.png" alt="nextflow_logo"/>
+  <img width="360" src="docs/resources/logo_large.png" alt="nextflow_logo"/>
 </p>
 
 A [Nextflow](https://www.nextflow.io/) pipeline assembler for genomics.
