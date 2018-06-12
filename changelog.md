@@ -18,7 +18,8 @@
 ### Features
 
 - Added `inspect` run mode to flowcraft for displaying the progress overview
-  during a nextflow run.
+  during a nextflow run. This run mode has an `overview` and `broadcast` options
+  for viewing the progress of a pipeline.
 
 ### Minor/Other changes
 

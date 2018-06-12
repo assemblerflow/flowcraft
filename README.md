@@ -228,6 +228,10 @@ trimmomatic fastqc
 
 As the number of existing components grow, so does your freedom to build pipelines.
 
+## Roadmap
+
+You can see what we're planning next on our [roadmap guide](https://github.com/assemblerflow/flowcraft/wiki/Roadmap).
+
 ## Developer guide
 
 ### Adding new components
