@@ -108,7 +108,7 @@ Taxonomical Profiling
 ---------------------
 
 - :doc:`components/kraken`: Performs taxonomical identification with kraken
-  (minikrakenDB2014 as default database)
+  (minikrakenDB2017 as default database)
 
 - :doc:`components/midas_species`: Performs taxonomical identification on the
   species level with midas (requires database)
