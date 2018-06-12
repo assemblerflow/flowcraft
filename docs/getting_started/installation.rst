@@ -33,10 +33,17 @@ require the processes to run on a separate root daemon.
 Singularity
 :::::::::::
 
-Singularity is available as a bioconda package. Simply install it, and it's
-ready to use::
+Singularity is available to download and install `here <http://singularity.lbl.gov/install-linux>`_.
+Make sure that you have singularity v2.5.x or higher.
+Note that singularity should be installed as root and available on the machine(s) that
+will be running the nextflow processes.
 
-    conda install singularity
+.. important::
+
+    Singularity is available as a bioconda package. However, conda installs singularity
+    in user space without root privileges, which may prevent singularity images from
+    being correctly downloaded. **Therefore it is not recommended that you install
+    singularity via bioconda**.
 
 Docker
 ::::::
