@@ -51,6 +51,8 @@ full advantage of the inspect mode, the following trace fields should be present
 Usage
 -----
 
+::
+
     flowcraft inspect --help
     usage: flowcraft inspect [-h] [-i TRACE_FILE] [-r REFRESH_RATE]
                              [-m {overview,broadcast}] [-u URL] [--pretty]
