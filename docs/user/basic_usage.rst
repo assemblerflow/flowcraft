@@ -250,31 +250,35 @@ Inspect
 -------
 
 FlowCraft has two options (``overview`` and ``broadcast``) for inspecting the
-progress of a pipeline that is
-running locally, either it is a personal computer or a server machine.
+progress of a pipeline that is running locally, either in a personal computer
+or a server machine. In both cases, the progress of the pipeline will be
+continuously updated in real-time.
 
 In a terminal
 :::::::::::::
 
-To open inspect in the terminal just write the following command on the folder
-that the pipeline is running.::
+To open inspect in the terminal just write the following command **on the folder
+that the pipeline is running**::
 
     flowcraft inspect
+
+.. image:: ../resources/flowcraft_inspect_terminal.png
+   :align: center
 
 ``overview`` is the default behavior of this module, but it can also be called
 like this::
 
     flowcraft inspect -m overview
 
-`Note`: to cancel this command just do ``ctrl+c`` in the terminal
-flowcraft inspect is running.
+.. note::
+    To exit the inspection just type ``q`` or ``ctrl+c``.
 
 In a browser
 ::::::::::::
 
-It is also possible to track the pipeline process by using a browser in any
-device. To do so, the following command should be run in the folder where the
-pipeline is running.::
+It is also possible to track the pipeline progress in a browser in any
+device using the flowcraft web application. **To do so, the following command
+should be run in the folder where the pipeline is running**::
 
     flowcraft inspect -m broadcast
 
@@ -284,13 +288,18 @@ This will output a url to the terminal that can be opened in a browser::
     http://192.92.149.169/inspect/af7745b37280081ec48c925cd0d3550a7f68f2e405e23e0fb8dab2ad3ecac264
 
 
-This is the screen that is displayed once the url is opened:
+This is an example of the screen that is displayed once the url is opened:
 
 .. image:: ../resources/flowcraft_inspect_broadcast.png
    :align: center
 
-`Note`: This will be available until the command is canceled as described for
-``overview``.
+.. important::
+    This pipeline inspection will be available for **anyone** via the provided URL,
+    which means that the URL can be shared with anyone and/or any device with
+    a browser. **However, the inspection section will only be available while
+    the** ``flowcraft inspect -m broadcast`` **command is running. Once this command
+    is cancelled, the data will be erased from the service and the URL will
+    no longer be available**.
 
 Want to know more?
 ::::::::::::::::::
