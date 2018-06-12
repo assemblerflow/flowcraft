@@ -6,6 +6,10 @@
 FlowCraft
 =========
 
+.. image:: resources/logo_large.png
+   :scale: 20 %
+   :align: center
+
 A NextFlow pipeline assembler for genomics.
 
 .. _Getting Started:
