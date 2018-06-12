@@ -20,6 +20,7 @@ A NextFlow pipeline assembler for genomics.
 
    getting_started/overview
    getting_started/installation
+   about/about
 
 .. _User Guide:
 
@@ -52,4 +53,3 @@ A NextFlow pipeline assembler for genomics.
    :caption: Source API
 
    flowcraft
-
