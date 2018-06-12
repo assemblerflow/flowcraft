@@ -59,7 +59,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'FlowCraft'
 copyright = '2018, FlowCraft team'
-author = 'Diogo N. Silva, Tiago F. Jesus, Ines Mendes, Bruno Ribeiro-Gonçalves'
+author = 'Diogo N. Silva, Tiago F. Jesus, Ines Mendes, Bruno Ribeiro-Goncalves'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
