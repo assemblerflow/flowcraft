@@ -178,6 +178,25 @@ nextflow run my_pipeline --fastq "path/to/fastq/*_{1,2}.*" -profile slurm_sing
 During the execution of the pipeline, the results and reports for each component
 are continuously saved to the `results` and `reports` directory, respectively.
 
+#### Inspecting a pipeline progress
+
+Since version 1.2.0, it is possible to inspect the progress of a nextflow pipeline
+using the `flowcraft inspect` mode. To check the progress in a terminal, simply
+type:
+
+```
+flowcraft inspect
+```
+
+On the directory where the pipeline is running. Alternatively, you can view the progress
+in FlowCraft's web service by using the ``broadcast`` option:
+
+```
+flowcraft inspect -m broadcast
+```
+
+<img src="https://github.com/assemblerflow/flowcraft-webapp/raw/master/flowcraft-webapp/frontend/resources/fc_short_demo.gif"/>
+
 ## Why not just write a Nextflow pipeline?
 
 In many cases, building a static nextflow pipeline is sufficient for our goals.
