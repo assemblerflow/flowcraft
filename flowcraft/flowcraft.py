@@ -136,7 +136,7 @@ def validate_build_arguments(args):
 
     if args.output_nf:
         parsed_output_nf = (args.output_nf if args.output_nf.endswith(".nf")
-                            else "{}.nf".format(args.output_nf))
+                            else "{}.nf".format(args.output_nf.strip()))
         opath = parsed_output_nf
         if os.path.dirname(opath):
             parent_dir = os.path.dirname(opath)
