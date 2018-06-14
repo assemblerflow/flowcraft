@@ -38,7 +38,7 @@ MAIN_integrity_{{ pid }}
     }
 
 
-process report_coverage_2_{{ pid }} {
+process report_coverage2_{{ pid }} {
 
     // This process can only use a single CPU
     cpus 1

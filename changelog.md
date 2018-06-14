@@ -1,6 +1,17 @@
 # Changelog
 
-## New in upcoming 1.2.0 release (`dev` branch)
+## Upcoming release (`dev` branch)
+
+### New components
+
+- `maxbin2`: An automatic tool for binning metagenomic sequences
+
+### Bug fixes
+
+- Fixed pipeline names that contain new line characters.
+- **Template: sistr.nf**: Fixed comparison that determined process status.
+
+## 1.2.0
 
 ### New components
 
@@ -30,7 +41,7 @@ environmental variable.
 - Updated indexes for both `mapping_patlas` and `mash` based processes.
 - New logo!
 
-# Bug Fixes
+### Bug Fixes
 
 - **Template: fastqc_report.py**: Added fix to trim range evaluation.
 - **Script: merge_json.py**: Fixed chewbbaca JSON merge function.
