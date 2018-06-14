@@ -48,6 +48,62 @@ class Kraken(Process):
         ]
 
 
+class MaxBin2(Process):
+    """MaxBin2, a metagenomics binning software
+
+            This process is set with:
+
+                - ``input_type``: assembly
+                - ``output_type``: assembly
+                - ``ptype``: post_assembly
+
+            It contains one **secondary channel link end**:
+
+                - ``MAIN_fq`` (alias: ``_MAIN_assembly``): Receives the FastQ files
+                from the last process with ``fastq`` output type.
+
+            """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "fasta"
+
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
+        self.params = {
+            "min_contig_lenght": {
+                "default": 1000,
+                "description": "minimum contig length. Default: 1000"
+            },
+            "max_iteration": {
+                "default": 50,
+                "description": "maximum Expectation-Maximization algorithm"
+                               "iteration number. Default: 50"
+            },
+            "prob_threshold": {
+                "default": 0.9,
+                "description": "probability threshold for EM final classification."
+                               "Default: 0.9"
+            }
+        }
+
+        self.directives = {
+            "maxbin2": {
+                "container": "flowcraft/maxbin2",
+                "version": "2.2.4-1",
+                "cpus": 3,
+                "memory": "{ 5.GB * task.attempt }"
+            }
+        }
+
+        self.status_channels = [
+            "maxbin2"
+        ]
+
+
 class Megahit(Process):
     """megahit process template interface
 

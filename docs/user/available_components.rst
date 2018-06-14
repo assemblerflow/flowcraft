@@ -64,6 +64,10 @@ Post-assembly
   from Spades and performs filtering base on quality criteria of GC content
   k-mer coverage and read length.
 
+Binning
+-------
+
+- :doc:`components/maxbin2`: An automatic tool for binning metagenomic sequences
 
 Annotation
 ----------
