@@ -1,14 +1,10 @@
+// Check for the presence of absence of both index and fasta reference
 if (params.index == null && params.reference == null){
     exit 1, "An index or a reference fasta file must be provided."
 } else if (params.index != null && params.reference != null){
     exit 1, "Provide only an index OR a reference fasta file."
 }
 
-if (params.index){
-    index = params.index
-} else {
-    index = "ref_index"
-}
 
 if (params.reference){
 
@@ -21,23 +17,25 @@ if (params.reference){
         // Send POST request to platform
         {% include "post.txt" ignore missing %}
 
-        tag { sample_id }
-        storeDir 'index/'
+        tag { build_id }
+        storeDir 'bowtie_index/'
         maxForks 1
 
         input:
-        set sample_id, file(fasta) from reference_in
+        set build_id, file(fasta) from reference_in
 
         output:
-        file "ref_index*" into bowtiebuild_index
+        val build_id into bowtieIndexId_{{ pid }}
+        file "${build_id}*.bt2" into bowtieIndex_{{ pid }}
 
         script:
         """
-        bowtie2-build ${fasta} ref_index > ${sample_id}_bowtie2_build.log
+        bowtie2-build ${fasta} $build_id > ${build_id}_bowtie2_build.log
         """
     }
 } else {
-    bowtiebuild_index = Channel.value(params.index)
+    bowtieIndexId_{{ pid }} = Channel.value(params.index.split("/").last())
+    bowtieIndex_{{ pid }} = Channel.fromPath("${params.index}*.bt2").collect().toList()
 }
 
 
@@ -51,7 +49,8 @@ process bowtie_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    file bowtie2Index from bowtiebuild_index
+    each index from bowtieIndexId_{{pid}}
+    each file(index_files) from bowtieIndex_{{ pid }}
 
     output:
     set sample_id , file("*.bam") into {{ output_channel }}
@@ -63,7 +62,6 @@ process bowtie_{{ pid }} {
     script:
     """
     bowtie2 -x $index -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} -p $task.cpus 1> ${sample_id}.bam 2> ${sample_id}_bowtie2.log
-
     """
 }
 
