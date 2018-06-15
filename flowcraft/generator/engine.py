@@ -27,6 +27,7 @@ try:
     from generator import header_skeleton as hs
     from generator import footer_skeleton as fs
     from generator.process_details import colored_print
+    from generator.pipeline_parser import guess_process
 except ImportError:
     import flowcraft.generator.process as pc
     import flowcraft.generator.components.assembly as assembly
@@ -44,6 +45,7 @@ except ImportError:
     from flowcraft.generator import header_skeleton as hs
     from flowcraft.generator import footer_skeleton as fs
     from flowcraft.generator.process_details import colored_print
+    from flowcraft.generator.pipeline_parser import guess_process
 
 
 process_map = {
@@ -314,8 +316,9 @@ class NextflowGenerator:
             # Check if process is available or correctly named
             if p_out_name not in process_map:
                 logger.error(colored_print(
-                    "\nThe process '{}' is not available".format(p_out_name),
-                    "red_bold"))
+                    "\nThe process '{}' is not available."
+                        .format(p_out_name), "red_bold"))
+                guess_process(p_out_name, process_map)
                 sys.exit(1)
 
             # Instance output process
