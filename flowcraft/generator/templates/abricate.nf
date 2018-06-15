@@ -33,6 +33,8 @@ process abricate_{{ pid }} {
 
 process process_abricate_{{ pid }} {
 
+    tag "process_abricate_{{ pid }}"
+
     // Send POST request to platform
     {% with overwrite="false" %}
     {% include "report_post.txt" ignore missing %}
@@ -40,6 +42,11 @@ process process_abricate_{{ pid }} {
 
     input:
     file abricate_file from abricate_out_{{ pid }}.collect()
+
+    output:
+    {% with task_name="process_abricate", sample_id="val('process_abricate')" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     template "process_abricate.py"
