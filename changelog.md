@@ -6,6 +6,12 @@
 
 - `maxbin2`: An automatic tool for binning metagenomic sequences
 
+### Minor/Other changes
+
+- Added "smart" check when the user provides a typo in pipeline string
+for a given process, outputting some "educated" guesses to the the
+terminal.
+
 ### Bug fixes
 
 - Fixed pipeline names that contain new line characters.
@@ -40,9 +46,6 @@
 environmental variable.
 - Updated indexes for both `mapping_patlas` and `mash` based processes.
 - New logo!
-- Added "smart" check when the user provides a typo in pipeline string
-for a given process, outputting some "educated" guesses to the the
-terminal.
 
 ### Bug Fixes
 
