@@ -361,15 +361,15 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                     "tableRow": [
                         {"header": "Raw BP",
                          "value": chars,
-                         "table": "assembly",
+                         "table": "qc",
                          "columnBar": True},
                         {"header": "Reads",
                          "value": nreads,
-                         "table": "assembly",
+                         "table": "qc",
                          "columnBar": True},
                         {"header": "Coverage (1st)",
                          "value": exp_coverage,
-                         "table": "assembly",
+                         "table": "qc",
                          "columnBar": True}
                     ],
                     "plotData": {
@@ -382,7 +382,7 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                     "tableRow": [
                         {"header": "Coverage (2nd)",
                          "value": exp_coverage,
-                         "table": "assembly",
+                         "table": "qc",
                          "columnBar": True},
                     ],
                     "minCoverage": minimum_coverage

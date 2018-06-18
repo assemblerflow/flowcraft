@@ -141,7 +141,7 @@ def write_report(storage_dic, output_file):
                 "tableRow": [
                     {"header": "trimmed",
                      "value": vals["total_trim_perc"],
-                     "table": "assembly",
+                     "table": "qc",
                      "columnBar": True},
                     ],
                 "plotData": {
