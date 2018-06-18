@@ -6,6 +6,7 @@ logger = logging.getLogger("main.{}".format(__name__))
 COLORS = {
     "green_bold": "1;32m",
     "red_bold": "1;31m",
+    "white": "2;38m",
     "white_bold": "1;38m",
     "white_underline": "4;38m",
     "blue_bold": "1;36m",

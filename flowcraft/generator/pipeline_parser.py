@@ -1,11 +1,14 @@
 import os
 import logging
 import re
+from difflib import SequenceMatcher
 
 try:
     from generator.error_handling import SanityError
+    from generator.process_details import colored_print
 except ImportError:
     from flowcraft.generator.error_handling import SanityError
+    from flowcraft.generator.process_details import colored_print
 
 logger = logging.getLogger("main.{}".format(__name__))
 
@@ -16,6 +19,40 @@ FORK_TOKEN = "("
 LANE_TOKEN = "|"
 # Token that closes a fork
 CLOSE_TOKEN = ")"
+
+
+def guess_process(query_str, process_map):
+    """
+    Function to guess processes based on strings that are not available in
+    process_map. If the string has typos and is somewhat similar (50%) to any
+    process available in flowcraft it will print info to the terminal,
+    suggesting the most similar processes available in flowcraft.
+
+    Parameters
+    ----------
+    query_str: str
+        The string of the process with potential typos
+    process_map:
+        The dictionary that contains all the available processes
+
+    """
+
+    save_list = []
+    # loops between the processes available in process_map
+    for process in process_map:
+        similarity = SequenceMatcher(None, process, query_str)
+        # checks if similarity between the process and the query string is
+        # higher than 50%
+        if similarity.ratio() > 0.5:
+            save_list.append(process)
+
+    # checks if any process is stored in save_list
+    if save_list:
+        logger.info(colored_print(
+            "Maybe you meant:\n\t{}".format("\n\t".join(save_list)), "white"))
+
+    logger.info(colored_print("Hint: check the available processes by using "
+                              "the '-l' or '-L' flag.", "white"))
 
 
 def remove_inner_forks(text):

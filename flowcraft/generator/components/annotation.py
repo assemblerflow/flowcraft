@@ -29,7 +29,7 @@ class Abricate(Process):
 
         self.ignore_type = True
 
-        self.status_channels = ["STATUS_abricate"]
+        self.status_channels = ["STATUS_abricate", "STATUS_process_abricate"]
 
         self.params = {
             "abricateDatabases": {
