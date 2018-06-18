@@ -5,6 +5,7 @@
 ### New components
 
 - `maxbin2`: An automatic tool for binning metagenomic sequences
+- `bowtie2`: Align short paired-end sequencing reads to long reference sequences
 
 ### Bug fixes
 

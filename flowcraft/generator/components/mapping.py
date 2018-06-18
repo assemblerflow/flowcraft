@@ -5,7 +5,7 @@ except ImportError:
 
 
 class Bowtie(Process):
-    """bowtie2 to
+    """bowtie2 to align short paired-end sequencing reads to long reference sequences
 
         This process is set with:
 
@@ -30,7 +30,7 @@ class Bowtie(Process):
             },
             "index": {
                 "default": "null",
-                "description": "Specifies the reference indexes, with full path, to be provided "
+                "description": "Specifies the reference indexes to be provided "
                                "to bowtie2."
             }
         }
