@@ -14,24 +14,6 @@ def tmp():
     shutil.rmtree("temp")
 
 
-def test_list_short():
-
-    sys.argv.append(1)
-    args = af.get_args(["build", "-l"])
-
-    with pytest.raises(SystemExit):
-        af.build(args)
-
-
-def test_list_long():
-
-    sys.argv.append(1)
-    args = af.get_args(["build", "-L"])
-
-    with pytest.raises(SystemExit):
-        af.build(args)
-
-
 def test_check():
 
     sys.argv.append(1)
