@@ -111,7 +111,7 @@ def _get_quality_stats(d, start_str, field_start=1, field_end=2):
                                ";".join(fields[field_start: field_end])))
 
 
-def write_json_report(data1, data2):
+def write_json_report(sample_id, data1, data2):
     """Writes the report
 
     Parameters
@@ -134,14 +134,17 @@ def write_json_report(data1, data2):
     }
 
     json_dic = {
-        "plotData": {
-            "base_sequence_quality": {"status": None, "data": []},
-            "sequence_quality": {"status": None, "data": []},
-            "base_gc_content": {"status": None, "data": []},
-            "base_n_content": {"status": None, "data": []},
-            "sequence_length_dist": {"status": None, "data": []},
-            "per_base_sequence_content": {"status": None, "data": []}
-        }
+        "plotData": [{
+            "sample": sample_id,
+            "data": {
+                "base_sequence_quality": {"status": None, "data": []},
+                "sequence_quality": {"status": None, "data": []},
+                "base_gc_content": {"status": None, "data": []},
+                "base_n_content": {"status": None, "data": []},
+                "sequence_length_dist": {"status": None, "data": []},
+                "per_base_sequence_content": {"status": None, "data": []}
+            }
+        }]
     }
 
     for cat, start_str in parser_map.items():
@@ -163,8 +166,8 @@ def write_json_report(data1, data2):
             if i in [status1, status2]:
                 status = i
 
-        json_dic["plotData"][cat]["data"] = [report1, report2]
-        json_dic["plotData"][cat]["status"] = status
+        json_dic["plotData"][0]["data"][cat]["data"] = [report1, report2]
+        json_dic["plotData"][0]["data"][cat]["status"] = status
 
     return json_dic
 
@@ -545,7 +548,8 @@ def main(sample_id, result_p1, result_p2, opts):
         if "--ignore-tests" not in opts:
 
             # Get reports for each category in json format
-            json_dic = write_json_report(result_p1[0], result_p2[0])
+            json_dic = write_json_report(sample_id, result_p1[0],
+                                         result_p2[0])
 
             logger.info("Performing FastQ health check")
             for p, fastqc_summary in enumerate([result_p1[1], result_p2[1]]):
@@ -559,13 +563,14 @@ def main(sample_id, result_p1, result_p2, opts):
 
                 # Write any warnings
                 if warnings:
-                    json_dic["warnings"] = {
-                        "process": "FastQC",
+                    json_dic["warnings"] = [{
+                        "sample": sample_id,
+                        "table": "qc",
                         "value": []
-                    }
+                    }]
                     for w in warnings:
                         warn_fh.write("{}\\n".format(w))
-                        json_dic["warnings"]["value"].append(w)
+                        json_dic["warnings"][0]["value"].append(w)
 
                 # Rename category summary file to the channel that will publish
                 # The results
@@ -581,10 +586,11 @@ def main(sample_id, result_p1, result_p2, opts):
                                " {}".format(",".join(f_cat))
                     logger.warning(fail_msg)
                     fail_fh.write(fail_msg)
-                    json_dic["fail"] = {
-                        "process": "fastqc",
+                    json_dic["fail"] = [{
+                        "sample": sample_id,
+                        "table": "qc",
                         "value": fail_msg
-                    }
+                    }]
                     report_fh.write(
                         json.dumps(json_dic, separators=(",", ":")))
                     status_fh.write("fail")
