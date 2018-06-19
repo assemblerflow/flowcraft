@@ -540,27 +540,32 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
     # Write json report
     with open(".report.json", "w") as json_report:
         json_dic = {
-            "tableRow": [
-                {"header": "Contigs ({})".format(assembler),
-                 "value": len(assembly_obj.contigs),
-                 "table": "assembly",
-                 "columnBar": True},
-                {"header": "Assembled BP ({})".format(assembler),
-                 "value": assembly_len,
-                 "table": "assembly",
-                 "columnBar": True}
-            ],
-            "warnings": {
-                "process": "process_assembly",
+            "tableRow": [{
+                "sample": sample_id,
+                "data": [
+                    {"header": "Contigs ({})".format(assembler),
+                     "value": len(assembly_obj.contigs),
+                     "table": "assembly",
+                     "columnBar": True},
+                    {"header": "Assembled BP ({})".format(assembler),
+                     "value": assembly_len,
+                     "table": "assembly",
+                     "columnBar": True}
+                ]
+            }],
+            "warnings": [{
+                "sample": sample_id,
+                "table": "assembly",
                 "value": warnings
-            }
+            }]
         }
 
         if fails:
-            json_dic["fail"] = {
-                "process": "process_assembly",
+            json_dic["fail"] = [{
+                "sample": sample_id,
+                "table": "assembly",
                 "value": fails
-            }
+            }]
 
         json_report.write(json.dumps(json_dic, separators=(",", ":")))
 

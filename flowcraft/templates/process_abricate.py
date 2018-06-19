@@ -464,20 +464,32 @@ class AbricateReport(Abricate):
         # Collect the gene lists for each database
         for key, entry in self.storage.items():
 
+            # Retrieve and initiate new sample entry, if not present already
+            sample_id = re.match("", entry["infile"]).groups()[0]
+            if sample_id not in gene_storage:
+                gene_storage[sample_id] = {}
+
             database = entry["database"]
-            gene_storage[database].append(entry["gene"].replace("'", "").
-                                          replace('"', ''))
+            gene_storage[sample_id][database].append(
+                entry["gene"].replace("'", "").replace('"', ''))
 
         # For each database, create the JSON report
-        for db, gene_list in gene_storage.items():
+        for sample, table_data in gene_storage.items():
 
-            ind_json = {
-                "table": "abricate",
-                "header": db,
-                "value": len(gene_list),
-                "geneList": gene_list
-            }
-            json_dic["tableRow"].append(ind_json)
+            json_dic["tableRow"].append({
+                "sample": sample,
+                "data": []
+            })
+
+            for db, gene_list in table_data.items():
+
+                ind_json = {
+                    "table": "abricate",
+                    "header": db,
+                    "value": len(gene_list),
+                    "geneList": gene_list
+                }
+                json_dic["tableRow"][-1]["data"].append(ind_json)
 
         return json_dic
 
