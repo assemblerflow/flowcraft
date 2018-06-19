@@ -79,6 +79,7 @@ process_map = {
         "prokka": annotation.Prokka,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
+        "retrieve_mapped": map.Retrieve_mapped,
         "seq_typing": typing.SeqTyping,
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,

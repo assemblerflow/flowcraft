@@ -21,7 +21,7 @@ process remove_host_{{ pid }} {
     """
     bowtie2 -x ${bowtie2Index} -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} -p $task.cpus 1> ${sample_id}.bam 2> ${sample_id}_bowtie2.log
 
-    samtools view -buh -f 12 -o ${sample_id}_samtools.bam -@ 2 ${sample_id}.bam
+    samtools view -buh -f 12 -o ${sample_id}_samtools.bam -@ $task.cpus ${sample_id}.bam
 
     samtools fastq -1 ${sample_id}_unmapped_1.fq -2 ${sample_id}_unmapped_2.fq ${sample_id}_samtools.bam
 
