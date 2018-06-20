@@ -27,7 +27,7 @@ process patho_typing_{{ pid }} {
         export PATH="\$(pwd)/rematch_temp/ReMatCh:\$PATH"
 
         patho_typing.py -f \$(pwd)/${fastq_pair[0]} \$(pwd)/${fastq_pair[1]} -o \$(pwd) -j $task.cpus --trueCoverage --species $species
-        json_str="{'typing':{'pathotyping':'\$(cat patho_typing.report.txt)'}}"
+        json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'pathotyping','value':'\$(cat patho_typing.report.txt)','table':'typing'}]}]}"
         echo \$json_str > .report.json
 
         rm -r rematch_temp
