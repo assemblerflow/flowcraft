@@ -15,7 +15,7 @@ def write_json(report_json, task_name, project_name, sample_name, pid):
     del res["task"]
 
     report = {
-        "report_json": res,
+        "reportJson": res,
         "processId": pid,
         "pipelineId": 1,
         "projectid": 1,
