@@ -22,7 +22,7 @@ except ImportError:
     import flowcraft.generator.error_handling as eh
     from flowcraft.generator.process_details import colored_print
 
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, "")
 code = locale.getpreferredencoding()
 
 logger = logging.getLogger("main.{}".format(__name__))
