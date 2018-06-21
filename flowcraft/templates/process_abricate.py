@@ -109,6 +109,8 @@ class Abricate:
         dic: Main storage of Abricate's file content. Each entry corresponds
         to a single line and contains the keys::
         
+            - ``log_file``: Name of the summary log file containing abricate 
+              results
             - ``infile``: Input file of Abricate.
             - ``reference``: Reference of the query sequence.
             - ``seq_range``: Range of the query sequence in the database
@@ -192,6 +194,7 @@ class Abricate:
                     accession = None
 
                 self.storage[self._key] = {
+                    "log_file": os.path.basename(fl),
                     "infile": fields[0],
                     "reference": fields[1],
                     "seq_range": (int(fields[2]), int(fields[3])),
@@ -458,20 +461,28 @@ class AbricateReport(Abricate):
 
         """
 
-        gene_storage = defaultdict(list)
+        gene_storage = {}
         json_dic = {"tableRow": []}
+        logger.info("Generating JSON table data")
 
         # Collect the gene lists for each database
         for key, entry in self.storage.items():
 
             # Retrieve and initiate new sample entry, if not present already
-            sample_id = re.match("", entry["infile"]).groups()[0]
+            logger.debug("Retrieving sample if from: {}".format(
+                entry["infile"]))
+            sample_id = re.match("(.*)_abr", entry["log_file"]).groups()[0]
+            database = entry["database"]
+
             if sample_id not in gene_storage:
                 gene_storage[sample_id] = {}
 
-            database = entry["database"]
+            if database not in gene_storage[sample_id]:
+                gene_storage[sample_id][database] = []
+
             gene_storage[sample_id][database].append(
-                entry["gene"].replace("'", "").replace('"', ''))
+                entry["gene"].replace("'", "").replace('"', '')
+            )
 
         # For each database, create the JSON report
         for sample, table_data in gene_storage.items():
