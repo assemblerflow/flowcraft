@@ -31,6 +31,7 @@ process compile_reports {
 
     """
     #!/usr/bin/env python3
+    import sys
     import json
 
     reports = '${report}'.split()
@@ -40,6 +41,7 @@ process compile_reports {
         with open(r) as fh:
             rjson = json.load(fh)
             storage.append(rjson)
+            print("{}: {}".format(rjson["processName"], sys.getsizeof(json.dumps(rjson))))
 
     with open("pipeline_report.json", "w") as rep_fh:
        rep_fh.write(json.dumps({"data": {"results": storage}},
