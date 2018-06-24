@@ -294,8 +294,6 @@ class Assembly:
         -------
         xbars : list
             The x-axis position of the ending for each contig.
-        labels : list
-            The x-axis labels for each data point in the sliding window
 
         """
 
@@ -313,21 +311,11 @@ class Assembly:
             xbars.append(
                 {
                     "contig": contig_id,
-                    "position": c / window,
-                    "absPosition": c,
-                    "window": window
+                    "pos": c,
                 }
             )
 
-        # Get label contig for each window
-        labels = []
-        for i in range(0, self.summary_info["total_len"], window):
-            for contig, rg in self.contig_boundaries.items():
-                if rg[0] <= i < rg[1]:
-                    labels.append("{}_{}".format(contig, i))
-                    break
-
-        return labels, xbars
+        return xbars
 
     @staticmethod
     def _gc_prop(s, length):
@@ -357,8 +345,6 @@ class Assembly:
         gc_res : list
             List of GC proportion floats for each data point in the sliding
             window
-        labels: list
-            List of labels for each data point
         xbars : list
             List of the ending position of each contig in the genome
 
@@ -367,7 +353,7 @@ class Assembly:
         gc_res = []
 
         # Get contigID for each window position
-        labels, xbars = self._get_window_labels(window)
+        xbars = self._get_window_labels(window)
 
         # Get complete sequence to calculate sliding window values
         complete_seq = "".join(self.contigs.values()).lower()
@@ -377,9 +363,15 @@ class Assembly:
             seq_window = complete_seq[i:i + window]
 
             # Get GC proportion
-            gc_res.append(self._gc_prop(seq_window, len(seq_window)))
+            gc_res.append(round(self._gc_prop(seq_window, len(seq_window)), 2))
 
-        return gc_res, labels, xbars
+        plot_data = {
+            "data": gc_res,
+            "window": window,
+            "xbars": xbars
+        }
+
+        return plot_data
 
     def _get_coverage_from_file(self, coverage_file):
         """
@@ -428,7 +420,7 @@ class Assembly:
             self._get_coverage_from_file(coverage_file)
 
         # Get contigID for each window position
-        labels, xbars = self._get_window_labels(window)
+        xbars = self._get_window_labels(window)
 
         # Stores the coverage results
         cov_res = []
@@ -440,9 +432,15 @@ class Assembly:
             # Get coverage values for current window
             cov_window = complete_cov[i:i + window]
             # Get mean coverage
-            cov_res.append(sum(cov_window) / len(cov_window))
+            cov_res.append(int(sum(cov_window) / len(cov_window)))
 
-        return cov_res, labels, xbars
+        plot_data = {
+            "data": cov_res,
+            "window": window,
+            "xbars": xbars
+        }
+
+        return plot_data
 
 
 @MainWrapper
@@ -489,8 +487,8 @@ def main(sample_id, assembly_file, coverage_bp_file=None):
 
     if coverage_bp_file:
         try:
-            gc_sliding_data, gc_label, gc_xbars = assembly_obj.get_gc_sliding()
-            cov_sliding_data, cov_label, cov_xbars = \
+            gc_sliding_data = assembly_obj.get_gc_sliding()
+            cov_sliding_data = \
                 assembly_obj.get_coverage_sliding(coverage_bp_file)
 
             # Get total basepairs based on the individual coverage of each
@@ -500,10 +498,8 @@ def main(sample_id, assembly_file, coverage_bp_file=None):
             )
 
             # Add data to json report
-            json_dic["plotData"][0]["data"]["gcSliding"] = \
-                [gc_sliding_data, gc_label, gc_xbars]
-            json_dic["plotData"][0]["data"]["covSliding"] = \
-                [cov_sliding_data, cov_label, cov_xbars]
+            json_dic["plotData"][0]["data"]["gcSliding"] = gc_sliding_data
+            json_dic["plotData"][0]["data"]["covSliding"] = cov_sliding_data
             json_dic["plotData"][0]["data"]["sparkline"] = total_bp
 
         except:
