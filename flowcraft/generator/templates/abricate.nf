@@ -9,7 +9,7 @@ process abricate_{{ pid }} {
 
     input:
     set sample_id, file(assembly) from {{ input_channel }}
-    each db from params.abricateDatabases
+    each db from params.abricateDatabases{{ param_id }}
 
     output:
     file '*.tsv' into abricate_out_{{ pid }}

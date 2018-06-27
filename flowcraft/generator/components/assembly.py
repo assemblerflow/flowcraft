@@ -56,35 +56,6 @@ class Spades(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "spadesOpts",
-                "channel":
-                    "if ( !params.spadesMinCoverage.toString().isNumber() )"
-                    "{ exit 1, \"'spadesMinCoverage' parameter must "
-                    "be a number. Provided value: "
-                    "${params.spadesMinCoverage}\"}\n"
-                    "if ( !params.spadesMinKmerCoverage.toString().isNumber())"
-                    "{ exit 1, \"'spadesMinKmerCoverage' parameter must "
-                    "be a number. Provided value: "
-                    "${params.spadesMinKmerCoverage}\"}\n"
-                    "IN_spades_opts = Channel"
-                    ".value([params.spadesMinCoverage,"
-                    "params.spadesMinKmerCoverage])"
-            },
-            {
-                "params": "spadesKmers",
-                "channel":
-                    "if ( params.spadesKmers.toString().split(\" \").size() "
-                    "<= 1 )"
-                    "{ if (params.spadesKmers.toString() != 'auto'){"
-                    "exit 1, \"'spadesKmers' parameter must be a sequence "
-                    "of space separated numbers or 'auto'. Provided "
-                    "value: ${params.spadesKmers}\"} }\n"
-                    "IN_spades_kmers = Channel.value(params.spadesKmers)"
-            }
-        ]
-
         self.directives = {"spades": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",

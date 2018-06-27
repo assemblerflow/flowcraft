@@ -43,28 +43,6 @@ class IntegrityCoverage(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "genomeSize",
-                "channel":
-                    "IN_genome_size = Channel"
-                    ".value(params.genomeSize)"
-                    "map{it -> it.toString().isNumber() ?"
-                    " it : exit(1, \"The genomeSize parameter must be a number"
-                    "or a float. Provided value: '${params.genomeSize}'\")}"
-            },
-            {
-                "params": "minCoverage",
-                "channel":
-                    "IN_min_coverage = Channel"
-                    ".value(params.minCoverage)"
-                    "map{it -> it.toString().isNumber() ?"
-                    " it : exit(1, \"The minCoverage parameter must be a "
-                    "number or a float. Provided value: "
-                    "'${params.minCoverage}'\")}"
-            }
-        ]
-
         self.link_start.extend(["SIDE_phred", "SIDE_max_len"])
 
 
@@ -106,28 +84,6 @@ class CheckCoverage(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "genomeSize",
-                "channel":
-                    "IN_genome_size = Channel"
-                    ".value(params.genomeSize)"
-                    "map{it -> it.toString().isNumber() ?"
-                    " it : exit(1, \"The genomeSize parameter must be a number"
-                    "or a float. Provided value: '${params.genomeSize}'\")}"
-            },
-            {
-                "params": "minCoverage",
-                "channel":
-                    "IN_min_coverage = Channel"
-                    ".value(params.minCoverage)"
-                    "map{it -> it.toString().isNumber() ?"
-                    " it : exit(1, \"The minCoverage parameter must be a "
-                    "number or a float. Provided value: "
-                    "'${params.minCoverage}'\")}"
-            }
-        ]
-
         self.link_start.extend(["SIDE_max_len"])
 
 
@@ -151,20 +107,6 @@ class TrueCoverage(Process):
                     "(default: $params.species)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "species",
-                "channel":
-                    "if ( !params.species){ exit 1, \"'species' parameter "
-                    "missing\" }\n"
-                    "if ( params.species.toString().split(\" \").size() != 2 )"
-                    "{ exit 1, \"'species' parameter must contain two "
-                    "values (e.g.: 'escherichia coli').Provided value: "
-                    "'${params.species}'\"}\n"
-                    "IN_pathoSpecies = Channel.value(params.species)"
-            }
-        ]
 
         self.directives = {
             "true_coverage": {
@@ -212,13 +154,6 @@ class FastQC(Process):
                     "(default: $params.adapters)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "adapters",
-                "channel": "IN_adapters = Channel.value(params.adapters)"
-            }
-        ]
 
         self.directives = {"fastqc2": {
             "cpus": 2,
@@ -286,36 +221,6 @@ class Trimmomatic(Process):
                     "(default: $params.trimMinLength)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "trimOpts",
-                "channel":
-                    "// Check sliding window parameter\n"
-                    "if ( params.trimSlidingWindow.toString().split(\":\")"
-                    ".size() != 2 )"
-                    "{ exit 1, \"'trimSlidingWindow' parameter must contain"
-                    "two values separated by a ':'. Provided value: "
-                    "'${params.trimSlidingWindow}' \"}\n"
-                    "if ( !params.trimLeading.toString().isNumber() )"
-                    "{ exit 1, \"'trimLeading' parameter must be a number."
-                    "Provide value: '${params.trimLeading}'\"}\n"
-                    "if ( !params.trimTrailing.toString().isNumber() )"
-                    "{ exit 1, \"'trimTrailing' parameter must be a number."
-                    "Provide value: '${params.trimTrailing}'\"}\n"
-                    "if ( !params.trimMinLength.toString().isNumber() )"
-                    "{ exit 1, \"'trimMinLength' parameter must be a number."
-                    "Provide value: '${params.trimMinLength}'\"}\n"
-                    "IN_trimmomatic_opts = Channel."
-                    "value([params.trimSlidingWindow,"
-                    "params.trimLeading,params.trimTrailing,"
-                    "params.trimMinLength])"
-            },
-            {
-                "params": "adapters",
-                "channel": "IN_adapters = Channel.value(params.adapters)"
-            }
-        ]
 
         self.directives = {"trimmomatic": {
             "cpus": 2,
@@ -395,36 +300,6 @@ class FastqcTrimmomatic(Process):
                     "(default: $params.trimMinLength)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "adapters",
-                "channel": "IN_adapters = Channel.value(params.adapters)"
-            },
-            {
-                "params": "trimOpts",
-                "channel":
-                    "// Check sliding window parameter\n"
-                    "if ( params.trimSlidingWindow.toString().split(\":\")"
-                    ".size() != 2 )"
-                    "{ exit 1, \"'trimSlidingWindow' parameter must contain"
-                    "two values separated by a ':'. Provided value: "
-                    "'${params.trimSlidingWindow}' \"}\n"
-                    "if ( !params.trimLeading.toString().isNumber() )"
-                    "{ exit 1, \"'trimLeading' parameter must be a number."
-                    "Provide value: '${params.trimLeading}'\"}\n"
-                    "if ( !params.trimTrailing.toString().isNumber() )"
-                    "{ exit 1, \"'trimTrailing' parameter must be a number."
-                    "Provide value: '${params.trimTrailing}'\"}\n"
-                    "if ( !params.trimMinLength.toString().isNumber() )"
-                    "{ exit 1, \"'trimMinLength' parameter must be a number."
-                    "Provide value: '${params.trimMinLength}'\"}\n"
-                    "IN_trimmomatic_opts = Channel."
-                    "value([params.trimSlidingWindow,"
-                    "params.trimLeading,params.trimTrailing,"
-                    "params.trimMinLength])"
-            }
-        ]
 
         self.directives = {
             "fastqc": {

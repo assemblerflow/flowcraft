@@ -15,6 +15,13 @@ class ProcessSkesa(Process):
         self.output_type = "fasta"
 
         self.params = {
+            "genomeSize": {
+                "default": 1,
+                "description":
+                    "Genome size estimate for the samples in Mb. It is used "
+                    "to assess whether an assembly is much larger or smaller "
+                    "than expected (default: $params.genomeSize)",
+            },
             "skesaMinKmerCoverage": {
                 "default": 2,
                 "description":
@@ -35,28 +42,6 @@ class ProcessSkesa(Process):
                     "genome size (default: $params.skesaMaxContigs)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "processSkesaOpts",
-                "channel":
-                    "if ( !params.skesaMinKmerCoverage.toString().isNumber() )"
-                    "{ exit 1, \"'skesaMinKmerCoverage' parameter must "
-                    "be a number. Provided value: "
-                    "${params.skesaMinKmerCoverage}\"}\n"
-                    "if ( !params.skesaMinContigLen.toString().isNumber() )"
-                    "{ exit 1, \"'skesaMinContigLen' parameter must "
-                    "be a number. Provided value: "
-                    "${params.skesaMinContigLen}\"}\n"
-                    "if ( !params.skesaMaxContigs.toString().isNumber() )"
-                    "{ exit 1, \"'skesaMaxContigs' parameter must "
-                    "be a number. Provided value: "
-                    "${params.skesaMaxContigs}\"}\n"
-                    "IN_process_skesa_opts = Channel"
-                    ".value([params.skesaMinContigLen,"
-                    "params.skesaMinKmerCoverage,params.skesaMaxContigs])"
-            }
-        ]
 
         self.directives = {"skesa": {
             "cpus": 1,
@@ -85,6 +70,14 @@ class ProcessSpades(Process):
         self.output_type = "fasta"
 
         self.params = {
+            "genomeSize": {
+                "default": 1,
+                "description":
+                    "Genome size estimate for the samples in Mb. It is used "
+                    "to assess whether an assembly is much larger or smaller "
+                    "than expected (default: $params.genomeSize)",
+
+            },
             "spadesMinKmerCoverage": {
                 "default": 2,
                 "description":
@@ -105,28 +98,6 @@ class ProcessSpades(Process):
                     "genome size (default: $params.spadesMaxContigs)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "processSpadesOpts",
-                "channel":
-                    "if ( !params.spadesMinKmerCoverage.toString().isNumber())"
-                    "{ exit 1, \"'spadesMinKmerCoverage' parameter must "
-                    "be a number. Provided value: "
-                    "${params.spadesMinKmerCoverage}\"}\n"
-                    "if ( !params.spadesMinContigLen.toString().isNumber() )"
-                    "{ exit 1, \"'spadesMinContigLen' parameter must "
-                    "be a number. Provided value: "
-                    "${params.spadesMinContigLen}\"}\n"
-                    "if ( !params.spadesMaxContigs.toString().isNumber() )"
-                    "{ exit 1, \"'spadesMaxContigs' parameter must "
-                    "be a number. Provided value: "
-                    "${params.spadesMaxContigs}\"}\n"
-                    "IN_process_spades_opts = Channel"
-                    ".value([params.spadesMinContigLen, "
-                    "params.spadesMinKmerCoverage, params.spadesMaxContigs])"
-            }
-        ]
 
         self.directives = {"process_spades": {
             "container": "flowcraft/spades",
@@ -190,31 +161,6 @@ class AssemblyMapping(Process):
                     "(default: $params.genomeSize)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "assemblyMappingOpts",
-                "channel":
-                    "if ( !params.minAssemblyCoverage.toString().isNumber() )"
-                    "{ if (params.minAssemblyCoverage.toString() != 'auto'){"
-                    "exit 1, \"'minAssemblyCoverage' parameter must be a"
-                    " number or 'auto'. Provided value: "
-                    "${params.minAssemblyCoverage}\"} }\n"
-                    "if ( !params.AMaxContigs.toString().isNumber() )"
-                    "{ exit 1, \"'AMaxContigs' parameter must be a number."
-                    "Provide value: '${params.AMaxContigs}'\"}\n"
-                    "IN_assembly_mapping_opts = Channel"
-                    ".value([params.minAssemblyCoverage,params.AMaxContigs])"
-            },
-            {
-                "params": "genomeSize",
-                "channel":
-                    "if ( !params.genomeSize.toString().isNumber() )"
-                    "{ exit 1, \"'genomeSize' parameter must be a number."
-                    "Provide value: '${params.genomeSize}'\"}\n"
-                    "IN_genome_size = Channel.value(params.genomeSize)"
-            }
-        ]
 
         self.directives = {
             "assembly_mapping": {

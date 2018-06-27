@@ -29,78 +29,118 @@ and have the ``.nf`` extension. In order to allow the template to be
 dynamically added to a pipeline file, we use the jinja2_ template language to
 substitute key variables in the process, such as input/output channels.
 
-A minimal example created as a ``my_process.nf`` file is as follows::
+An example created as a ``my_process.nf`` file is as follows::
+
+    some_channel_{{ pid }} = Channel.value(params.param1{{ param_id}})
+    other_channel_{{ pid }} = Chanel.fromPath(params.param2{{ param_id}})
 
     process myProcess_{{ pid }} {
 
-    {% include "post.txt" ignore missing %}
+        {% include "post.txt" ignore missing %}
 
-    input:
-    set sample_id, <data> from {{ input_channel }}
+        publishDir "results/myProcess_{{ pid }}", pattern: "*.tsv"
 
-    // The output is optional
-    output:
-    set sample_id, <data> into {{ output_channel }}
-    {% with task_name="abricate" %}
-    {%- include "compiler_channels.txt" ignore missing -%}
-    {% endwith %}
+        input:
+        set sample_id, <data> from {{ input_channel }}
+        val x from some_channel_{{ pid }}
+        file y from other_channel_{{ pid }}
+        val direct_from_parms from Channel.value(params.param3{{param_id}}
 
-    """
-    <process code/commands>
-    """
+        // The output is optional
+        output:
+        set sample_id, <data> into {{ output_channel }}
+        {% with task_name="abricate" %}
+        {%- include "compiler_channels.txt" ignore missing -%}
+        {% endwith %}
 
+        """
+        <process code/commands>
+        """
     }
 
     {{ forks }}
 
 The fields surrounded by curly brackets are jinja placeholders that will be
-dynamically interpolated when building the pipeline, ensuring that the
-processes and potential forks correctly link with each other. This example
-contains all placeholder variables that are currently supported by
-FlowCraft:
+dynamically substituted when building the pipeline. They will ensure that the
+processes and potential forks correctly link with each other and that
+channels are unique and correctly linked. This example contains all
+placeholder variables that are currently supported by FlowCraft.
 
+{{pid}}
+^^^^^^^
 
-- ``pid`` (**Mandatory**): This placeholder is used as a unique process
-  identifier that prevent issues from process duplication in the pipeline.
-  It is also important for for unique secondary output channels, such as
-  those that send run status information (see `Status channels`_).
+Used as a unique process identifier that prevent issues
+from process and channel duplication in the pipeline. Therefore, is should be
+appended to each process and channel name as ``_{{ pid }}`` (note the underscore)::
 
-- ``include "post.txt"`` (**Mandatory**): Inserts
-  ``beforeScript`` and ``afterScript`` statements to the process that setup
-  environmental variables and a series of *dotfiles* for the process to
-  log their status, warnings, fails and reports (see :ref:`dotfiles` for
-  more information). It also includes scripts for sending requests to
-  REST APIs (only when certain pipeline parameters are used).
+    some_channel_{{ pid }}
+    process myProcess_{{ pid }}
 
-- ``input_channel`` (**Mandatory**): All processes must include **one and only
-  one** input channel. In most cases, this channel should be defined with
-  a two element tuple that contains the sample ID and then
-  the actual data file/stream. We suggest the sample ID variable to be named
-  ``sample_id`` as a standard. If other name variable name is specified and
-  you include the ``compiler_channels.txt`` in the process, you'll need to
-  change the sample ID variable (see `Sample ID variable`_).
+{{param_id}}
+^^^^^^^^^^^^
 
-- ``output_channel`` (**Optional**): Terminal processes may skip the output
-  channel entirely. However, if you want to link the main output of this
-  process with subsequent ones, this placeholder must be used **only once**.
-  Like in the input channel, this channel should be defined with a two element
-  tuple with the sample ID and the data. The sample ID must match the one
-  specified in the ``input_channel``.
+Same as the **{{ pid }}**, but sets the identified for nextflow ``params``. It should
+be appended to each ``param`` as ``{{ param_id }}``. This will allow parameters
+to be specific to each component in the pipeline::
 
-- ``include "compiler_channels.txt"`` (**Mandatory**): This will include the
-  special channels that will compile the status/logging of the processes
-  throughout the pipeline. **You must include the
-  whole block** (see `Status channels`_)::
+    Channel.value(params.param1{{ param_id}})
+
+Note that the parameters used in the template, should also be defined in the
+Process class params attribute (see `Parameters`_).
+
+{% include "post.txt" %}
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Inserts ``beforeScript`` and ``afterScript`` statements to the process that
+sets environmental variables and a series of *dotfiles* for the process to
+log their status, warnings, fails and reports (see :ref:`dotfiles` for
+more information). It also includes scripts for sending requests to
+REST APIs (only when certain pipeline parameters are used).
+
+{{input_channel}}
+^^^^^^^^^^^^^^^^^
+
+All processes must include **one and only one** input channel. In most cases,
+this channel should be defined with a two element tuple that contains the
+sample ID and then the actual data file/stream. We suggest the sample ID
+variable to be named ``sample_id`` as a standard. If other name variable name
+is specified and you include the ``compiler_channels.txt`` in the process,
+you'll need to change the sample ID variable (see `Sample ID variable`_).
+
+{{output_channel}}
+^^^^^^^^^^^^^^^^^^
+
+Terminal processes may skip the output channel entirely. However, if you want
+to link the main output of this process with subsequent ones, this placeholder
+must be used **only once**. Like in the input channel, this channel should
+be defined with a two element tuple with the sample ID and the data. The
+sample ID must match the one specified in the ``input_channel``.
+
+{% include "compiler_channels.txt %}
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This will include the special channels that will compile the status/logging
+of the processes throughout the pipeline. **You must include the whole
+block** (see `Status channels`_)::
 
     {% with task_name="abricate" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
 
-- ``forks`` (**Conditional**): Inserts potential forks of the main output
-  channel. It is **mandatory** if the ``output_channel`` is set.
+{{forks}}
+^^^^^^^^^
+
+Inserts potential forks of the main output channel. It is **mandatory** if
+the ``output_channel`` is set.
+
+Complete example
+^^^^^^^^^^^^^^^^
 
 As an example of a complete process, this is the template of ``spades.nf``::
+
+    IN_spades_opts_{{ pid }} = Channel.value([params.spadesMinCoverage{{ param_id }},params.spadesMinKmerCoverage{{ param_id }}])
+    IN_spades_kmers_{{pid}} = Channel.value(params.spadesKmers{{ param_id }})
 
     process spades_{{ pid }} {
 
@@ -112,20 +152,16 @@ As an example of a complete process, this is the template of ``spades.nf``::
 
         input:
         set fastq_id, file(fastq_pair), max_len from {{ input_channel }}.join(SIDE_max_len_{{ pid }})
-        val opts from IN_spades_opts
-        val kmers from IN_spades_kmers
+        val opts from IN_spades_opts_{{ pid }}
+        val kmers from IN_spades_kmers_{{ pid }}
 
         output:
         set fastq_id, file('*_spades.assembly.fasta') optional true into {{ output_channel }}
         set fastq_id, val("spades"), file(".status"), file(".warning"), file(".fail") into STATUS_{{ pid }}
         file ".report.json"
 
-        when:
-        params.stopAt != "spades"
-
         script:
         template "spades.py"
-
     }
 
     {{ forks }}
@@ -251,6 +287,11 @@ They can be specified when running the pipeline like any nextflow parameter
 
 Secondary inputs
 ::::::::::::::::
+
+.. warning::
+    The ``secondary_inputs`` attribute has been deprecated since **v1.2.1.**
+    Instead, specify the secondary channels directly in the nextflow template
+    files.
 
 Any process can receive one or more input channels in addition to the main
 channel. These are particularly useful when the process needs to receive
