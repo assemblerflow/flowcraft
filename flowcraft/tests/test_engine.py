@@ -300,14 +300,6 @@ def test_set_channels_multi_raw_input(single_con_multi_raw):
            [["fasta", "fastq"], 2]
 
 
-def test_set_channels_secondary_inputs(single_con):
-
-    single_con._set_channels()
-
-    assert list(single_con.secondary_inputs.keys()) == \
-        ["genomeSize", "minCoverage", "adapters"]
-
-
 def test_set_channels_secondary_channels_nolink(single_con):
 
     single_con._set_channels()
@@ -323,17 +315,6 @@ def test_set_channels_secondary_chanels_link(multi_forks):
             multi_forks.secondary_channels["SIDE_max_len"][1]["end"],
             multi_forks.secondary_channels["SIDE_max_len"][3]["end"]] == \
            [[], ["SIDE_max_len_4_5"], ["SIDE_max_len_6_7"]]
-
-
-def test_set_secondary_inputs_single(single_con):
-
-    single_con._set_channels()
-    single_con._set_init_process()
-
-    p = single_con
-
-    assert sorted(p.secondary_inputs.keys()) == ["adapters", "genomeSize",
-                                                 "minCoverage"]
 
 
 def test_set_secondary_inputs_raw_forks(raw_forks):
