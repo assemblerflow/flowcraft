@@ -1,3 +1,9 @@
+if ( !params.species{{ param_id }}){ exit 1, "'species' parameter missing" }
+if ( params.species{{ param_id }}.toString().split(" ").size() != 2 ){
+    exit 1, "'species' parameter must contain two values (e.g.: 'escherichia coli'). Provided value: ${params.species{{ param_id }}}"
+}
+
+IN_pathoSpecies_{{ pid }} = Channel.value(params.species{{ param_id }})
 
 process patho_typing_{{ pid }} {
 
@@ -10,7 +16,7 @@ process patho_typing_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val species from IN_pathoSpecies
+    val species from IN_pathoSpecies_{{ pid }}
 
     output:
     file "patho_typing*"

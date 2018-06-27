@@ -1,3 +1,8 @@
+IN_genome_size_{{ pid }} = Channel.value(params.genomeSize{{ param_id }})
+    .map{it -> it.toString().isNumber() ? it : exit(1, "The genomeSize parameter must be a number or a float. Provided value: '${params.genomeSize_{{ param_id }}}'")}
+
+IN_min_coverage_{{ pid }} = Channel.value(params.minCoverage{{ param_id }})
+    .map{it -> it.toString().isNumber() ? it : exit(1, "The minCoverage parameter must be a number or a float. Provided value: '${params.minCoverage_{{ param_id }}}'")}
 
 process integrity_coverage_{{ pid }} {
 
@@ -10,8 +15,8 @@ process integrity_coverage_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val gsize from IN_genome_size
-    val cov from IN_min_coverage
+    val gsize from IN_genome_size_{{ pid }}
+    val cov from IN_min_coverage_{{ pid }}
     // This channel is for the custom options of the integrity_coverage.py
     // script. See the script's documentation for more information.
     val opts from Channel.value('')
@@ -22,8 +27,8 @@ process integrity_coverage_{{ pid }} {
         file('*_encoding'),
         file('*_phred'),
         file('*_coverage'),
-        file('*_max_len') into MAIN_integrity
-    file('*_report') optional true into LOG_report_coverage1
+        file('*_max_len') into MAIN_integrity_{{ pid }}
+    file('*_report') optional true into LOG_report_coverage1_{{ pid }}
     {% with task_name="integrity_coverage" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -34,10 +39,10 @@ process integrity_coverage_{{ pid }} {
 }
 
 // TRIAGE OF CORRUPTED SAMPLES
-LOG_corrupted = Channel.create()
-MAIN_PreCoverageCheck = Channel.create()
+LOG_corrupted_{{ pid }} = Channel.create()
+MAIN_PreCoverageCheck_{{ pid }} = Channel.create()
 // Corrupted samples have the 2nd value with 'corrupt'
-MAIN_integrity.choice(LOG_corrupted, MAIN_PreCoverageCheck) {
+MAIN_integrity_{{ pid }}.choice(LOG_corrupted_{{ pid }}, MAIN_PreCoverageCheck_{{ pid }}) {
     a -> a[2].text == "corrupt" ? 0 : 1
 }
 
@@ -46,7 +51,7 @@ MAIN_integrity.choice(LOG_corrupted, MAIN_PreCoverageCheck) {
 SIDE_phred_{{ pid }} = Channel.create()
 SIDE_max_len_{{ pid }} = Channel.create()
 
-MAIN_PreCoverageCheck
+MAIN_PreCoverageCheck_{{ pid }}
 // Low coverage samples have the 4th value of the Channel with 'fail'
     .filter{ it[4].text != "fail" }
 // For the channel to proceed with FastQ in 'sample_good' and the
@@ -66,7 +71,7 @@ process report_coverage_{{ pid }} {
     publishDir 'reports/coverage_{{ pid }}/'
 
     input:
-    file(report) from LOG_report_coverage1.filter{ it.text != "corrupt" }.collect()
+    file(report) from LOG_report_coverage1_{{ pid }}.filter{ it.text != "corrupt" }.collect()
 
     output:
     file 'estimated_coverage_initial.csv'
@@ -88,7 +93,7 @@ process report_corrupt_{{ pid }} {
     publishDir 'reports/corrupted_{{ pid }}/'
 
     input:
-    val sample_id from LOG_corrupted.collect{it[0]}
+    val sample_id from LOG_corrupted_{{ pid }}.collect{it[0]}
 
     output:
     file 'corrupted_samples.txt'

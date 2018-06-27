@@ -146,28 +146,6 @@ class Chewbbaca(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "schemaPath",
-                "channel":
-                    "if ( !params.schemaPath ){ exit 1, \"'schemaPath' "
-                    "parameter missing\"}\n"
-                    "if ( params.chewbbacaTraining){"
-                    "if (!file(params.chewbbacaTraining).exists()) {"
-                    "exit 1, \"'chewbbacaTraining' file was not found: "
-                    "'${params.chewbbacaTraining}'\"}}\n"
-                    "if ( params.schemaSelectedLoci){"
-                    "if (!file(params.schemaSelectedLoci).exists()) {"
-                    "exit 1, \"'schemaSelectedLoci' file was not found: "
-                    "'${params.schemaSelectedLoci}'\"}}\n"
-                    "if ( params.schemaCore){"
-                    "if (!file(params.schemaCore).exists()) {"
-                    "exit 1, \"'schemaCore' file was not found: "
-                    "'${params.schemaCore}'\"}}\n"
-                    "IN_schema = Channel.fromPath(params.schemaPath)"
-            }
-        ]
-
 
 class MetaMlst(Process):
     """MetaMlst mapping process template interface

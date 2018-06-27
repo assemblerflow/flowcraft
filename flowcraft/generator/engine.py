@@ -98,7 +98,7 @@ class NextflowGenerator:
 
     def __init__(self, process_connections, nextflow_file,
                  pipeline_name="flowcraft", ignore_dependencies=False,
-                 auto_dependency=True):
+                 auto_dependency=True, merge_params=True):
 
         self.processes = []
 
@@ -165,6 +165,13 @@ class NextflowGenerator:
 
             {"genomeSize": "IN_genome_size = Channel.value(params.genomeSize)"}
 
+        """
+
+        self.merge_params = merge_params
+        """
+        bool: Determines whether the params of the pipeline should be merged
+        (i.e., the same param name in multiple components is merged into one)
+        or if they should be unique and specific to each component.
         """
 
         self.extra_inputs = {}
@@ -636,7 +643,8 @@ class NextflowGenerator:
                 if ch["params"] not in self.secondary_inputs:
                     logger.debug("[{}] Added channel: {}".format(
                         p.template, ch["channel"]))
-                    self.secondary_inputs[ch["params"]] = ch["channel"]
+                    self.secondary_inputs[ch["params"]] = \
+                        ch["channel"].format(p.pid)
 
     def _update_extra_inputs(self, p):
         """Given a process, this method updates the
@@ -1114,6 +1122,58 @@ class NextflowGenerator:
             Nextflow params configuration string
         """
 
+        params_str = ""
+
+        for p in self.processes:
+
+            logger.debug("[{}] Adding parameters: {}\n".format(
+                p.template, p.params)
+            )
+
+            # Add an header with the template name to structure the params
+            # configuration
+            if p.params and p.template != "init":
+
+                p.set_param_id("_{}".format(p.pid))
+                params_str += "\n//Component '{}_{}'\n".format(p.template,
+                                                               p.pid)
+
+            for param, val in p.params.items():
+
+                if p.template == "init":
+                    param_id = param
+                else:
+                    param_id = "{}_{}".format(param, p.pid)
+
+                params_str += "{} = {}\n".format(param_id, val["default"])
+
+        return params_str
+
+    def _get_merged_params_string(self):
+        """Returns the merged nextflow params string from a dictionary object.
+
+        The params dict should be a set of key:value pairs with the
+        parameter name, and the default parameter value::
+
+            self.params = {
+                "genomeSize": 2.1,
+                "minCoverage": 15
+            }
+
+        The values are then added to the string as they are. For instance,
+        a ``2.1`` float will appear as ``param = 2.1`` and a
+        ``"'teste'" string will appear as ``param = 'teste'`` (Note the
+        string).
+
+        Identical parameters in multiple processes will be merged into the same
+        param.
+
+        Returns
+        -------
+        str
+            Nextflow params configuration string
+        """
+
         params_temp = {}
 
         for p in self.processes:
@@ -1186,7 +1246,11 @@ class NextflowGenerator:
         containers = ""
         params = ""
 
-        params += self._get_params_string()
+        if self.merge_params:
+            params += self._get_merged_params_string()
+        else:
+            params += self._get_params_string()
+
         help_dict = self._get_params_help()
 
         for p in self.processes:

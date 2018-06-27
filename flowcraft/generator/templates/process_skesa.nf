@@ -1,3 +1,15 @@
+if ( !params.skesaMinKmerCoverage{{ param_id }}.toString().isNumber() ){ 
+    exit 1, "'skesaMinKmerCoverage{{ param_id }}' parameter must be a number. Provided value: ${params.skesaMinKmerCoverage{{ param_id }}}"
+}
+if ( !params.skesaMinContigLen{{ param_id }}.toString().isNumber() ){ 
+    exit 1, "'skesaMinContigLen{{ param_id }}' parameter must be a number. Provided value: ${params.skesaMinContigLen{{ param_id }}}"
+}
+if ( !params.skesaMaxContigs{{ param_id }}.toString().isNumber() ){ 
+    exit 1, "'skesaMaxContigs{{ param_id }}' parameter must be a number. Provided value: ${params.skesaMaxContigs{{ param_id }}}"
+}
+
+IN_process_skesa_opts_{{ pid }} = Channel.value([params.skesaMinContigLen{{ param_id }},params.skesaMinKmerCoverage{{ param_id }},params.skesaMaxContigs{{ param_id }}])
+IN_genome_size_{{ pid }} = Channel.value(params.genomeSize{{ param_id }})
 
 process process_skesa_{{ pid }} {
 
@@ -11,8 +23,8 @@ process process_skesa_{{ pid }} {
 
     input:
     set sample_id, file(assembly) from {{ input_channel }}
-    val opts from IN_process_skesa_opts
-    val gsize from IN_genome_size
+    val opts from IN_process_skesa_opts_{{ pid }}
+    val gsize from IN_genome_size_{{ pid }}
     val assembler from Channel.value("skesa")
 
     output:
