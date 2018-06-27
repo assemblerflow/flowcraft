@@ -157,16 +157,6 @@ class NextflowGenerator:
         first process(es).
         """
 
-        self.secondary_inputs = {}
-        """
-        dict: Stores the secondary input channels that may be required by
-        some processes. The key is the params variable and the key is the
-        channel definition for nextflow::
-
-            {"genomeSize": "IN_genome_size = Channel.value(params.genomeSize)"}
-
-        """
-
         self.merge_params = merge_params
         """
         bool: Determines whether the params of the pipeline should be merged
@@ -625,27 +615,6 @@ class NextflowGenerator:
         logger.debug("[{}] Updated main raw inputs: {}".format(
             p.template, self.main_raw_inputs))
 
-    def _update_secondary_inputs(self, p):
-        """Given a process, this method updates the
-        :attr:`~Process.secondary_inputs` attribute with the corresponding
-        secondary inputs of that process.
-
-        Parameters
-        ----------
-        p : flowcraft.Process.Process
-        """
-
-        logger.debug("[{}] Checking secondary links".format(p.template))
-        if p.secondary_inputs:
-            logger.debug("[{}] Found secondary input channel(s): "
-                         "{}".format(p.template, p.secondary_inputs))
-            for ch in p.secondary_inputs:
-                if ch["params"] not in self.secondary_inputs:
-                    logger.debug("[{}] Added channel: {}".format(
-                        p.template, ch["channel"]))
-                    self.secondary_inputs[ch["params"]] = \
-                        ch["channel"].format(p.pid)
-
     def _update_extra_inputs(self, p):
         """Given a process, this method updates the
         :attr:`~Process.extra_inputs` attribute with the corresponding extra
@@ -840,8 +809,6 @@ class NextflowGenerator:
               process of each lane so that they fork from the user provide
               parameters (See
               :func:`~NextflowGenerator._update_raw_input`).
-            - Check for the presence of secondary inputs and adds them to the
-              :attr:`~NextflowGenerator.secondary_inputs` attribute.
             - Check for the presence of secondary channels and adds them to the
               :attr:`~NextflowGenerator.secondary_channels` attribute.
 
@@ -871,8 +838,6 @@ class NextflowGenerator:
             if not p.parent_lane and p.input_type:
                 self._update_raw_input(p)
 
-            self._update_secondary_inputs(p)
-
             self._update_extra_inputs(p)
 
             self._update_secondary_channels(p)
@@ -885,8 +850,7 @@ class NextflowGenerator:
 
         This method will fetch the :class:`flowcraft.process.Init` process
         instance and sets the raw input (
-        :func:`flowcraft.process.Init.set_raw_inputs`) and the secondary
-        inputs (:func:`flowcraft.process.Init.set_secondary_inputs`) for
+        :func:`flowcraft.process.Init.set_raw_inputs`) for
         that process. This will handle the connection of the user parameters
         with channels that are then consumed in the pipeline.
         """
@@ -900,9 +864,6 @@ class NextflowGenerator:
         logger.debug("Setting main raw inputs: "
                      "{}".format(self.main_raw_inputs))
         init_process.set_raw_inputs(self.main_raw_inputs)
-        logger.debug("Setting secondary inputs: "
-                     "{}".format(self.secondary_inputs))
-        init_process.set_secondary_inputs(self.secondary_inputs)
         logger.debug("Setting extra inputs: {}".format(self.extra_inputs))
         init_process.set_extra_inputs(self.extra_inputs)
 
@@ -1452,10 +1413,6 @@ class NextflowGenerator:
         self._set_channels()
 
         self._set_init_process()
-
-        logger.info(colored_print(
-            "\tSuccessfully set {} secondary input(s) \u2713".format(
-                len(self.secondary_inputs))))
 
         self._set_secondary_channels()
 
