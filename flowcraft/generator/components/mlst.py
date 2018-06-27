@@ -89,29 +89,25 @@ class Chewbbaca(Process):
                 "default": "null",
                 "description":
                     "Specifiy a queue/partition for chewbbaca. This option"
-                    " is only used for grid schedulers. (default: "
-                    "$params.chewbbacaQueue)"
+                    " is only used for grid schedulers."
             },
             "chewbbacaTraining": {
                 "default": "null",
                 "description":
                     "Specify the full path to the prodigal training file "
-                    "of the corresponding species. (default: "
-                    "$params.chewbbacaTraining)"
+                    "of the corresponding species."
             },
             "schemaPath": {
                 "default": "null",
                 "description":
-                    "The path to the chewbbaca schema directory. (default: "
-                    "$params.schemaPath)"
+                    "The path to the chewbbaca schema directory."
             },
             "schemaSelectedLoci": {
                 "default": "null",
                 "description":
                     "The path to the selection of loci in the schema "
                     "directory to be used. If not specified, all loci in the"
-                    " schema will be used. (default: "
-                    "$params.schemaSelectedLoci)"
+                    " schema will be used."
             },
             "schemaCore": {
                 "default": "null",
@@ -121,26 +117,24 @@ class Chewbbaca(Process):
                 "default": "false",
                 "description":
                     "If set to True, chewbbaca's allele call output will be "
-                    "set to JSON format. (default: $params.chewbbacaJson)"
+                    "set to JSON format."
             },
             "chewbbacaToPhyloviz": {
                 "default": "false",
                 "description":
                     "If set to True, the ExtractCgMLST module of chewbbaca"
-                    " will be executed after the allele calling (default: "
-                    "$params.chewbbacaToPhyloviz)",
+                    " will be executed after the allele calling.",
             },
             "chewbbacaProfilePercentage": {
                 "default": 0.95,
                 "description":
                     "Specifies the proportion of samples that must be "
-                    "present in a locus to save the profile. (default: "
-                    "$params.chewbbacaProfilePercentage)"
+                    "present in a locus to save the profile."
             },
             "chewbbacaBatch": {
                 "default": "false",
                 "description":
-                    "Specifies whther a chewbbaca run will be performed on the"
+                    "Specifies whether a chewbbaca run will be performed on the"
                     " complete input batch (all at the same time) or one by "
                     "one."
             }

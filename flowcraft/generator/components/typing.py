@@ -34,7 +34,6 @@ class SeqTyping(Process):
                     "Fasta file containing reference sequences. If more"
                     "than one file is passed via the 'referenceFileH parameter"
                     ", a reference sequence for each file will be determined. "
-                    "(default: $params.referenceFileO)"
             },
             "referenceFileH": {
                 "default": "null",
@@ -42,7 +41,6 @@ class SeqTyping(Process):
                     "Fasta file containing reference sequences. If more"
                     "than one file is passed via the 'referenceFileO parameter"
                     ", a reference sequence for each file will be determined. "
-                    "(default: $params.referenceFileH)"
             }
         }
 
@@ -69,7 +67,6 @@ class PathoTyping(Process):
                 "description":
                     "Species name. Must be the complete species name with"
                     "genus and species, e.g.: 'Yersinia enterocolitica'. "
-                    "(default: $params.species)"
             }
         }
 
