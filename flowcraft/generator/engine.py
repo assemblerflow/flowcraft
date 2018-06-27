@@ -1135,8 +1135,11 @@ class NextflowGenerator:
             if p.params and p.template != "init":
 
                 p.set_param_id("_{}".format(p.pid))
-                params_str += "\n//Component '{}_{}'\n".format(p.template,
+                params_str += "\n\t/*"
+                params_str += "\n\tComponent '{}_{}'\n".format(p.template,
                                                                p.pid)
+                params_str += "\t{}\n".format("-" * (len(p.template) + len(p.pid) + 12))
+                params_str += "\t*/\n"
 
             for param, val in p.params.items():
 
@@ -1145,7 +1148,7 @@ class NextflowGenerator:
                 else:
                     param_id = "{}_{}".format(param, p.pid)
 
-                params_str += "{} = {}\n".format(param_id, val["default"])
+                params_str += "\t{} = {}\n".format(param_id, val["default"])
 
         return params_str
 
@@ -1191,6 +1194,29 @@ class NextflowGenerator:
         return config_str
 
     def _get_params_help(self):
+
+        help_list = []
+
+        for p in self.processes:
+
+            # Skip init process
+            if p.template == "init":
+                continue
+
+            # Add component header and a line break
+            if p.params:
+                help_list.extend(
+                    ["",
+                     "Component '{}_{}'".format(p.template.upper(), p.pid),
+                     "-" * (len(p.template) + len(p.pid) + 13)])
+
+            for param, val in p.params.items():
+                help_list.append("--{:<25} {} (default: {})".format(
+                    param + "_" + p.pid, val["description"], val["default"]))
+
+        return help_list
+
+    def _get_merged_params_help(self):
         """
 
         Returns
@@ -1199,6 +1225,7 @@ class NextflowGenerator:
         """
 
         help_dict = {}
+        help_list = []
 
         for p in self.processes:
 
@@ -1217,8 +1244,10 @@ class NextflowGenerator:
                 val["process"] = ""
             else:
                 val["process"] = "({})".format(";".join(val["process"]))
+            help_list.append("--{:<25} {} {}".format(
+                p, val["description"], val["process"]))
 
-        return help_dict
+        return help_list
 
     @staticmethod
     def _render_config(template, context):
@@ -1248,10 +1277,10 @@ class NextflowGenerator:
 
         if self.merge_params:
             params += self._get_merged_params_string()
+            help_list = self._get_merged_params_help()
         else:
             params += self._get_params_string()
-
-        help_dict = self._get_params_help()
+            help_list = self._get_params_help()
 
         for p in self.processes:
 
@@ -1275,7 +1304,7 @@ class NextflowGenerator:
         })
         self.help = self._render_config("Helper.groovy", {
             "nf_file": basename(self.nf_file),
-            "help_dict": help_dict,
+            "help_list": help_list,
             "version": __version__,
             "pipeline_name": " ".join([x.upper() for x in self.pipeline_name])
         })

@@ -5,7 +5,7 @@ if ( !params.spadesMinKmerCoverage{{ param_id }}.toString().isNumber()){
     exit 1, "'spadesMinKmerCoverage{{ param_id }}' parameter must be a number. Provided value: '${params.spadesMinKmerCoverage{{ param_id }}}'"
 }
 
-IN_spades_opts{{ pid }} = Channel.value([params.spadesMinCoverage{{ param_id }},params.spadesMinKmerCoverage{{ param_id }}])
+IN_spades_opts_{{ pid }} = Channel.value([params.spadesMinCoverage{{ param_id }},params.spadesMinKmerCoverage{{ param_id }}])
 
 if ( params.spadesKmers{{ param_id }}.toString().split(" ").size() <= 1 ){
     if (params.spadesKmers{{ param_id }}.toString() != 'auto'){

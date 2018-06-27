@@ -35,16 +35,14 @@ class Spades(Process):
                 "default": 2,
                 "description":
                     "The minimum number of reads to consider an edge in the"
-                    " de Bruijn graph during the assembly (default: "
-                    "$params.spadesMinCoverage)"
+                    " de Bruijn graph during the assembly"
             },
             "spadesMinKmerCoverage": {
                 "default": 2,
                 "description":
                     "Minimum contigs K-mer coverage. After assembly only "
                     "keep contigs with reported k-mer coverage equal or "
-                    "above this value (default: "
-                    "$params.spadesMinKmerCoverage)"
+                    "above this value"
             },
             "spadesKmers": {
                 "default": "'auto'",
@@ -52,7 +50,6 @@ class Spades(Process):
                     "If 'auto' the SPAdes k-mer lengths will be determined "
                     "from the maximum read length of each assembly. If "
                     "'default', SPAdes will use the default k-mer lengths. "
-                    "(default: $params.spadesKmers)"
             }
         }
 

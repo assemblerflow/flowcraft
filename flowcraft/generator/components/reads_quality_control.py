@@ -33,13 +33,13 @@ class IntegrityCoverage(Process):
                 "description":
                     "Genome size estimate for the samples in Mb. It is used to "
                     "estimate the coverage and other assembly parameters and"
-                    "checks (default: $params.genomeSize)"
+                    "checks"
             },
             "minCoverage": {
                 "default": 0,
                 "description":
                     "Minimum coverage for a sample to proceed. By default it's set"
-                    "to 0 to allow any coverage (default: $params.minCoverage)"
+                    "to 0 to allow any coverage"
             }
         }
 
@@ -74,13 +74,13 @@ class CheckCoverage(Process):
                 "description":
                     "Genome size estimate for the samples. It is used to "
                     "estimate the coverage and other assembly parameters and"
-                    "checks (default: $params.genomeSize)"
+                    "checks"
             },
             "minCoverage": {
                 "default": 15,
                 "description":
                     "Minimum coverage for a sample to proceed. Can be set to"
-                    "0 to allow any coverage (default: $params.minCoverage)"
+                    "0 to allow any coverage"
             }
         }
 
@@ -104,7 +104,6 @@ class TrueCoverage(Process):
                 "description":
                     "Species name. Must be the complete species name with"
                     "genus and species, e.g.: 'Yersinia enterocolitica'. "
-                    "(default: $params.species)"
             }
         }
 
@@ -150,8 +149,7 @@ class FastQC(Process):
             "adapters": {
                 "default": "'None'",
                 "description":
-                    "Path to adapters files, if any "
-                    "(default: $params.adapters)"
+                    "Path to adapters files, if any."
             }
         }
 
@@ -192,33 +190,31 @@ class Trimmomatic(Process):
             "adapters": {
                 "default": "'None'",
                 "description":
-                    "Path to adapters files, if any "
-                    "(default: $params.adapters)"
+                    "Path to adapters files, if any."
             },
             "trimSlidingWindow": {
                 "default": "'5:20'",
                 "description":
                     "Perform sliding window trimming, cutting once the "
                     "average quality within the window falls below a "
-                    "threshold (default: $params.trimSlidingWindow)"
+                    "threshold"
             },
             "trimLeading": {
                 "default": "3",
                 "description":
                     "Cut bases off the start of a read, if below a threshold "
-                    "quality (default: $params.trimLeading"
+                    "quality"
             },
             "trimTrailing": {
                 "default": "3",
                 "description":
                     "Cut bases of the end of a read, if below a "
-                    "threshold quality (default: $params.trimTrailing)"
+                    "threshold quality"
             },
             "trimMinLength": {
                 "default": "55",
                 "description":
                     "Drop the read if it is below a specified length "
-                    "(default: $params.trimMinLength)"
             }
         }
 
@@ -271,33 +267,31 @@ class FastqcTrimmomatic(Process):
             "adapters": {
                 "default": "'None'",
                 "description":
-                    "Path to adapters files, if any "
-                    "(default: $params.adapters)"
+                    "Path to adapters files, if any."
             },
             "trimSlidingWindow": {
                 "default": "'5:20'",
                 "description":
                     "Perform sliding window trimming, cutting once the "
                     "average quality within the window falls below a "
-                    "threshold (default: $params.trimSlidingWindow)"
+                    "threshold."
             },
             "trimLeading": {
                 "default": "3",
                 "description":
                     "Cut bases off the start of a read, if below a threshold "
-                    "quality (default: $params.trimLeading"
+                    "quality."
             },
             "trimTrailing": {
                 "default": "3",
                 "description":
                     "Cut bases of the end of a read, if below a "
-                    "threshold quality (default: $params.trimTrailing)"
+                    "threshold quality."
             },
             "trimMinLength": {
                 "default": "55",
                 "description":
-                    "Drop the read if it is below a specified length "
-                    "(default: $params.trimMinLength)"
+                    "Drop the read if it is below a specified length."
             }
         }
 

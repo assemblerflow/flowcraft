@@ -20,26 +20,26 @@ class ProcessSkesa(Process):
                 "description":
                     "Genome size estimate for the samples in Mb. It is used "
                     "to assess whether an assembly is much larger or smaller "
-                    "than expected (default: $params.genomeSize)",
+                    "than expected",
             },
             "skesaMinKmerCoverage": {
                 "default": 2,
                 "description":
                     "Minimum contigs K-mer coverage. After assembly only keep"
                     " contigs with reported k-mer coverage equal or above "
-                    "this value (default: $params.skesaMinKmerCoverage)"
+                    "this value"
             },
             "skesaMinContigLen": {
                 "default": 200,
                 "description":
                     "Filter contigs for length greater or equal than this "
-                    "value (default: $params.skesaMinContigLen)"
+                    "value"
             },
             "skesaMaxContigs": {
                 "default": 100,
                 "description":
                     "Maximum number of contigs per 1.5 Mb of expected "
-                    "genome size (default: $params.skesaMaxContigs)"
+                    "genome size"
             }
         }
 
@@ -75,7 +75,7 @@ class ProcessSpades(Process):
                 "description":
                     "Genome size estimate for the samples in Mb. It is used "
                     "to assess whether an assembly is much larger or smaller "
-                    "than expected (default: $params.genomeSize)",
+                    "than expected",
 
             },
             "spadesMinKmerCoverage": {
@@ -83,19 +83,19 @@ class ProcessSpades(Process):
                 "description":
                     "Minimum contigs K-mer coverage. After assembly only keep"
                     " contigs with reported k-mer coverage equal or above "
-                    "this value (default: $params.spadesMinKmerCoverage)"
+                    "this value"
             },
             "spadesMinContigLen": {
                 "default": 200,
                 "description":
                     "Filter contigs for length greater or equal than this "
-                    "value (default: $params.spadesMinContigLen)"
+                    "value"
             },
             "spadesMaxContigs": {
                 "default": 100,
                 "description":
                     "Maximum number of contigs per 1.5 Mb of expected "
-                    "genome size (default: $params.spadesMaxContigs)"
+                    "genome size"
             }
         }
 
@@ -144,21 +144,19 @@ class AssemblyMapping(Process):
                 "description":
                     "In auto, the default minimum coverage for each "
                     "assembled contig is 1/3 of the assembly mean coverage or"
-                    " 10x, if the mean coverage is below 10x (default: "
-                    "$params.minAssemblyCoverage)"
+                    " 10x, if the mean coverage is below 10x"
             },
             "AMaxContigs": {
                 "default": 100,
                 "description":
-                    "A warning is issues if the number of contigs is over"
-                    "this threshold"
+                    "A warning is issued if the number of contigs is over"
+                    "this threshold."
             },
             "genomeSize": {
                 "default": 2.1,
                 "description":
                     "Genome size estimate for the samples. It is used to "
-                    "check the ratio of contig number per genome MB "
-                    "(default: $params.genomeSize)"
+                    "check the ratio of contig number per genome MB"
             }
         }
 
