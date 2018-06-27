@@ -87,6 +87,7 @@ def _get_quality_stats(d, start_str, field_start=1, field_end=2):
 
     """
 
+    min_parsed = False
     parse = False
     report = []
     start_str = start_str
@@ -106,7 +107,18 @@ def _get_quality_stats(d, start_str, field_start=1, field_end=2):
                 return report, status
 
             elif parse:
+
                 fields = line.strip().split()
+
+                # This is triggered when the first value of a line series is
+                # not 1. If the starting point of the series is a number
+                # different from 1, fill the report with 0 until that point
+                if not min_parsed:
+                    if fields[0] != "1":
+                        blank_points = int(fields[0]) - 1
+                        report.extend([0] * blank_points)
+                    min_parsed = True
+
                 report.append(";".join([
                     str(round(float(x), 2)) for x in
                     fields[field_start: field_end]
