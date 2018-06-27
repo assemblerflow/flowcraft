@@ -417,7 +417,7 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
         json_dic = {
             "plotData": [{
                 "sample": sample_id,
-                "data:": {"sparkline": total_assembled_bp,
+                "data": {"sparkline": total_assembled_bp,
                           "coverageDist": [x["cov"] for x in coverage_info.values()]
                 }
             }]
