@@ -1212,7 +1212,8 @@ class NextflowGenerator:
 
             for param, val in p.params.items():
                 help_list.append("--{:<25} {} (default: {})".format(
-                    param + "_" + p.pid, val["description"], val["default"]))
+                    param + "_" + p.pid, val["description"],
+                    str(val["default"]).replace('"', "'")))
 
         return help_list
 
