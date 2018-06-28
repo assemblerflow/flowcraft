@@ -51,22 +51,6 @@ class PatlasMapping(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "refIndex",
-                "channel": "IN_index_files = Channel.value(params.refIndex)"
-            },
-            {
-                "params": "samtoolsIndex",
-                "channel": "IN_samtools_indexes = Channel"
-                           ".value(params.samtoolsIndex)"
-            },
-            {
-                "params": "lengthJson",
-                "channel": "IN_length_json = Channel.value(params.lengthJson)"
-            }
-        ]
-
         self.directives = {
             "mappingBowtie": {
                 "container": "flowcraft/mapping-patlas",

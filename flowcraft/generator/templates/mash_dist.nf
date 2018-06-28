@@ -1,3 +1,5 @@
+IN_reference_file_{{ pid }} = Channel.value(params.refFile{{ param_id }})
+IN_shared_hashes_{{ pid }} = Channel.value(params.shared_hashes{{ param_id }})
 
 // runs mash dist
 process runMashDist_{{ pid }} {
@@ -10,7 +12,7 @@ process runMashDist_{{ pid }} {
 
     input:
     set sample_id, file(fasta) from {{ input_channel }}
-    val refFile from IN_reference_file
+    val refFile from IN_reference_file_{{ pid }}
 
     output:
     set sample_id, fasta, file("*_mashdist.txt") into mashDistOutChannel_{{ pid }}
@@ -19,8 +21,8 @@ process runMashDist_{{ pid }} {
     {% endwith %}
 
     """
-    mash dist -i -p ${task.cpus} -v ${params.pValue} \
-    -d ${params.mash_distance} ${refFile} ${fasta} > ${fasta}_mashdist.txt
+    mash dist -i -p ${task.cpus} -v ${params.pValue{{ param_id }}} \
+    -d ${params.mash_distance{{ param_id }}} ${refFile} ${fasta} > ${fasta}_mashdist.txt
     """
 
 }
@@ -36,6 +38,7 @@ process mashDistOutputJson_{{ pid }} {
 
     input:
     set sample_id, fasta, file(mashtxt) from mashDistOutChannel_{{ pid }}
+    val shared_hashes from IN_shared_hashes_{{ pid }}
 
     output:
     set sample_id, file("*.json") optional true into {{ output_channel }}
