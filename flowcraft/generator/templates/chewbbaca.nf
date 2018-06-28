@@ -55,7 +55,7 @@ if (params.chewbbacaBatch) {
             echo $assembly | tr " " "\n" >> input_file.txt
             chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results $jsonOpt --cpu $task.cpus $training
             if [ "$jsonOpt" = "--json" ]; then
-                merge_json.py ${params.schemaCore} chew_results_*/*/results*
+                merge_json.py ${params.schemaCore} chew_results/*/results*
             else
                 cp chew_results*/*/results_alleles.tsv cgMLST.tsv
             fi
