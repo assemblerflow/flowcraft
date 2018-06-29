@@ -14,6 +14,9 @@ if ( params.spadesKmers{{ param_id }}.toString().split(" ").size() <= 1 ){
 }
 IN_spades_kmers_{{pid}} = Channel.value(params.spadesKmers{{ param_id }})
 
+clear = params.clearAtCheckpoint ? "true" : "false"
+checkpointClear_{{ pid }} = Channel.value(clear)
+
 process spades_{{ pid }} {
 
     // Send POST request to platform
@@ -26,6 +29,7 @@ process spades_{{ pid }} {
     set sample_id, file(fastq_pair), max_len from {{ input_channel }}.join(SIDE_max_len_{{ pid }})
     val opts from IN_spades_opts_{{ pid }}
     val kmers from IN_spades_kmers_{{ pid }}
+    val clear from checkpointClear_{{ pid }}
 
     output:
     set sample_id, file('*_spades*.fasta') into {{ output_channel }}
