@@ -340,13 +340,6 @@ class FilterPoly(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "adapter",
-                "channel": "IN_adapter = Channel.value(params.adapter)"
-            }
-        ]
-
         self.directives = {"filter_poly": {
             "cpus": 1,
             "memory": "{ 4.GB * task.attempt }",

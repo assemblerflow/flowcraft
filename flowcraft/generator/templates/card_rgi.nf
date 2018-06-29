@@ -1,3 +1,6 @@
+IN_alignment_tool_{{ pid }} = Channel.value(params.alignmentTool{{ param_id }})
+
+
 process card_rgi_{{ pid }} {
 
     // Send POST request to platform
@@ -9,7 +12,7 @@ process card_rgi_{{ pid }} {
 
     input:
     set sample_id, file(assembly) from {{ input_channel }}
-    val alignmetTool from IN_alignment_tool
+    val alignmetTool from IN_alignment_tool_{{ pid }}
 
     output:
     file("${sample_id}_card_rgi.txt")
