@@ -4,14 +4,29 @@
 
 ### New components
 
-- `maxbin2`: An automatic tool for binning metagenomic sequences
-- `bowtie2`: Align short paired-end sequencing reads to long reference sequences
+- `maxbin2`: An automatic tool for binning metagenomic sequences.
+- `bowtie2`: Align short paired-end sequencing reads to long reference
+sequences.
+
+### New recipes
+
+- `plasmids`: A recipe to perform mapping, mash screen on reads
+and also mash dist for assembly based approaches (all to detect
+plasmdis). This also includes annotation with abricate for the assembly.
+- `plasmids_mapping`: A recipe to perfmorm mapping for plasmids.
+- `plasmids_mash`: A recipe to perform mash screen for plasmids.
+- `plasmids_assembly`: A recipe to perform mash dist for plasmid
+assemblies.
 
 ### Minor/Other changes
 
 - Added "smart" check when the user provides a typo in pipeline string
 for a given process, outputting some "educated" guesses to the the
 terminal.
+- Added "-cr" option to show current recipe `pipeline_string`.
+- Changed the way recipes were being parsed by `proc_collector` for the
+usage of `-l` and `-L` options.
+- Added check for non-ascii characteres in colored_print.
 
 ### Bug fixes
 

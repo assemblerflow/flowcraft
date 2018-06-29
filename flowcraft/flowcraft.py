@@ -15,7 +15,7 @@ try:
     from __init__ import __version__, __build__
     from generator.engine import NextflowGenerator, process_map
     from generator.inspect import NextflowInspector
-    from generator.recipe import brew_recipe
+    from generator.recipe import brew_recipe, available_recipes
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
     import generator.error_handling as eh
@@ -23,7 +23,7 @@ except ImportError:
     from flowcraft import __version__, __build__
     from flowcraft.generator.engine import NextflowGenerator, process_map
     from flowcraft.generator.inspect import NextflowInspector
-    from flowcraft.generator.recipe import brew_recipe
+    from flowcraft.generator.recipe import brew_recipe, available_recipes
     from flowcraft.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from flowcraft.generator.process_details import proc_collector, \
@@ -82,6 +82,12 @@ def get_args(args=None):
         "-l", "--short-list", action="store_const", dest="short_list",
         const=True, help="Print a short list of the currently "
                          "available processes")
+    build_parser.add_argument("-cr", "--check-recipe", dest="check_recipe",
+                              action="store_const", const=True,
+                              help="Check tasks that the recipe contain and "
+                                   "their flow. This option might be useful "
+                                   "if a user wants to change some components "
+                                   "of a given recipe, by using the -t option.")
 
     # GENERAL OPTIONS
     parser.add_argument(
@@ -126,6 +132,9 @@ def get_args(args=None):
 
 def validate_build_arguments(args):
 
+    if args.detailed_list or args.short_list:
+        return
+
     if not args.tasks and not args.recipe and not args.check_only \
             and not args.detailed_list and not args.short_list:
         logger.error(colored_print(
@@ -133,7 +142,8 @@ def validate_build_arguments(args):
             "-l, -L", "red_bold"))
         sys.exit(1)
 
-    if (args.tasks or args.recipe) and not args.output_nf:
+    if (args.tasks or args.recipe) and not args.check_recipe \
+            and not args.output_nf:
         logger.error(colored_print(
             "Please provide the path and name of the pipeline file using the"
             " -o option.", "red_bold"))
@@ -207,13 +217,26 @@ def build(args):
     # If a recipe is specified, build pipeline based on the
     # appropriate recipe
     if args.recipe:
-        pipeline_string, list_processes = brew_recipe(args)
+        if args.recipe == "innuendo":
+            pipeline_string = brew_recipe(args, available_recipes)
+        else:
+            pipeline_string = available_recipes[args.recipe]
+            if args.tasks:
+                logger.warning(colored_print(
+                    "-t parameter will be ignored for recipe: {}\n"
+                        .format(args.recipe), "yellow_bold")
+                )
+
+        if args.check_recipe:
+            logger.info(colored_print("Pipeline string for recipe: {}"
+                                      .format(args.recipe), "purple_bold"))
+            logger.info(pipeline_string)
+            sys.exit(0)
     else:
         pipeline_string = args.tasks
-        list_processes = None
 
     # used for lists print
-    proc_collector(process_map, args, list_processes)
+    proc_collector(process_map, args, pipeline_string)
 
     logger.info(colored_print("Resulting pipeline string:\n"))
     logger.info(colored_print(pipeline_string + "\n"))

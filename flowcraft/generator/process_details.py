@@ -10,7 +10,8 @@ COLORS = {
     "white_bold": "1;38m",
     "white_underline": "4;38m",
     "blue_bold": "1;36m",
-    "purple_bold": "1;34m"
+    "purple_bold": "1;34m",
+    "yellow_bold": "1;93m"
 }
 
 
@@ -32,6 +33,9 @@ def colored_print(msg, color_label="white_bold"):
         "\n".
 
     """
+
+    if sys.stdout.encoding != "UTF-8":
+        msg = "".join([i if ord(i) < 128 else "" for i in msg])
 
     col = COLORS[color_label]
 
@@ -75,7 +79,7 @@ def procs_dict_parser(procs_dict):
             ))
 
 
-def proc_collector(process_map, args, processes_list=None):
+def proc_collector(process_map, args, pipeline_string):
     """
     Function that collects all processes available and stores a dictionary of
     the required arguments of each process class to be passed to
@@ -89,9 +93,8 @@ def proc_collector(process_map, args, processes_list=None):
     args: argparse.Namespace
         The arguments passed through argparser that will be access to check the
         type of list to be printed
-    processes_list: list
-        List with all the available processes of a recipe. In case no recipe
-        is passed, the list should come empty.
+    pipeline_string: str
+        the pipeline string
 
     """
 
@@ -120,16 +123,16 @@ def proc_collector(process_map, args, processes_list=None):
         # loops between all process_map Processes
         for name, cls in process_map.items():
 
-            if processes_list:
-                # Skip process if process_list is provided and name not in
-                # processes list
-                if name not in processes_list:
-                    continue
-
             # instantiates each Process class
             cls_inst = cls(template=name)
-            d = {arg_key: vars(cls_inst)[arg_key] for arg_key in vars(cls_inst)
-                 if arg_key in arguments_list}
+
+            # checks if recipe is provided
+            if pipeline_string:
+                if name not in pipeline_string:
+                    continue
+
+            d = {arg_key: vars(cls_inst)[arg_key] for arg_key in
+                 vars(cls_inst) if arg_key in arguments_list}
             procs_dict[name] = d
 
         procs_dict_parser(procs_dict)
