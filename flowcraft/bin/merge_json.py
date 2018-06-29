@@ -83,15 +83,21 @@ def main():
         j1 = json.load(f1h)
         j2 = json.load(f2h)
 
-        current_result = [v for k, v in j1.items()
-                          if "header" not in k][0]
+        sample_info = [(k, v) for k, v in j1.items() if "header" not in k]
         current_array = j1["header"]
-        core_results = filter_core_genes(current_result, current_array,
-                                         core_genes)
-        status, perc = assess_quality(core_results, core_genes)
+        status_info = []
+        for sample, info in sample_info:
+
+            core_results = filter_core_genes(info, current_array, core_genes)
+            status, perc = assess_quality(core_results, core_genes)
+            status_info.append({
+                "sample": sample,
+                "status": status,
+                "lnfPercentage": perc
+            })
 
         table_data = get_table_data(j2)
-        res = {"cagao": [j1, j2], "status": status, 'lnfPercentage': perc,
+        res = {"cagao": [j1, j2], "status": status_info,
                "tableRow": table_data}
 
         with open(".report.json", "w") as fh:
