@@ -31,6 +31,7 @@ usage of `-l` and `-L` options.
 ### Bug fixes
 
 - Fixed pipeline names that contain new line characters.
+- Fixed pipeline generation when automatic dependencies were added right after a fork
 - **Template: sistr.nf**: Fixed comparison that determined process status.
 
 ## 1.2.0
