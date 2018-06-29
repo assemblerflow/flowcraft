@@ -16,6 +16,7 @@ try:
     import generator.components.annotation as annotation
     import generator.components.assembly_processing as ap
     import generator.components.downloads as downloads
+    import generator.components.mapping as map
     import generator.components.distance_estimation as distest
     import generator.components.metagenomics as meta
     import generator.components.patlas_mapping as mapping_patlas
@@ -34,6 +35,7 @@ except ImportError:
     import flowcraft.generator.components.annotation as annotation
     import flowcraft.generator.components.assembly_processing as ap
     import flowcraft.generator.components.downloads as downloads
+    import flowcraft.generator.components.mapping as map
     import flowcraft.generator.components.distance_estimation as distest
     import flowcraft.generator.components.mlst as mlst
     import flowcraft.generator.components.metagenomics as meta
@@ -51,6 +53,7 @@ except ImportError:
 process_map = {
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
+        "bowtie": map.Bowtie,
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
         "chewbbaca": mlst.Chewbbaca,

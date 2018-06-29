@@ -102,6 +102,8 @@ Mapping
   procedure of FastQ files into a their assembly and performs filtering
   based on quality criteria of read coverage and genome size.
 
+- :doc:`components/bowtie`: Align short paired-end sequencing reads to long reference sequences
+
 - :doc:`components/mapping_patlas`: Performs read mapping and generates a JSON
   input file for pATLAS.
 
