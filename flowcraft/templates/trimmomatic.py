@@ -51,6 +51,7 @@ __build__ = "28032018"
 __template__ = "trimmomatic-nf"
 
 import os
+import re
 import json
 import fileinput
 import subprocess
@@ -224,7 +225,7 @@ def trimmomatic_log(log_file):
     write_report(log_storage, "trimmomatic_report.csv")
 
 
-def clean_up():
+def clean_up(fastq_pairs):
     """Cleans the working directory of unwanted temporary files"""
 
     # Find unpaired fastq files
@@ -234,6 +235,14 @@ def clean_up():
     # Remove unpaired fastq files, if any
     for fpath in unpaired_fastq:
         os.remove(fpath)
+
+    for fq in fastq_pairs:
+        # Get real path of fastq files, following symlinks
+        rp = os.path.realpath(fq)
+        print(rp)
+        print(re.match("/work/.{2}/.{30}", rp))
+        if re.match("/work/.{2}/.{30}", rp):
+            print(rp)
 
 
 def merge_default_adapters():
@@ -366,7 +375,7 @@ def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file):
 
     trimmomatic_log("{}_trimlog.txt".format(sample_id))
 
-    clean_up()
+    clean_up(fastq_pair)
 
     # Check if trimmomatic ran successfully. If not, write the error message
     # to the status channel and exit.
