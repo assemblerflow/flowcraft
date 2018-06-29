@@ -16,7 +16,7 @@ try:
     import generator.components.annotation as annotation
     import generator.components.assembly_processing as ap
     import generator.components.downloads as downloads
-    import generator.components.mapping as map
+    import generator.components.mapping as mapping
     import generator.components.distance_estimation as distest
     import generator.components.metagenomics as meta
     import generator.components.patlas_mapping as mapping_patlas
@@ -35,7 +35,7 @@ except ImportError:
     import flowcraft.generator.components.annotation as annotation
     import flowcraft.generator.components.assembly_processing as ap
     import flowcraft.generator.components.downloads as downloads
-    import flowcraft.generator.components.mapping as map
+    import flowcraft.generator.components.mapping as mapping
     import flowcraft.generator.components.distance_estimation as distest
     import flowcraft.generator.components.mlst as mlst
     import flowcraft.generator.components.metagenomics as meta
@@ -53,7 +53,7 @@ except ImportError:
 process_map = {
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
-        "bowtie": map.Bowtie,
+        "bowtie": mapping.Bowtie,
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
         "chewbbaca": mlst.Chewbbaca,
@@ -353,6 +353,8 @@ class NextflowGenerator:
                 # to None. This will tell the engine that this process
                 # will receive the main input from the raw user input.
                 out_process.parent_lane = None
+            logger.debug("[{}] Parent lane: {}".format(
+                p, out_process.parent_lane))
 
             # If the current connection is a fork, add it to the fork tree
             if in_lane != out_lane:
@@ -493,7 +495,8 @@ class NextflowGenerator:
             p.parent_lane = outlane
             dependency_proc.parent_lane = None
         else:
-            dependency_proc.parent_lane = outlane
+            dependency_proc.parent_lane = inlane
+            p.parent_lane = outlane
 
         self.processes.append(dependency_proc)
 
@@ -1311,7 +1314,7 @@ class NextflowGenerator:
         for x, (k, v) in enumerate(f_tree.items()):
             for p in self.processes[1:]:
 
-                if x == 0 and p.lane not in [k] + v :
+                if x == 0 and p.lane not in [k] + v:
                     continue
 
                 if x > 0 and p.lane not in v:
