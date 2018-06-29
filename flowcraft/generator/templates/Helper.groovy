@@ -54,8 +54,8 @@ class Help {
         println "Usage: "
         println "    nextflow run {{ nf_file }}"
         println ""
-        {% for param, info in help_dict.items() -%}
-        println "       --{{ "%-25s" | format(param,) }} {{ info.description }} {{ info.process }}"
+        {% for line in help_list -%}
+        println "       {{ line }}"
         {% endfor %}
     }
 

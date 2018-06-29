@@ -1,3 +1,15 @@
+if ( !params.minAssemblyCoverage{{ param_id }}.toString().isNumber() ){
+    if (params.minAssemblyCoverage{{ param_id }}.toString() != 'auto'){
+        exit 1, "'minAssemblyCoverage{{ param_id }}' parameter must be a number or 'auto'. Provided value: ${params.minAssemblyCoverage{{ param_id }}}"
+    }
+}
+if ( !params.AMaxContigs{{ param_id }}.toString().isNumber() ){
+    exit 1, "'AMaxContigs{{ param_id }}' parameter must be a number. Provide value: '${params.AMaxContigs{{ param_id }}}'"
+}
+
+IN_assembly_mapping_opts_{{ pid }} = Channel.value([params.minAssemblyCoverage{{ param_id }},params.AMaxContigs{{ param_id }}])
+IN_genome_size_{{ pid }} = Channel.value(params.genomeSize{{ param_id }})
+
 
 process assembly_mapping_{{ pid }} {
 
@@ -68,8 +80,8 @@ process process_assembly_mapping_{{ pid }} {
 
     input:
     set sample_id, file(assembly), file(coverage), file(coverage_bp), file(bam_file), file(bam_index) from MAIN_am_out_{{ pid }}
-    val opts from IN_assembly_mapping_opts
-    val gsize from IN_genome_size
+    val opts from IN_assembly_mapping_opts_{{ pid }}
+    val gsize from IN_genome_size_{{ pid }}
 
     output:
     set sample_id, '*_filt.fasta', 'filtered.bam', 'filtered.bam.bai' into {{ output_channel }}

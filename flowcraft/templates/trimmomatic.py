@@ -174,7 +174,7 @@ def parse_log(log_file):
     return template
 
 
-def write_report(storage_dic, output_file):
+def write_report(storage_dic, output_file, sample_id):
     """ Writes a report from multiple samples.
 
     Parameters
@@ -198,21 +198,27 @@ def write_report(storage_dic, output_file):
                 sample, ",".join([str(x) for x in vals.values()])))
 
             json_dic = {
-                "tableRow": [
-                    {"header": "Trimmed (%)",
-                     "value": vals["total_trim_perc"],
-                     "table": "assembly",
-                     "columnBar": True},
-                    ],
-                "plotData": {
-                    "sparkline": vals["clean_len"]
-                },
+                "tableRow": [{
+                    "sample": sample_id,
+                    "data": [
+                        {"header": "trimmed",
+                         "value": vals["total_trim_perc"],
+                         "table": "qc",
+                         "columnBar": True},
+                    ]
+                }],
+                "plotData": [{
+                    "sample": sample_id,
+                    "data": {
+                        "sparkline": vals["clean_len"]
+                    }
+                }],
                 "badReads": vals["bad_reads"]
             }
             json_rep.write(json.dumps(json_dic, separators=(",", ":")))
 
 
-def trimmomatic_log(log_file):
+def trimmomatic_log(log_file, sample_id):
 
     log_storage = OrderedDict()
 
@@ -222,7 +228,7 @@ def trimmomatic_log(log_file):
 
     os.remove(log_file)
 
-    write_report(log_storage, "trimmomatic_report.csv")
+    write_report(log_storage, "trimmomatic_report.csv", sample_id)
 
 
 def clean_up(fastq_pairs):
@@ -373,7 +379,7 @@ def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file):
     logger.info("Finished trimmomatic with return code: {}".format(
         p.returncode))
 
-    trimmomatic_log("{}_trimlog.txt".format(sample_id))
+    trimmomatic_log("{}_trimlog.txt".format(sample_id), sample_id)
 
     clean_up(fastq_pair)
 

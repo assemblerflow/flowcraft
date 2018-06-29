@@ -466,19 +466,25 @@ def main(sample_id, assembly_file, coverage_bp_file=None):
 
     size_dist = [len(x) for x in assembly_obj.contigs.values()]
     json_dic = {
-        "tableRow": [
-            {"header": "Contigs",
-             "value": assembly_obj.summary_info["ncontigs"],
-             "table": "assembly",
-             "columnBar": True},
-            {"header": "Assembled BP",
-             "value": assembly_obj.summary_info["total_len"],
-             "table": "assembly",
-             "columnBar": True},
-        ],
-        "plotData": {
-            "size_dist": size_dist
-        }
+        "tableRow": [{
+            "sample": sample_id,
+            "data": [
+                {"header": "Contigs",
+                 "value": assembly_obj.summary_info["ncontigs"],
+                 "table": "assembly",
+                 "columnBar": True},
+                {"header": "Assembled BP",
+                 "value": assembly_obj.summary_info["total_len"],
+                 "table": "assembly",
+                 "columnBar": True},
+            ]
+        }],
+        "plotData": [{
+            "sample": sample_id,
+            "data": {
+                "size_dist": size_dist
+            }
+        }]
     }
 
     if coverage_bp_file:
@@ -494,11 +500,11 @@ def main(sample_id, assembly_file, coverage_bp_file=None):
             )
 
             # Add data to json report
-            json_dic["plotData"]["gcSliding"] = \
+            json_dic["plotData"][0]["data"]["gcSliding"] = \
                 [gc_sliding_data, gc_label, gc_xbars]
-            json_dic["plotData"]["covSliding"] = \
+            json_dic["plotData"][0]["data"]["covSliding"] = \
                 [cov_sliding_data, cov_label, cov_xbars]
-            json_dic["plotData"]["sparkline"] = total_bp
+            json_dic["plotData"][0]["data"]["sparkline"] = total_bp
 
         except:
             logger.error("Unexpected error creating sliding window data:\\n"

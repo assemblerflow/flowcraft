@@ -1,3 +1,4 @@
+IN_adapters_{{ pid }} = Channel.value(params.adapters{{ param_id }})
 
 process fastqc2_{{ pid }} {
 
@@ -9,7 +10,7 @@ process fastqc2_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val ad from IN_adapters
+    val ad from IN_adapters_{{ pid }}
 
     output:
     set sample_id, file(fastq_pair), file('pair_1*'), file('pair_2*') into MAIN_fastqc_out_{{ pid }}

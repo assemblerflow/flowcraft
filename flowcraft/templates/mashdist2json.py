@@ -36,7 +36,7 @@ logger = get_logger(__file__)
 
 if __file__.endswith(".command.sh"):
     MASH_TXT = '$mashtxt'
-    HASH_CUTOFF = '$params.shared_hashes'
+    HASH_CUTOFF = '$shared_hashes'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("MASH_TXT: {}".format(MASH_TXT))

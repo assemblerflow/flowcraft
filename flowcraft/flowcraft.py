@@ -59,6 +59,11 @@ def get_args(args=None):
         "-n", dest="pipeline_name", default="flowcraft",
         help="Provide a name for your pipeline.")
     build_parser.add_argument(
+        "--merge-params", dest="merge_params", action="store_true",
+        help="Merges identical parameters from multiple components into the "
+             "same one. Otherwise, the parameters will be separated and unique"
+             " to each component.")
+    build_parser.add_argument(
         "--pipeline-only", dest="pipeline_only", action="store_true",
         help="Write only the pipeline files and not the templates, bin, and"
              " lib folders.")
@@ -251,7 +256,8 @@ def build(args):
     nfg = NextflowGenerator(process_connections=pipeline_list,
                             nextflow_file=parsed_output_nf,
                             pipeline_name=args.pipeline_name,
-                            auto_dependency=args.no_dep)
+                            auto_dependency=args.no_dep,
+                            merge_params=args.merge_params)
 
     logger.info(colored_print("Building your awesome pipeline..."))
 
