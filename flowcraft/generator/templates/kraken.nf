@@ -1,3 +1,7 @@
+IN_kraken_DB_{{ pid }} = Channel.value(params.krakenDB{{ param_id }})
+
+
+//Process to run Kraken
 process kraken_{{ pid }} {
 
     // Send POST request to platform
@@ -9,7 +13,7 @@ process kraken_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val krakenDB from IN_kraken_DB
+    val krakenDB from IN_kraken_DB_{{ pid }}
 
     output:
     file("${sample_id}_kraken_report.txt")

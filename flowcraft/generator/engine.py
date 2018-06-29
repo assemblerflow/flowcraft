@@ -76,7 +76,7 @@ process_map = {
         "pilon": ap.Pilon,
         "process_skesa": ap.ProcessSkesa,
         "process_spades": ap.ProcessSpades,
-        "prokka": annotation.Prokka,
+        #"prokka": annotation.Prokka,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
         "seq_typing": typing.SeqTyping,

@@ -1,3 +1,6 @@
+IN_adapter_{{ pid }} = Channel.value(params.adapter{{ param_id }})
+
+
 process filter_poly_{{ pid }} {
 
     // Send POST request to platform
@@ -5,7 +8,7 @@ process filter_poly_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val adapter from IN_adapter
+    val adapter from IN_adapter_{{ pid }}
 
     output:
     set sample_id , file("${sample_id}_filtered_*.fastq.gz") into {{ output_channel }}
