@@ -1,3 +1,8 @@
+IN_index_files_{{ pid }} = Channel.value(params.refIndex{{ param_id }})
+IN_samtools_indexes_{{ pid }} = Channel.value(params.samtoolsIndex{{ param_id }})
+IN_length_json_{{ pid }} = Channel.value(params.lengthJson{{ param_id }})
+IN_cov_cutoff_{{ pid }} = Channel.value(params.cov_cutoff{{ param_id }})
+
 
 // process that runs bowtie2
 process mappingBowtie_{{ pid }} {
@@ -10,7 +15,7 @@ process mappingBowtie_{{ pid }} {
 
     input:
     set sample_id, file(reads) from {{ input_channel }}
-    val bowtie2Index from IN_index_files
+    val bowtie2Index from IN_index_files_{{ pid }}
 
     output:
     set sample_id, file("mappingBowtie*.sam") into bowtieResults
@@ -29,7 +34,8 @@ process mappingBowtie_{{ pid }} {
 
     """
     bowtie2 -x ${bowtie2Index} ${readsString} -p ${task.cpus} -k \
-    ${params.max_k} -5 ${params.trim5} -S mappingBowtie_${sample_id}.sam
+    ${params.max_k{{ param_id }} } -5 ${params.trim5{{ param_id }} } -S \
+    mappingBowtie_${sample_id}.sam
     """
 }
 
@@ -47,7 +53,7 @@ process samtoolsView_{{ pid }} {
 
     input:
     set sample_id, file(samtoolsFile) from bowtieResults
-    val samtoolsIdx from IN_samtools_indexes
+    val samtoolsIdx from IN_samtools_indexes_{{ pid }}
 
     output:
     set sample_id, file("samtoolsDepthOutput*.txt") into samtoolsResults
@@ -77,7 +83,8 @@ process jsonDumpingMapping_{{ pid }} {
 
     input:
     set sample_id, file(depthFile) from samtoolsResults
-    val lengthJson from IN_length_json
+    val lengthJson from IN_length_json_{{ pid }}
+    val cov_cutoff from IN_cov_cutoff_{{ pid }}
 
     output:
     set sample_id, file("samtoolsDepthOutput*.txt_mapping.json") optional true into mappingOutputChannel_{{ pid }}

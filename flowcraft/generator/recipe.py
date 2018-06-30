@@ -478,8 +478,8 @@ class Recipe:
 
         return self.pipeline_string
 
-    def get_process_info(self):
-        return list(self.process_descriptions.keys())
+    # def get_process_info(self):
+    #     return list(self.process_descriptions.keys())
 
 
 class Innuendo(Recipe):
@@ -512,17 +512,12 @@ class Innuendo(Recipe):
             "mlst": [False, "pilon", "abricate|prokka|chewbbaca|sistr"],
             "sistr": [True, "mlst", None],
             "abricate": [True, "mlst", None],
-            "prokka": [True, "mlst", None],
+            #"prokka": [True, "mlst", None],
             "chewbbaca": [True, "mlst", None]
         }
 
 
-available_recipes = {
-    "innuendo": Innuendo
-}
-
-
-def brew_recipe(args):
+def brew_recipe(args, available_recipes):
     """Brews a given list of processes according to the recipe
 
     Parameters
@@ -555,8 +550,6 @@ def brew_recipe(args):
     else:
         input_processes = args.tasks
 
-    # Get the list of processes for that recipe
-    list_processes = automatic_pipeline.get_process_info()
     # Validate the provided pipeline processes
     validated = automatic_pipeline.validate_pipeline(input_processes)
     if not validated:
@@ -564,4 +557,16 @@ def brew_recipe(args):
     # Get the final pipeline string
     pipeline_string = automatic_pipeline.run_auto_pipeline(input_processes)
 
-    return pipeline_string, list_processes
+    return pipeline_string
+
+
+# A dictionary of quick recipes
+available_recipes = {
+    "innuendo": Innuendo,
+    "plasmids": "integrity_coverage fastqc_trimmomatic (spades pilon "
+              "(mash_dist | abricate) | mash_screen | mapping_patlas)",
+    "plasmids_mapping": "integrity_coverage fastqc_trimmomatic mapping_patlas",
+    "plasmids_assembly": "integrity_coverage fastqc_trimmomatic (spades pilon"
+                         " mash_dist)",
+    "plasmids_mash": "integrity_coverage fastqc_trimmomatic mash_screen",
+}

@@ -1,4 +1,10 @@
+file(params.referenceFileO{{ param_id }}) ? params.referenceFileO{{ param_id }} : exit(1, "'referenceFileO{{ param_id }}' parameter missing")
+IN_refO_{{ pid }} = Channel.fromPath(params.referenceFileO{{ param_id }})
+    .map{ it -> it.exists() ? it : exit(1, "referenceFileO file was not found: '${params.referenceFileO{{ param_id }}}'")}
 
+file(params.referenceFileH{{ param_id }}) ? params.referenceFileH{{ param_id }} : exit(1, "'referenceFileH{{ param_id }}' parameter missing")
+IN_refH_{{ pid }} = Channel.fromPath(params.referenceFileH{{ param_id }})
+    .map{ it -> it.exists() ? it : exit(1, "referenceFileH file was not found: '${params.referenceFileH{{ param_id }}}'")}
 
 process seq_typing_{{ pid }} {
 
@@ -11,8 +17,8 @@ process seq_typing_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    file refO from IN_refO
-    file refH from IN_refH
+    file refO from IN_refO_{{ pid }}
+    file refH from IN_refH_{{ pid }}
 
     output:
     file "seq_typing*"
