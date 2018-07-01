@@ -1,14 +1,14 @@
 // Check for the presence of absence of both index and fasta reference
-if (params.index == null && params.reference == null){
+if (params.index{{ param_id }} == null && params.reference{{ param_id }} == null){
     exit 1, "An index or a reference fasta file must be provided."
-} else if (params.index != null && params.reference != null){
+} else if (params.index{{ param_id }} != null && params.reference{{ param_id }} != null){
     exit 1, "Provide only an index OR a reference fasta file."
 }
 
 
 if (params.reference){
 
-    reference_in = Channel.fromPath(params.reference)
+    reference_in_{{ pid }} = Channel.fromPath(params.reference{{ param_id }})
         .map{it -> file(it).exists() ? [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.') ,it] : null}
         .ifEmpty{ exit 1, "No fasta file was provided"}
 
@@ -22,7 +22,7 @@ if (params.reference){
         maxForks 1
 
         input:
-        set build_id, file(fasta) from reference_in
+        set build_id, file(fasta) from reference_in_{{ pid }}
 
         output:
         val build_id into bowtieIndexId_{{ pid }}
@@ -34,8 +34,8 @@ if (params.reference){
         """
     }
 } else {
-    bowtieIndexId_{{ pid }} = Channel.value(params.index.split("/").last())
-    bowtieIndex_{{ pid }} = Channel.fromPath("${params.index}*.bt2").collect().toList()
+    bowtieIndexId_{{ pid }} = Channel.value(params.index{{ param_id }}.split("/").last())
+    bowtieIndex_{{ pid }} = Channel.fromPath("${params.index{{ param_id }}}*.bt2").collect().toList()
 }
 
 
@@ -45,7 +45,7 @@ process bowtie_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { sample_id }
-     publishDir 'results/mapping/bowtie_{{ pid }}/'
+    publishDir 'results/mapping/bowtie_{{ pid }}/'
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}

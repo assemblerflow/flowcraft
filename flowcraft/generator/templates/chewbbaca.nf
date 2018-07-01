@@ -13,7 +13,7 @@ if ( params.schemaSelectedLoci{{ param_id }}){
 }
 if ( params.schemaCore{{ param_id }}){
     if (!file(params.schemaCore{{ param_id }}).exists()) {
-        exit 1, \"'schemaCore{{ param_id }}' file was not found: '${params.schemaCore{{ param_id }}}'"
+        exit 1, "'schemaCore{{ param_id }}' file was not found: '${params.schemaCore{{ param_id }}}'"
     }
 }
 

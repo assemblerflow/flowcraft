@@ -26,6 +26,7 @@ terminal.
 - Added "-cr" option to show current recipe `pipeline_string`.
 - Changed the way recipes were being parsed by `proc_collector` for the
 usage of `-l` and `-L` options.
+- Added check for non-ascii characteres in colored_print.
 
 ### Bug fixes
 

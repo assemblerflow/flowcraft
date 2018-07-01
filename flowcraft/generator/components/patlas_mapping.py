@@ -40,12 +40,12 @@ class PatlasMapping(Process):
                                " to bowtie2."
             },
             "samtoolsIndex": {
-                "default": "'/ngstools/data/indexes/master_fasta_patlas_version_18042018.fas.fai'",
+                "default": "'/ngstools/data/indexes/master_fasta_v1_4_1_11_06_2018.fas.fai'",
                 "description": "Specifies the reference indexes to be provided"
                                " to samtools."
             },
             "lengthJson": {
-                "default": "'/ngstools/data/reads_sample_result_length.json'",
+                "default": "'/ngstools/data/length_v1_4_1_11_06_2018.json'",
                 "description": "A dictionary of all the lengths of reference "
                                "sequences."
             }
@@ -54,19 +54,19 @@ class PatlasMapping(Process):
         self.directives = {
             "mappingBowtie": {
                 "container": "flowcraft/mapping-patlas",
-                "version": "1.1.2-1",
+                "version": "1.4.1",
                 "cpus": 1,
                 "memory": "{ 4.GB * task.attempt }"
             },
             "samtoolsView": {
                 "container": "flowcraft/mapping-patlas",
-                "version": "1.1.2-1",
+                "version": "1.4.1",
                 "cpus": 1,
                 "memory": "{ 4.GB * task.attempt }"
             },
             "jsonDumpingMapping": {
                 "container": "flowcraft/mapping-patlas",
-                "version": "1.1.2-1",
+                "version": "1.4.1",
                 "cpus": 1,
                 "memory": "'4GB'"
             }

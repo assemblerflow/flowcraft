@@ -684,7 +684,7 @@ def test_automatic_dependency_wfork():
     con = [{"input": {"process": "__init__", "lane": 0},
             "output": {"process": "spades", "lane": 1}},
            {"input": {"process": "__init__", "lane": 0},
-            "output": {"process": "integrity_coverage", "lane": 1}}]
+            "output": {"process": "integrity_coverage", "lane": 2}}]
 
     nf = eg.NextflowGenerator(con, "teste.nf")
 
@@ -702,6 +702,38 @@ def test_automatic_dependency_wfork_2():
     nf._set_channels()
 
     assert len(nf.main_raw_inputs["fastq"]["raw_forks"]) == 2
+
+
+def test_automatic_dependency_wfork_3():
+
+    con = [{"input": {"process": "__init__", "lane": 0},
+            "output": {"process": "reads_download", "lane": 1}},
+           {"input": {"process": "reads_download", "lane": 1},
+            "output": {"process": "skesa", "lane": 2}},
+           {"input": {"process": "reads_download", "lane": 1},
+            "output": {"process": "spades", "lane": 3}}
+           ]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf._set_channels()
+
+    assert nf.processes[3].parent_lane == 1
+
+
+def test_automatic_dependency_wfork_4():
+
+    con = [{"input": {"process": "__init__", "lane": 0},
+            "output": {"process": "reads_download", "lane": 1}},
+           {"input": {"process": "reads_download", "lane": 1},
+            "output": {"process": "skesa", "lane": 2}},
+           {"input": {"process": "reads_download", "lane": 1},
+            "output": {"process": "spades", "lane": 3}}
+           ]
+
+    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf._set_channels()
+
+    assert nf.processes[4].parent_lane == 3
 
 
 def test_automatic_dependency_multi():

@@ -34,6 +34,9 @@ def colored_print(msg, color_label="white_bold"):
 
     """
 
+    if sys.stdout.encoding != "UTF-8":
+        msg = "".join([i if ord(i) < 128 else "" for i in msg])
+
     col = COLORS[color_label]
 
     return "\x1b[{}{}\x1b[0m".format(col, msg)
