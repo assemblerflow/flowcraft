@@ -96,7 +96,7 @@ if (params.chewbbacaBatch{{ param_id }}) {
         tag { sample_id }
         scratch true
         if (params.chewbbacaQueue{{ param_id }} != null) {
-            queue "${params.chewbbacaQueue{{ param_id }}"
+            queue "${params.chewbbacaQueue{{ param_id }}}"
         }
         publishDir "results/chewbbaca_alleleCall_{{ pid }}/", mode: "copy"
 
