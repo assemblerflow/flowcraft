@@ -12,8 +12,8 @@ process metamlst_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val metamlstDB_index from IN_metamlstDB_{{ pid }}
-    val metamlstDB from IN_metamlstDB_index_{{ pid }}
+    val metamlstDB from IN_metamlstDB_{{ pid }}
+    val metamlstDB_index from IN_metamlstDB_index_{{ pid }}
 
     output:
     file 'out/merged/*.txt' optional true
