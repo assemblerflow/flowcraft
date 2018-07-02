@@ -1168,6 +1168,10 @@ class NextflowGenerator:
 
             # Skip init process
             if p.template == "init":
+                for param, val in p.params.items():
+                    help_list.append("--{:25} {} (default: {})".format(
+                        param, val["description"],
+                        str(val["default"]).replace('"', "'")))
                 continue
 
             # Add component header and a line break
