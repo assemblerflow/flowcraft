@@ -66,7 +66,7 @@ if (params.chewbbacaBatch{{ param_id }}) {
                 rm -r $schema/temp
             fi
 
-            if [ "$params.schemaSelectedLoci" = "null" ];
+            if [ "$params.schemaSelectedLoci{{ param_id }}" = "null" ];
             then
                 inputGenomes=$schema
             else
@@ -96,7 +96,7 @@ if (params.chewbbacaBatch{{ param_id }}) {
         tag { sample_id }
         scratch true
         if (params.chewbbacaQueue{{ param_id }} != null) {
-            queue "${params.chewbbacaQueue}"
+            queue "${params.chewbbacaQueue{{ param_id }"
         }
         publishDir "results/chewbbaca_alleleCall_{{ pid }}/", mode: "copy"
 
@@ -120,7 +120,7 @@ if (params.chewbbacaBatch{{ param_id }}) {
                 rm -r $schema/temp
             fi
 
-            if [ "$params.schemaSelectedLoci" = "null" ];
+            if [ "$params.schemaSelectedLoci{{ param_id }}" = "null" ];
             then
                 inputGenomes=$schema
             else
@@ -155,7 +155,7 @@ process chewbbacaExtractMLST_{{ pid }} {
     """
     head -n1 ${profiles[0]} > chewbbaca_profiles.tsv
     awk 'FNR == 2' $profiles >> chewbbaca_profiles.tsv
-    chewBBACA.py ExtractCgMLST -i chewbbaca_profiles.tsv -o results -p $params.chewbbacaProfilePercentage
+    chewBBACA.py ExtractCgMLST -i chewbbaca_profiles.tsv -o results -p $params.chewbbacaProfilePercentage{{ param_id }}
     """
 
 }
