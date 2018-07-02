@@ -1,7 +1,7 @@
 Basic Usage
 ===========
 
-FlowCraft has currently two execution mode, ``build`` and ``inspect``, that is
+FlowCraft has currently two execution modes, ``build`` and ``inspect``, that are
 used to build and inspect the nextflow pipeline, respectively. However, a
 ``report`` mode is also being developed.
 
@@ -84,39 +84,56 @@ Parameters
 The parameters of the pipeline can be viewed by running the pipeline file
 with ``nextflow`` and using the ``--help`` option::
 
-    $ nextflow my_pipe.nf --help
-
-    N E X T F L O W  ~  version 0.28.0
-    Launching `my_pipe.nf` [stupefied_booth] - revision: 504208431f
+    $ nextflow run my_pipe.nf --help
+    N E X T F L O W  ~  version 0.30.1
+    Launching `my_pipe.nf` [kickass_mcclintock] - revision: 480b3455ba
 
     ============================================================
-                          F L O W C R A F T
+                    F L O W C R A F T
     ============================================================
-    Built using flowcraft v1.0.2
+    Built using flowcraft v1.2.1.dev1
 
 
     Usage:
         nextflow run my_pipe.nf
 
-           --fastq                     Path expression to paired-end fastq files. (default: fastq/*_{1,2}.*) (integrity_coverage)
-           --genomeSize                Genome size estimate for the samples. It is used to estimate the coverage and other assembly parameters andchecks (default: 2.1) (integrity_coverage)
-           --minCoverage               Minimum coverage for a sample to proceed. Can be set to0 to allow any coverage (default: 15) (integrity_coverage)
-           --adapters                  Path to adapters files, if any (default: None) (trimmomatic;fastqc)
-           --trimSlidingWindow         Perform sliding window trimming, cutting once the average quality within the window falls below a threshold (default: 5:20) (trimmomatic)
-           --trimLeading               Cut bases off the start of a read, if below a threshold quality (default: 3 (trimmomatic)
-           --trimTrailing              Cut bases of the end of a read, if below a threshold quality (default: 3) (trimmomatic)
-           --trimMinLength             Drop the read if it is below a specified length (default: 55) (trimmomatic)
-           --spadesMinCoverage         The minimum number of reads to consider an edge in the de Bruijn graph during the assembly (default: 2) (spades)
-           --spadesMinKmerCoverage     Minimum contigs K-mer coverage. After assembly only keep contigs with reported k-mer coverage equal or above this value (default: 2) (spades)
-           --spadesKmers               If 'auto' the SPAdes k-mer lengths will be determined from the maximum read length of each assembly. If 'default', SPAdes will use the default k-mer lengths. (default: auto) (spades)
+           --fastq                     Path expression to paired-end fastq files. (default: fastq/*_{1,2}.*) (default: 'fastq/*_{1,2}.*')
 
-All these parameters are related to the components of the pipeline. However,
+           Component 'INTEGRITY_COVERAGE_1_1'
+           ----------------------------------
+           --genomeSize_1_1            Genome size estimate for the samples in Mb. It is used to estimate the coverage and other assembly parameters andchecks (default: 1)
+           --minCoverage_1_1           Minimum coverage for a sample to proceed. By default it's setto 0 to allow any coverage (default: 0)
+
+           Component 'TRIMMOMATIC_1_2'
+           ---------------------------
+           --adapters_1_2              Path to adapters files, if any. (default: 'None')
+           --trimSlidingWindow_1_2     Perform sliding window trimming, cutting once the average quality within the window falls below a threshold (default: '5:20')
+           --trimLeading_1_2           Cut bases off the start of a read, if below a threshold quality (default: 3)
+           --trimTrailing_1_2          Cut bases of the end of a read, if below a threshold quality (default: 3)
+           --trimMinLength_1_2         Drop the read if it is below a specified length  (default: 55)
+
+           Component 'FASTQC_1_3'
+           ----------------------
+           --adapters_1_3              Path to adapters files, if any. (default: 'None')
+
+           Component 'SPADES_1_4'
+           ----------------------
+           --spadesMinCoverage_1_4     The minimum number of reads to consider an edge in the de Bruijn graph during the assembly (default: 2)
+           --spadesMinKmerCoverage_1_4 Minimum contigs K-mer coverage. After assembly only keep contigs with reported k-mer coverage equal or above this value (default: 2)
+           --spadesKmers_1_4           If 'auto' the SPAdes k-mer lengths will be determined from the maximum read length of each assembly. If 'default', SPAdes will use the default k-mer lengths.  (default: 'auto')
+
+All these parameters are specific to the components of the pipeline. However,
 the main input parameter (or parameters) of the pipeline is always available.
-Since this pipeline started with fastq paired-end files as the main input,
-the ``--fastq`` parameter is available. If the pipeline started with any other
-input type or with more than one input type, the appropriate parameters would
-appear. These parameters can be provided on run-time or edited in the
-``params.config`` file.
+In this case, since the pipeline started with fastq paired-end files as the
+main input, the ``--fastq`` parameter is available. If the pipeline started
+with any other input type or with more than one input type, the appropriate
+parameters would appear. These parameters can be provided on run-time or
+edited in the ``params.config`` file.
+
+It worth noting that, by default, all parameters will be independent between
+different components, **even if the parameter name is the same**. This
+behaviour can be changed when building the pipeline by using the
+``--merge-params`` option (See :ref:`mergeParams`).
 
 Executing the pipeline
 ::::::::::::::::::::::

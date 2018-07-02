@@ -19,6 +19,56 @@ respective parameters:
 - ``Fasta``: ``--fasta``
 - ``Accessions``: ``--accessions``
 
+
+.. _mergeParams:
+
+Merge parameters
+----------------
+
+By default, parameters in a FlowCraft pipeline are unique and independent
+between different components, even if the parameters have the same name and/or
+the components are the same. This allows for the execution of the same software
+using different parameters in a single workflow. Therefore, the ``params.config``
+of these pipelines will look something like::
+
+    params {
+        /*
+        Component 'trimmomatic_1_2'
+        --------------------------
+        */
+        adapters_1_2 = 'None'
+        trimSlidingWindow_1_2 = '5:20'
+        trimLeading_1_2 = 3
+        trimTrailing_1_2 = 3
+        trimMinLength_1_2 = 55
+
+        /*
+        Component 'fastqc_1_3'
+        ---------------------
+        */
+        adapters_1_3 = 'None'
+    }
+
+Notice that the ``adapters`` parameter occurs twice and can be independently set
+in each component.
+
+If you want to override this behaviour, FlowCraft has a ``--merge-params`` option
+that merges all parameters with the same name in a single parameter, which is then
+equally applied to all components. So, if we generate the pipeline above
+with this option::
+
+    flowcraft build -t "trimmomatic fastqc" -o pipe.nf --merge-params
+
+Then, the ``params.config`` will become::
+
+    params {
+        adapters = 'None'
+        trimSlidingWindow = '5:20'
+        trimLeading = 3
+        trimTrailing = 3
+        trimMinLength = 5
+    }
+
 Forks
 -----
 
