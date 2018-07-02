@@ -1,5 +1,5 @@
 if (params.midasDB{{ param_id }} == null){
-    exit 1, "The path to the midas database must be provided."
+    exit 1, "The path to the midas database must be provided with the 'midasDB{{ param_id }}' option."
 }
 
 IN_midas_DB_{{ pid }} = Channel.value(params.midasDB{{ param_id }})
