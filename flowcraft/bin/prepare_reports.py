@@ -3,10 +3,10 @@
 import sys
 import json
 
-from os.path import dirname, relpath, abspath
+from os.path import dirname, abspath
 
 
-def write_json(report_json, task_name, project_name, sample_name, pid):
+def write_json(report_json, task_name, sample_name, pid):
 
     with open(report_json) as fh:
         res = json.load(fh)

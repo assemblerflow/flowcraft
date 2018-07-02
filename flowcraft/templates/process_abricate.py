@@ -109,7 +109,7 @@ class Abricate:
         dic: Main storage of Abricate's file content. Each entry corresponds
         to a single line and contains the keys::
         
-            - ``log_file``: Name of the summary log file containing abricate 
+            - ``log_file``: Name of the summary log file containing abricate
               results
             - ``infile``: Input file of Abricate.
             - ``reference``: Reference of the query sequence.
