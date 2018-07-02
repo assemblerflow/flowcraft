@@ -1,3 +1,6 @@
+if (params.midasDB{{ param_id }} == null{
+    exit 1, "The path to the midas database must be provided."
+
 IN_midas_DB_{{ pid }} = Channel.value(params.midasDB{{ param_id }})
 
 process midas_species_{{ pid }} {

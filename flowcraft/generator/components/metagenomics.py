@@ -203,7 +203,7 @@ class Midas_species(Process):
 
         self.params = {
             "midasDB": {
-                "default": "'/MidasDB/midas_db_v1.2'",
+                "default": "null",
                 "description": "Specifies Midas database."
             }
         }
