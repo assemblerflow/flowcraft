@@ -28,8 +28,8 @@ Merge parameters
 By default, parameters in a FlowCraft pipeline are unique and independent
 between different components, even if the parameters have the same name and/or
 the components are the same. This allows for the execution of the same software
-using different parameters in a single workflow. Therefore, the ``params.config``
-of these pipelines will look something like::
+using different parameters in a single workflow. The ``params.config`` of these
+pipelines will look something like::
 
     params {
         /*
