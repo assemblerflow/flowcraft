@@ -46,7 +46,7 @@ def main():
     print(pid)
 
     try:
-        write_json(report_json, task_name, project_name, sample_name, pid)
+        write_json(report_json, task_name, sample_name, pid)
     except json.decoder.JSONDecodeError:
         print("Could not parse JSON output from {}, sample name {} and "
               "pid {}".format(report_json, sample_name, pid))
