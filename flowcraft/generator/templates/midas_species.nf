@@ -1,4 +1,4 @@
-if (params.midasDB{{ param_id }} == null{
+if (params.midasDB{{ param_id }} == null){
     exit 1, "The path to the midas database must be provided."
 }
 
