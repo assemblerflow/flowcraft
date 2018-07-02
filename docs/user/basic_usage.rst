@@ -130,8 +130,10 @@ with any other input type or with more than one input type, the appropriate
 parameters would appear. These parameters can be provided on run-time or
 edited in the ``params.config`` file.
 
-It worth noting that, by default, all parameters will be independent between
-different components, **even if the parameter name is the same**. This
+The parameters are composed by its name (`adapters`) followed by the ID of
+the process it refers to (`_1_2`). The IDs can be consulted in the DAG tree
+(See `Assembling a pipeline`_). As such, all parameters will be independent
+between different components, **even if the parameter name is the same**. This
 behaviour can be changed when building the pipeline by using the
 ``--merge-params`` option (See :ref:`mergeParams`).
 
