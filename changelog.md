@@ -2,6 +2,14 @@
 
 ## Upcoming release (`dev` branch)
 
+### Improvements
+
+- The parameter system has been revamped, and parameters are now component-specific
+and independent by default. This allows a better fine-tuning of the parameters
+and also the execution of the same component multiple times (in a fork, for instance)
+with different parameters. The old parameter system that merged identical parameters
+is still available by using the `--merge-params` flag when building the pipeline.
+
 ### New components
 
 - `maxbin2`: An automatic tool for binning metagenomic sequences.
