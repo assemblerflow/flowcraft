@@ -38,7 +38,6 @@ import operator
 import subprocess
 
 from subprocess import PIPE
-from collections import defaultdict
 
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
