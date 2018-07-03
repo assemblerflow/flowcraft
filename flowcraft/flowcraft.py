@@ -127,9 +127,11 @@ def get_args(args=None):
 
 def validate_build_arguments(args):
 
+    # Skip all checks when listing the processes
     if args.detailed_list or args.short_list:
         return
 
+    # When none of the main run options is specified
     if not args.tasks and not args.recipe and not args.check_only \
             and not args.detailed_list and not args.short_list:
         logger.error(colored_print(
@@ -137,6 +139,8 @@ def validate_build_arguments(args):
             "-l, -L", "red_bold"))
         sys.exit(1)
 
+    # When the build mode is active via taks or recipe, but no output file
+    # option has been provided
     if (args.tasks or args.recipe) and not args.check_recipe \
             and not args.output_nf:
         logger.error(colored_print(
@@ -145,6 +149,12 @@ def validate_build_arguments(args):
         sys.exit(1)
 
     if args.output_nf:
+        if not os.path.basename(args.output_nf):
+            logger.error(colored_print(
+                "Output pipeline path '{}' missing a name (only the directory "
+                "path was provided)".format(args.output_nf), "red_bold"))
+            sys.exit(1)
+
         parsed_output_nf = (args.output_nf if args.output_nf.endswith(".nf")
                             else "{}.nf".format(args.output_nf.strip()))
         opath = parsed_output_nf
