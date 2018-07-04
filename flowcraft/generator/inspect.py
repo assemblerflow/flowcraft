@@ -1428,9 +1428,13 @@ class NextflowInspector:
 
             logger.debug("Sending initial data with run id: {}".format(run_id))
 
+            payload = {"run_id": run_id, "dag_json": dict_dag,
+                       "pipeline_files": static_info}
+            logger.debug("Connection payload size: {}".format(
+                asizeof.asizeof(payload)))
+
             r = requests.post(self.broadcast_address,
-                              json={"run_id": run_id, "dag_json": dict_dag,
-                                    "pipeline_files": static_info})
+                              json=payload)
 
             logger.debug("Response received: {}".format(r.status_code))
             if r.status_code != 201:
