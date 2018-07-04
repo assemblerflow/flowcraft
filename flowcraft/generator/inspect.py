@@ -1427,7 +1427,6 @@ class NextflowInspector:
             static_info = self._prepare_static_info()
 
             logger.debug("Sending initial data with run id: {}".format(run_id))
-            logger.debug("Sending static info: {}".format(static_info))
 
             r = requests.post(self.broadcast_address,
                               json={"run_id": run_id, "dag_json": dict_dag,
