@@ -79,6 +79,7 @@ process_map = {
         #"prokka": annotation.Prokka,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
+        "retrieve_mapped": mapping.Retrieve_mapped,
         "seq_typing": typing.SeqTyping,
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
@@ -891,7 +892,7 @@ class NextflowGenerator:
 
         for source, lanes in self.secondary_channels.items():
 
-            for lane, vals in lanes.items():
+            for vals in lanes.values():
 
                 if not vals["end"]:
                     logger.debug("[{}] No secondary links to setup".format(

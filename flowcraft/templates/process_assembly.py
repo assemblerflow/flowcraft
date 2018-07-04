@@ -484,7 +484,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
         # k-mer coverage filter
         assembly_len = assembly_obj.get_assembly_length()
         logger.debug("Checking assembly length: {}".format(assembly_len))
-        
+
         if assembly_len < t_80:
 
             logger.warning("Assembly size ({}) smaller than the minimum "
@@ -501,7 +501,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
             if assembly_len < t_80:
 
                 warn_msg = "Assembly size smaller than the minimum" \
-                           " threshold of 80% of expected genome size.".format(
+                           " threshold of 80% of expected genome size: {}".format(
                                 assembly_len)
                 logger.warning(warn_msg)
                 warn_fh.write(warn_msg)

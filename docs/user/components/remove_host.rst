@@ -44,8 +44,8 @@ Default directives
 - ``remove_host``:
     - ``cpus``: 3
     - ``memory``: 5GB (dynamically increased on retry)
-    - ``container``: cimendes/bowtie2_hg19
-    - ``version``: 2.0
+    - ``container``: flowcraft/remove_host
+    - ``version``: 2-0.1
 
 
 Advanced

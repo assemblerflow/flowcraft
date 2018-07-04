@@ -117,7 +117,7 @@ RANGES = {
 """
 dict: Dictionary containing the encoding values for several fastq formats. The
 key contains the format and the value contains a list with the corresponding
-phred score and a list with the range of encodings. 
+phred score and a list with the range of encodings.
 """
 
 COPEN = {

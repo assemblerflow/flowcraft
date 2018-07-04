@@ -19,6 +19,7 @@ from the work directory. This option is currently supported for the `trimmomatic
 - `maxbin2`: An automatic tool for binning metagenomic sequences.
 - `bowtie2`: Align short paired-end sequencing reads to long reference
 sequences.
+- `retrieve_mapped`: Retrieves the mapped reads of a previous bowtie2 mapping process.
 
 ### New recipes
 
@@ -39,6 +40,8 @@ terminal.
 - Changed the way recipes were being parsed by `proc_collector` for the
 usage of `-l` and `-L` options.
 - Added check for non-ascii characters in colored_print.
+- Fixed log when a file with the pipeline is provided to -t option
+instead of a string.
 
 ### Bug fixes
 
