@@ -110,7 +110,7 @@ Mapping
 - :doc:`components/remove_host`: Performs read mapping with bowtie2
   against the host genome (default hg19) and removes the mapping reads
 
-- :doc:`components/retrieve_mapped`: Retrieves the mapping reads of a previous
+- :doc:`components/retrieve_mapped`: Retrieves the mapped reads of a previous
   bowtie2 mapping process.
 
 Taxonomical Profiling
