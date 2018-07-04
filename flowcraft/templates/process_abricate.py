@@ -107,7 +107,7 @@ class Abricate:
         """
         dic: Main storage of Abricate's file content. Each entry corresponds
         to a single line and contains the keys::
-        
+
             - ``log_file``: Name of the summary log file containing abricate
               results
             - ``infile``: Input file of Abricate.
@@ -299,7 +299,7 @@ class Abricate:
         if filter_behavior not in ["and", "or"]:
             raise ValueError("Filter behavior must be either 'and' or 'or'")
 
-        for key, dic in self.storage.items():
+        for dic in self.storage.values():
 
             # This attribute will determine whether an entry will be yielded
             # or not
@@ -432,7 +432,7 @@ class AbricateReport(Abricate):
 
         json_dic = {"plotData": {}}
 
-        for key, entry in self.storage.items():
+        for entry in self.storage.values():
             # Get contig ID using the same regex as in `assembly_report.py`
             # template
             contig_id = self._get_contig_id(entry["reference"])

@@ -398,7 +398,7 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
         # threshold, fail this check and return False
         if assembly_len < genome_size * 1e6 * 0.8:
             warn_msg = "Assembly size smaller than the minimum" \
-                       " threshold of 80% of expected genome size.".format(
+                       " threshold of 80% of expected genome size: {}".format(
                             assembly_len)
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)

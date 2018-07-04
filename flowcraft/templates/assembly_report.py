@@ -107,7 +107,7 @@ class Assembly:
         ])
         """
         OrderedDict: Initialize summary information dictionary. Contains keys:
-        
+
             - ``ncontigs``: Number of contigs
             - ``avg_contig_size``: Average size of contigs
             - ``n50``: N50 metric
@@ -372,7 +372,7 @@ class Assembly:
         # Get complete sequence to calculate sliding window values
         complete_seq = "".join(self.contigs.values()).lower()
 
-        for p, i in enumerate(range(0, len(complete_seq), window)):
+        for i in range(0, len(complete_seq), window):
 
             seq_window = complete_seq[i:i + window]
 

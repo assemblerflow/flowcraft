@@ -84,6 +84,7 @@ def get_previous_stats(stats_path):
     return stats_json
 
 
+@MainWrapper
 def main(sample_id, trace_file, workdir):
     """
     Parses a nextflow trace file, searches for processes with a specific tag
@@ -158,9 +159,4 @@ def main(sample_id, trace_file, workdir):
 
 if __name__ == "__main__":
 
-    try:
-        main(fastq_id, TRACE_FILE, WORKDIR)
-    except Exception:
-        logger.error("Module exited unexpectedly with error:\\n{}".format(
-            traceback.format_exc()))
-        log_error()
+    main(fastq_id, TRACE_FILE, WORKDIR)
