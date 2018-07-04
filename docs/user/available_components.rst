@@ -108,18 +108,18 @@ Mapping
   input file for pATLAS.
 
 - :doc:`components/remove_host`: Performs read mapping with bowtie2
-  against the host genome (default hg19) and removes the mapping reads
+  against the target host genome (default hg19) and removes the mapping reads
 
 - :doc:`components/retrieve_mapped`: Retrieves the mapped reads of a previous
   bowtie2 mapping process.
 
-Taxonomical Profiling
+Taxonomic Profiling
 ---------------------
 
-- :doc:`components/kraken`: Performs taxonomical identification with kraken
+- :doc:`components/kraken`: Performs taxonomic identification with kraken
   (minikrakenDB2017 as default database)
 
-- :doc:`components/midas_species`: Performs taxonomical identification on the
+- :doc:`components/midas_species`: Performs taxonomic identification on the
   species level with midas (requires database)
 
 Typing

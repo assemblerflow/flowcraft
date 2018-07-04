@@ -9,6 +9,10 @@ and independent by default. This allows a better fine-tuning of the parameters
 and also the execution of the same component multiple times (in a fork, for instance)
 with different parameters. The old parameter system that merged identical parameters
 is still available by using the `--merge-params` flag when building the pipeline.
+- Added a global `--clearAtCheckpoint` parameter that, when set to true, will remove
+temporary files that are no longer necessary for downstream steps of the pipeline
+from the work directory. This option is currently supported for the `trimmomatic`,
+`fastqc_trimmomatic`, `skesa` and `spades` components. 
 
 ### New components
 
@@ -22,7 +26,7 @@ sequences.
 - `plasmids`: A recipe to perform mapping, mash screen on reads
 and also mash dist for assembly based approaches (all to detect
 plasmdis). This also includes annotation with abricate for the assembly.
-- `plasmids_mapping`: A recipe to perfmorm mapping for plasmids.
+- `plasmids_mapping`: A recipe to perform mapping for plasmids.
 - `plasmids_mash`: A recipe to perform mash screen for plasmids.
 - `plasmids_assembly`: A recipe to perform mash dist for plasmid
 assemblies.
@@ -35,7 +39,7 @@ terminal.
 - Added "-cr" option to show current recipe `pipeline_string`.
 - Changed the way recipes were being parsed by `proc_collector` for the
 usage of `-l` and `-L` options.
-- Added check for non-ascii characteres in colored_print.
+- Added check for non-ascii characters in colored_print.
 
 ### Bug fixes
 
@@ -49,13 +53,13 @@ usage of `-l` and `-L` options.
 
 - `card_rgi`: Anti-microbial gene screening for assemblies
 - `filter_poly`: Runs PrinSeq on paired-end FastQ files to remove low complexity sequences
-- `kraken`: Taxonomical identification of FastQ files
+- `kraken`: Taxonomic identification of FastQ files
 - `megahit`: Metagenomic assembler for paired-end FastQ files
 - `metaprob`: Preforms read binning on metagenomic FastQ files
 - `metamlst`: Checks the Sequence Type of metagenomic FastQ reads using Multilocus Sequence Typing
 - `metaspades`: Metagenomic assembler for paired-end FastQ files
-- `midas_species`: Taxonomical identification of FastQ files on the species level
-- `remove host`: Read mapping with Bowtie2 against the host genome (default hg19) and removes the mapping reads
+- `midas_species`: Taxonomic identification of FastQ files on the species level
+- `remove host`: Read mapping with Bowtie2 against the target host genome (default hg19) and removes the mapping reads
 - `sistr`: Salmonella *in silico* typing component for assemblies. 
 
 ### Features
