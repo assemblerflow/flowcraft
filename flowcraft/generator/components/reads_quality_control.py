@@ -33,37 +33,15 @@ class IntegrityCoverage(Process):
                 "description":
                     "Genome size estimate for the samples in Mb. It is used to "
                     "estimate the coverage and other assembly parameters and"
-                    "checks (default: $params.genomeSize)"
+                    "checks"
             },
             "minCoverage": {
                 "default": 0,
                 "description":
                     "Minimum coverage for a sample to proceed. By default it's set"
-                    "to 0 to allow any coverage (default: $params.minCoverage)"
+                    "to 0 to allow any coverage"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "genomeSize",
-                "channel":
-                    "IN_genome_size = Channel"
-                    ".value(params.genomeSize)"
-                    "map{it -> it.toString().isNumber() ?"
-                    " it : exit(1, \"The genomeSize parameter must be a number"
-                    "or a float. Provided value: '${params.genomeSize}'\")}"
-            },
-            {
-                "params": "minCoverage",
-                "channel":
-                    "IN_min_coverage = Channel"
-                    ".value(params.minCoverage)"
-                    "map{it -> it.toString().isNumber() ?"
-                    " it : exit(1, \"The minCoverage parameter must be a "
-                    "number or a float. Provided value: "
-                    "'${params.minCoverage}'\")}"
-            }
-        ]
 
         self.link_start.extend(["SIDE_phred", "SIDE_max_len"])
 
@@ -96,37 +74,15 @@ class CheckCoverage(Process):
                 "description":
                     "Genome size estimate for the samples. It is used to "
                     "estimate the coverage and other assembly parameters and"
-                    "checks (default: $params.genomeSize)"
+                    "checks"
             },
             "minCoverage": {
                 "default": 15,
                 "description":
                     "Minimum coverage for a sample to proceed. Can be set to"
-                    "0 to allow any coverage (default: $params.minCoverage)"
+                    "0 to allow any coverage"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "genomeSize",
-                "channel":
-                    "IN_genome_size = Channel"
-                    ".value(params.genomeSize)"
-                    "map{it -> it.toString().isNumber() ?"
-                    " it : exit(1, \"The genomeSize parameter must be a number"
-                    "or a float. Provided value: '${params.genomeSize}'\")}"
-            },
-            {
-                "params": "minCoverage",
-                "channel":
-                    "IN_min_coverage = Channel"
-                    ".value(params.minCoverage)"
-                    "map{it -> it.toString().isNumber() ?"
-                    " it : exit(1, \"The minCoverage parameter must be a "
-                    "number or a float. Provided value: "
-                    "'${params.minCoverage}'\")}"
-            }
-        ]
 
         self.link_start.extend(["SIDE_max_len"])
 
@@ -148,23 +104,8 @@ class TrueCoverage(Process):
                 "description":
                     "Species name. Must be the complete species name with"
                     "genus and species, e.g.: 'Yersinia enterocolitica'. "
-                    "(default: $params.species)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "species",
-                "channel":
-                    "if ( !params.species){ exit 1, \"'species' parameter "
-                    "missing\" }\n"
-                    "if ( params.species.toString().split(\" \").size() != 2 )"
-                    "{ exit 1, \"'species' parameter must contain two "
-                    "values (e.g.: 'escherichia coli').Provided value: "
-                    "'${params.species}'\"}\n"
-                    "IN_pathoSpecies = Channel.value(params.species)"
-            }
-        ]
 
         self.directives = {
             "true_coverage": {
@@ -208,17 +149,9 @@ class FastQC(Process):
             "adapters": {
                 "default": "'None'",
                 "description":
-                    "Path to adapters files, if any "
-                    "(default: $params.adapters)"
+                    "Path to adapters files, if any."
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "adapters",
-                "channel": "IN_adapters = Channel.value(params.adapters)"
-            }
-        ]
 
         self.directives = {"fastqc2": {
             "cpus": 2,
@@ -257,65 +190,33 @@ class Trimmomatic(Process):
             "adapters": {
                 "default": "'None'",
                 "description":
-                    "Path to adapters files, if any "
-                    "(default: $params.adapters)"
+                    "Path to adapters files, if any."
             },
             "trimSlidingWindow": {
                 "default": "'5:20'",
                 "description":
                     "Perform sliding window trimming, cutting once the "
                     "average quality within the window falls below a "
-                    "threshold (default: $params.trimSlidingWindow)"
+                    "threshold"
             },
             "trimLeading": {
                 "default": "3",
                 "description":
                     "Cut bases off the start of a read, if below a threshold "
-                    "quality (default: $params.trimLeading"
+                    "quality"
             },
             "trimTrailing": {
                 "default": "3",
                 "description":
                     "Cut bases of the end of a read, if below a "
-                    "threshold quality (default: $params.trimTrailing)"
+                    "threshold quality"
             },
             "trimMinLength": {
                 "default": "55",
                 "description":
                     "Drop the read if it is below a specified length "
-                    "(default: $params.trimMinLength)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "trimOpts",
-                "channel":
-                    "// Check sliding window parameter\n"
-                    "if ( params.trimSlidingWindow.toString().split(\":\")"
-                    ".size() != 2 )"
-                    "{ exit 1, \"'trimSlidingWindow' parameter must contain"
-                    "two values separated by a ':'. Provided value: "
-                    "'${params.trimSlidingWindow}' \"}\n"
-                    "if ( !params.trimLeading.toString().isNumber() )"
-                    "{ exit 1, \"'trimLeading' parameter must be a number."
-                    "Provide value: '${params.trimLeading}'\"}\n"
-                    "if ( !params.trimTrailing.toString().isNumber() )"
-                    "{ exit 1, \"'trimTrailing' parameter must be a number."
-                    "Provide value: '${params.trimTrailing}'\"}\n"
-                    "if ( !params.trimMinLength.toString().isNumber() )"
-                    "{ exit 1, \"'trimMinLength' parameter must be a number."
-                    "Provide value: '${params.trimMinLength}'\"}\n"
-                    "IN_trimmomatic_opts = Channel."
-                    "value([params.trimSlidingWindow,"
-                    "params.trimLeading,params.trimTrailing,"
-                    "params.trimMinLength])"
-            },
-            {
-                "params": "adapters",
-                "channel": "IN_adapters = Channel.value(params.adapters)"
-            }
-        ]
 
         self.directives = {"trimmomatic": {
             "cpus": 2,
@@ -366,65 +267,33 @@ class FastqcTrimmomatic(Process):
             "adapters": {
                 "default": "'None'",
                 "description":
-                    "Path to adapters files, if any "
-                    "(default: $params.adapters)"
+                    "Path to adapters files, if any."
             },
             "trimSlidingWindow": {
                 "default": "'5:20'",
                 "description":
                     "Perform sliding window trimming, cutting once the "
                     "average quality within the window falls below a "
-                    "threshold (default: $params.trimSlidingWindow)"
+                    "threshold."
             },
             "trimLeading": {
                 "default": "3",
                 "description":
                     "Cut bases off the start of a read, if below a threshold "
-                    "quality (default: $params.trimLeading"
+                    "quality."
             },
             "trimTrailing": {
                 "default": "3",
                 "description":
                     "Cut bases of the end of a read, if below a "
-                    "threshold quality (default: $params.trimTrailing)"
+                    "threshold quality."
             },
             "trimMinLength": {
                 "default": "55",
                 "description":
-                    "Drop the read if it is below a specified length "
-                    "(default: $params.trimMinLength)"
+                    "Drop the read if it is below a specified length."
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "adapters",
-                "channel": "IN_adapters = Channel.value(params.adapters)"
-            },
-            {
-                "params": "trimOpts",
-                "channel":
-                    "// Check sliding window parameter\n"
-                    "if ( params.trimSlidingWindow.toString().split(\":\")"
-                    ".size() != 2 )"
-                    "{ exit 1, \"'trimSlidingWindow' parameter must contain"
-                    "two values separated by a ':'. Provided value: "
-                    "'${params.trimSlidingWindow}' \"}\n"
-                    "if ( !params.trimLeading.toString().isNumber() )"
-                    "{ exit 1, \"'trimLeading' parameter must be a number."
-                    "Provide value: '${params.trimLeading}'\"}\n"
-                    "if ( !params.trimTrailing.toString().isNumber() )"
-                    "{ exit 1, \"'trimTrailing' parameter must be a number."
-                    "Provide value: '${params.trimTrailing}'\"}\n"
-                    "if ( !params.trimMinLength.toString().isNumber() )"
-                    "{ exit 1, \"'trimMinLength' parameter must be a number."
-                    "Provide value: '${params.trimMinLength}'\"}\n"
-                    "IN_trimmomatic_opts = Channel."
-                    "value([params.trimSlidingWindow,"
-                    "params.trimLeading,params.trimTrailing,"
-                    "params.trimMinLength])"
-            }
-        ]
 
         self.directives = {
             "fastqc": {
@@ -470,13 +339,6 @@ class FilterPoly(Process):
                     "letters ATCGN), and the number of repeats or percentage of occurence."
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "adapter",
-                "channel": "IN_adapter = Channel.value(params.adapter)"
-            }
-        ]
 
         self.directives = {"filter_poly": {
             "cpus": 1,

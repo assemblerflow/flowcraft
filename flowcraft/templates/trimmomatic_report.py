@@ -114,7 +114,7 @@ def parse_log(log_file):
     return template
 
 
-def write_report(storage_dic, output_file):
+def write_report(storage_dic, output_file, sample_id):
     """ Writes a report from multiple samples.
 
     Parameters
@@ -124,6 +124,8 @@ def write_report(storage_dic, output_file):
         for its generation.
     output_file : str
         Path where the output file will be generated.
+    sample_id : str
+        Id or name of the current sample.
     """
 
     with open(output_file, "w") as fh, open(".report.json", "w") as json_rep:
@@ -138,15 +140,21 @@ def write_report(storage_dic, output_file):
                 sample, ",".join([str(x) for x in vals.values()])))
 
             json_dic = {
-                "tableRow": [
-                    {"header": "trimmed",
-                     "value": vals["total_trim_perc"],
-                     "table": "assembly",
-                     "columnBar": True},
-                    ],
-                "plotData": {
-                    "sparkline": vals["clean_len"]
-                },
+                "tableRow": [{
+                    "sample": sample_id,
+                    "data": [
+                        {"header": "trimmed",
+                         "value": vals["total_trim_perc"],
+                         "table": "qc",
+                         "columnBar": True},
+                    ]
+                }],
+                "plotData": [{
+                    "sample": sample_id,
+                    "data": {
+                        "sparkline": vals["clean_len"]
+                    }
+                }],
                 "badReads": vals["bad_reads"]
             }
             json_rep.write(json.dumps(json_dic, separators=(",", ":")))
@@ -174,7 +182,7 @@ def main(log_files):
         # Remove temporary trim log file
         os.remove(log)
 
-    write_report(log_storage, "trimmomatic_report.csv")
+    write_report(log_storage, "trimmomatic_report.csv", log_id)
 
 
 if __name__ == '__main__':

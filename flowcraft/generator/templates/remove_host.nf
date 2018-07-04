@@ -1,3 +1,6 @@
+IN_index_files_{{ pid }} = Channel.value(params.refIndex{{ param_id }})
+
+
 process remove_host_{{ pid }} {
 
     // Send POST request to platform
@@ -8,7 +11,7 @@ process remove_host_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val bowtie2Index from IN_index_files
+    val bowtie2Index from IN_index_files_{{ pid }}
 
     output:
     set sample_id , file("${sample_id}*.headersRenamed_*.fq.gz") into {{ output_channel }}

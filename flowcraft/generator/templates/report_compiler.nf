@@ -4,7 +4,7 @@ Compiles the reports from every process
 */
 process report {
 
-    tag { $sample_id }
+    tag { sample_id }
 
     input:
     set sample_id, task_name, pid, report_json from {{ compile_channels }}

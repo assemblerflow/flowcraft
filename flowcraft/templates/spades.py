@@ -25,6 +25,8 @@ The following variables are expected whether using NextFlow or the
         - e.g.: ``'5'``
     2. Minimum contigs k-mer coverage.
         - e.g.: ``['2' '2']``
+- ``clear`` : If 'true', remove the input fastq files at the end of the
+    component run, IF THE FILES ARE IN THE WORK DIRECTORY
 
 Generated output
 ----------------
@@ -41,11 +43,12 @@ Code documentation
 
 """
 
-__version__ = "1.0.1"
-__build__ = "16012018"
+__version__ = "1.0.2"
+__build__ = "29062018"
 __template__ = "spades-nf"
 
 import os
+import re
 import subprocess
 
 from subprocess import PIPE
@@ -80,6 +83,7 @@ if __file__.endswith(".command.sh"):
     FASTQ_PAIR = '$fastq_pair'.split()
     MAX_LEN = int('$max_len'.strip())
     KMERS = '$kmers'.strip()
+    CLEAR = '$clear'
     OPTS = [x.strip() for x in '$opts'.strip("[]").split(",")]
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
@@ -88,6 +92,7 @@ if __file__.endswith(".command.sh"):
     logger.debug("MAX_LEN: {}".format(MAX_LEN))
     logger.debug("KMERS: {}".format(KMERS))
     logger.debug("OPTS: {}".format(OPTS))
+    logger.debug("CLEAR: {}".format(CLEAR))
 
 
 def set_kmers(kmer_opt, max_read_len):
@@ -136,8 +141,27 @@ def set_kmers(kmer_opt, max_read_len):
     return kmers
 
 
+def clean_up(fastq):
+    """
+    Cleans the temporary fastq files. If they are symlinks, the link
+    source is removed
+
+    Parameters
+    ----------
+    fastq : list
+        List of fastq files.
+    """
+
+    for fq in fastq:
+        # Get real path of fastq files, following symlinks
+        rp = os.path.realpath(fq)
+        logger.debug("Removing temporary fastq file path: {}".format(rp))
+        if re.match(".*/work/.{2}/.{30}/.*", rp):
+            os.remove(rp)
+
+
 @MainWrapper
-def main(sample_id, fastq_pair, max_len, kmer, opts):
+def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
     """Main executor of the spades template.
 
     Parameters
@@ -153,6 +177,9 @@ def main(sample_id, fastq_pair, max_len, kmer, opts):
         Can be either ``'auto'``, ``'default'`` or a
         sequence of space separated integers, ``'23, 45, 67'``.
     opts : List of options for spades execution. See above.
+    clear : str
+        Can be either 'true' or 'false'. If 'true', the input fastq files will
+        be removed at the end of the run, IF they are in the working directory
 
     """
 
@@ -204,7 +231,7 @@ def main(sample_id, fastq_pair, max_len, kmer, opts):
 
     logger.info("Finished SPAdes subprocess with STDOUT:\\n"
                 "======================================\\n{}".format(stdout))
-    logger.info("Fished SPAdes subprocesswith STDERR:\\n"
+    logger.info("Fished SPAdes subprocess with STDERR:\\n"
                 "======================================\\n{}".format(stderr))
     logger.info("Finished SPAdes with return code: {}".format(
         p.returncode))
@@ -227,7 +254,11 @@ def main(sample_id, fastq_pair, max_len, kmer, opts):
     os.rename("contigs.fasta", assembly_file)
     logger.info("Setting main assembly file to: {}".format(assembly_file))
 
+    # Remove input fastq files when clear option is specified.
+    if clear == "true":
+        clean_up(fastq_pair)
+
 
 if __name__ == '__main__':
 
-    main(SAMPLE_ID, FASTQ_PAIR, MAX_LEN, KMERS, OPTS)
+    main(SAMPLE_ID, FASTQ_PAIR, MAX_LEN, KMERS, OPTS, CLEAR)

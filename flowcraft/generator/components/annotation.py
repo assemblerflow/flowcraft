@@ -80,13 +80,6 @@ class CardRgi(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "alignmentTool",
-                "channel": "IN_alignment_tool = Channel.value(params.alignmentTool)"
-            }
-        ]
-
         self.directives = {
             "card_rgi": {
                 "container": "flowcraft/card_rgi",

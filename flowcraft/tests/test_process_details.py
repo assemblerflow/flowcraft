@@ -19,14 +19,18 @@ def test_long_list():
 
     arguments = af.get_args(["build", "-L"])
 
+    pipeline_string = "fastqc trimmomatic"
+
     with pytest.raises(SystemExit):
-        pd.proc_collector(process_map, arguments)
+        pd.proc_collector(process_map, arguments, pipeline_string)
 
 
 def test_short_list():
 
     arguments = af.get_args(["build", "-l"])
 
+    pipeline_string = "fastqc trimmomatic"
+
     with pytest.raises(SystemExit):
-        pd.proc_collector(process_map, arguments)
+        pd.proc_collector(process_map, arguments, pipeline_string)
         

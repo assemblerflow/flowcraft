@@ -1,3 +1,22 @@
+// Check sliding window parameter
+if ( params.trimSlidingWindow{{ param_id }}.toString().split(":").size() != 2 ){
+    exit 1, "'trimSlidingWindow{{ param_id }}' parameter must contain two values separated by a ':'. Provided value: '${params.trimSlidingWindow{{ param_id }}}'"
+}
+if ( !params.trimLeading{{ param_id }}.toString().isNumber() ){
+    exit 1, "'trimLeading{{ param_id }}' parameter must be a number. Provide value: '${params.trimLeading{{ param_id }}}'"
+}
+if ( !params.trimTrailing{{ param_id }}.toString().isNumber() ){
+    exit 1, "'trimTrailing{{ param_id }}' parameter must be a number. Provide value: '${params.trimTrailing{{ param_id }}}'"
+}
+if ( !params.trimMinLength{{ param_id }}.toString().isNumber() ){
+    exit 1, "'trimMinLength{{ param_id }}' parameter must be a number. Provide value: '${params.trimMinLength{{ param_id }}}'"
+}
+
+IN_trimmomatic_opts_{{ pid }} = Channel.value([params.trimSlidingWindow{{ param_id }},params.trimLeading{{ param_id }},params.trimTrailing{{ param_id }},params.trimMinLength{{ param_id }}])
+IN_adapters_{{ pid }} = Channel.value(params.adapters{{ param_id }})
+
+clear = params.clearAtCheckpoint ? "true" : "false"
+checkpointClear_{{ pid }} = Channel.value(clear)
 
 process fastqc_{{ pid }} {
 
@@ -43,7 +62,7 @@ process fastqc_report_{{ pid }} {
     val opts from Channel.value("--ignore-tests")
 
     output:
-    set sample_id, file(fastq_pair), 'optimal_trim', ".status" into MAIN_fastqc_trim
+    set sample_id, file(fastq_pair), 'optimal_trim', ".status" into _MAIN_fastqc_trim_{{ pid }}
     file '*_trim_report' into LOG_trim_{{ pid }}
     file "*_status_report" into LOG_fastqc_report_{{ pid }}
     file "${sample_id}_*_summary.txt" optional true
@@ -57,7 +76,7 @@ process fastqc_report_{{ pid }} {
 }
 
 MAIN_fastqc_trim_{{ pid }} = Channel.create()
-MAIN_fastqc_trim
+_MAIN_fastqc_trim_{{ pid }}
         .filter{ it[3].text == "pass" }
         .map{ [it[0], it[1], file(it[2]).text] }
         .into(MAIN_fastqc_trim_{{ pid }})
@@ -118,8 +137,9 @@ process trimmomatic_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair), trim_range, phred from MAIN_fastqc_trim_{{ pid }}.join(SIDE_phred_{{ pid }})
-    val opts from IN_trimmomatic_opts
-    val ad from IN_adapters
+    val opts from IN_trimmomatic_opts_{{ pid }}
+    val ad from IN_adapters_{{ pid }}
+    val clear from checkpointClear_{{ pid }}
 
     output:
     set sample_id, "${sample_id}_*trim.fastq.gz" into {{ output_channel }}

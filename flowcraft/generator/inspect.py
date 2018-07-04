@@ -22,7 +22,7 @@ except ImportError:
     import flowcraft.generator.error_handling as eh
     from flowcraft.generator.process_details import colored_print
 
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, "")
 code = locale.getpreferredencoding()
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -906,8 +906,10 @@ class NextflowInspector:
         size_stamp = os.path.getsize(self.log_file)
         self.log_retry = 0
         if size_stamp and size_stamp == self.log_sizestamp:
+            logger.debug("No changes detected in log size stamp. Skipping.")
             return
         else:
+            logger.debug("Updating log size stamp to: {}".format(size_stamp))
             self.log_sizestamp = size_stamp
 
         r = ".* (.*) \[.*\].*\[(.*)\].*process > (.*) \((.*)\).*"
@@ -967,6 +969,7 @@ class NextflowInspector:
         """
 
         try:
+            logger.debug("Started log parsing")
             self.log_parser()
         except (FileNotFoundError, StopIteration) as e:
             logger.debug("ERROR: ", sys.exc_info()[0])
@@ -974,6 +977,7 @@ class NextflowInspector:
             if self.log_retry == self.MAX_RETRIES:
                 raise e
         try:
+            logger.debug("Started trace parsing")
             self.trace_parser()
         except (FileNotFoundError, StopIteration) as e:
             logger.debug("ERROR: ", sys.exc_info()[0])
@@ -1422,9 +1426,17 @@ class NextflowInspector:
 
             static_info = self._prepare_static_info()
 
+            logger.debug("Sending initial data with run id: {}".format(run_id))
+
+            payload = {"run_id": run_id, "dag_json": dict_dag,
+                       "pipeline_files": static_info}
+            logger.debug("Connection payload size: {}".format(
+                asizeof.asizeof(payload)))
+
             r = requests.post(self.broadcast_address,
-                              json={"run_id": run_id, "dag_json": dict_dag,
-                                    "pipeline_files": static_info})
+                              json=payload)
+
+            logger.debug("Response received: {}".format(r.status_code))
             if r.status_code != 201:
                 logger.error(colored_print(
                     "ERROR: There was a problem sending data to the server"
@@ -1488,16 +1500,19 @@ class NextflowInspector:
         run_hash = self._get_run_hash()
         dict_dag = self._dag_file_to_dict()
         _broadcast_sent = False
+        logger.debug("Establishing connection...")
         self._establish_connection(run_hash, dict_dag)
 
         stay_alive = True
         try:
+            logger.debug("Starting inspection loop")
             while stay_alive:
 
                 if not _broadcast_sent:
                     self._print_msg(run_hash)
                     _broadcast_sent = True
 
+                logger.debug("Updating inspection")
                 self.update_inspection()
                 if self.send:
                     self._send_status_info(run_hash)

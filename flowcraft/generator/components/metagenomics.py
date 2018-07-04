@@ -27,13 +27,6 @@ class Kraken(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "krakenDB",
-                "channel": "IN_kraken_DB = Channel.value(params.krakenDB)"
-            }
-        ]
-
         self.directives = {
             "kraken": {
                 "container": "flowcraft/kraken",
@@ -139,20 +132,6 @@ class Megahit(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "megahitKmers",
-                "channel":
-                    "if ( params.megahitKmers.toString().split(\" \").size() "
-                    "<= 1 )"
-                    "{ if (params.megahitKmers.toString() != 'auto'){"
-                    "exit 1, \"'megahitKmers' parameter must be a sequence "
-                    "of space separated numbers or 'auto'. Provided "
-                    "value: ${params.megahitKmers}\"} }\n"
-                    "IN_megahit_kmers = Channel.value(params.megahitKmers)"
-            }
-        ]
-
         self.directives = {"megahit": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
@@ -197,20 +176,6 @@ class Metaspades(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "metaspadesKmers",
-                "channel":
-                    "if ( params.metaspadesKmers.toString().split(\" \").size() "
-                    "<= 1 )"
-                    "{ if (params.metaspadesKmers.toString() != 'auto'){"
-                    "exit 1, \"'metaspadesKmers' parameter must be a sequence "
-                    "of space separated numbers or 'auto'. Provided "
-                    "value: ${params.metaspadesKmers}\"} }\n"
-                    "IN_metaspades_kmers = Channel.value(params.metaspadesKmers)"
-            }
-        ]
-
         self.directives = {"metaspades": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
@@ -238,17 +203,10 @@ class Midas_species(Process):
 
         self.params = {
             "midasDB": {
-                "default": "'/MidasDB/midas_db_v1.2'",
+                "default": "null",
                 "description": "Specifies Midas database."
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "midasDB",
-                "channel": "IN_midas_DB = Channel.value(params.midasDB)"
-            }
-        ]
 
         self.directives = {
             "midas_species": {
@@ -290,13 +248,6 @@ class RemoveHost(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "refIndex",
-                "channel": "IN_index_files = Channel.value(params.refIndex)"
-            }
-        ]
-
         self.directives = {
             "remove_host": {
                 "container": "flowcraft/remove_host",
@@ -311,13 +262,13 @@ class RemoveHost(Process):
         ]
 
 class MetaProb(Process):
-    """bowtie2 to remove host reads process template interface
+    """MetaProb to bin metagenomic reads interface
 
             This process is set with:
 
                 - ``input_type``: fastq
-                - ``output_type``: fastq
-                - ``ptype``: removal os host reads
+                - ``output_type``: csv
+                - ``ptype``: binning of reads
 
             """
 

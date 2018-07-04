@@ -1,3 +1,12 @@
+if (params.asperaKey{{ param_id }}){
+    if (file(params.asperaKey{{ param_id }}).exists()){
+        IN_asperaKey_{{ pid }} = Channel.fromPath(params.asperaKey{{ param_id }})
+    } else {
+        IN_asperaKey_{{ pid }} = Channel.value("")
+    }
+} else {
+    IN_asperaKey_{{ pid }} = Channel.value("")
+}
 
 process reads_download_{{ pid }} {
 
@@ -9,7 +18,7 @@ process reads_download_{{ pid }} {
 
     input:
     val accession_id from {{ input_channel }}.splitText(){ it.trim() }.filter{ it.trim() != "" }
-    each file(aspera_key) from Channel.fromPath(params.asperaKey)
+    each file(aspera_key) from IN_asperaKey_{{ pid }}
 
     output:
     set accession_id, file("${accession_id}/*fq.gz") optional true into {{ output_channel }}

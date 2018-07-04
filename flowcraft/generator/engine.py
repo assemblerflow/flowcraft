@@ -16,7 +16,7 @@ try:
     import generator.components.annotation as annotation
     import generator.components.assembly_processing as ap
     import generator.components.downloads as downloads
-    import generator.components.mapping as map
+    import generator.components.mapping as mapping
     import generator.components.distance_estimation as distest
     import generator.components.metagenomics as meta
     import generator.components.patlas_mapping as mapping_patlas
@@ -35,7 +35,7 @@ except ImportError:
     import flowcraft.generator.components.annotation as annotation
     import flowcraft.generator.components.assembly_processing as ap
     import flowcraft.generator.components.downloads as downloads
-    import flowcraft.generator.components.mapping as map
+    import flowcraft.generator.components.mapping as mapping
     import flowcraft.generator.components.distance_estimation as distest
     import flowcraft.generator.components.mlst as mlst
     import flowcraft.generator.components.metagenomics as meta
@@ -53,7 +53,7 @@ except ImportError:
 process_map = {
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
-        "bowtie": map.Bowtie,
+        "bowtie": mapping.Bowtie,
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
         "chewbbaca": mlst.Chewbbaca,
@@ -76,7 +76,7 @@ process_map = {
         "pilon": ap.Pilon,
         "process_skesa": ap.ProcessSkesa,
         "process_spades": ap.ProcessSpades,
-        "prokka": annotation.Prokka,
+        #"prokka": annotation.Prokka,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
         "retrieve_mapped": map.Retrieve_mapped,
@@ -102,7 +102,7 @@ class NextflowGenerator:
 
     def __init__(self, process_connections, nextflow_file,
                  pipeline_name="flowcraft", ignore_dependencies=False,
-                 auto_dependency=True):
+                 auto_dependency=True, merge_params=True):
 
         self.processes = []
 
@@ -161,14 +161,11 @@ class NextflowGenerator:
         first process(es).
         """
 
-        self.secondary_inputs = {}
+        self.merge_params = merge_params
         """
-        dict: Stores the secondary input channels that may be required by
-        some processes. The key is the params variable and the key is the
-        channel definition for nextflow::
-
-            {"genomeSize": "IN_genome_size = Channel.value(params.genomeSize)"}
-
+        bool: Determines whether the params of the pipeline should be merged
+        (i.e., the same param name in multiple components is merged into one)
+        or if they should be unique and specific to each component.
         """
 
         self.extra_inputs = {}
@@ -357,6 +354,8 @@ class NextflowGenerator:
                 # to None. This will tell the engine that this process
                 # will receive the main input from the raw user input.
                 out_process.parent_lane = None
+            logger.debug("[{}] Parent lane: {}".format(
+                p, out_process.parent_lane))
 
             # If the current connection is a fork, add it to the fork tree
             if in_lane != out_lane:
@@ -497,7 +496,8 @@ class NextflowGenerator:
             p.parent_lane = outlane
             dependency_proc.parent_lane = None
         else:
-            dependency_proc.parent_lane = outlane
+            dependency_proc.parent_lane = inlane
+            p.parent_lane = outlane
 
         self.processes.append(dependency_proc)
 
@@ -621,26 +621,6 @@ class NextflowGenerator:
             }
         logger.debug("[{}] Updated main raw inputs: {}".format(
             p.template, self.main_raw_inputs))
-
-    def _update_secondary_inputs(self, p):
-        """Given a process, this method updates the
-        :attr:`~Process.secondary_inputs` attribute with the corresponding
-        secondary inputs of that process.
-
-        Parameters
-        ----------
-        p : flowcraft.Process.Process
-        """
-
-        logger.debug("[{}] Checking secondary links".format(p.template))
-        if p.secondary_inputs:
-            logger.debug("[{}] Found secondary input channel(s): "
-                         "{}".format(p.template, p.secondary_inputs))
-            for ch in p.secondary_inputs:
-                if ch["params"] not in self.secondary_inputs:
-                    logger.debug("[{}] Added channel: {}".format(
-                        p.template, ch["channel"]))
-                    self.secondary_inputs[ch["params"]] = ch["channel"]
 
     def _update_extra_inputs(self, p):
         """Given a process, this method updates the
@@ -836,8 +816,6 @@ class NextflowGenerator:
               process of each lane so that they fork from the user provide
               parameters (See
               :func:`~NextflowGenerator._update_raw_input`).
-            - Check for the presence of secondary inputs and adds them to the
-              :attr:`~NextflowGenerator.secondary_inputs` attribute.
             - Check for the presence of secondary channels and adds them to the
               :attr:`~NextflowGenerator.secondary_channels` attribute.
 
@@ -867,8 +845,6 @@ class NextflowGenerator:
             if not p.parent_lane and p.input_type:
                 self._update_raw_input(p)
 
-            self._update_secondary_inputs(p)
-
             self._update_extra_inputs(p)
 
             self._update_secondary_channels(p)
@@ -881,8 +857,7 @@ class NextflowGenerator:
 
         This method will fetch the :class:`flowcraft.process.Init` process
         instance and sets the raw input (
-        :func:`flowcraft.process.Init.set_raw_inputs`) and the secondary
-        inputs (:func:`flowcraft.process.Init.set_secondary_inputs`) for
+        :func:`flowcraft.process.Init.set_raw_inputs`) for
         that process. This will handle the connection of the user parameters
         with channels that are then consumed in the pipeline.
         """
@@ -896,9 +871,6 @@ class NextflowGenerator:
         logger.debug("Setting main raw inputs: "
                      "{}".format(self.main_raw_inputs))
         init_process.set_raw_inputs(self.main_raw_inputs)
-        logger.debug("Setting secondary inputs: "
-                     "{}".format(self.secondary_inputs))
-        init_process.set_secondary_inputs(self.secondary_inputs)
         logger.debug("Setting extra inputs: {}".format(self.extra_inputs))
         init_process.set_extra_inputs(self.extra_inputs)
 
@@ -1118,6 +1090,61 @@ class NextflowGenerator:
             Nextflow params configuration string
         """
 
+        params_str = ""
+
+        for p in self.processes:
+
+            logger.debug("[{}] Adding parameters: {}\n".format(
+                p.template, p.params)
+            )
+
+            # Add an header with the template name to structure the params
+            # configuration
+            if p.params and p.template != "init":
+
+                p.set_param_id("_{}".format(p.pid))
+                params_str += "\n\t/*"
+                params_str += "\n\tComponent '{}_{}'\n".format(p.template,
+                                                               p.pid)
+                params_str += "\t{}\n".format("-" * (len(p.template) + len(p.pid) + 12))
+                params_str += "\t*/\n"
+
+            for param, val in p.params.items():
+
+                if p.template == "init":
+                    param_id = param
+                else:
+                    param_id = "{}_{}".format(param, p.pid)
+
+                params_str += "\t{} = {}\n".format(param_id, val["default"])
+
+        return params_str
+
+    def _get_merged_params_string(self):
+        """Returns the merged nextflow params string from a dictionary object.
+
+        The params dict should be a set of key:value pairs with the
+        parameter name, and the default parameter value::
+
+            self.params = {
+                "genomeSize": 2.1,
+                "minCoverage": 15
+            }
+
+        The values are then added to the string as they are. For instance,
+        a ``2.1`` float will appear as ``param = 2.1`` and a
+        ``"'teste'" string will appear as ``param = 'teste'`` (Note the
+        string).
+
+        Identical parameters in multiple processes will be merged into the same
+        param.
+
+        Returns
+        -------
+        str
+            Nextflow params configuration string
+        """
+
         params_temp = {}
 
         for p in self.processes:
@@ -1135,6 +1162,34 @@ class NextflowGenerator:
         return config_str
 
     def _get_params_help(self):
+
+        help_list = []
+
+        for p in self.processes:
+
+            # Skip init process
+            if p.template == "init":
+                for param, val in p.params.items():
+                    help_list.append("--{:25} {} (default: {})".format(
+                        param, val["description"],
+                        str(val["default"]).replace('"', "'")))
+                continue
+
+            # Add component header and a line break
+            if p.params:
+                help_list.extend(
+                    ["",
+                     "Component '{}_{}'".format(p.template.upper(), p.pid),
+                     "-" * (len(p.template) + len(p.pid) + 13)])
+
+            for param, val in p.params.items():
+                help_list.append("--{:<25} {} (default: {})".format(
+                    param + "_" + p.pid, val["description"],
+                    str(val["default"]).replace('"', "'")))
+
+        return help_list
+
+    def _get_merged_params_help(self):
         """
 
         Returns
@@ -1143,6 +1198,7 @@ class NextflowGenerator:
         """
 
         help_dict = {}
+        help_list = []
 
         for p in self.processes:
 
@@ -1161,8 +1217,10 @@ class NextflowGenerator:
                 val["process"] = ""
             else:
                 val["process"] = "({})".format(";".join(val["process"]))
+            help_list.append("--{:<25} {} {}".format(
+                p, val["description"], val["process"]))
 
-        return help_dict
+        return help_list
 
     @staticmethod
     def _render_config(template, context):
@@ -1190,8 +1248,12 @@ class NextflowGenerator:
         containers = ""
         params = ""
 
-        params += self._get_params_string()
-        help_dict = self._get_params_help()
+        if self.merge_params:
+            params += self._get_merged_params_string()
+            help_list = self._get_merged_params_help()
+        else:
+            params += self._get_params_string()
+            help_list = self._get_params_help()
 
         for p in self.processes:
 
@@ -1215,7 +1277,7 @@ class NextflowGenerator:
         })
         self.help = self._render_config("Helper.groovy", {
             "nf_file": basename(self.nf_file),
-            "help_dict": help_dict,
+            "help_list": help_list,
             "version": __version__,
             "pipeline_name": " ".join([x.upper() for x in self.pipeline_name])
         })
@@ -1257,7 +1319,7 @@ class NextflowGenerator:
         for x, (k, v) in enumerate(f_tree.items()):
             for p in self.processes[1:]:
 
-                if x == 0 and p.lane not in [k] + v :
+                if x == 0 and p.lane not in [k] + v:
                     continue
 
                 if x > 0 and p.lane not in v:
@@ -1362,10 +1424,6 @@ class NextflowGenerator:
         self._set_channels()
 
         self._set_init_process()
-
-        logger.info(colored_print(
-            "\tSuccessfully set {} secondary input(s) \u2713".format(
-                len(self.secondary_inputs))))
 
         self._set_secondary_channels()
 
