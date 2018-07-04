@@ -377,6 +377,9 @@ def parse_pipeline(pipeline_str):
         with open(pipeline_str) as fh:
             pipeline_str = "".join([x.strip() for x in fh.readlines()])
 
+    logger.info(colored_print("Resulting pipeline string:\n"))
+    logger.info(colored_print(pipeline_str + "\n"))
+
     # Perform pipeline insanity checks
     insanity_checks(pipeline_str)
 

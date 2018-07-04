@@ -40,6 +40,8 @@ terminal.
 - Changed the way recipes were being parsed by `proc_collector` for the
 usage of `-l` and `-L` options.
 - Added check for non-ascii characters in colored_print.
+- Fixed log when a file with the pipeline is provided to -t option
+instead of a string.
 
 ### Bug fixes
 

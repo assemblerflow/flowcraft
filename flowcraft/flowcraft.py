@@ -144,7 +144,7 @@ def validate_build_arguments(args):
             "-l, -L", "red_bold"))
         sys.exit(1)
 
-    # When the build mode is active via taks or recipe, but no output file
+    # When the build mode is active via tasks or recipe, but no output file
     # option has been provided
     if (args.tasks or args.recipe) and not args.check_recipe \
             and not args.output_nf:
@@ -247,9 +247,6 @@ def build(args):
 
     # used for lists print
     proc_collector(process_map, args, pipeline_string)
-
-    logger.info(colored_print("Resulting pipeline string:\n"))
-    logger.info(colored_print(pipeline_string + "\n"))
 
     try:
         logger.info(colored_print("Checking pipeline for errors..."))
