@@ -23,6 +23,8 @@ The following variables are expected whether using NextFlow or the
     - e.g.: ``'[trim_sliding_window, trim_leading, trim_trailing, trim_min_length]'``
 - ``phred`` : List of guessed phred values for each sample
     - e.g.: ``'[SampleA: 33, SampleB: 33]'``
+- ``clear`` : If 'true', remove the input fastq files at the end of the
+    component run, IF THE FILES ARE IN THE WORK DIRECTORY
 
 Generated output
 ----------------
@@ -46,11 +48,12 @@ Code documentation
 # TODO: Add option to remove adapters
 # TODO: What to do when there is encoding failure
 
-__version__ = "1.0.2"
-__build__ = "28032018"
+__version__ = "1.0.3"
+__build__ = "20062018"
 __template__ = "trimmomatic-nf"
 
 import os
+import re
 import json
 import fileinput
 import subprocess
@@ -90,6 +93,7 @@ if __file__.endswith(".command.sh"):
     TRIM_OPTS = [x.strip() for x in '$opts'.strip("[]").split(",")]
     PHRED = '$phred'
     ADAPTERS_FILE = '$ad'
+    CLEAR = '$clear'
 
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
@@ -99,6 +103,7 @@ if __file__.endswith(".command.sh"):
     logger.debug("TRIM_OPTS: {}".format(TRIM_OPTS))
     logger.debug("PHRED: {}".format(PHRED))
     logger.debug("ADAPTERS_FILE: {}".format(ADAPTERS_FILE))
+    logger.debug("CLEAR: {}".format(CLEAR))
 
 TRIM_PATH = "/NGStools/Trimmomatic-0.36/trimmomatic.jar"
 ADAPTERS_PATH = "/NGStools/Trimmomatic-0.36/adapters"
@@ -230,7 +235,7 @@ def trimmomatic_log(log_file, sample_id):
     write_report(log_storage, "trimmomatic_report.csv", sample_id)
 
 
-def clean_up():
+def clean_up(fastq_pairs, clear):
     """Cleans the working directory of unwanted temporary files"""
 
     # Find unpaired fastq files
@@ -240,6 +245,14 @@ def clean_up():
     # Remove unpaired fastq files, if any
     for fpath in unpaired_fastq:
         os.remove(fpath)
+
+    if clear == "true":
+        for fq in fastq_pairs:
+            # Get real path of fastq files, following symlinks
+            rp = os.path.realpath(fq)
+            logger.debug("Removing temporary fastq file path: {}".format(rp))
+            if re.match(".*/work/.{2}/.{30}/.*", rp):
+                os.remove(rp)
 
 
 def merge_default_adapters():
@@ -264,7 +277,8 @@ def merge_default_adapters():
 
 
 @MainWrapper
-def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file):
+def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file,
+         clear):
     """ Main executor of the trimmomatic template.
 
     Parameters
@@ -284,6 +298,9 @@ def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file):
     adapters_file : str
         Path to adapters file. If not provided, or the path is not available,
         it will use the default adapters from Trimmomatic will be used
+    clear : str
+        Can be either 'true' or 'false'. If 'true', the input fastq files will
+        be removed at the end of the run, IF they are in the working directory
     """
 
     logger.info("Starting trimmomatic")
@@ -372,7 +389,7 @@ def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file):
 
     trimmomatic_log("{}_trimlog.txt".format(sample_id), sample_id)
 
-    clean_up()
+    clean_up(fastq_pair, clear)
 
     # Check if trimmomatic ran successfully. If not, write the error message
     # to the status channel and exit.
@@ -386,4 +403,5 @@ def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file):
 
 if __name__ == '__main__':
 
-    main(SAMPLE_ID, FASTQ_PAIR, TRIM_RANGE, TRIM_OPTS, PHRED, ADAPTERS_FILE)
+    main(SAMPLE_ID, FASTQ_PAIR, TRIM_RANGE, TRIM_OPTS, PHRED, ADAPTERS_FILE,
+         CLEAR)

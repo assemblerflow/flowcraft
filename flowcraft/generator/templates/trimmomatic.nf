@@ -15,6 +15,9 @@ if ( !params.trimMinLength{{ param_id}}.toString().isNumber() ){
 IN_trimmomatic_opts_{{ pid }} = Channel.value([params.trimSlidingWindow{{ param_id}},params.trimLeading{{ param_id}},params.trimTrailing{{ param_id}},params.trimMinLength{{ param_id}}])
 IN_adapters_{{ pid }} = Channel.value(params.adapters{{ param_id}})
 
+clear = params.clearAtCheckpoint ? "true" : "false"
+checkpointClear_{{ pid }} = Channel.value(clear)
+
 process trimmomatic_{{ pid }} {
 
     // Send POST request to platform
@@ -29,6 +32,7 @@ process trimmomatic_{{ pid }} {
     val trim_range from Channel.value("None")
     val opts from IN_trimmomatic_opts_{{ pid }}
     val ad from IN_adapters_{{ pid }}
+    val clear from checkpointClear_{{ pid }}
 
     output:
     set sample_id, "${sample_id}_*trim.fastq.gz" into {{ output_channel }}
