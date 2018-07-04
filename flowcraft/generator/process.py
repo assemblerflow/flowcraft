@@ -282,7 +282,7 @@ class Process:
             - memory
             - container
             - container tag/version
-        
+
         An example of directives for two process is as follows::
         
             self.directives = {

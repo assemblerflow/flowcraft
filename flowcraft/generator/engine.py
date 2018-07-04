@@ -891,7 +891,7 @@ class NextflowGenerator:
 
         for source, lanes in self.secondary_channels.items():
 
-            for lane, vals in lanes.items():
+            for vals in lanes.values():
 
                 if not vals["end"]:
                     logger.debug("[{}] No secondary links to setup".format(
