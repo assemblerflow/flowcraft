@@ -9,6 +9,10 @@ and independent by default. This allows a better fine-tuning of the parameters
 and also the execution of the same component multiple times (in a fork, for instance)
 with different parameters. The old parameter system that merged identical parameters
 is still available by using the `--merge-params` flag when building the pipeline.
+- Added a global `--clearAtCheckpoint` parameter that, when set to true, will remove
+temporary files that are no longer necessary for downstream steps of the pipeline
+from the work directory. This option is currently supported for the `trimmomatic`,
+`fastqc_trimmomatic`, `skesa` and `spades` components. 
 
 ### New components
 
