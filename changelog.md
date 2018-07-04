@@ -15,7 +15,7 @@ is still available by using the `--merge-params` flag when building the pipeline
 - `maxbin2`: An automatic tool for binning metagenomic sequences.
 - `bowtie2`: Align short paired-end sequencing reads to long reference
 sequences.
-- `retrieve_mapped`: Retrieves the mapping reads of a previous bowtie2 mapping process.
+- `retrieve_mapped`: Retrieves the mapped reads of a previous bowtie2 mapping process.
 
 ### New recipes
 
