@@ -227,7 +227,7 @@ trimmomatic spades pilon
 trimmomatic skesa pilon
 ```
 
-![example1](https://github.com/ODiogoSilva/flowcraft/raw/master/docs/resources/example_3.png)
+![example1](https://github.com/assemblerflow/flowcraft/raw/master/docs/resources/example_3.png)
 
 If you are interested in having some sort of genome annotation, simply add those
 components at the end, using a fork syntax:
@@ -237,7 +237,7 @@ components at the end, using a fork syntax:
 trimmomatic spades pilon (prokka | abricate)
 ```
 
-![example2](https://github.com/ODiogoSilva/flowcraft/raw/master/docs/resources/example_1.png)
+![example2](https://github.com/assemblerflow/flowcraft/raw/master/docs/resources/example_1.png)
 
 On the other hand, if you are interest in just perform allele calling for wgMLST,
 simply add `chewbbaca`:
@@ -246,7 +246,7 @@ simply add `chewbbaca`:
 trimmomatic spades pilon chewbbaca
 ```
 
-![example3](https://github.com/ODiogoSilva/flowcraft/raw/master/docs/resources/example_2.png)
+![example3](https://github.com/assemblerflow/flowcraft/raw/master/docs/resources/example_2.png)
 
 Since nextflow handles parallelism of large sets of data so well, simple pipelines
 of two components are also useful to build:
