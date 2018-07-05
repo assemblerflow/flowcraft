@@ -22,7 +22,7 @@ except ImportError:
     import flowcraft.generator.error_handling as eh
     from flowcraft.generator.process_details import colored_print
 
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, "")
 code = locale.getpreferredencoding()
 
 logger = logging.getLogger("main.{}".format(__name__))
@@ -94,9 +94,9 @@ class NextflowInspector:
         self.processes = OrderedDict()
         """
         dict: Dictionary of processes from the pipeline with the status of the
-        channel as the value. This information is retrieved from the 
+        channel as the value. This information is retrieved from the
         .nextflow.log file in the :func:`_parser_pipeline_processes` method
-        and updated in the :func:`_update_barrier_status` and 
+        and updated in the :func:`_update_barrier_status` and
         :func:`_update_process_stats` and :func:`_update_submission_status`.
         """
 
@@ -126,7 +126,7 @@ class NextflowInspector:
 
         self.log_sizestamp = None
         """
-        str: Stores the sizestamp of the last modification of the nextflow 
+        str: Stores the sizestamp of the last modification of the nextflow
         log file. This is used to parse the file only when it has changed.
         """
 
@@ -137,7 +137,7 @@ class NextflowInspector:
 
         self.log_retry = 0
         """
-        int: Each time the log file is not found, this counter is 
+        int: Each time the log file is not found, this counter is
         increased. Only when it matches the :attr:`MAX_RETRIES` attribute
         does it raises a FileNotFoundError.
         """
@@ -161,7 +161,7 @@ class NextflowInspector:
 
         self.time_stop = None
         """
-        datetime.time object with the finish time of the pipeline. This 
+        datetime.time object with the finish time of the pipeline. This
         attribute is only set when the pipeline is not running.
         """
 
@@ -382,7 +382,7 @@ class NextflowInspector:
         """
 
         if s / 1024 > 1:
-            return "{}GB".format(round(s / 1024), 1)
+            return "{}GB".format(round(s / 1024, 1))
         else:
             return "{}MB".format(s)
 
@@ -906,8 +906,10 @@ class NextflowInspector:
         size_stamp = os.path.getsize(self.log_file)
         self.log_retry = 0
         if size_stamp and size_stamp == self.log_sizestamp:
+            logger.debug("No changes detected in log size stamp. Skipping.")
             return
         else:
+            logger.debug("Updating log size stamp to: {}".format(size_stamp))
             self.log_sizestamp = size_stamp
 
         r = ".* (.*) \[.*\].*\[(.*)\].*process > (.*) \((.*)\).*"
@@ -967,16 +969,18 @@ class NextflowInspector:
         """
 
         try:
+            logger.debug("Started log parsing")
             self.log_parser()
         except (FileNotFoundError, StopIteration) as e:
-            logger.debug("ERROR: ", sys.exc_info()[0])
+            logger.debug("ERROR: " + str(sys.exc_info()[0]))
             self.log_retry += 1
             if self.log_retry == self.MAX_RETRIES:
                 raise e
         try:
+            logger.debug("Started trace parsing")
             self.trace_parser()
         except (FileNotFoundError, StopIteration) as e:
-            logger.debug("ERROR: ", sys.exc_info()[0])
+            logger.debug("ERROR: " + str(sys.exc_info()[0]))
             self.trace_retry += 1
             if self.trace_retry == self.MAX_RETRIES:
                 raise e
@@ -1218,7 +1222,7 @@ class NextflowInspector:
         # Set table data
         data = []
         table_headers = ["avgTime", "cpuhour", "maxMem", "avgRead", "avgWrite"]
-        for p, process in enumerate(list(self.processes)):
+        for process in list(self.processes):
 
             proc = self.processes[process]
             # Add general data that is always available for all processes
@@ -1422,9 +1426,17 @@ class NextflowInspector:
 
             static_info = self._prepare_static_info()
 
+            logger.debug("Sending initial data with run id: {}".format(run_id))
+
+            payload = {"run_id": run_id, "dag_json": dict_dag,
+                       "pipeline_files": static_info}
+            logger.debug("Connection payload size: {}".format(
+                asizeof.asizeof(payload)))
+
             r = requests.post(self.broadcast_address,
-                              json={"run_id": run_id, "dag_json": dict_dag,
-                                    "pipeline_files": static_info})
+                              json=payload)
+
+            logger.debug("Response received: {}".format(r.status_code))
             if r.status_code != 201:
                 logger.error(colored_print(
                     "ERROR: There was a problem sending data to the server"
@@ -1488,16 +1500,19 @@ class NextflowInspector:
         run_hash = self._get_run_hash()
         dict_dag = self._dag_file_to_dict()
         _broadcast_sent = False
+        logger.debug("Establishing connection...")
         self._establish_connection(run_hash, dict_dag)
 
         stay_alive = True
         try:
+            logger.debug("Starting inspection loop")
             while stay_alive:
 
                 if not _broadcast_sent:
                     self._print_msg(run_hash)
                     _broadcast_sent = True
 
+                logger.debug("Updating inspection")
                 self.update_inspection()
                 if self.send:
                     self._send_status_info(run_hash)
@@ -1509,8 +1524,8 @@ class NextflowInspector:
             logger.error(colored_print(
                 "ERROR: nextflow log and/or trace files are no longer "
                 "reachable!", "red_bold"))
-        except Exception as e:
-            logger.error("ERROR: ", sys.exc_info()[0])
+        except Exception:
+            logger.error("ERROR: " + str(sys.exc_info()[0]))
         finally:
             logger.info("Closing connection")
             self._close_connection(run_hash)

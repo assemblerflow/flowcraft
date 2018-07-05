@@ -1,6 +1,6 @@
 
-__version__ = "1.2.0"
-__build__ = "12052018"
+__version__ = "1.2.1"
+__build__ = "04072018"
 __author__ = "Diogo N. Silva, Tiago F. Jesus, Ines Mendes, Bruno Ribeiro-Goncalves"
 __copyright__ = "Diogo N. Silva"
 __license__ = "GPL3"

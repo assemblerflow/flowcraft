@@ -43,7 +43,7 @@ logger = get_logger(__file__)
 if __file__.endswith(".command.sh"):
     DEPTH_TXT = '$depthFile'
     JSON_LENGTH = '$lengthJson'
-    CUTOFF = '$params.cov_cutoff'
+    CUTOFF = '$cov_cutoff'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("DEPTH_TXT: {}".format(DEPTH_TXT))

@@ -29,7 +29,7 @@ class Abricate(Process):
 
         self.ignore_type = True
 
-        self.status_channels = ["STATUS_abricate"]
+        self.status_channels = ["STATUS_abricate", "STATUS_process_abricate"]
 
         self.params = {
             "abricateDatabases": {
@@ -79,13 +79,6 @@ class CardRgi(Process):
                                "Options: DIAMOND or BLAST"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "alignmentTool",
-                "channel": "IN_alignment_tool = Channel.value(params.alignmentTool)"
-            }
-        ]
 
         self.directives = {
             "card_rgi": {

@@ -205,8 +205,6 @@ def main(sample_id, fastq_pair, max_len, kmer):
     # Change the default contigs.fasta assembly name to a more informative one
     if "_trim." in fastq_pair[0]:
         sample_id += "_trim"
-    # Get spades version for output name
-    info = __get_version_spades()
 
     assembly_file = "{}_metaspades.fasta".format(
         sample_id)

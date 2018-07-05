@@ -30,7 +30,6 @@ class DownloadReads(Process):
                     "by providing the private-key file "
                     "'asperaweb_id_dsa.openssh' normally found in "
                     "~/.aspera/connect/etc/asperaweb_id_dsa.openssh "
-                    "(Default: null)"
             }
         }
 

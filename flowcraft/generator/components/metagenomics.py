@@ -27,24 +27,73 @@ class Kraken(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "krakenDB",
-                "channel": "IN_kraken_DB = Channel.value(params.krakenDB)"
-            }
-        ]
-
         self.directives = {
             "kraken": {
                 "container": "flowcraft/kraken",
                 "version": "1.0-0.1",
-                "memory": "{2.Gb*task.attempt}",
+                "memory": "{5.Gb*task.attempt}",
                 "cpus": 3
             }
         }
 
         self.status_channels = [
             "kraken"
+        ]
+
+
+class MaxBin2(Process):
+    """MaxBin2, a metagenomics binning software
+
+            This process is set with:
+
+                - ``input_type``: assembly
+                - ``output_type``: assembly
+                - ``ptype``: post_assembly
+
+            It contains one **secondary channel link end**:
+
+                - ``MAIN_fq`` (alias: ``_MAIN_assembly``): Receives the FastQ files
+                from the last process with ``fastq`` output type.
+
+            """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "fasta"
+
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
+        self.params = {
+            "min_contig_lenght": {
+                "default": 1000,
+                "description": "minimum contig length. Default: 1000"
+            },
+            "max_iteration": {
+                "default": 50,
+                "description": "maximum Expectation-Maximization algorithm"
+                               "iteration number. Default: 50"
+            },
+            "prob_threshold": {
+                "default": 0.9,
+                "description": "probability threshold for EM final classification."
+                               "Default: 0.9"
+            }
+        }
+
+        self.directives = {
+            "maxbin2": {
+                "container": "flowcraft/maxbin2",
+                "version": "2.2.4-1",
+                "cpus": 3,
+                "memory": "{ 5.GB * task.attempt }"
+            }
+        }
+
+        self.status_channels = [
+            "maxbin2"
         ]
 
 
@@ -82,20 +131,6 @@ class Megahit(Process):
                     "(default: $params.megahitKmers)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "megahitKmers",
-                "channel":
-                    "if ( params.megahitKmers.toString().split(\" \").size() "
-                    "<= 1 )"
-                    "{ if (params.megahitKmers.toString() != 'auto'){"
-                    "exit 1, \"'megahitKmers' parameter must be a sequence "
-                    "of space separated numbers or 'auto'. Provided "
-                    "value: ${params.megahitKmers}\"} }\n"
-                    "IN_megahit_kmers = Channel.value(params.megahitKmers)"
-            }
-        ]
 
         self.directives = {"megahit": {
             "cpus": 4,
@@ -141,20 +176,6 @@ class Metaspades(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "metaspadesKmers",
-                "channel":
-                    "if ( params.metaspadesKmers.toString().split(\" \").size() "
-                    "<= 1 )"
-                    "{ if (params.metaspadesKmers.toString() != 'auto'){"
-                    "exit 1, \"'metaspadesKmers' parameter must be a sequence "
-                    "of space separated numbers or 'auto'. Provided "
-                    "value: ${params.metaspadesKmers}\"} }\n"
-                    "IN_metaspades_kmers = Channel.value(params.metaspadesKmers)"
-            }
-        ]
-
         self.directives = {"metaspades": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
@@ -182,17 +203,10 @@ class Midas_species(Process):
 
         self.params = {
             "midasDB": {
-                "default": "'/MidasDB/midas_db_v1.2'",
+                "default": "null",
                 "description": "Specifies Midas database."
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "midasDB",
-                "channel": "IN_midas_DB = Channel.value(params.midasDB)"
-            }
-        ]
 
         self.directives = {
             "midas_species": {
@@ -234,13 +248,6 @@ class RemoveHost(Process):
             }
         }
 
-        self.secondary_inputs = [
-            {
-                "params": "refIndex",
-                "channel": "IN_index_files = Channel.value(params.refIndex)"
-            }
-        ]
-
         self.directives = {
             "remove_host": {
                 "container": "flowcraft/remove_host",
@@ -255,13 +262,13 @@ class RemoveHost(Process):
         ]
 
 class MetaProb(Process):
-    """bowtie2 to remove host reads process template interface
+    """MetaProb to bin metagenomic reads interface
 
             This process is set with:
 
                 - ``input_type``: fastq
-                - ``output_type``: fastq
-                - ``ptype``: removal os host reads
+                - ``output_type``: csv
+                - ``ptype``: binning of reads
 
             """
 

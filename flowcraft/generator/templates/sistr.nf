@@ -22,7 +22,7 @@ process sistr_{{ pid }} {
         json_str="{'typing':{'sistr':'\$(awk \"FNR == 2\" *.tab | cut -f14)'}}"
         echo \$json_str > .report.json
 
-        if [ -s ${sample_id}_sistr.tab ${assembly} ];
+        if [ -s ${sample_id}_sistr.tab ];
         then
             echo pass > .status
         else

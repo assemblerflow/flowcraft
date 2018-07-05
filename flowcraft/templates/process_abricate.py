@@ -38,7 +38,6 @@ import operator
 import subprocess
 
 from subprocess import PIPE
-from collections import defaultdict
 
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
@@ -108,7 +107,9 @@ class Abricate:
         """
         dic: Main storage of Abricate's file content. Each entry corresponds
         to a single line and contains the keys::
-        
+
+            - ``log_file``: Name of the summary log file containing abricate
+              results
             - ``infile``: Input file of Abricate.
             - ``reference``: Reference of the query sequence.
             - ``seq_range``: Range of the query sequence in the database
@@ -192,6 +193,7 @@ class Abricate:
                     accession = None
 
                 self.storage[self._key] = {
+                    "log_file": os.path.basename(fl),
                     "infile": fields[0],
                     "reference": fields[1],
                     "seq_range": (int(fields[2]), int(fields[3])),
@@ -297,7 +299,7 @@ class Abricate:
         if filter_behavior not in ["and", "or"]:
             raise ValueError("Filter behavior must be either 'and' or 'or'")
 
-        for key, dic in self.storage.items():
+        for dic in self.storage.values():
 
             # This attribute will determine whether an entry will be yielded
             # or not
@@ -430,7 +432,7 @@ class AbricateReport(Abricate):
 
         json_dic = {"plotData": {}}
 
-        for key, entry in self.storage.items():
+        for entry in self.storage.values():
             # Get contig ID using the same regex as in `assembly_report.py`
             # template
             contig_id = self._get_contig_id(entry["reference"])
@@ -458,26 +460,46 @@ class AbricateReport(Abricate):
 
         """
 
-        gene_storage = defaultdict(list)
+        gene_storage = {}
         json_dic = {"tableRow": []}
+        logger.info("Generating JSON table data")
 
         # Collect the gene lists for each database
         for key, entry in self.storage.items():
 
+            # Retrieve and initiate new sample entry, if not present already
+            logger.debug("Retrieving sample if from: {}".format(
+                entry["infile"]))
+            sample_id = re.match("(.*)_abr", entry["log_file"]).groups()[0]
             database = entry["database"]
-            gene_storage[database].append(entry["gene"].replace("'", "").
-                                          replace('"', ''))
+
+            if sample_id not in gene_storage:
+                gene_storage[sample_id] = {}
+
+            if database not in gene_storage[sample_id]:
+                gene_storage[sample_id][database] = []
+
+            gene_storage[sample_id][database].append(
+                entry["gene"].replace("'", "").replace('"', '')
+            )
 
         # For each database, create the JSON report
-        for db, gene_list in gene_storage.items():
+        for sample, table_data in gene_storage.items():
 
-            ind_json = {
-                "table": "abricate",
-                "header": db,
-                "value": len(gene_list),
-                "geneList": gene_list
-            }
-            json_dic["tableRow"].append(ind_json)
+            json_dic["tableRow"].append({
+                "sample": sample,
+                "data": []
+            })
+
+            for db, gene_list in table_data.items():
+
+                ind_json = {
+                    "table": "abricate",
+                    "header": db,
+                    "value": len(gene_list),
+                    "geneList": gene_list
+                }
+                json_dic["tableRow"][-1]["data"].append(ind_json)
 
         return json_dic
 

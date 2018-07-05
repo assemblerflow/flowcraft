@@ -484,7 +484,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
         # k-mer coverage filter
         assembly_len = assembly_obj.get_assembly_length()
         logger.debug("Checking assembly length: {}".format(assembly_len))
-        
+
         if assembly_len < t_80:
 
             logger.warning("Assembly size ({}) smaller than the minimum "
@@ -501,7 +501,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
             if assembly_len < t_80:
 
                 warn_msg = "Assembly size smaller than the minimum" \
-                           " threshold of 80% of expected genome size.".format(
+                           " threshold of 80% of expected genome size: {}".format(
                                 assembly_len)
                 logger.warning(warn_msg)
                 warn_fh.write(warn_msg)
@@ -540,27 +540,32 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
     # Write json report
     with open(".report.json", "w") as json_report:
         json_dic = {
-            "tableRow": [
-                {"header": "Contigs ({})".format(assembler),
-                 "value": len(assembly_obj.contigs),
-                 "table": "assembly",
-                 "columnBar": True},
-                {"header": "Assembled BP ({})".format(assembler),
-                 "value": assembly_len,
-                 "table": "assembly",
-                 "columnBar": True}
-            ],
-            "warnings": {
-                "process": "process_assembly",
+            "tableRow": [{
+                "sample": sample_id,
+                "data": [
+                    {"header": "Contigs ({})".format(assembler),
+                     "value": len(assembly_obj.contigs),
+                     "table": "assembly",
+                     "columnBar": True},
+                    {"header": "Assembled BP ({})".format(assembler),
+                     "value": assembly_len,
+                     "table": "assembly",
+                     "columnBar": True}
+                ]
+            }],
+            "warnings": [{
+                "sample": sample_id,
+                "table": "assembly",
                 "value": warnings
-            }
+            }]
         }
 
         if fails:
-            json_dic["fail"] = {
-                "process": "process_assembly",
+            json_dic["fail"] = [{
+                "sample": sample_id,
+                "table": "assembly",
                 "value": fails
-            }
+            }]
 
         json_report.write(json.dumps(json_dic, separators=(",", ":")))
 

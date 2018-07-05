@@ -302,7 +302,8 @@ def filter_bam(coverage_info, bam_file, min_coverage, output_bam):
 
 
 def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
-                            genome_size, contig_size, max_contigs):
+                            genome_size, contig_size, max_contigs,
+                            sample_id):
     """Checks whether a filtered assembly passes a size threshold
 
     Given a minimum coverage threshold, this function evaluates whether an
@@ -330,6 +331,8 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
     max_contigs : int
         Maximum threshold for contig number. A warning is issued if this
         threshold is crossed.
+    sample_id : str
+        Id or name of the current sample
 
     Returns
     -------
@@ -395,7 +398,7 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
         # threshold, fail this check and return False
         if assembly_len < genome_size * 1e6 * 0.8:
             warn_msg = "Assembly size smaller than the minimum" \
-                       " threshold of 80% of expected genome size.".format(
+                       " threshold of 80% of expected genome size: {}".format(
                             assembly_len)
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)
@@ -412,22 +415,26 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
             health = False
 
         json_dic = {
-            "plotData": {
-                "sparkline": total_assembled_bp,
-                "coverageDist": [x["cov"] for x in coverage_info.values()]
-            }
+            "plotData": [{
+                "sample": sample_id,
+                "data:": {"sparkline": total_assembled_bp,
+                          "coverageDist": [x["cov"] for x in coverage_info.values()]
+                }
+            }]
         }
 
         if warnings:
-            json_dic["warnings"] = {
-                "process": "Assembly mapping",
+            json_dic["warnings"] = [{
+                "sample": sample_id,
+                "table": "assembly",
                 "value": warnings
-            }
+            }]
         if fails:
-            json_dic["fail"] = {
-                "process": "Assembly mapping",
+            json_dic["fail"] = [{
+                "sample": sample_id,
+                "table": "assembly",
                 "value": fails
-            }
+            }]
 
         json_report.write(json.dumps(json_dic, separators=(",", ":")))
 
@@ -600,7 +607,8 @@ def main(sample_id, assembly_file, coverage_file, coverage_bp_file, bam_file,
     filtered_bam = "filtered.bam"
     logger.info("Checking filtered assembly")
     if check_filtered_assembly(coverage_info, coverage_bp_data, min_coverage,
-                               gsize, contig_size, int(max_contigs)):
+                               gsize, contig_size, int(max_contigs),
+                               sample_id):
         # Filter assembly contigs based on the minimum coverage.
         logger.info("Filtered assembly passed minimum size threshold")
         logger.info("Writting filtered assembly")

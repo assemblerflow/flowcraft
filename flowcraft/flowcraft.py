@@ -15,7 +15,7 @@ try:
     from __init__ import __version__, __build__
     from generator.engine import NextflowGenerator, process_map
     from generator.inspect import NextflowInspector
-    from generator.recipe import brew_recipe
+    from generator.recipe import brew_recipe, available_recipes
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
     import generator.error_handling as eh
@@ -23,7 +23,7 @@ except ImportError:
     from flowcraft import __version__, __build__
     from flowcraft.generator.engine import NextflowGenerator, process_map
     from flowcraft.generator.inspect import NextflowInspector
-    from flowcraft.generator.recipe import brew_recipe
+    from flowcraft.generator.recipe import brew_recipe, available_recipes
     from flowcraft.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from flowcraft.generator.process_details import proc_collector, \
@@ -59,6 +59,11 @@ def get_args(args=None):
         "-n", dest="pipeline_name", default="flowcraft",
         help="Provide a name for your pipeline.")
     build_parser.add_argument(
+        "--merge-params", dest="merge_params", action="store_true",
+        help="Merges identical parameters from multiple components into the "
+             "same one. Otherwise, the parameters will be separated and unique"
+             " to each component.")
+    build_parser.add_argument(
         "--pipeline-only", dest="pipeline_only", action="store_true",
         help="Write only the pipeline files and not the templates, bin, and"
              " lib folders.")
@@ -77,13 +82,19 @@ def get_args(args=None):
         "-l", "--short-list", action="store_const", dest="short_list",
         const=True, help="Print a short list of the currently "
                          "available processes")
+    build_parser.add_argument("-cr", "--check-recipe", dest="check_recipe",
+                              action="store_const", const=True,
+                              help="Check tasks that the recipe contain and "
+                                   "their flow. This option might be useful "
+                                   "if a user wants to change some components "
+                                   "of a given recipe, by using the -t option.")
 
     # GENERAL OPTIONS
     parser.add_argument(
         "--debug", dest="debug", action="store_const", const=True,
         help="Set log to debug mode")
     parser.add_argument(
-        "-v, --version", dest="version", action="store_const", const=True,
+        "-v", "--version", dest="version", action="store_const", const=True,
         help="Show version and exit.")
 
     # INSPECT MODE
@@ -121,6 +132,11 @@ def get_args(args=None):
 
 def validate_build_arguments(args):
 
+    # Skip all checks when listing the processes
+    if args.detailed_list or args.short_list:
+        return
+
+    # When none of the main run options is specified
     if not args.tasks and not args.recipe and not args.check_only \
             and not args.detailed_list and not args.short_list:
         logger.error(colored_print(
@@ -128,15 +144,24 @@ def validate_build_arguments(args):
             "-l, -L", "red_bold"))
         sys.exit(1)
 
-    if (args.tasks or args.recipe) and not args.output_nf:
+    # When the build mode is active via tasks or recipe, but no output file
+    # option has been provided
+    if (args.tasks or args.recipe) and not args.check_recipe \
+            and not args.output_nf:
         logger.error(colored_print(
             "Please provide the path and name of the pipeline file using the"
             " -o option.", "red_bold"))
         sys.exit(1)
 
     if args.output_nf:
+        if not os.path.basename(args.output_nf):
+            logger.error(colored_print(
+                "Output pipeline path '{}' missing a name (only the directory "
+                "path was provided)".format(args.output_nf), "red_bold"))
+            sys.exit(1)
+
         parsed_output_nf = (args.output_nf if args.output_nf.endswith(".nf")
-                            else "{}.nf".format(args.output_nf))
+                            else "{}.nf".format(args.output_nf.strip()))
         opath = parsed_output_nf
         if os.path.dirname(opath):
             parent_dir = os.path.dirname(opath)
@@ -202,16 +227,26 @@ def build(args):
     # If a recipe is specified, build pipeline based on the
     # appropriate recipe
     if args.recipe:
-        pipeline_string, list_processes = brew_recipe(args)
+        if args.recipe == "innuendo":
+            pipeline_string = brew_recipe(args, available_recipes)
+        else:
+            pipeline_string = available_recipes[args.recipe]
+            if args.tasks:
+                logger.warning(colored_print(
+                    "-t parameter will be ignored for recipe: {}\n"
+                        .format(args.recipe), "yellow_bold")
+                )
+
+        if args.check_recipe:
+            logger.info(colored_print("Pipeline string for recipe: {}"
+                                      .format(args.recipe), "purple_bold"))
+            logger.info(pipeline_string)
+            sys.exit(0)
     else:
         pipeline_string = args.tasks
-        list_processes = None
 
     # used for lists print
-    proc_collector(process_map, args, list_processes)
-
-    logger.info(colored_print("Resulting pipeline string:\n"))
-    logger.info(colored_print(pipeline_string + "\n"))
+    proc_collector(process_map, args, pipeline_string)
 
     try:
         logger.info(colored_print("Checking pipeline for errors..."))
@@ -228,7 +263,8 @@ def build(args):
     nfg = NextflowGenerator(process_connections=pipeline_list,
                             nextflow_file=parsed_output_nf,
                             pipeline_name=args.pipeline_name,
-                            auto_dependency=args.no_dep)
+                            auto_dependency=args.no_dep,
+                            merge_params=args.merge_params)
 
     logger.info(colored_print("Building your awesome pipeline..."))
 

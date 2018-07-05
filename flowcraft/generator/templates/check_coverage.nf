@@ -1,3 +1,7 @@
+IN_genome_size_{{ pid }} = Channel.value(params.genomeSize{{ param_id }})
+    .map{it -> it.toString().isNumber() ? it : exit (1, "The genomeSize parameter must be a number or a float. Provided value: '${params.genomeSize{{ param_id }}}'")}
+IN_min_coverage_{{ pid }} = Channel.value(params.minCoverage{{ param_id }})
+    .map{it -> it.toString().isNumber() ? it : exit (1, "The minCoverage parameter must be a number or a float. Provided value: '${params.minCoverage{{ param_id }}}'")}
 
 process integrity_coverage2_{{ pid }} {
 
@@ -9,8 +13,8 @@ process integrity_coverage2_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val gsize from IN_genome_size
-    val cov from IN_min_coverage
+    val gsize from IN_genome_size_{{ pid }}
+    val cov from IN_min_coverage_{{ pid }}
     // Use -e option for skipping encoding guess
     val opts from Channel.value('-e')
 
@@ -38,7 +42,7 @@ MAIN_integrity_{{ pid }}
     }
 
 
-process report_coverage_2_{{ pid }} {
+process report_coverage2_{{ pid }} {
 
     // This process can only use a single CPU
     cpus 1

@@ -256,6 +256,13 @@ class Process:
         dict: Maps the parameter names to the corresponding default values.
         """
 
+        self.param_id = ""
+        """
+        str: The parameter id suffix that will be added to each parameter. In
+        case it is empty, the multiple identical parameters in different
+        components will be merged.
+        """
+
         self._context = {}
         """
         dict: Dictionary with the keyword placeholders for the string template
@@ -275,7 +282,7 @@ class Process:
             - memory
             - container
             - container tag/version
-        
+
         An example of directives for two process is as follows::
         
             self.directives = {
@@ -339,6 +346,18 @@ class Process:
         self.output_channel = "{}_out_{}".format(self.template, output_suffix)
         self.lane = lane
 
+    def set_param_id(self, param_id):
+        """Sets the param_id for the process, which will be used to render
+        the template.
+
+        Parameters
+        ----------
+        param_id : str
+            The :attr:`param_id` attribute of the process.
+        """
+
+        self._context = {**self._context, "param_id": param_id}
+
     def get_user_channel(self, input_channel, input_type=None):
         """Returns the main raw channel for the process
 
@@ -375,10 +394,6 @@ class Process:
         if itype in self.RAW_MAPPING:
 
             channel_info = self.RAW_MAPPING[itype]
-            self.params[channel_info["params"]] = {
-                "default": channel_info["default_value"],
-                "description": channel_info["description"]
-            }
 
             return {**res, **channel_info}
 

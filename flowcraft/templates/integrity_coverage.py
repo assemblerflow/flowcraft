@@ -117,7 +117,7 @@ RANGES = {
 """
 dict: Dictionary containing the encoding values for several fastq formats. The
 key contains the format and the value contains a list with the corresponding
-phred score and a list with the range of encodings. 
+phred score and a list with the range of encodings.
 """
 
 COPEN = {
@@ -357,34 +357,44 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
 
             # Set json report
             if "-e" not in opts:
+
                 json_dic = {
-                    "tableRow": [
-                        {"header": "Raw BP",
-                         "value": chars,
-                         "table": "assembly",
-                         "columnBar": True},
-                        {"header": "Reads",
-                         "value": nreads,
-                         "table": "assembly",
-                         "columnBar": True},
-                        {"header": "Coverage (1st)",
-                         "value": exp_coverage,
-                         "table": "assembly",
-                         "columnBar": True}
-                    ],
-                    "plotData": {
-                        "sparkline": chars
-                    },
+                    "tableRow": [{
+                        "sample": sample_id,
+                        "data": [
+                            {"header": "Raw BP",
+                             "value": chars,
+                             "table": "qc",
+                             "columnBar": True},
+                            {"header": "Reads",
+                             "value": nreads,
+                             "table": "qc",
+                             "columnBar": True},
+                            {"header": "Coverage (1st)",
+                             "value": exp_coverage,
+                             "table": "qc",
+                             "columnBar": True}
+                        ]
+                    }],
+                    "plotData": [{
+                        "sample": sample_id,
+                        "data": {
+                            "sparkline": chars
+                        }
+                    }],
                     "minCoverage": minimum_coverage
                 }
             else:
                 json_dic = {
-                    "tableRow": [
-                        {"header": "Coverage (2nd)",
-                         "value": exp_coverage,
-                         "table": "assembly",
-                         "columnBar": True},
-                    ],
+                    "tableRow": [{
+                        "sample": sample_id,
+                        "data": [
+                            {"header": "Coverage (2nd)",
+                             "value": exp_coverage,
+                             "table": "qc",
+                             "columnBar": True}
+                        ],
+                    }],
                     "minCoverage": minimum_coverage
                 }
 
@@ -429,10 +439,11 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                 status_fh.write("fail")
                 cov_rep.write("{},{},{}\\n".format(
                     sample_id, str(exp_coverage), "FAIL"))
-                json_dic["fail"] = {
-                    "process": "integrityCoverage",
+                json_dic["fail"] = [{
+                    "sample": sample_id,
+                    "table": "qc",
                     "value": fail_msg
-                }
+                }]
 
             json_report.write(json.dumps(json_dic, separators=(",", ":")))
             # Maximum read length

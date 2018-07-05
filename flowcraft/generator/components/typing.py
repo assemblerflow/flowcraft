@@ -34,7 +34,6 @@ class SeqTyping(Process):
                     "Fasta file containing reference sequences. If more"
                     "than one file is passed via the 'referenceFileH parameter"
                     ", a reference sequence for each file will be determined. "
-                    "(default: $params.referenceFileO)"
             },
             "referenceFileH": {
                 "default": "null",
@@ -42,32 +41,8 @@ class SeqTyping(Process):
                     "Fasta file containing reference sequences. If more"
                     "than one file is passed via the 'referenceFileO parameter"
                     ", a reference sequence for each file will be determined. "
-                    "(default: $params.referenceFileH)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "referenceFileO",
-                "channel":
-                    "file(params.referenceFileO) ? params.referenceFileO : "
-                    "exit(1, \"'referenceFileO' parameter missing\")\n"
-                    "IN_refO = Channel"
-                    ".fromPath(params.referenceFileO)"
-                    "map{ it -> it.exists() ? it : exit(1, \"referenceFileO"
-                    " file was not found: '${params.referenceFileO}'\")}"
-            },
-            {
-                "params": "referenceFileH",
-                "channel":
-                    "file(params.referenceFileH) ? params.referenceFileH : "
-                    "exit(1, \"'referenceFileH' parameter missing\")\n"
-                    "IN_refH = Channel"
-                    ".fromPath(params.referenceFileH)"
-                    "map{ it -> it.exists() ? it : exit(1, \"referenceFileH"
-                    " file was not found: '${params.referenceFileH}'\")}"
-            }
-        ]
 
 
 class PathoTyping(Process):
@@ -92,23 +67,8 @@ class PathoTyping(Process):
                 "description":
                     "Species name. Must be the complete species name with"
                     "genus and species, e.g.: 'Yersinia enterocolitica'. "
-                    "(default: $params.species)"
             }
         }
-
-        self.secondary_inputs = [
-            {
-                "params": "species",
-                "channel":
-                    "if ( !params.species){ exit 1, \"'species' parameter "
-                    "missing\" }\n"
-                    "if ( params.species.toString().split(\" \").size() != 2 )"
-                    "{ exit 1, \"'species' parameter must contain two "
-                    "values (e.g.: 'escherichia coli'). Provided value: "
-                    "${params.species}\"}\n"
-                    "IN_pathoSpecies = Channel.value(params.species)"
-            }
-        ]
 
         self.link_start = None
         self.link_end.append({"link": "MAIN_raw",

@@ -1,11 +1,14 @@
 import os
 import logging
 import re
+from difflib import SequenceMatcher
 
 try:
     from generator.error_handling import SanityError
+    from generator.process_details import colored_print
 except ImportError:
     from flowcraft.generator.error_handling import SanityError
+    from flowcraft.generator.process_details import colored_print
 
 logger = logging.getLogger("main.{}".format(__name__))
 
@@ -16,6 +19,40 @@ FORK_TOKEN = "("
 LANE_TOKEN = "|"
 # Token that closes a fork
 CLOSE_TOKEN = ")"
+
+
+def guess_process(query_str, process_map):
+    """
+    Function to guess processes based on strings that are not available in
+    process_map. If the string has typos and is somewhat similar (50%) to any
+    process available in flowcraft it will print info to the terminal,
+    suggesting the most similar processes available in flowcraft.
+
+    Parameters
+    ----------
+    query_str: str
+        The string of the process with potential typos
+    process_map:
+        The dictionary that contains all the available processes
+
+    """
+
+    save_list = []
+    # loops between the processes available in process_map
+    for process in process_map:
+        similarity = SequenceMatcher(None, process, query_str)
+        # checks if similarity between the process and the query string is
+        # higher than 50%
+        if similarity.ratio() > 0.5:
+            save_list.append(process)
+
+    # checks if any process is stored in save_list
+    if save_list:
+        logger.info(colored_print(
+            "Maybe you meant:\n\t{}".format("\n\t".join(save_list)), "white"))
+
+    logger.info(colored_print("Hint: check the available processes by using "
+                              "the '-l' or '-L' flag.", "white"))
 
 
 def remove_inner_forks(text):
@@ -262,26 +299,6 @@ def inner_fork_insanity_checks(pipeline_string):
                               "separator between the processes to fork. This is"
                               " the prime suspect: '({})'".format(fork))
 
-        # splits by LANE_TOKEN
-        fork_simplified_unique = remove_inner_forks(fork_simplified)
-        list_fork_lanes = fork_simplified_unique.split(LANE_TOKEN)
-
-        # Check if there is a repeated process within a fork - linked with the
-        # above
-        first_elements_list = []
-        for each_lane in list_fork_lanes:
-            # only if the first element of each lane is repeated between them,
-            # the warning is raised
-            first_element = each_lane.strip().split(" ")[0]
-            if first_element not in first_elements_list:
-                first_elements_list.append(first_element)
-            else:
-                raise SanityError(
-                    "There are duplicated processes within a fork. "
-                    "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2). "
-                    "This is the prime suspect: '({})'".format(fork)
-                )
-
 
 def insanity_checks(pipeline_str):
     """Wrapper that performs all sanity checks on the pipeline string
@@ -339,6 +356,9 @@ def parse_pipeline(pipeline_str):
         logger.debug("Found pipeline file: {}".format(pipeline_str))
         with open(pipeline_str) as fh:
             pipeline_str = "".join([x.strip() for x in fh.readlines()])
+
+    logger.info(colored_print("Resulting pipeline string:\n"))
+    logger.info(colored_print(pipeline_str + "\n"))
 
     # Perform pipeline insanity checks
     insanity_checks(pipeline_str)

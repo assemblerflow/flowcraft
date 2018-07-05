@@ -43,7 +43,7 @@ Launching `my_pipeline.nf` [admiring_lamarck] - revision: 82cc9cd2ed
 ============================================================
                 M Y   P I P E L I N E
 ============================================================
-Built using flowcraft v1.2.0
+Built using flowcraft v1.2.1
 
  Input FastQ                 : 2
  Input samples               : 1
@@ -120,33 +120,43 @@ described in the documentation of each process and you can check the options
 of your particular pipeline using the `help` option:
 
 ```
-nextflow my_pipeline.nf --help
-
+$ nextflow run my_pipeline.nf --help
 N E X T F L O W  ~  version 0.30.1
-Launching `my_pipeline.nf` [admiring_lamarck] - revision: 82cc9cd2ed
+Launching `my_pipeline.nf` [prickly_picasso] - revision: 2e1a226e6d
 
 ============================================================
-                A S S E M B L Y   P I P E
+                F L O W C R A F T
 ============================================================
-Built using flowcraft v1.2.0
+Built using flowcraft v1.2.1
 
 
-Usage:
+Usage: 
     nextflow run my_pipeline.nf
 
-       --fastq                     Path expression to paired-end fastq files. (default: fastq/*_{1,2}.*) (integrity_coverage)
-       --genomeSize                Genome size estimate for the samples. It is used to estimate the coverage and other assembly parameters andchecks (default: 2.1) (integrity_coverage)
-       --minCoverage               Minimum coverage for a sample to proceed. Can be set to0 to allow any coverage (default: 15) (integrity_coverage)
-       --adapters                  Path to adapters files, if any (default: None) (trimmomatic)
-       --trimSlidingWindow         Perform sliding window trimming, cutting once the average quality within the window falls below a threshold (default: 5:20) (trimmomatic)
-       --trimLeading               Cut bases off the start of a read, if below a threshold quality (default: 3 (trimmomatic)
-       --trimTrailing              Cut bases of the end of a read, if below a threshold quality (default: 3) (trimmomatic)
-       --trimMinLength             Drop the read if it is below a specified length (default: 55) (trimmomatic)
-       --spadesMinCoverage         The minimum number of reads to consider an edge in the de Bruijn graph during the assembly (default: 2) (spades)
-       --spadesMinKmerCoverage     Minimum contigs K-mer coverage. After assembly only keep contigs with reported k-mer coverage equal or above this value (default: 2) (spades)
-       --spadesKmers               If 'auto' the SPAdes k-mer lengths will be determined from the maximum read length of each assembly. If 'default', SPAdes will use the default k-mer lengths. (default: auto) (spades)
-       --abricateDatabases         Specify the databases for abricate. (abricate)
-
+       --fastq                     Path expression to paired-end fastq files. (default: fastq/*_{1,2}.*) (default: 'fastq/*_{1,2}.*')
+       
+       Component 'INTEGRITY_COVERAGE_1_1'
+       ----------------------------------
+       --genomeSize_1_1            Genome size estimate for the samples in Mb. It is used to estimate the coverage and other assembly parameters andchecks (default: 1)
+       --minCoverage_1_1           Minimum coverage for a sample to proceed. By default it's setto 0 to allow any coverage (default: 0)
+       
+       Component 'TRIMMOMATIC_1_2'
+       ---------------------------
+       --adapters_1_2              Path to adapters files, if any. (default: 'None')
+       --trimSlidingWindow_1_2     Perform sliding window trimming, cutting once the average quality within the window falls below a threshold (default: '5:20')
+       --trimLeading_1_2           Cut bases off the start of a read, if below a threshold quality (default: 3)
+       --trimTrailing_1_2          Cut bases of the end of a read, if below a threshold quality (default: 3)
+       --trimMinLength_1_2         Drop the read if it is below a specified length  (default: 55)
+       
+       Component 'FASTQC_1_3'
+       ----------------------
+       --adapters_1_3              Path to adapters files, if any. (default: 'None')
+       
+       Component 'ASSEMBLY_MAPPING_1_5'
+       --------------------------------
+       --minAssemblyCoverage_1_5   In auto, the default minimum coverage for each assembled contig is 1/3 of the assembly mean coverage or 10x, if the mean coverage is below 10x (default: 'auto')
+       --AMaxContigs_1_5           A warning is issued if the number of contigs is overthis threshold. (default: 100)
+       --genomeSize_1_5            Genome size estimate for the samples. It is used to check the ratio of contig number per genome MB (default: 2.1)
 ```
 
 This help message is dynamically generated depending on the pipeline you build.
