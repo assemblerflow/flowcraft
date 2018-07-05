@@ -6,7 +6,7 @@
 
 - The parameter system has been revamped, and parameters are now component-specific
 and independent by default. This allows a better fine-tuning of the parameters
-and also the execution of the same component multiple times (in a fork, for instance)
+and also the execution of the same component multiple times (for instance in a fork)
 with different parameters. The old parameter system that merged identical parameters
 is still available by using the `--merge-params` flag when building the pipeline.
 - Added a global `--clearAtCheckpoint` parameter that, when set to true, will remove
@@ -25,7 +25,7 @@ sequences.
 
 - `plasmids`: A recipe to perform mapping, mash screen on reads
 and also mash dist for assembly based approaches (all to detect
-plasmdis). This also includes annotation with abricate for the assembly.
+plasmids). This also includes annotation with abricate for the assembly.
 - `plasmids_mapping`: A recipe to perform mapping for plasmids.
 - `plasmids_mash`: A recipe to perform mash screen for plasmids.
 - `plasmids_assembly`: A recipe to perform mash dist for plasmid
@@ -34,7 +34,7 @@ assemblies.
 ### Minor/Other changes
 
 - Added "smart" check when the user provides a typo in pipeline string
-for a given process, outputting some "educated" guesses to the the
+for a given process, outputting some "educated" guesses to the
 terminal.
 - Added "-cr" option to show current recipe `pipeline_string`.
 - Changed the way recipes were being parsed by `proc_collector` for the
@@ -48,26 +48,27 @@ instead of a string.
 - Fixed pipeline names that contain new line characters.
 - Fixed pipeline generation when automatic dependencies were added right after a fork
 - **Template: sistr.nf**: Fixed comparison that determined process status.
+- Fixed issue with `--version` option.
 
 ## 1.2.0
 
 ### New components
 
-- `card_rgi`: Anti-microbial gene screening for assemblies
+- `card_rgi`: Anti-microbial resistance gene screening for assemblies
 - `filter_poly`: Runs PrinSeq on paired-end FastQ files to remove low complexity sequences
-- `kraken`: Taxonomic identification of FastQ files
+- `kraken`: Taxonomic identification on FastQ files
 - `megahit`: Metagenomic assembler for paired-end FastQ files
-- `metaprob`: Preforms read binning on metagenomic FastQ files
+- `metaprob`: Performs read binning on metagenomic FastQ files
 - `metamlst`: Checks the Sequence Type of metagenomic FastQ reads using Multilocus Sequence Typing
 - `metaspades`: Metagenomic assembler for paired-end FastQ files
-- `midas_species`: Taxonomic identification of FastQ files on the species level
+- `midas_species`: Taxonomic identification on FastQ files at the species level
 - `remove host`: Read mapping with Bowtie2 against the target host genome (default hg19) and removes the mapping reads
 - `sistr`: Salmonella *in silico* typing component for assemblies. 
 
 ### Features
 
 - Added `inspect` run mode to flowcraft for displaying the progress overview
-  during a nextflow run. This run mode has an `overview` and `broadcast` options
+  during a nextflow run. This run mode has `overview` and `broadcast` options
   for viewing the progress of a pipeline.
 
 ### Minor/Other changes
