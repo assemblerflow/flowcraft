@@ -1,5 +1,5 @@
 
-__version__ = "1.2.1"
+__version__ = "1.2.1dev1"
 __build__ = "04072018"
 __author__ = "Diogo N. Silva, Tiago F. Jesus, Ines Mendes, Bruno Ribeiro-Goncalves"
 __copyright__ = "Diogo N. Silva"

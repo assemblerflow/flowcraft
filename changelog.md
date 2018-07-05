@@ -2,6 +2,12 @@
 
 ## Upcoming release (`dev` branch)
 
+### Bug fixes
+
+- Fixed issue when the `inspect` mode was executed on a pipeline directory
+with failed processes but with the work directory removed (the log files
+where no longer available).
+
 ## 1.2.1
 
 ### Improvements
