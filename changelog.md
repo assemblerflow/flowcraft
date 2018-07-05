@@ -2,6 +2,8 @@
 
 ## Upcoming release (`dev` branch)
 
+## 1.2.1
+
 ### Improvements
 
 - The parameter system has been revamped, and parameters are now component-specific

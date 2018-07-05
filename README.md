@@ -81,12 +81,8 @@ conda install flowcraft
 Pipelines built with FlowCraft require at least one container
 engine to be installed, among `docker`, `singularity` or `shifter`.
 If you already have any one of these installed, you're good to go.
-If not, we recommend installing singularity, which also has a bioconda
-package:
-
-```
-conda install singularity
-```
+If not, we recommend installing singularity, though it should be installed with
+root privileges and accessible in all compute nodes. 
 
 ## How to use it
 
