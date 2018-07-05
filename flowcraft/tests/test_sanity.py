@@ -111,8 +111,6 @@ def test_inner_forks_fail():
 
     pipeline_strs = [
         "A B ( A D )",
-        "A B ( C | C)",
-        "A B (B | B)"
     ]
 
     for p in pipeline_strs:
