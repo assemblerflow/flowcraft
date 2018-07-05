@@ -94,7 +94,7 @@ def get_args(args=None):
         "--debug", dest="debug", action="store_const", const=True,
         help="Set log to debug mode")
     parser.add_argument(
-        "-v, --version", dest="version", action="store_const", const=True,
+        "-v", "--version", dest="version", action="store_const", const=True,
         help="Show version and exit.")
 
     # INSPECT MODE
