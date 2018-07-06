@@ -53,3 +53,39 @@ class Bowtie(Process):
         self.status_channels = [
             "bowtie"
         ]
+
+class Retrieve_mapped(Process):
+    """Samtools process to  to align short paired-end sequencing reads to long reference sequences
+
+        This process is set with:
+
+            - ``input_type``: bam
+            - ``output_type``: fastq
+            - ``ptype``: mapping
+
+        """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "bam"
+        self.output_type = "fastq"
+
+        self.params = {
+        }
+
+        self.dependencies = ["bowtie"]
+
+        self.directives = {
+            "retrieve_mapped": {
+                "container": "flowcraft/bowtie2_samtools",
+                "version": "1.0.0-1",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 2
+            }
+        }
+
+        self.status_channels = [
+            "retrieve_mapped"
+        ]

@@ -75,7 +75,7 @@ Annotation
 - :doc:`components/abricate`: Performs anti-microbial gene screening using
   abricate.
 
-- :doc:`components/card_rgi`: Performs anti-microbial gene screening using
+- :doc:`components/card_rgi`: Performs anti-microbial resistance gene screening using
   CARD rgi (with contigs as input).
 
 - :doc:`components/prokka`: Performs assembly annotation using prokka.
@@ -108,15 +108,18 @@ Mapping
   input file for pATLAS.
 
 - :doc:`components/remove_host`: Performs read mapping with bowtie2
-  against the host genome (default hg19) and removes the mapping reads
+  against the target host genome (default hg19) and removes the mapping reads
 
-Taxonomical Profiling
+- :doc:`components/retrieve_mapped`: Retrieves the mapped reads of a previous
+  bowtie2 mapping process.
+
+Taxonomic Profiling
 ---------------------
 
-- :doc:`components/kraken`: Performs taxonomical identification with kraken
+- :doc:`components/kraken`: Performs taxonomic identification with kraken on FastQ files
   (minikrakenDB2017 as default database)
 
-- :doc:`components/midas_species`: Performs taxonomical identification on the
+- :doc:`components/midas_species`: Performs taxonomic identification on FastQ files at the
   species level with midas (requires database)
 
 Typing

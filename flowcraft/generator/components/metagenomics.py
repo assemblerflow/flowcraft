@@ -31,7 +31,7 @@ class Kraken(Process):
             "kraken": {
                 "container": "flowcraft/kraken",
                 "version": "1.0-0.1",
-                "memory": "{2.Gb*task.attempt}",
+                "memory": "{5.Gb*task.attempt}",
                 "cpus": 3
             }
         }
@@ -203,7 +203,7 @@ class Midas_species(Process):
 
         self.params = {
             "midasDB": {
-                "default": "'/MidasDB/midas_db_v1.2'",
+                "default": "null",
                 "description": "Specifies Midas database."
             }
         }

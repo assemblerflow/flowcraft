@@ -16,6 +16,8 @@ The following variables are expected whether using NextFlow or the
     - e.g.: ``'SampleA'``
 - ``fastq_pair`` : Pair of FastQ file paths.
     - e.g.: ``'SampleA_1.fastq.gz SampleA_2.fastq.gz'``
+- ``clear`` : If 'true', remove the input fastq files at the end of the
+    component run, IF THE FILES ARE IN THE WORK DIRECTORY
 
 Generated output
 ----------------
@@ -148,7 +150,7 @@ def main(sample_id, fastq_pair, clear):
 
     logger.info("Finished Skesa subprocess with STDOUT:\\n"
                 "======================================\\n{}".format(stdout))
-    logger.info("Fished Skesa subprocesswith STDERR:\\n"
+    logger.info("Fished Skesa subprocess with STDERR:\\n"
                 "======================================\\n{}".format(stderr))
     logger.info("Finished Skesa with return code: {}".format(
         p.returncode))

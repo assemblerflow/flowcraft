@@ -107,7 +107,7 @@ class Assembly:
         ])
         """
         OrderedDict: Initialize summary information dictionary. Contains keys:
-        
+
             - ``ncontigs``: Number of contigs
             - ``avg_contig_size``: Average size of contigs
             - ``n50``: N50 metric
@@ -294,6 +294,8 @@ class Assembly:
         -------
         xbars : list
             The x-axis position of the ending for each contig.
+        labels : list
+            The x-axis labels for each data point in the sliding window
 
         """
 
@@ -311,11 +313,21 @@ class Assembly:
             xbars.append(
                 {
                     "contig": contig_id,
-                    "pos": c,
+                    "position": c / window,
+                    "absPosition": c,
+                    "window": window
                 }
             )
 
-        return xbars
+        # Get label contig for each window
+        labels = []
+        for i in range(0, self.summary_info["total_len"], window):
+            for contig, rg in self.contig_boundaries.items():
+                if rg[0] <= i < rg[1]:
+                    labels.append("{}_{}".format(contig, i))
+                    break
+
+        return labels, xbars
 
     @staticmethod
     def _gc_prop(s, length):
@@ -345,6 +357,8 @@ class Assembly:
         gc_res : list
             List of GC proportion floats for each data point in the sliding
             window
+        labels: list
+            List of labels for each data point
         xbars : list
             List of the ending position of each contig in the genome
 
@@ -358,7 +372,7 @@ class Assembly:
         # Get complete sequence to calculate sliding window values
         complete_seq = "".join(self.contigs.values()).lower()
 
-        for p, i in enumerate(range(0, len(complete_seq), window)):
+        for i in range(0, len(complete_seq), window):
 
             seq_window = complete_seq[i:i + window]
 

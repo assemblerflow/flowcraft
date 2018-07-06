@@ -299,26 +299,6 @@ def inner_fork_insanity_checks(pipeline_string):
                               "separator between the processes to fork. This is"
                               " the prime suspect: '({})'".format(fork))
 
-        # splits by LANE_TOKEN
-        fork_simplified_unique = remove_inner_forks(fork_simplified)
-        list_fork_lanes = fork_simplified_unique.split(LANE_TOKEN)
-
-        # Check if there is a repeated process within a fork - linked with the
-        # above
-        first_elements_list = []
-        for each_lane in list_fork_lanes:
-            # only if the first element of each lane is repeated between them,
-            # the warning is raised
-            first_element = each_lane.strip().split(" ")[0]
-            if first_element not in first_elements_list:
-                first_elements_list.append(first_element)
-            else:
-                raise SanityError(
-                    "There are duplicated processes within a fork. "
-                    "E.g.: proc1 (proc2.1 | proc2.1 | proc2.2). "
-                    "This is the prime suspect: '({})'".format(fork)
-                )
-
 
 def insanity_checks(pipeline_str):
     """Wrapper that performs all sanity checks on the pipeline string
@@ -376,6 +356,9 @@ def parse_pipeline(pipeline_str):
         logger.debug("Found pipeline file: {}".format(pipeline_str))
         with open(pipeline_str) as fh:
             pipeline_str = "".join([x.strip() for x in fh.readlines()])
+
+    logger.info(colored_print("Resulting pipeline string:\n"))
+    logger.info(colored_print(pipeline_str + "\n"))
 
     # Perform pipeline insanity checks
     insanity_checks(pipeline_str)

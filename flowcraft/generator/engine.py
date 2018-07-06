@@ -79,6 +79,7 @@ process_map = {
         #"prokka": annotation.Prokka,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
+        "retrieve_mapped": mapping.Retrieve_mapped,
         "seq_typing": typing.SeqTyping,
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
@@ -891,7 +892,7 @@ class NextflowGenerator:
 
         for source, lanes in self.secondary_channels.items():
 
-            for lane, vals in lanes.items():
+            for vals in lanes.values():
 
                 if not vals["end"]:
                     logger.debug("[{}] No secondary links to setup".format(
@@ -1144,6 +1145,61 @@ class NextflowGenerator:
             Nextflow params configuration string
         """
 
+        params_str = ""
+
+        for p in self.processes:
+
+            logger.debug("[{}] Adding parameters: {}\n".format(
+                p.template, p.params)
+            )
+
+            # Add an header with the template name to structure the params
+            # configuration
+            if p.params and p.template != "init":
+
+                p.set_param_id("_{}".format(p.pid))
+                params_str += "\n\t/*"
+                params_str += "\n\tComponent '{}_{}'\n".format(p.template,
+                                                               p.pid)
+                params_str += "\t{}\n".format("-" * (len(p.template) + len(p.pid) + 12))
+                params_str += "\t*/\n"
+
+            for param, val in p.params.items():
+
+                if p.template == "init":
+                    param_id = param
+                else:
+                    param_id = "{}_{}".format(param, p.pid)
+
+                params_str += "\t{} = {}\n".format(param_id, val["default"])
+
+        return params_str
+
+    def _get_merged_params_string(self):
+        """Returns the merged nextflow params string from a dictionary object.
+
+        The params dict should be a set of key:value pairs with the
+        parameter name, and the default parameter value::
+
+            self.params = {
+                "genomeSize": 2.1,
+                "minCoverage": 15
+            }
+
+        The values are then added to the string as they are. For instance,
+        a ``2.1`` float will appear as ``param = 2.1`` and a
+        ``"'teste'" string will appear as ``param = 'teste'`` (Note the
+        string).
+
+        Identical parameters in multiple processes will be merged into the same
+        param.
+
+        Returns
+        -------
+        str
+            Nextflow params configuration string
+        """
+
         params_temp = {}
 
         for p in self.processes:
@@ -1168,6 +1224,10 @@ class NextflowGenerator:
 
             # Skip init process
             if p.template == "init":
+                for param, val in p.params.items():
+                    help_list.append("--{:25} {} (default: {})".format(
+                        param, val["description"],
+                        str(val["default"]).replace('"', "'")))
                 continue
 
             # Add component header and a line break

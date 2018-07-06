@@ -83,6 +83,7 @@ if __file__.endswith(".command.sh"):
     FASTQ_PAIR = '$fastq_pair'.split()
     MAX_LEN = int('$max_len'.strip())
     KMERS = '$kmers'.strip()
+    CLEAR = '$clear'
     OPTS = [x.strip() for x in '$opts'.strip("[]").split(",")]
     CLEAR = '$clear'
     logger.debug("Running {} with parameters:".format(
@@ -231,7 +232,7 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
 
     logger.info("Finished SPAdes subprocess with STDOUT:\\n"
                 "======================================\\n{}".format(stdout))
-    logger.info("Fished SPAdes subprocesswith STDERR:\\n"
+    logger.info("Fished SPAdes subprocess with STDERR:\\n"
                 "======================================\\n{}".format(stderr))
     logger.info("Finished SPAdes with return code: {}".format(
         p.returncode))

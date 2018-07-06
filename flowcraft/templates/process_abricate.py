@@ -38,7 +38,6 @@ import operator
 import subprocess
 
 from subprocess import PIPE
-from collections import defaultdict
 
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
@@ -108,8 +107,8 @@ class Abricate:
         """
         dic: Main storage of Abricate's file content. Each entry corresponds
         to a single line and contains the keys::
-        
-            - ``log_file``: Name of the summary log file containing abricate 
+
+            - ``log_file``: Name of the summary log file containing abricate
               results
             - ``infile``: Input file of Abricate.
             - ``reference``: Reference of the query sequence.
@@ -300,7 +299,7 @@ class Abricate:
         if filter_behavior not in ["and", "or"]:
             raise ValueError("Filter behavior must be either 'and' or 'or'")
 
-        for key, dic in self.storage.items():
+        for dic in self.storage.values():
 
             # This attribute will determine whether an entry will be yielded
             # or not
@@ -434,7 +433,7 @@ class AbricateReport(Abricate):
         json_dic = {"plotData": []}
         sample_dic = {}
 
-        for key, entry in self.storage.items():
+        for entry in self.storage.values():
 
             sample_id = re.match("(.*)_abr", entry["log_file"]).groups()[0]
             if sample_id not in sample_dic:

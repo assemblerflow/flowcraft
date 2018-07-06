@@ -3,10 +3,11 @@
 import sys
 import json
 
-from os.path import dirname, relpath, abspath
+from os.path import dirname, abspath
 
 
-def write_json(report_json, task_name, project_name, sample_name, pid):
+
+def write_json(report_json, task_name, sample_name, pid):
 
     with open(report_json) as fh:
         res = json.load(fh)
@@ -46,7 +47,7 @@ def main():
     print(pid)
 
     try:
-        write_json(report_json, task_name, project_name, sample_name, pid)
+        write_json(report_json, task_name, sample_name, pid)
     except json.decoder.JSONDecodeError:
         print("Could not parse JSON output from {}, sample name {} and "
               "pid {}".format(report_json, sample_name, pid))

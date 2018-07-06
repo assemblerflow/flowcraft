@@ -18,7 +18,6 @@ IN_adapters_{{ pid }} = Channel.value(params.adapters{{ param_id }})
 clear = params.clearAtCheckpoint ? "true" : "false"
 checkpointClear_{{ pid }} = Channel.value(clear)
 
-
 process fastqc_{{ pid }} {
 
     // Send POST request to platform
