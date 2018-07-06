@@ -1527,7 +1527,7 @@ class NextflowInspector:
                 "ERROR: nextflow log and/or trace files are no longer "
                 "reachable!", "red_bold"))
         except Exception:
-            logger.error("ERROR: " + str(sys.exc_info()[0]))
+            logger.exception("ERROR: " + str(sys.exc_info()[0]))
         finally:
             logger.info("Closing connection")
             self._close_connection(run_hash)
