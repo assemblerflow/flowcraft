@@ -1515,9 +1515,9 @@ class NextflowInspector:
                     self._print_msg(run_hash)
                     _broadcast_sent = True
 
-                logger.debug("Updating inspection")
                 self.update_inspection()
                 if self.send:
+                    logger.debug("Updating inspection")
                     self._send_status_info(run_hash)
                     self.send = False
 
