@@ -373,6 +373,9 @@ class NextflowInspector:
         elif s.upper().endswith("GB"):
             return float(s.rstrip("GB")) * 1024
 
+        elif s.upper().endswith("TB"):
+            return float(s.rstrip("TB")) * 1024 * 1024
+
         else:
             return float(s)
 
