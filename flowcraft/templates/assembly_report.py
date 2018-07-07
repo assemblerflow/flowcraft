@@ -310,24 +310,9 @@ class Assembly:
             contig_id = self._get_contig_id(contig)
             self.contig_boundaries[contig_id] = [c, c + len(seq)]
             c += len(seq)
-            xbars.append(
-                {
-                    "contig": contig_id,
-                    "position": c / window,
-                    "absPosition": c,
-                    "window": window
-                }
-            )
+            xbars.append((contig_id, c))
 
-        # Get label contig for each window
-        labels = []
-        for i in range(0, self.summary_info["total_len"], window):
-            for contig, rg in self.contig_boundaries.items():
-                if rg[0] <= i < rg[1]:
-                    labels.append("{}_{}".format(contig, i))
-                    break
-
-        return labels, xbars
+        return xbars
 
     @staticmethod
     def _gc_prop(s, length):
@@ -348,7 +333,7 @@ class Assembly:
 
         return gc / length
 
-    def get_gc_sliding(self, window=500):
+    def get_gc_sliding(self, window=2000):
         """Calculates a sliding window of the GC content for the assembly
 
 
@@ -414,7 +399,7 @@ class Assembly:
                 else:
                     self.contig_coverage[header].append(coverage)
 
-    def get_coverage_sliding(self, coverage_file, window=500):
+    def get_coverage_sliding(self, coverage_file, window=2000):
         """
 
         Parameters
