@@ -373,6 +373,9 @@ class NextflowInspector:
         elif s.upper().endswith("GB"):
             return float(s.rstrip("GB")) * 1024
 
+        elif s.upper().endswith("TB"):
+            return float(s.rstrip("TB")) * 1024 * 1024
+
         else:
             return float(s)
 
@@ -867,6 +870,7 @@ class NextflowInspector:
         if size_stamp and size_stamp == self.trace_sizestamp:
             return
         else:
+            logger.debug("Updating trace size stamp to: {}".format(size_stamp))
             self.trace_sizestamp = size_stamp
 
         with open(self.trace_file) as fh:
@@ -908,7 +912,6 @@ class NextflowInspector:
         size_stamp = os.path.getsize(self.log_file)
         self.log_retry = 0
         if size_stamp and size_stamp == self.log_sizestamp:
-            logger.debug("No changes detected in log size stamp. Skipping.")
             return
         else:
             logger.debug("Updating log size stamp to: {}".format(size_stamp))
@@ -971,7 +974,6 @@ class NextflowInspector:
         """
 
         try:
-            logger.debug("Started log parsing")
             self.log_parser()
         except (FileNotFoundError, StopIteration) as e:
             logger.debug("ERROR: " + str(sys.exc_info()[0]))
@@ -979,7 +981,6 @@ class NextflowInspector:
             if self.log_retry == self.MAX_RETRIES:
                 raise e
         try:
-            logger.debug("Started trace parsing")
             self.trace_parser()
         except (FileNotFoundError, StopIteration) as e:
             logger.debug("ERROR: " + str(sys.exc_info()[0]))
@@ -1514,9 +1515,9 @@ class NextflowInspector:
                     self._print_msg(run_hash)
                     _broadcast_sent = True
 
-                logger.debug("Updating inspection")
                 self.update_inspection()
                 if self.send:
+                    logger.debug("Updating inspection")
                     self._send_status_info(run_hash)
                     self.send = False
 
