@@ -47,7 +47,7 @@ from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 logger = get_logger(__file__)
 
 
-def __set_version_fastqc():
+def __get_version_fastqc():
 
     try:
 
