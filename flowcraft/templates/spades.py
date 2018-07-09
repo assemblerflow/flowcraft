@@ -255,7 +255,8 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
     logger.info("Setting main assembly file to: {}".format(assembly_file))
 
     # Remove input fastq files when clear option is specified.
-    if clear == "true":
+    # Only remove temporary input when the expected output exists.
+    if clear == "true" and os.path.exists("contigs.fasta"):
         clean_up(fastq_pair)
 
 

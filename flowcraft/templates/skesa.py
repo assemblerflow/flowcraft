@@ -154,7 +154,8 @@ def main(sample_id, fastq_pair, clear):
         p.returncode))
 
     # Remove input fastq files when clear option is specified.
-    if clear == "true":
+    # Only remove temporary input when the expected output exists.
+    if clear == "true" and os.path.exists(output_file):
         clean_up(fastq_pair)
 
     with open(".status", "w") as fh:
