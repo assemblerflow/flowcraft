@@ -7,6 +7,8 @@
 - Fixed issue when the `inspect` mode was executed on a pipeline directory
 with failed processes but with the work directory removed (the log files
 where no longer available).
+- Fixed bug on `midas_species` process where the output file wasn't being 
+linked correctly, causing the process to fail
 
 ## 1.2.1
 
