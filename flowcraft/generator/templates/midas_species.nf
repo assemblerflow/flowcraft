@@ -27,7 +27,7 @@ process midas_species_{{ pid }} {
     """
     run_midas.py species midas/ -d ${midasDB} -t $task.cpus -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} --remove_temp
 
-    mv midas/species_profile.txt ./${sample_id}_midas_species_profile.txt
+    mv midas/species/species_profile.txt ./${sample_id}_midas_species_profile.txt
     """
 }
 
