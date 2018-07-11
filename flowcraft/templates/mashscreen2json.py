@@ -22,8 +22,8 @@ Code documentation
 
 """
 
-__version__ = "1.0.1"
-__build__ = "20022018"
+__version__ = "1.1.0"
+__build__ = "04072018"
 __template__ = "mashscreen2json-nf"
 
 from statistics import median
@@ -36,12 +36,14 @@ logger = get_logger(__file__)
 
 if __file__.endswith(".command.sh"):
     MASH_TXT = '$mashtxt'
+    SAMPLE_ID = '$sample_id'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("MASH_TXT: {}".format(MASH_TXT))
+    logger.debug("SAMPLE_ID: {}".format(MASH_TXT))
 
 @MainWrapper
-def main(mash_output):
+def main(mash_output, sample_id):
     '''
     converts top results from mash screen txt output to json format
 
@@ -50,6 +52,8 @@ def main(mash_output):
     mash_output: str
         this is a string that stores the path to this file, i.e, the name of
         the file
+    sample_id: str
+        sample name
 
     '''
     logger.info("Reading file : {}".format(mash_output))
@@ -91,8 +95,10 @@ def main(mash_output):
             copy_number = int(float(v[1]) / median_cutoff)
             # assure that plasmid as at least twice the median coverage depth
             if float(v[1]) > median_cutoff:
-                filtered_dic["_".join(k.split("_")[0:3])] = [v[0],
-                                                             str(copy_number)]
+                filtered_dic["_".join(k.split("_")[0:3])] = [
+                    round(float(v[0]),2),
+                    copy_number
+                ]
         logger.info(
             "Exported dictionary has {} entries".format(len(filtered_dic)))
     else:
@@ -102,6 +108,15 @@ def main(mash_output):
     output_json.write(json.dumps(filtered_dic))
     output_json.close()
 
+    json_dic = {
+        "sample_id": sample_id,
+        "patlas_mashscreen": filtered_dic
+        # TODO add information for report webapp
+    }
+
+    with open(".report.json", "w") as json_report:
+        json_report.write(json.dumps(json_dic, separators=(",", ":")))
+
 if __name__ == "__main__":
 
-    main(MASH_TXT)
+    main(MASH_TXT, SAMPLE_ID)

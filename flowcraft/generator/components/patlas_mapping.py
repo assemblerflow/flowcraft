@@ -14,13 +14,6 @@ class PatlasMapping(Process):
         self.output_type = "json"
 
         self.params = {
-            "max_k": {
-                "default": 10949,
-                "description": "Sets the k parameter for bowtie2 allowing to "
-                               "make multiple mappings of the same read "
-                               "against several hits on the query sequence or "
-                               "sequences."
-            },
             "trim5": {
                 "default": 0,
                 "description": "Sets trim5 option for bowtie. This will become"
@@ -58,12 +51,6 @@ class PatlasMapping(Process):
                 "cpus": 1,
                 "memory": "{ 4.GB * task.attempt }"
             },
-            "samtoolsView": {
-                "container": "flowcraft/mapping-patlas",
-                "version": "1.4.1",
-                "cpus": 1,
-                "memory": "{ 4.GB * task.attempt }"
-            },
             "jsonDumpingMapping": {
                 "container": "flowcraft/mapping-patlas",
                 "version": "1.4.1",
@@ -74,7 +61,6 @@ class PatlasMapping(Process):
 
         self.status_channels = [
             "mappingBowtie",
-            "samtoolsView",
             "jsonDumpingMapping"
         ]
 

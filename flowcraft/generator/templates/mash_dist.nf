@@ -8,8 +8,6 @@ process runMashDist_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir 'results/mashdist/mashdist_{{ pid }}/'
-
     input:
     set sample_id, file(fasta) from {{ input_channel }}
     val refFile from IN_reference_file_{{ pid }}
@@ -34,7 +32,7 @@ process mashDistOutputJson_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir 'results/mashdist/mashdist_json_{{ pid }}/'
+    publishDir 'results/mashdist/mashdist_json_{{ pid }}/', mode: 'copy'
 
     input:
     set sample_id, fasta, file(mashtxt) from mashDistOutChannel_{{ pid }}

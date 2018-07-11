@@ -10,6 +10,12 @@ where no longer available).
 - Fixed bug on `midas_species` process where the output file wasn't being 
 linked correctly, causing the process to fail
 
+### Components changes
+
+- `mapping_patlas`: refactored to remove temporary files used to create
+sam and bam files and added data to .report.json
+- `mash_screen` and `mash_dist`: addded data to .report.json
+
 ## 1.2.1
 
 ### Improvements
