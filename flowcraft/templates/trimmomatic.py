@@ -246,7 +246,10 @@ def clean_up(fastq_pairs, clear):
     for fpath in unpaired_fastq:
         os.remove(fpath)
 
-    if clear == "true":
+    # Expected output to assess whether it is safe to remove temporary input
+    expected_out = [f for f in os.listdir(".") if f.endswith("_trim.fastq.gz")]
+
+    if clear == "true" and len(expected_out) == 2:
         for fq in fastq_pairs:
             # Get real path of fastq files, following symlinks
             rp = os.path.realpath(fq)
