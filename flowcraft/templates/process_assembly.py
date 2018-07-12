@@ -553,12 +553,14 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
                      "columnBar": True}
                 ]
             }],
-            "warnings": [{
+        }
+
+        if warnings:
+            json_dic["warnings"] = [{
                 "sample": sample_id,
                 "table": "assembly",
                 "value": warnings
             }]
-        }
 
         if fails:
             json_dic["fail"] = [{
