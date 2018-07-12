@@ -49,7 +49,8 @@ class PatlasMapping(Process):
                 "container": "flowcraft/mapping-patlas",
                 "version": "1.4.1",
                 "cpus": 1,
-                "memory": "{ 4.GB * task.attempt }"
+                "memory": "{ 4.GB * task.attempt }",
+                "scratch": "true"
             },
             "jsonDumpingMapping": {
                 "container": "flowcraft/mapping-patlas",
