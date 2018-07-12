@@ -392,10 +392,11 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                             {"header": "Coverage (2nd)",
                              "value": exp_coverage,
                              "table": "qc",
-                             "columnBar": True}
+                             "columnBar": True,
+                             "threshold": minimum_coverage
+                             }
                         ],
                     }],
-                    "minCoverage": minimum_coverage
                 }
 
             # Get encoding
