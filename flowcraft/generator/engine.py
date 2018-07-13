@@ -61,6 +61,7 @@ process_map = {
         "fastqc_trimmomatic": readsqc.FastqcTrimmomatic,
         "filter_poly": readsqc.FilterPoly,
         "integrity_coverage": readsqc.IntegrityCoverage,
+        "fasterq_dump": downloads.FasterqDump,
         "kraken": meta.Kraken,
         "mapping_patlas": mapping_patlas.PatlasMapping,
         "mash_dist": distest.PatlasMashDist,
@@ -1439,7 +1440,7 @@ class NextflowGenerator:
             "\tFinished configurations \u2713"))
 
         for p in self.processes:
-            self.template += p.template_str
+            self.template += "\n{}".format(p.template_str)
 
         self._build_footer()
 

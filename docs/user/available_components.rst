@@ -14,6 +14,9 @@ Download
 - :doc:`components/reads_download`: Downloads reads from the SRA/ENA public
   databases from a list of accessions.
 
+- :doc:`components/fasterq_dump`: Downloads reads from the SRA public databases
+  from a list of accessions, using ``fasterq-dump``.
+
 Reads Quality Control
 --------------------
 
