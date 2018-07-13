@@ -66,6 +66,8 @@ process_map = {
         "mapping_patlas": mapping_patlas.PatlasMapping,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
+        "mash_sketch_fasta": distest.MashSketchFasta,
+        "mash_sketch_fastq": distest.MashSketchFastq,
         "maxbin2": meta.MaxBin2,
         "megahit": meta.Megahit,
         "metamlst": mlst.MetaMlst,

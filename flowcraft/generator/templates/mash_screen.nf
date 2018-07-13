@@ -1,4 +1,8 @@
-IN_reference_file_{{ pid }} = Channel.value(params.refFile{{ param_id }})
+if (binding.hasVariable("SIDE_mashSketchOutChannel_{{ pid }}")){
+    IN_reference_file_{{ pid }} = SIDE_mashSketchOutChannel_{{ pid }}
+} else {
+    IN_reference_file_{{ pid }} = Channel.value(params.refFile{{ param_id }})
+}
 
 // check if noWinner is provided or not
 winnerVar = (params.noWinner{{ param_id }} == false) ? "-w" : ""

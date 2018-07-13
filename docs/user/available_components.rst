@@ -89,14 +89,18 @@ Distance Estimation
 - :doc:`components/mash_dist`: Executes mash distance against a reference index
   plasmid database and generates a `JSON` for pATLAS. This component calculates
   pairwise distances between sequences (one from the database and the query
-  sequence). However if a
-  different database is provided it can use mash dist for other purposes.
+  sequence). However if a different database is provided it can use mash dist
+  for other purposes.
 
 - :doc:`components/mash_screen`: Performs mash screen against a reference index
   plasmid database and generates a JSON input file for pATLAS. This component
   searches for containment of a given sequence in read sequencing data.
-  However if a different
-  database is provided it can use mash screen for other purporses.
+  However if a different database is provided it can use mash screen for other
+  purporses.
+
+- :doc:`components/mash_sketch_fasta`: Performs mash sketch for fasta files.
+
+- :doc:`components/mash_sketch_fastq`: Performes mash sketch for fastq files.
 
 Mapping
 -------

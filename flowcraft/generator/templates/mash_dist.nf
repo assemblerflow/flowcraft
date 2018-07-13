@@ -1,5 +1,10 @@
-IN_reference_file_{{ pid }} = Channel.value(params.refFile{{ param_id }})
 IN_shared_hashes_{{ pid }} = Channel.value(params.shared_hashes{{ param_id }})
+
+if (binding.hasVariable("SIDE_mashSketchOutChannel_{{ pid }}")){
+    IN_reference_file_{{ pid }} = SIDE_mashSketchOutChannel_{{ pid }}
+} else {
+    IN_reference_file_{{ pid }} = Channel.value(params.refFile{{ param_id }})
+}
 
 // runs mash dist
 process runMashDist_{{ pid }} {
@@ -9,6 +14,7 @@ process runMashDist_{{ pid }} {
     tag { sample_id }
 
     input:
+//    file refFile from SIDE_mashSketchOutChannel_{{ pid }}.ifEmpty(IN_reference_file_{{ pid }})
     set sample_id, file(fasta) from {{ input_channel }}
     val refFile from IN_reference_file_{{ pid }}
 
