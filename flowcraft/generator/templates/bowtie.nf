@@ -6,7 +6,7 @@ if (params.index{{ param_id }} == null && params.reference{{ param_id }} == null
 }
 
 
-if (params.reference){
+if (params.reference{{ param_id }}){
 
     reference_in_{{ pid }} = Channel.fromPath(params.reference{{ param_id }})
         .map{it -> file(it).exists() ? [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.') ,it] : null}

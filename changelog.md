@@ -9,6 +9,7 @@ with failed processes but with the work directory removed (the log files
 where no longer available).
 - Fixed bug on `midas_species` process where the output file wasn't being 
 linked correctly, causing the process to fail
+- Fixed bug on `bowtie` where the reference parameter was missing the pid
 
 ### Components changes
 
