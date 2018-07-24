@@ -10,6 +10,7 @@ where no longer available).
 - Fixed bug on `midas_species` process where the output file wasn't being 
 linked correctly, causing the process to fail
 - Fixed bug on `bowtie` where the reference parameter was missing the pid
+- Fixed bug on `filter_poly` where the tag was missing
 
 ### Components changes
 

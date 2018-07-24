@@ -6,6 +6,8 @@ process filter_poly_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
+    tag { sample_id }
+
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
     val adapter from IN_adapter_{{ pid }}
@@ -23,7 +25,7 @@ process filter_poly_{{ pid }} {
 
     prinseq-lite.pl --fastq ${sample_id}_1.fq  --fastq2 ${sample_id}_2.fq  --custom_params "${adapter}" -out_format 3 -out_good ${sample_id}_filtered
 
-    gzip ${sample_id}_filtered_*.fastq
+    gzip ${sample_id}_filtered_{1,2}.fastq
 
     """
 }
