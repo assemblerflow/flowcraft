@@ -25,7 +25,7 @@ process filter_poly_{{ pid }} {
 
     prinseq-lite.pl --fastq ${sample_id}_1.fq  --fastq2 ${sample_id}_2.fq  --custom_params "${adapter}" -out_format 3 -out_good ${sample_id}_filtered
 
-    gzip ${sample_id}_filtered_{1,2}.fastq
+    gzip ${sample_id}_filtered_*.fastq
 
     """
 }
