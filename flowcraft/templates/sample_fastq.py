@@ -156,7 +156,7 @@ def main(sample_id, fastq_pair, genome_size, depth, clear):
                     "sample": sample_id,
                     "data": [{
                         "header": "Coverage",
-                        "value": estimated_coverage,
+                        "value": round(estimated_coverage, 1),
                         "table": "qc"
                     }]
                  }
