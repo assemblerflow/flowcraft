@@ -659,8 +659,11 @@ class NextflowInspector:
         if "cpus" in info and not self.processes[process]["cpus"]:
             self.processes[process]["cpus"] = info["cpus"]
         if "memory" in info and not self.processes[process]["memory"]:
-            self.processes[process]["memory"] = self._size_coverter(
-                info["memory"])
+            try:
+                self.processes[process]["memory"] = self._size_coverter(
+                    info["memory"])
+            except ValueError:
+                self.processes[process]["memory"] = None
 
         if info["hash"] in self.stored_ids:
             return
