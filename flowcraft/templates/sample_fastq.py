@@ -55,8 +55,8 @@ logger = get_logger(__file__)
 if __file__.endswith(".command.sh"):
     SAMPLE_ID = '$sample_id'
     FASTQ_PAIR = '$fastq_pair'.split()
-    GSIZE = int('$gsize'.strip())
-    DEPTH = int('$depth'.strip())
+    GSIZE = float('$gsize'.strip())
+    DEPTH = float('$depth'.strip())
     CLEAR = '$clear'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
