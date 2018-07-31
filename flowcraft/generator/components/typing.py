@@ -97,3 +97,24 @@ class Sistr(Process):
             "container": "ummidock/sistr_cmd",
             "version": "1.0.2"
         }}
+
+
+class Momps(Process):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = None
+
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
+        self.directives = {
+            "momps": {
+                "cpus": 1,
+                "memory": "'4GB'",
+                "container": "flowcraft/momps",
+                "version": "0.1.0-2"
+            }
+        }

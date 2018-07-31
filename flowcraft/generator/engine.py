@@ -75,6 +75,7 @@ process_map = {
         "metaspades": meta.Metaspades,
         "midas_species": meta.Midas_species,
         "mlst": mlst.Mlst,
+        "momps": typing.Momps,
         "patho_typing": typing.PathoTyping,
         "pilon": ap.Pilon,
         "process_skesa": ap.ProcessSkesa,
@@ -845,6 +846,7 @@ class NextflowGenerator:
             p.set_channels(pid=i)
 
             # If there is no parent lane, set the raw input channel from user
+            logger.debug("{} {} {}".format(p.parent_lane, p.input_type, p.template))
             if not p.parent_lane and p.input_type:
                 self._update_raw_input(p)
 
