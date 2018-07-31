@@ -112,9 +112,9 @@ class Momps(Process):
 
         self.directives = {
             "momps": {
-                "cpus": 1,
+                "cpus": 3,
                 "memory": "'4GB'",
                 "container": "flowcraft/momps",
-                "version": "0.1.0-2"
+                "version": "0.1.0-4"
             }
         }

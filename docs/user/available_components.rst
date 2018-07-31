@@ -152,3 +152,6 @@ Typing
 
 - :doc:`components/sistr`: Serovar predictions from whole-genome sequence assemblies
   by determination of antigen gene and cgMLST gene alleles.
+
+- :doc:`components/momps`: Multi-locus sequence typing for Legionella pneumophila
+  from assemblies and reads.
