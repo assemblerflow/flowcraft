@@ -415,8 +415,14 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                 phred_fh.write(phred)
             # Encoding not found
             else:
-                logger.warning("Could not guess encoding and phred from "
-                               "FastQ")
+                encoding_msg = "Could not guess encoding and phred from " \
+                               "FastQ"
+                logger.warning(encoding_msg)
+                json_dic["warnings"] = [{
+                    "sample": sample_id,
+                    "table": "qc",
+                    "value": [encoding_msg]
+                }]
                 enc_fh.write("None")
                 phred_fh.write("None")
 
