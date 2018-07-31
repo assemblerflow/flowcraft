@@ -60,6 +60,11 @@ class PatlasMashDist(Process):
             "mashDistOutputJson"
         ]
 
+        self.link_end.append({
+            "link": "SIDE_mashSketchOutChannel",
+            "alias": "SIDE_mashSketchOutChannel"
+        })
+
 
 class PatlasMashScreen(Process):
 
@@ -116,3 +121,82 @@ class PatlasMashScreen(Process):
         ]
 
         self.compiler["patlas_consensus"] = ["mashScreenOutputChannel"]
+
+        self.link_end.append({
+            "link": "SIDE_mashSketchOutChannel",
+            "alias": "SIDE_mashSketchOutChannel"
+        })
+
+
+class MashSketchFasta(Process):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "msh"
+
+        self.ignore_type = True
+
+        self.params = {
+            "kmerSize": {
+                "default": 21,
+                "description": "Set the kmer size for hashing. Default: 21."
+            },
+            "sketchSize": {
+                "default": 1000,
+                "description": "Set the number of hashes per sketch. Default: "
+                               "1000"
+            },
+        }
+
+        self.directives = {
+            "mashSketchFasta": {
+                "container": "flowcraft/mash-patlas",
+                "version": "1.4.1",
+                "cpus": 1,
+                "memory": "{ 4.GB * task.attempt }"
+            },
+        }
+
+        self.status_channels = [
+            "mashSketchFasta",
+        ]
+
+        self.link_start.extend(["SIDE_mashSketchOutChannel"])
+
+
+class MashSketchFastq(MashSketchFasta):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+
+        # add more params to dict
+        self.params.update({
+            "minKmer": {
+                "default": 1,
+                "description": "Minimum copies of each k-mer required to pass "
+                               "noise filter for reads. Implies -r. Default: 1"
+            },
+            "genomeSize": {
+                "default": "false",
+                "description": "Genome size (raw bases or with K/M/G/T). If "
+                               "specified, will be used for p-value calculation"
+                               " instead of an estimated size from k-mer "
+                               "content. Default: false, meaning that it won't"
+                               "be used. If you want to use it pass a number to"
+                               " this parameter."
+            }
+        })
+
+        self.directives = {
+            "mashSketchFastq": self.directives["mashSketchFasta"]
+        }
+
+        self.status_channels = [
+            "mashSketchFastq",
+        ]

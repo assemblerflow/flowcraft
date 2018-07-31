@@ -27,11 +27,14 @@ if (params.containsKey("fasta")){
     }
 }
 if (params.containsKey("accessions")){
-    BufferedReader reader = new BufferedReader(new FileReader(params.accessions));
-    int lines = 0;
-    while (reader.readLine() != null) lines++;
-    reader.close();
-    infoMap.put("accessions", lines)
+    // checks if params.accessions is different from null
+    if (params.accessions) {
+        BufferedReader reader = new BufferedReader(new FileReader(params.accessions));
+        int lines = 0;
+        while (reader.readLine() != null) lines++;
+        reader.close();
+        infoMap.put("accessions", lines)
+    }
 }
 
 Help.start_info(infoMap, "$workflow.start", "$workflow.profile")

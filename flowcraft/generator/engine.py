@@ -61,10 +61,13 @@ process_map = {
         "fastqc_trimmomatic": readsqc.FastqcTrimmomatic,
         "filter_poly": readsqc.FilterPoly,
         "integrity_coverage": readsqc.IntegrityCoverage,
+        "fasterq_dump": downloads.FasterqDump,
         "kraken": meta.Kraken,
         "mapping_patlas": mapping_patlas.PatlasMapping,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
+        "mash_sketch_fasta": distest.MashSketchFasta,
+        "mash_sketch_fastq": distest.MashSketchFastq,
         "maxbin2": meta.MaxBin2,
         "megahit": meta.Megahit,
         "metamlst": mlst.MetaMlst,
@@ -72,6 +75,7 @@ process_map = {
         "metaspades": meta.Metaspades,
         "midas_species": meta.Midas_species,
         "mlst": mlst.Mlst,
+        "momps": typing.Momps,
         "patho_typing": typing.PathoTyping,
         "pilon": ap.Pilon,
         "process_skesa": ap.ProcessSkesa,
@@ -80,6 +84,7 @@ process_map = {
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
         "retrieve_mapped": mapping.Retrieve_mapped,
+        "sample_fastq": readsqc.SampleFastq,
         "seq_typing": typing.SeqTyping,
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
@@ -842,6 +847,7 @@ class NextflowGenerator:
             p.set_channels(pid=i)
 
             # If there is no parent lane, set the raw input channel from user
+            logger.debug("{} {} {}".format(p.parent_lane, p.input_type, p.template))
             if not p.parent_lane and p.input_type:
                 self._update_raw_input(p)
 
@@ -1494,7 +1500,7 @@ class NextflowGenerator:
             "\tFinished configurations \u2713"))
 
         for p in self.processes:
-            self.template += p.template_str
+            self.template += "\n{}".format(p.template_str)
 
         self._build_footer()
 

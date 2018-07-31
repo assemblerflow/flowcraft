@@ -17,8 +17,8 @@ can be imported into `pATLAS <http://www.patlas.site/>`_.
 Input/Output type
 ------------------
 
-- Input type: ``FastQ``
-- Output type: ``JSON``
+- Input type: ``fastq``
+- Output type: ``json``
 
 
 Parameters
@@ -59,11 +59,11 @@ Default directives
 ------------------
 
 - ``mappingBowtie``:
-    - ``container``: tiagofilipe12/patlasflow_mapping
-    - ``version``: 1.1.2
+    - ``container``: flowcraft/mapping-patlas
+    - ``version``: 1.4.1
 - ``samtoolsView``:
-    - ``container``: tiagofilipe12/patlasflow_mapping
-    - ``version``: 1.1.2
+    - ``container``: flowcraft/mapping-patlas
+    - ``version``: 1.4.1
 - ``jsonDumpingMapping``:
-    - ``container``: tiagofilipe12/patlasflow_mapping
-    - ``version``: 1.1.2
+    - ``container``: flowcraft/mapping-patlas
+    - ``version``: 1.4.1

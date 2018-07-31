@@ -78,6 +78,14 @@ def main(list_of_jsons):
     out_file.write(json.dumps(json_dict))
     out_file.close()
 
+    json_dic = {
+        "patlas_mashscreen": json_dict
+        # TODO add information for report webapp
+    }
+
+    with open(".report.json", "w") as json_report:
+        json_report.write(json.dumps(json_dic, separators=(",", ":")))
+
 
 if __name__ == "__main__":
     main(LIST_OF_FILES)

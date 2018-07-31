@@ -7,6 +7,32 @@
 - Fixed issue when the `inspect` mode was executed on a pipeline directory
 with failed processes but with the work directory removed (the log files
 where no longer available).
+- Fixed bug on `midas_species` process where the output file wasn't being 
+linked correctly, causing the process to fail
+- Fixed bug on `bowtie` where the reference parameter was missing the pid
+- Fixed bug on `filter_poly` where the tag was missing
+
+### Components changes
+
+- `mapping_patlas`: refactored to remove temporary files used to create
+sam and bam files and added data to .report.json
+- `mash_screen` and `mash_dist`: addded data to .report.json
+
+### New components
+
+- Added component `fasterq_dump`
+- Added component `mash_sketch_fasta`
+- Added component `mash_sketch_fastq`
+
+### Minor/Other changes
+
+- Added check for `params.accessions` that enables to report a proper
+error when it is set to `null`.
+
+### Bug fixes
+
+- Removed the need for the nf process templates to have an empty line
+at the beginning of the template files.
 
 ## 1.2.1
 

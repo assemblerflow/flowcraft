@@ -16,8 +16,8 @@ receive FastQ data.
 Input/Output type
 ------------------
 
-- Input type: ``Accessions``
-- Output type: ``FastQ``
+- Input type: ``accessions``
+- Output type: ``fastq``
 
 .. note::
     The default input parameter for Accessions data is ``--accessions``.
@@ -44,5 +44,5 @@ Default directives
 
 - ``cpus``: 1
 - ``memory``: 1GB
-- ``container``: ummidock/getseqena
+- ``container``: flowcraft/getseqena
 - ``version``: 0.4.0-2

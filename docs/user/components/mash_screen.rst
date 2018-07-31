@@ -21,8 +21,8 @@ database than the default that is intended for plasmid searches.
 Input/Output type
 ------------------
 
-- Input type: ``FastQ``
-- Output type: ``JSON``
+- Input type: ``fastq``
+- Output type: ``json``
 
 
 Parameters
@@ -59,8 +59,8 @@ Default directives
 ------------------
 
 - ``mashScreen``:
-    - ``container``: tiagofilipe12/patlasflow_mash_screen
-    - ``version``: 1.1
+    - ``container``: flowcraft/mash-patlas
+    - ``version``: 1.4.1
 - ``mashOutputJson``:
-    - ``container``: tiagofilipe12/patlasflow_mash_screen
-    - ``version``: 1.1
+    - ``container``: flowcraft/mash-patlas
+    - ``version``: 1.4.1

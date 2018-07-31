@@ -6,12 +6,14 @@ process filter_poly_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
+    tag { sample_id }
+
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
     val adapter from IN_adapter_{{ pid }}
 
     output:
-    set sample_id , file("${sample_id}_filtered_*.fastq.gz") into {{ output_channel }}
+    set sample_id , file("${sample_id}_filtered_{1,2}.fastq.gz") into {{ output_channel }}
     {% with task_name="filter_poly" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
