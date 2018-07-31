@@ -123,7 +123,7 @@ def main(sample_id, fastq_pair, genome_size, depth, clear):
         ps = subprocess.Popen(('seqtk', 'sample', '-s100', p1, str(ratio)),
                               stdout=subprocess.PIPE)
         with open('{}_ss.fq.gz'.format(bn1), 'w') as outfile:
-            subprocess.Popen(('pigz', '--fast', '-c'),
+            subprocess.Popen(('gzip', '--fast', '-c'),
                              stdin=ps.stdout, stdout=outfile )
         ps.wait()
 
@@ -131,7 +131,7 @@ def main(sample_id, fastq_pair, genome_size, depth, clear):
         ps = subprocess.Popen(('seqtk', 'sample', '-s100', p2, str(ratio)),
                               stdout=subprocess.PIPE)
         with open('{}_ss.fq.gz'.format(bn2), 'w') as outfile:
-            subprocess.Popen(('pigz', '--fast', '-c'),
+            subprocess.Popen(('gzip', '--fast', '-c'),
                              stdin=ps.stdout, stdout=outfile)
         ps.wait()
 
