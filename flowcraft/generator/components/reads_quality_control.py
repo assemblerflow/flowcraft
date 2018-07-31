@@ -350,3 +350,47 @@ class FilterPoly(Process):
         self.status_channels = [
             "filter_poly"
         ]
+
+
+class SampleFastq(Process):
+    """Subsamples FastQ file based on depth using seqtk
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: fastq
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fastq"
+
+        self.params = {
+            "genomeSize": {
+                "default": 1,
+                "description":
+                    "Genome size estimate for the samples in Mb. It is used to"
+                    " estimate the coverage"
+            },
+            "depth": {
+                "default": 100,
+                "description":
+                    "Maximum estimated depth coverage allowed. FastQ with "
+                    "higher estimated depth will be subsampled to this value."
+            }
+        }
+
+        self.directives = {"sample_fastq": {
+            "cpus": 1,
+            "memory": "{ 4.GB * task.attempt }",
+            "container": "flowcraft/seqtk",
+            "version": "1.3.0-3"
+        }}
+
+        self.status_channels = [
+            "sample_fastq"
+        ]

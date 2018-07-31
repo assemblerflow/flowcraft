@@ -84,6 +84,7 @@ process_map = {
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
         "retrieve_mapped": mapping.Retrieve_mapped,
+        "sample_fastq": readsqc.SampleFastq,
         "seq_typing": typing.SeqTyping,
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
