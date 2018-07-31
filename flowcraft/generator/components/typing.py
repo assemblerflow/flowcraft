@@ -115,6 +115,6 @@ class Momps(Process):
                 "cpus": 3,
                 "memory": "'4GB'",
                 "container": "flowcraft/momps",
-                "version": "0.1.0-4"
+                "version": "0.1.0-5"
             }
         }
