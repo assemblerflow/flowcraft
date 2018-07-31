@@ -1,0 +1,6 @@
+# ignore ide folders
+.idea/
+.vscode/
+
+# ignore python generated files
+*.pyc
