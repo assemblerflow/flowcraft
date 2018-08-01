@@ -42,6 +42,7 @@ process momps_{{ pid }} {
         else
             echo fail > .status
             rm -r res
+        fi
     } || {
         echo fail > .status
         # Remove results directory
