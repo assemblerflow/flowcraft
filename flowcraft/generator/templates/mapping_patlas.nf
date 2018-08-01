@@ -1,5 +1,5 @@
 // checks if cutoff value is higher than 0
-if (Float.parseFloat(params.cov_cutoff.toString()) == 0) {
+if (Float.parseFloat(params.cov_cutoff{{ param_id }}.toString()) == 0) {
     exit 1, "Cutoff value of 0 will output every plasmid in the database with coverage 0. Provide a value higher than 0."
 }
 
