@@ -28,7 +28,7 @@ process momps_{{ pid }} {
         then
             st=\$(grep -oP "ST = \\K\\w+" res/*.MLST_res.txt)
             # If the ST cannot be determined, set string to ND
-            if [ -z $st ]
+            if [ -z \$st ]
             then
                 st="ND"
             fi
