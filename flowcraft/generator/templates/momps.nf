@@ -18,18 +18,30 @@ process momps_{{ pid }} {
 
     script:
     """
-    # Stage in momps source files. This cannot be a symlink because the files
-    # need to be writable.
-    cp -r /NGStools/mompS/* .
-    momps.pl -r ${fastq[0]} -f ${fastq[1]} -a $assembly -o res -p $sample_id -t ${task.cpus}
-    # Get the ST for the sample
-    st=\$(grep -oP "ST = \\K\\w+" res/*.MLST_res.txt)
-    echo $sample_id\t\${st}> ${sample_id}_st.tsv
-    # Add ST information to report JSON
-    json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'mompS','value':'\$st','table':'typing'}]}]}"
-    echo \$json_str > .report.json
-    # Get the profile for the sample
-    echo $sample_id\t\$(awk "NR == 7" res/*.MLST_res.txt) > ${sample_id}_profile.tsv
+    {
+        # Stage in momps source files. This cannot be a symlink because the files
+        # need to be writable.
+        cp -r /NGStools/mompS/* .
+        momps.pl -r ${fastq[0]} -f ${fastq[1]} -a $assembly -o res -p $sample_id -t ${task.cpus}
+        # Get the ST for the sample
+        if [ -f "res/${sample_id}.MLST_res.txt" ]
+        then
+            st=\$(grep -oP "ST = \\K\\w+" res/*.MLST_res.txt)
+            echo $sample_id\t\${st}> ${sample_id}_st.tsv
+            # Add ST information to report JSON
+            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'mompS','value':'\$st','table':'typing'}]}]}"
+            echo \$json_str > .report.json
+            # Get the profile for the sample
+            echo $sample_id\t\$(awk "NR == 7" res/*.MLST_res.txt) > ${sample_id}_profile.tsv
+            rm -r res
+        else
+            echo fail > .status
+            rm -r res
+    } || {
+        echo fail > .status
+        # Remove results directory
+        rm -r res
+    }
     """
 
 }
