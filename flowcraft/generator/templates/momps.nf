@@ -27,6 +27,11 @@ process momps_{{ pid }} {
         if [ -f "res/${sample_id}.MLST_res.txt" ]
         then
             st=\$(grep -oP "ST = \\K\\w+" res/*.MLST_res.txt)
+            # If the ST cannot be determined, set string to ND
+            if [ -z $st ]
+            then
+                st="ND"
+            fi
             echo $sample_id\t\${st}> ${sample_id}_st.tsv
             # Add ST information to report JSON
             json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'mompS','value':'\$st','table':'typing'}]}]}"
