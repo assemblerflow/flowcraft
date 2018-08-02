@@ -32,6 +32,8 @@ with failed processes but with the work directory removed (the log files
 where no longer available).
 - Fixed issue when the `inspect` mode was executed on a pipeline without the 
 memory directory defined.
+- Fixed issue in the `inspect` mode, where there is a rare race condition between
+tags in the log and trace files.
 - Fixed bug on `midas_species` process where the output file was not being 
 linked correctly, causing the process to fail
 - Fixed bug on `bowtie` where the reference parameter was missing the pid
