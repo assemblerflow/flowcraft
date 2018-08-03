@@ -9,6 +9,8 @@ sam and bam files and added data to .report.json. Updated databases to pATLAS
 version 1.5.2.
 - `mash_screen` and `mash_dist`: added data to .report.json. Updated databases 
 to pATLAS version 1.5.2.
+- Added new options to `abricate` componente. Users can now provide custom database
+directories, minimum coverage and minimum identity parameters.
 
 ### New components
 
