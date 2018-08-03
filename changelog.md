@@ -2,22 +2,12 @@
 
 ## Upcoming release (`dev` branch)
 
-### Bug fixes
-
-- Fixed issue when the `inspect` mode was executed on a pipeline directory
-with failed processes but with the work directory removed (the log files
-where no longer available).
-- Fixed bug on `midas_species` process where the output file wasn't being 
-linked correctly, causing the process to fail
-- Fixed bug on `bowtie` where the reference parameter was missing the pid
-- Fixed bug on `filter_poly` where the tag was missing
-
 ### Components changes
 
 - `mapping_patlas`: refactored to remove temporary files used to create
 sam and bam files and added data to .report.json. Updated databases to pATLAS
 version 1.5.2.
-- `mash_screen` and `mash_dist`: addded data to .report.json. Updated databases 
+- `mash_screen` and `mash_dist`: added data to .report.json. Updated databases 
 to pATLAS version 1.5.2.
 
 ### New components
@@ -37,6 +27,15 @@ error when it is set to `null`.
 
 - Removed the need for the nf process templates to have an empty line
 at the beginning of the template files.
+- Fixed issue when the `inspect` mode was executed on a pipeline directory
+with failed processes but with the work directory removed (the log files
+where no longer available).
+- Fixed issue when the `inspect` mode was executed on a pipeline without the 
+memory directory defined.
+- Fixed bug on `midas_species` process where the output file was not being 
+linked correctly, causing the process to fail
+- Fixed bug on `bowtie` where the reference parameter was missing the pid
+- Fixed bug on `filter_poly` where the tag was missing
 
 ## 1.2.1
 

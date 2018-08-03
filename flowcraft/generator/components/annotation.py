@@ -36,6 +36,19 @@ class Abricate(Process):
                 "default": '["resfinder", "card", "vfdb", "plasmidfinder", '
                            '"virulencefinder"]',
                 "description": "Specify the databases for abricate."
+            },
+            "abricateDataDir": {
+                "default": 'null',
+                "description": "Specify the full path location of the database "
+                               "folders."
+            },
+            "abricateMinId": {
+                "default": '75',
+                "description": "Minimum DNA %identity."
+            },
+            "abricateMinCov": {
+                "default": '0',
+                "description": "Minimum DNA %coverage."
             }
         }
 
