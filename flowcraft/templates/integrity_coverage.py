@@ -74,8 +74,8 @@ Code documentation
 
 """
 
-__version__ = "1.0.0"
-__build__ = "16012018"
+__version__ = "1.0.1"
+__build__ = "03082018"
 __template__ = "integrity_coverage-nf"
 
 import os
@@ -415,16 +415,17 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                 phred_fh.write(phred)
             # Encoding not found
             else:
-                encoding_msg = "Could not guess encoding and phred from " \
-                               "FastQ"
-                logger.warning(encoding_msg)
-                json_dic["warnings"] = [{
-                    "sample": sample_id,
-                    "table": "qc",
-                    "value": [encoding_msg]
-                }]
-                enc_fh.write("None")
-                phred_fh.write("None")
+                if not skip_encoding:
+                    encoding_msg = "Could not guess encoding and phred from " \
+                                   "FastQ"
+                    logger.warning(encoding_msg)
+                    json_dic["warnings"] = [{
+                        "sample": sample_id,
+                        "table": "qc",
+                        "value": [encoding_msg]
+                    }]
+                    enc_fh.write("None")
+                    phred_fh.write("None")
 
             # Estimate coverage
             logger.info("Estimating coverage based on a genome size of "
