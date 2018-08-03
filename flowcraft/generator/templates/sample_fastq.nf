@@ -33,3 +33,4 @@ process sample_fastq_{{ pid }} {
 
 }
 
+{{ forks }}
