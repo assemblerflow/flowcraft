@@ -82,12 +82,19 @@ def get_args(args=None):
         "-l", "--short-list", action="store_const", dest="short_list",
         const=True, help="Print a short list of the currently "
                          "available processes")
-    build_parser.add_argument("-cr", "--check-recipe", dest="check_recipe",
-                              action="store_const", const=True,
-                              help="Check tasks that the recipe contain and "
-                                   "their flow. This option might be useful "
-                                   "if a user wants to change some components "
-                                   "of a given recipe, by using the -t option.")
+    build_parser.add_argument(
+        "-cr", "--check-recipe", dest="check_recipe",
+        action="store_const", const=True,
+        help="Check tasks that the recipe contain and "
+             "their flow. This option might be useful "
+             "if a user wants to change some components "
+             "of a given recipe, by using the -t option.")
+    build_parser.add_argument(
+        "--export-params", dest="export_params", action="store_const",
+        const=True, help="Only export the parameters for the provided "
+                         "components (via -t option) in JSON format to stdout. "
+                         "No pipeline will be generated with this option."
+    )
 
     # GENERAL OPTIONS
     parser.add_argument(
@@ -134,6 +141,18 @@ def validate_build_arguments(args):
 
     # Skip all checks when listing the processes
     if args.detailed_list or args.short_list:
+        return
+
+    # Skill all checks when exporting parameters AND providing at least one
+    # component
+    if args.export_params:
+        # Check if components provided
+        if not args.tasks:
+            logger.error(colored_print(
+                "At least one component needs to be provided via the -t option"
+                " when exporting parameters in JSON format"
+            ))
+            sys.exit(1)
         return
 
     # When none of the main run options is specified
@@ -212,6 +231,10 @@ def copy_project(path):
 
 def build(args):
 
+    # Disable standard logging for stdout when the following modes are executed:
+    if args.export_params:
+        logger.setLevel(logging.ERROR)
+
     welcome = [
         "========= F L O W C R A F T =========",
         "Build mode\n"
@@ -264,12 +287,17 @@ def build(args):
                             nextflow_file=parsed_output_nf,
                             pipeline_name=args.pipeline_name,
                             auto_dependency=args.no_dep,
-                            merge_params=args.merge_params)
+                            merge_params=args.merge_params,
+                            export_params=args.export_params)
 
     logger.info(colored_print("Building your awesome pipeline..."))
 
-    # building the actual pipeline nf file
-    nfg.build()
+    if args.export_params:
+        nfg.export_params()
+        sys.exit(0)
+    else:
+        # building the actual pipeline nf file
+        nfg.build()
 
     # copy template to cwd, to allow for immediate execution
     if not args.pipeline_only:

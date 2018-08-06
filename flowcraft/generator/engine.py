@@ -107,7 +107,7 @@ class NextflowGenerator:
 
     def __init__(self, process_connections, nextflow_file,
                  pipeline_name="flowcraft", ignore_dependencies=False,
-                 auto_dependency=True, merge_params=True):
+                 auto_dependency=True, merge_params=True, export_params=False):
 
         self.processes = []
 
@@ -134,11 +134,22 @@ class NextflowGenerator:
         int: Stores the number of lanes in the pipelines
         """
 
+        self.export_parameters = export_params
+        """
+        bool: Determines whether the build mode is only for the export of 
+        parameters in JSON format. Setting to True will disabled some checks,
+        such as component dependency requirements
+        """
+
+        # When the export_params option is used, disable the auto dependency
+        # feature automatically
+        auto_deps = auto_dependency if not self.export_parameters else False
+
         # Builds the connections in the processes, which parses the
         # process_connections dictionary into the self.processes attribute
         # list.
         self._build_connections(process_connections, ignore_dependencies,
-                                auto_dependency)
+                                auto_deps)
 
         self.nf_file = nextflow_file
         """
@@ -409,7 +420,7 @@ class NextflowGenerator:
                         if auto_dependency:
                             self._add_dependency(
                                 out_process, dep, in_lane, out_lane, p)
-                        else:
+                        elif not self.export_parameters:
                             logger.error(colored_print(
                                 "\nThe following dependency of the process"
                                 " '{}' is missing: {}".format(p_out_name, dep),
@@ -1404,6 +1415,22 @@ class NextflowGenerator:
         pipeline_to_json = self.render_pipeline()
         with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
             fh.write(pipeline_to_json)
+
+    def export_params(self):
+        """Export pipeline params as a JSON to stdout
+
+        This run mode iterates over the pipeline processes and exports the
+        params dictionary of each component as a JSON to stdout.
+        """
+
+        params_json = {}
+
+        # Skip first init process
+        for p in self.processes[1:]:
+            params_json[p.template] = p.params
+
+        # Flush params json to stdout
+        sys.stdout.write(json.dumps(params_json))
 
     def build(self):
         """Main pipeline builder
