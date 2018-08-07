@@ -22,3 +22,5 @@ process mafft_{{ pid }} {
     """
 
 }
+
+{{ forks }}

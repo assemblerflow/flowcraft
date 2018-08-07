@@ -83,6 +83,7 @@ process_map = {
         "process_skesa": ap.ProcessSkesa,
         "process_spades": ap.ProcessSpades,
         #"prokka": annotation.Prokka,
+        "raxml": meta.Raxml,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
         "retrieve_mapped": mapping.Retrieve_mapped,

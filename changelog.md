@@ -19,6 +19,7 @@ to pATLAS version 1.5.2.
 - Added component `momps` for typing of Legionella pneumophila
 - Added component `split_assembly`
 - Added component `mafft`
+- Added component `raxml`
 
 ### Minor/Other changes
 
