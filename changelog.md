@@ -17,6 +17,8 @@ to pATLAS version 1.5.2.
 - Added component `mash_sketch_fastq`
 - Added component `downsample_fastq` for FastQ read sub sampling using seqtk
 - Added component `momps` for typing of Legionella pneumophila
+- Added component `split_assembly`
+- Added component `mafft`
 
 ### Minor/Other changes
 

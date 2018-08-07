@@ -64,6 +64,7 @@ process_map = {
         "integrity_coverage": readsqc.IntegrityCoverage,
         "fasterq_dump": downloads.FasterqDump,
         "kraken": meta.Kraken,
+        "mafft": meta.Mafft,
         "mapping_patlas": mapping_patlas.PatlasMapping,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
@@ -89,6 +90,7 @@ process_map = {
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
         "spades": assembly.Spades,
+        "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
         "true_coverage": readsqc.TrueCoverage
 }
