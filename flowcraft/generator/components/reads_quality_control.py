@@ -352,8 +352,8 @@ class FilterPoly(Process):
         ]
 
 
-class SampleFastq(Process):
-    """Subsamples FastQ file based on depth using seqtk
+class DownsampleFastq(Process):
+    """Downsamples FastQ file based on depth using seqtk
 
     This process is set with:
 
@@ -384,7 +384,7 @@ class SampleFastq(Process):
             }
         }
 
-        self.directives = {"sample_fastq": {
+        self.directives = {"downsample_fastq": {
             "cpus": 1,
             "memory": "{ 4.GB * task.attempt }",
             "container": "flowcraft/seqtk",
@@ -392,5 +392,5 @@ class SampleFastq(Process):
         }}
 
         self.status_channels = [
-            "sample_fastq"
+            "downsample_fastq"
         ]

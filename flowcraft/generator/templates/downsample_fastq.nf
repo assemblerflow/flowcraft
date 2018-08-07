@@ -8,13 +8,13 @@ IN_depth_{{ pid }} = Channel.value(params.depth{{ param_id }})
 clear = params.clearAtCheckpoint ? "true" : "false"
 checkpointClear_{{ pid }} = Channel.value(clear)
 
-process sample_fastq_{{ pid }} {
+process downsample_fastq_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
     tag { "${sample_id}" }
-    publishDir "results/sample_fastq_{{ pid }}/", pattern: "_ss.*"
+    publishDir "results/downsample_fastq_{{ pid }}/", pattern: "_ss.*"
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
@@ -24,12 +24,12 @@ process sample_fastq_{{ pid }} {
 
     output:
     set sample_id, file('*_ss.*') into {{ output_channel }}
-    {% with task_name="sample_fastq" %}
+    {% with task_name="downsample_fastq" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
     script:
-    template "sample_fastq.py"
+    template "downsample_fastq.py"
 
 }
 
