@@ -18,7 +18,7 @@ process split_assembly_{{ pid }} {
     val min_contig_size from IN_min_contig_size_{{ pid }}
 
     output:
-    file '*_split.fasta' into splitCh_{{ pid }}
+    file '*split.fasta' into splitCh_{{ pid }}
     {% with task_name="split_assembly" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

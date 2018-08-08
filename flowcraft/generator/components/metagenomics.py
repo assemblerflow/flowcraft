@@ -335,8 +335,6 @@ class SplitAssembly(Process):
 
         self.directives = {
             "split_assembly": {
-                "container": "mickaelsilva/chewbbaca_py3",
-                "version": "latest",
                 "cpus": 1,
                 "memory": "{ 1.GB * task.attempt }"
             }

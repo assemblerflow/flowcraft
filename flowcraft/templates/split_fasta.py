@@ -25,13 +25,12 @@ Generated output
 -  A fasta file per contig (given the minimum contig size
 """
 
-__version__ = "0.0.1"
-__build__ = "07082018"
+__version__ = "0.0.2"
+__build__ = "08082018"
 __template__ = "split_assembly-nf"
 
 import os
-from Bio import SeqIO
-
+from itertools import groupby
 
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
@@ -68,21 +67,23 @@ def main(sample_id, assembly, min_size):
 
     f_open = open(assembly, "rU")
 
-    for rec in SeqIO.parse(f_open, "fasta"):
-        rec.id = sample_id + '_' + rec.id.replace(' ','_')
-        #seq = rec.seq
-        success = 0
-        if len(rec.seq) >= min_size:
-            id_file = rec.id + '_split.fasta'
-            SeqIO.write(rec, id_file, 'fasta')
+    entry = (x[1] for x in groupby(f_open, lambda line: line[0] == ">"))
 
-            success+=1
+    success = 0
+
+    for header in entry:
+        headerStr = header.__next__()[1:].strip()
+        print(headerStr)
+        seq = "".join(s.strip() for s in entry.__next__())
+        print(seq)
+        if len(seq) >= min_size:
+            with open(sample_id + '_' + headerStr.replace(" ","_") + '_split.fasta', "w") as output_file:
+                output_file.write(">" + sample_id + "_" + headerStr + "\\n" + seq + "\\n")
+                success += 1
 
     f_open.close()
 
     logger.info("{} sequences sucessfully splitted.".format(success))
-
-
 
 
 if __name__ == '__main__':
