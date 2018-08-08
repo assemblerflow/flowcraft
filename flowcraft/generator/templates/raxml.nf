@@ -1,15 +1,20 @@
 IN_substitution_model_{{ pid }} = Channel.value(params.substitutionModel{{ param_id }})
-
+IN_seed_number_{{ pid }} = Channel.value(params.seedNumber{{ param_id }})
+IN_bootstrap_number_{{ pid }} = Channel.value(params.bootstrap{{ param_id }})
 
 process raxml_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
+
+    tag { 'raxml' }
 
     publishDir "results/raxml/"
 
     input:
     file(alignment) from {{ input_channel }}
     val substitution_model from IN_substitution_model_{{ pid }}
+    val seednumber from IN_seed_number_{{ pid }}
+    val bootstrapnumber from IN_bootstrap_number_{{ pid }}
 
     output:
     file ("*.tree") into {{ output_channel }}
@@ -19,7 +24,7 @@ process raxml_{{ pid }} {
 
     script:
     """
-    raxmlHPC -s ${alignment} -p 12345 -m ${substitution_model} -T $task.cpus -n tree
+    raxmlHPC -s ${alignment} -p 12345 -m ${substitution_model} -T $task.cpus -n $workflow.scriptName -f a -x ${seednumber} -N ${bootstrapnumber}
     """
 
 }
