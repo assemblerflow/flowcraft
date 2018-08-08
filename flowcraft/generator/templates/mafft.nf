@@ -4,7 +4,7 @@ process mafft_{{ pid }} {
 
     tag { 'mafft' }
 
-    publishDir "results/mafft/"
+    publishDir "results/alignment/mafft_{{ pid }}/"
 
     input:
     file(assembly) from {{ input_channel }}.map{ it[1] }.collect()

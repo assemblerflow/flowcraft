@@ -8,7 +8,7 @@ process raxml_{{ pid }} {
 
     tag { 'raxml' }
 
-    publishDir "results/raxml/"
+    publishDir "results/phylogeny/raxml_{{ pid }}/"
 
     input:
     file(alignment) from {{ input_channel }}
@@ -17,7 +17,7 @@ process raxml_{{ pid }} {
     val bootstrapnumber from IN_bootstrap_number_{{ pid }}
 
     output:
-    file ("*.tree") into {{ output_channel }}
+    file ("RAxML_*") into {{ output_channel }}
     {% with task_name="raxml", sample_id="val('single')" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
