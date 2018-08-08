@@ -19,7 +19,7 @@ process maxbin2_{{ pid }} {
 
 
     output:
-    file '*_maxbin.*.fasta' into binCh
+    file '*_maxbin.*.fasta' into binCh_{{ pid }}
     file '*_maxbin.{abundance,log,summary}'
     {% with task_name="maxbin2" %}
     {%- include "compiler_channels.txt" ignore missing -%}
@@ -33,7 +33,7 @@ process maxbin2_{{ pid }} {
 
 {{ output_channel }} = Channel.create()
 
-binCh.flatMap().map{ it -> [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.'), it] }
+binCh_{{ pid }}.flatMap().map{ it -> [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.'), it] }
     .into({{ output_channel }})
 
 {{ forks }}
