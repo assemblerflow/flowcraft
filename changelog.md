@@ -15,13 +15,14 @@ to pATLAS version 1.5.2.
 - Added component `fasterq_dump`
 - Added component `mash_sketch_fasta`
 - Added component `mash_sketch_fastq`
-- Added component `sample_fastq` for FastQ read sub sampling using seqtk
+- Added component `downsample_fastq` for FastQ read sub sampling using seqtk
 - Added component `momps` for typing of Legionella pneumophila
 
 ### Minor/Other changes
 
 - Added check for `params.accessions` that enables to report a proper
 error when it is set to `null`.
+- Added `build` option to export component parameters information in JSON format. 
 
 ### Bug fixes
 
@@ -32,6 +33,8 @@ with failed processes but with the work directory removed (the log files
 where no longer available).
 - Fixed issue when the `inspect` mode was executed on a pipeline without the 
 memory directory defined.
+- Fixed issue in the `inspect` mode, where there is a rare race condition between
+tags in the log and trace files.
 - Fixed bug on `midas_species` process where the output file was not being 
 linked correctly, causing the process to fail
 - Fixed bug on `bowtie` where the reference parameter was missing the pid

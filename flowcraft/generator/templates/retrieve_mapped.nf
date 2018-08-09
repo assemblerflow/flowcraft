@@ -26,3 +26,5 @@ process retrieve_mapped_{{ pid }} {
     gzip *.headersRenamed_*.fq
     """
 }
+
+{{ forks }}
