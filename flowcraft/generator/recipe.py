@@ -569,4 +569,5 @@ available_recipes = {
     "plasmids_assembly": "integrity_coverage fastqc_trimmomatic (spades pilon"
                          " mash_dist)",
     "plasmids_mash": "integrity_coverage fastqc_trimmomatic mash_screen",
+    "dengue": "integrity_coverage fastqc_trimmomatic filter_poly remove_host bowtie retrieve_mapped ( megahit | spades assembly_mapping pilon )",
 }

@@ -29,3 +29,5 @@ process metaProb_{{ pid }} {
     """
 
 }
+
+{{ forks }}
