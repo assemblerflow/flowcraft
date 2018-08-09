@@ -40,7 +40,7 @@ process assembly_mapping_{{ pid }} {
         echo [DEBUG] CREATING BAM INDEX >> .command.log 2>&1
         samtools index sorted.bam >> .command.log 2>&1
         echo [DEBUG] ESTIMATING READ DEPTH >> .command.log 2>&1
-        parallel -j ${task.cpus} samtools depth -ar {} sorted.bam \\> {}.tab  ::: \$(grep ">" $assembly | cut -c 2-)
+        parallel -j ${task.cpus} samtools depth -ar {} sorted.bam \\> {}.tab  ::: \$(grep ">" $assembly | cut -c 2- | tr " " "_")
         # Insert 0 coverage count in empty files. See Issue #2
         echo [DEBUG] REMOVING EMPTY FILES  >> .command.log 2>&1
         find . -size 0 -print0 | xargs -0 -I{} sh -c 'echo -e 0"\t"0"\t"0 > "{}"'
