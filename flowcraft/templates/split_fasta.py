@@ -73,9 +73,7 @@ def main(sample_id, assembly, min_size):
 
     for header in entry:
         headerStr = header.__next__()[1:].strip()
-        print(headerStr)
         seq = "".join(s.strip() for s in entry.__next__())
-        print(seq)
         if len(seq) >= min_size:
             with open(sample_id + '_' + headerStr.replace(" ","_") + '_split.fasta', "w") as output_file:
                 output_file.write(">" + sample_id + "_" + headerStr + "\\n" + seq + "\\n")
