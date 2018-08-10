@@ -17,12 +17,17 @@ to pATLAS version 1.5.2.
 - Added component `mash_sketch_fastq`
 - Added component `downsample_fastq` for FastQ read sub sampling using seqtk
 - Added component `momps` for typing of Legionella pneumophila
+- Added component `split_assembly`
+- Added component `mafft`
+- Added component `raxml`
 
 ### Minor/Other changes
 
 - Added check for `params.accessions` that enables to report a proper
 error when it is set to `null`.
 - Added `build` option to export component parameters information in JSON format. 
+- Fixed minor issue preventing the `maxbin2` and `split_assembly` components 
+from being used multiples times in a pipeline
 
 ### Bug fixes
 

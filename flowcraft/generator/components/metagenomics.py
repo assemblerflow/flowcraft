@@ -305,3 +305,42 @@ class MetaProb(Process):
         ]
 
 
+class SplitAssembly(Process):
+    """Component to filter metagenomic assemblies by contig size
+    If the contig is larger than $param.size, it gets separated
+    from the original assembly to continue the processes downstream
+    of the pipeline.
+
+            This process is set with:
+
+                - ``input_type``: fasta
+                - ``output_type``: fasta
+                - ``ptype``: assembly filter
+
+            """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "fasta"
+
+        self.params = {
+            "size": {
+                "default": "null",
+                "description": "Minimum contig size"
+            }
+        }
+
+        self.directives = {
+            "split_assembly": {
+                "cpus": 1,
+                "memory": "{ 1.GB * task.attempt }"
+            }
+        }
+
+        self.status_channels = [
+            "split_assembly"
+        ]
+

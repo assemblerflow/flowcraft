@@ -12,6 +12,7 @@ logger = logging.getLogger("main.{}".format(__name__))
 
 try:
     import generator.process as pc
+    import generator.components.alignment as alignment
     import generator.components.assembly as assembly
     import generator.components.annotation as annotation
     import generator.components.assembly_processing as ap
@@ -20,6 +21,7 @@ try:
     import generator.components.distance_estimation as distest
     import generator.components.metagenomics as meta
     import generator.components.patlas_mapping as mapping_patlas
+    import generator.components.phylogeny as phylogeny
     import generator.components.mlst as mlst
     import generator.components.reads_quality_control as readsqc
     import generator.components.typing as typing
@@ -31,6 +33,7 @@ try:
     from generator.pipeline_parser import guess_process
 except ImportError:
     import flowcraft.generator.process as pc
+    import flowcraft.generator.components.alignment as alignment
     import flowcraft.generator.components.assembly as assembly
     import flowcraft.generator.components.annotation as annotation
     import flowcraft.generator.components.assembly_processing as ap
@@ -40,6 +43,7 @@ except ImportError:
     import flowcraft.generator.components.mlst as mlst
     import flowcraft.generator.components.metagenomics as meta
     import flowcraft.generator.components.patlas_mapping as mapping_patlas
+    import flowcraft.generator.components.phylogeny as phylogeny
     import flowcraft.generator.components.reads_quality_control as readsqc
     import flowcraft.generator.components.typing as typing
     import flowcraft.generator.error_handling as eh
@@ -64,6 +68,7 @@ process_map = {
         "integrity_coverage": readsqc.IntegrityCoverage,
         "fasterq_dump": downloads.FasterqDump,
         "kraken": meta.Kraken,
+        "mafft": alignment.Mafft,
         "mapping_patlas": mapping_patlas.PatlasMapping,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
@@ -82,6 +87,7 @@ process_map = {
         "process_skesa": ap.ProcessSkesa,
         "process_spades": ap.ProcessSpades,
         #"prokka": annotation.Prokka,
+        "raxml": phylogeny.Raxml,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
         "retrieve_mapped": mapping.Retrieve_mapped,
@@ -89,6 +95,7 @@ process_map = {
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
         "spades": assembly.Spades,
+        "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
         "true_coverage": readsqc.TrueCoverage
 }
@@ -1081,7 +1088,8 @@ class NextflowGenerator:
                 else:
                     container += ":latest"
 
-            config_str += '\n\t${}_{}.container = "{}"'.format(p, pid, container)
+            if container:
+                config_str += '\n\t${}_{}.container = "{}"'.format(p, pid, container)
 
         return config_str
 
