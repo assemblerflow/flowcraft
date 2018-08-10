@@ -48,6 +48,7 @@ from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
 logger = get_logger(__file__)
 
+
 def is_odd(k_mer):
     for i in k_mer:
         if i % 2 != 0:
@@ -140,6 +141,34 @@ def set_kmers(kmer_opt, max_read_len):
     return kmers
 
 
+def fix_contig_names(asseembly_path):
+    """Removes whitespace from the assembly contig names
+
+    Parameters
+    ----------
+    asseembly_path : path to assembly file
+
+    Returns
+    -------
+    str:
+        Path to new assembly file with fixed contig names
+    """
+
+    fixed_assembly = "fixed_assembly.fa"
+
+    with open(asseembly_path) as in_hf, open(fixed_assembly) as ou_fh:
+
+        for line in in_hf:
+
+            if line.startswith(">"):
+                fixed_line = line.replace(" ", "_")
+                ou_fh.write(fixed_line)
+            else:
+                ou_fh.write(line)
+
+    return fixed_assembly
+
+
 @MainWrapper
 def main(sample_id, fastq_pair, max_len, kmer, mem):
     """Main executor of the megahit template.
@@ -220,7 +249,11 @@ def main(sample_id, fastq_pair, max_len, kmer, mem):
         else:
             fh.write("pass")
 
-    # Change the default final.contigs.fa assembly name to a more informative one
+    assembly_path = "megahit/final.contigs.fa"
+    fixed_assembly = fix_contig_names(assembly_path)
+
+    # Change the default final.contigs.fa assembly name to a more informative
+    #  one
     if "_trim." in fastq_pair[0]:
         sample_id += "_trim"
     # Get megahit version for output name
@@ -228,7 +261,7 @@ def main(sample_id, fastq_pair, max_len, kmer, mem):
 
     assembly_file = "{}_megahit{}.fasta".format(
         sample_id, info["version"].replace(".", ""))
-    os.rename("megahit/final.contigs.fa", assembly_file)
+    os.rename(fixed_assembly, assembly_file)
     logger.info("Setting main assembly file to: {}".format(assembly_file))
 
 
