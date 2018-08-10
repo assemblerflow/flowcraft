@@ -156,7 +156,7 @@ def fix_contig_names(asseembly_path):
 
     fixed_assembly = "fixed_assembly.fa"
 
-    with open(asseembly_path) as in_hf, open(fixed_assembly) as ou_fh:
+    with open(asseembly_path) as in_hf, open(fixed_assembly, "w") as ou_fh:
 
         for line in in_hf:
 
