@@ -57,7 +57,7 @@ class Spades(Process):
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "flowcraft/spades",
-            "version": "3.11.1-1",
+            "version": "3.12.0-1",
             "scratch": "true"
         }}
 
