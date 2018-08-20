@@ -20,6 +20,8 @@ to pATLAS version 1.5.2.
 - Added component `split_assembly`
 - Added component `mafft`
 - Added component `raxml`
+- Added component `viral_assembly`
+- Added component `mauve`
 
 ### Minor/Other changes
 
