@@ -21,7 +21,8 @@ to pATLAS version 1.5.2.
 - Added component `mafft`
 - Added component `raxml`
 - Added component `viral_assembly`
-- Added component `mauve`
+- Added component `progressive_mauve`
+- Added component `dengue_typing`
 
 ### Minor/Other changes
 
