@@ -54,7 +54,7 @@ def __get_version_pilon():
 
     try:
 
-        cli = ["java", "-jar", pilon_path , "--version"]
+        cli = ["java", "-jar", pilon_path, "--version"]
         p = subprocess.Popen(cli, stdout=PIPE, stderr=PIPE)
         stdout, _ = p.communicate()
 
@@ -342,17 +342,9 @@ class Assembly:
         gc_res : list
             List of GC proportion floats for each data point in the sliding
             window
-        labels: list
-            List of labels for each data point
-        xbars : list
-            List of the ending position of each contig in the genome
-
         """
 
         gc_res = []
-
-        # Get contigID for each window position
-        xbars = self._get_window_labels(window)
 
         # Get complete sequence to calculate sliding window values
         complete_seq = "".join(self.contigs.values()).lower()
@@ -364,13 +356,7 @@ class Assembly:
             # Get GC proportion
             gc_res.append(round(self._gc_prop(seq_window, len(seq_window)), 2))
 
-        plot_data = {
-            "data": gc_res,
-            "window": window,
-            "xbars": xbars
-        }
-
-        return plot_data
+        return gc_res
 
     def _get_coverage_from_file(self, coverage_file):
         """
@@ -418,9 +404,6 @@ class Assembly:
         if not self.contig_coverage:
             self._get_coverage_from_file(coverage_file)
 
-        # Get contigID for each window position
-        xbars = self._get_window_labels(window)
-
         # Stores the coverage results
         cov_res = []
 
@@ -433,13 +416,7 @@ class Assembly:
             # Get mean coverage
             cov_res.append(int(sum(cov_window) / len(cov_window)))
 
-        plot_data = {
-            "data": cov_res,
-            "window": window,
-            "xbars": xbars
-        }
-
-        return plot_data
+        return cov_res
 
 
 @MainWrapper
@@ -486,9 +463,11 @@ def main(sample_id, assembly_file, coverage_bp_file=None):
 
     if coverage_bp_file:
         try:
-            gc_sliding_data = assembly_obj.get_gc_sliding()
+            window = 2000
+            gc_sliding_data = assembly_obj.get_gc_sliding(window=window)
             cov_sliding_data = \
-                assembly_obj.get_coverage_sliding(coverage_bp_file)
+                assembly_obj.get_coverage_sliding(coverage_bp_file,
+                                                  window=window)
 
             # Get total basepairs based on the individual coverage of each
             # contig bp
@@ -497,8 +476,12 @@ def main(sample_id, assembly_file, coverage_bp_file=None):
             )
 
             # Add data to json report
-            json_dic["plotData"][0]["data"]["gcSliding"] = gc_sliding_data
-            json_dic["plotData"][0]["data"]["covSliding"] = cov_sliding_data
+            json_dic["plotData"][0]["data"]["genomeSliding"] = {
+                "gcData": gc_sliding_data,
+                "covData": cov_sliding_data,
+                "window": window,
+                "xbars": assembly_obj._get_window_labels(window)
+            }
             json_dic["plotData"][0]["data"]["sparkline"] = total_bp
 
         except:
