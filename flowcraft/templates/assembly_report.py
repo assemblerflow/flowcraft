@@ -480,7 +480,8 @@ def main(sample_id, assembly_file, coverage_bp_file=None):
                 "gcData": gc_sliding_data,
                 "covData": cov_sliding_data,
                 "window": window,
-                "xbars": assembly_obj._get_window_labels(window)
+                "xbars": assembly_obj._get_window_labels(window),
+                "assemblyFile": os.path.basename(assembly_file)
             }
             json_dic["plotData"][0]["data"]["sparkline"] = total_bp
 

@@ -453,7 +453,9 @@ class AbricateReport(Abricate):
                  "gene": entry["gene"].replace("'", ""),
                  "accession": entry["accession"],
                  "coverage": entry["coverage"],
-                 "identity": entry["identity"]}
+                 "identity": entry["identity"],
+                 "infile": entry["infile"]
+                 },
             )
 
         for sample, data in sample_dic.items():
@@ -485,7 +487,7 @@ class AbricateReport(Abricate):
             logger.debug("Retrieving sample if from: {}".format(
                 entry["infile"]))
             sample_id = re.match("(.*)_abr", entry["log_file"]).groups()[0]
-            database = entry["database"]
+            databxase = entry["database"]
 
             if sample_id not in gene_storage:
                 gene_storage[sample_id] = {}
