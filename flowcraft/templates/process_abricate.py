@@ -444,7 +444,7 @@ class AbricateReport(Abricate):
             contig_id = self._get_contig_id(entry["reference"])
             # Get database
             database = entry["database"]
-            if database not in json_dic["plotData"]:
+            if database not in sample_dic[sample_id]:
                 sample_dic[sample_id][database] = []
 
             sample_dic[sample_id][database].append(
