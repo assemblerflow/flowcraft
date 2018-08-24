@@ -487,7 +487,7 @@ class AbricateReport(Abricate):
             logger.debug("Retrieving sample if from: {}".format(
                 entry["infile"]))
             sample_id = re.match("(.*)_abr", entry["log_file"]).groups()[0]
-            databxase = entry["database"]
+            database = entry["database"]
 
             if sample_id not in gene_storage:
                 gene_storage[sample_id] = {}
