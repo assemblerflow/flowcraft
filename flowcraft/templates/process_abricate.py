@@ -432,6 +432,7 @@ class AbricateReport(Abricate):
 
         json_dic = {"plotData": []}
         sample_dic = {}
+        sample_assembly_map = {}
 
         for entry in self.storage.values():
 
@@ -447,6 +448,10 @@ class AbricateReport(Abricate):
             if database not in sample_dic[sample_id]:
                 sample_dic[sample_id][database] = []
 
+            # Update the sample-assembly correspondence dict
+            if sample_id not in sample_assembly_map:
+                sample_assembly_map[sample_id] = entry["infile"]
+
             sample_dic[sample_id][database].append(
                 {"contig": contig_id,
                  "seqRange": entry["seq_range"],
@@ -454,7 +459,6 @@ class AbricateReport(Abricate):
                  "accession": entry["accession"],
                  "coverage": entry["coverage"],
                  "identity": entry["identity"],
-                 "infile": entry["infile"]
                  },
             )
 
@@ -462,7 +466,8 @@ class AbricateReport(Abricate):
             json_dic["plotData"].append(
                 {
                     "sample": sample,
-                    "data": {"abricateXrange": data}
+                    "data": {"abricateXrange": data},
+                    "assemblyFile": sample_assembly_map[sample]
                 }
             )
 
