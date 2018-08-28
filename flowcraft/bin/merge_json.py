@@ -6,7 +6,7 @@ import json
 core_file, f1, f2 = sys.argv[1:4]
 
 try:
-    sample_id = sys.argv[3]
+    sample_id = sys.argv[4]
 except IndexError:
     sample_id = None
 
