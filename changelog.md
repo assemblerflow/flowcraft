@@ -31,6 +31,7 @@ error when it is set to `null`.
 - Added `build` option to export component parameters information in JSON format. 
 - Fixed minor issue preventing the `maxbin2` and `split_assembly` components 
 from being used multiples times in a pipeline
+- Added a catch to the `filter_poly` process for cases where the input file is empty. 
 
 ### Bug fixes
 
