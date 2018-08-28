@@ -6,6 +6,9 @@ import logging
 
 from os.path import dirname, abspath
 
+SCRIPT_ID = "${workflow.scriptId}"
+RUN_NAME = "${workflow.runName}"
+
 logger = logging.getLogger("main.{}".format(__name__))
 
 
@@ -41,8 +44,10 @@ def write_json(report_json, version_json, trace_file, task_name,
         "trace": trace,
         "processId": pid,
         "pipelineId": 1,
-        "projectid": 1,
+        "projectid": RUN_NAME,
         "userId": 1,
+        "scriptId": SCRIPT_ID,
+        "runName": RUN_NAME,
         "username": "user",
         "processName": task_name,
         "workdir": dirname(abspath(report_json))
