@@ -5,6 +5,11 @@ import json
 
 core_file, f1, f2 = sys.argv[1:]
 
+try:
+    sample_id = sys.argv[3]
+except IndexError:
+    sample_id = None
+
 
 def get_core_genes(core_file):
 
@@ -88,10 +93,12 @@ def main():
         status_info = []
         for sample, info in sample_info:
 
+            sample_name = sample_id if sample_id else sample
+
             core_results = filter_core_genes(info, current_array, core_genes)
             status, perc = assess_quality(core_results, core_genes)
             status_info.append({
-                "sample": sample,
+                "sample": sample_name,
                 "status": status,
                 "lnfPercentage": perc
             })
