@@ -65,7 +65,7 @@ def __get_version_skesa():
         version = "undefined"
 
     return {
-        "program": "SPAdes",
+        "program": "skesa",
         "version": version,
     }
 
