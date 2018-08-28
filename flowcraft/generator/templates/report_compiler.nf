@@ -30,7 +30,8 @@ process compile_reports {
 
     input:
     file report from master_report.collect()
-    file dag from Channel.fromPath(".forkTree.json")
+    file forks from Channel.fromPath(".forkTree.json")
+    file dag from Channel.fromPath(".treeDag.json")
 
     output:
     file "pipeline_report.json"
@@ -40,21 +41,44 @@ process compile_reports {
     import sys
     import json
 
-    reports = '${report}'.split()
-    dag = '${dag}'
+    reports = "${report}".split()
+    forks = "${forks}"
+    dag = "${dag}"
 
-    storage = []
+    # Add nextflow metadata
+    storage = [{
+        "nfMetadata": {
+            "scriptId": "${workflow.scriptId}",
+            "scriptName": "${workflow.scriptId}",
+            "profile": "${workflow.profile}",
+            "container": "${workflow.container}",
+            "containerEngine": "${workflow.containerEngine}",
+            "commandLine": "${workflow.commandLine}",
+            "runName": "${workflow.runName}",
+            "sessionId": "${workflow.sessionId}",
+            "projectDir": "${workflow.projectDir}",
+            "launchDir": "${workflow.launchDir}",
+            "start_time": "${workflow.start}"
+        }
+    }]
 
+    # Add forks dictionary
     try:
-        with open(dag) as fh:
-            dag = json.load(fh)
-            storage.append({"dag": dag})
+        with open(forks) as fh:
+            forks = json.load(fh)
+            storage[0]["nfMetadata"]["forks"] =  forks
     except json.JSONDecodeError:
         logging.warning("Could not parse versions JSON: {}".format(
             dag))
-        dag = None,
 
-    print(storage)
+    # Add tree DAG in JSON format
+    try:
+        with open(dag) as fh:
+            dag = json.load(fh)
+            storage[0]["nfMetadata"]["dag"] =  dag
+    except json.JSONDecodeError:
+        logging.warning("Could not parse versions JSON: {}".format(
+            dag))
 
     for r in reports:
         with open(r) as fh:
