@@ -60,7 +60,7 @@ process va_spades_{{ pid }} {
     val clear from checkpointClear_{{ pid }}
 
     output:
-    set sample_id, file({task.exitStatus == 1 ? ".exitcodeU" : '*_spades*.fasta'}) into assembly_spades
+    set sample_id, file({task.exitStatus == 1 ? ".exitcode" : '*_spades*.fasta'}) into assembly_spades
     {% with task_name="va_spades" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
