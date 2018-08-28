@@ -54,7 +54,7 @@ def assess_quality(core_array, core_genes):
     return status, perc
 
 
-def get_table_data(data_obj):
+def get_table_data(data_obj, sample_id=None):
 
     header_map = dict((p, h) for p, h in enumerate(data_obj["header"]))
     table_data = []
@@ -73,7 +73,7 @@ def get_table_data(data_obj):
             })
 
         table_data.append({
-            "sample": sample,
+            "sample": sample_id if sample_id else sample,
             "data": cur_data
         })
 
