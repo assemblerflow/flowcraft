@@ -103,7 +103,7 @@ def main():
                 "lnfPercentage": perc
             })
 
-        table_data = get_table_data(j2)
+        table_data = get_table_data(j2, sample_name)
         res = {"cagao": [j1, j2], "status": status_info,
                "tableRow": table_data}
 
