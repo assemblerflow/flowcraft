@@ -26,10 +26,11 @@ process report {
 
 process compile_reports {
 
-    publishDir "pipeline_report/"
+    publishDir "pipeline_report/", mode: "copy"
 
     input:
     file report from master_report.collect()
+    file dag from Channel.fromPath(".forkTree.json")
 
     output:
     file "pipeline_report.json"
@@ -40,8 +41,21 @@ process compile_reports {
     import json
 
     reports = '${report}'.split()
+    dag = '${dag}'
 
     storage = []
+
+    try:
+        with open(dag) as fh:
+            dag = json.load(fh)
+            storage.append({"dag": dag})
+    except json.JSONDecodeError:
+        logging.warning("Could not parse versions JSON: {}".format(
+            dag))
+        dag = None,
+
+    print(storage)
+
     for r in reports:
         with open(r) as fh:
             rjson = json.load(fh)

@@ -1443,6 +1443,10 @@ class NextflowGenerator:
         # write to file dict_viz
         self.dag_to_file(dict_viz)
 
+        # Write tree forking information for dotfile
+        with open(".forkTree.json", "w") as fh:
+            fh.write(json.dumps(self._fork_tree))
+
         # send with jinja to html resource
         return self._render_config("pipeline_graph.html", {"data": dict_viz})
 
