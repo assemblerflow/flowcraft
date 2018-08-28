@@ -48,6 +48,8 @@ process va_spades_{{ pid }} {
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
+    validExitStatus 0,1
+
     tag { sample_id }
     publishDir 'results/assembly/spades_{{ pid }}/', pattern: '*_spades*.fasta', mode: 'copy'
 
@@ -58,7 +60,7 @@ process va_spades_{{ pid }} {
     val clear from checkpointClear_{{ pid }}
 
     output:
-    set sample_id, file('*_spades*.fasta') into assembly_spades
+    set sample_id, file({task.exitStatus == 1 ? ".exitcodeU" : '*_spades*.fasta'}) into assembly_spades
     {% with task_name="va_spades" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -71,12 +73,9 @@ process va_spades_{{ pid }} {
 class VerifyCompletness {
 
     public static boolean contigs(String filename, int threshold){
-        println(filename)
         BufferedReader reader = new BufferedReader(new FileReader(filename));
         boolean result = processContigs(reader, threshold);
         reader.close()
-
-        println(result)
 
         return result;
     }
@@ -91,7 +90,6 @@ class VerifyCompletness {
                 splittedLine = line.split('_')
                 lineThreshold = splittedLine[3].toInteger()
                 if(lineThreshold >= threshold) {
-                    println(lineThreshold)
                     return true;
                 }
              }
@@ -103,7 +101,7 @@ class VerifyCompletness {
 
 megahit = Channel.create()
 good_assembly = Channel.create()
-assembly_spades.choice(good_assembly, megahit){a -> VerifyCompletness.contigs(a[1].toString(), params.minimumContigSize{{ param_id }}.toInteger()) == true ? 0 : 1}
+assembly_spades.choice(good_assembly, megahit){a -> a[1].toString() == "null" ? false : VerifyCompletness.contigs(a[1].toString(), params.minimumContigSize{{ param_id }}.toInteger()) == true ? 0 : 1}
 
 
 process va_megahit_{{ pid }}  {

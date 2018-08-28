@@ -32,6 +32,7 @@ error when it is set to `null`.
 - Fixed minor issue preventing the `maxbin2` and `split_assembly` components 
 from being used multiples times in a pipeline
 - Added a catch to the `filter_poly` process for cases where the input file is empty. 
+- spades template now reports the exit code of spades' execution
 
 ### Bug fixes
 
