@@ -470,7 +470,7 @@ def main(sample_id, assembly_file, coverage_bp_file=None):
                                                   window=window)
 
             # Get total basepairs based on the individual coverage of each
-            # contig bp
+            # contig bpx
             total_bp = sum(
                 [sum(x) for x in assembly_obj.contig_coverage.values()]
             )

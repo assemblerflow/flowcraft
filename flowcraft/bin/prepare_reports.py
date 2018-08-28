@@ -29,7 +29,7 @@ def write_json(report_json, version_json, trace_file, task_name,
     except json.JSONDecodeError:
         logging.warning("Could not parse versions JSON: {}".format(
             report_json))
-        versions = {}
+        versions = []
 
     logging.info("Parsing trace file")
     with open(trace_file) as fh:
