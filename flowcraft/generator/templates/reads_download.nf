@@ -54,6 +54,8 @@ process reads_download_{{ pid }} {
             echo "Could not download accession $accession_id" > .fail
         fi
     }
+    version_str="{'version':[{'program':'getSeqENA.py','version':'1.3'}]}"
+    echo \$version_str > .versions
     """
 
 }
