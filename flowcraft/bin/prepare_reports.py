@@ -6,8 +6,8 @@ import logging
 
 from os.path import dirname, abspath
 
-SCRIPT_ID = "${workflow.scriptId}"
-RUN_NAME = "${workflow.runName}"
+SCRIPT_ID = '${workflow.scriptId}'
+RUN_NAME = '${workflow.runName}'
 
 logger = logging.getLogger("main.{}".format(__name__))
 
