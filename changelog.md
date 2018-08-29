@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming release (`dev` branch)
+## 1.2.2
 
 ### Components changes
 
