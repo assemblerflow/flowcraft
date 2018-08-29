@@ -68,5 +68,9 @@ Template
 Reports JSON
 ^^^^^^^^^^^^
 
-``warnings``: Message with execution warnings
-``fail``: Messages with execution failures
+``plotData``:
+    - ``sparkline``: Total number of base pairs.
+``warnings``:
+    - When the number of contigs exceeds a provided threshold.
+``fail``:
+    - When the genome size is below 80% or above 150% of the expected genome size.

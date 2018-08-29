@@ -370,10 +370,12 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                              "value": nreads,
                              "table": "qc",
                              "columnBar": True},
-                            {"header": "Coverage (1st)",
+                            {"header": "Coverage",
                              "value": exp_coverage,
                              "table": "qc",
-                             "columnBar": True}
+                             "columnBar": True,
+                             "failThreshold": minimum_coverage
+                             }
                         ]
                     }],
                     "plotData": [{
@@ -382,18 +384,17 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                             "sparkline": chars
                         }
                     }],
-                    "minCoverage": minimum_coverage
                 }
             else:
                 json_dic = {
                     "tableRow": [{
                         "sample": sample_id,
                         "data": [
-                            {"header": "Coverage (2nd)",
+                            {"header": "Coverage",
                              "value": exp_coverage,
                              "table": "qc",
                              "columnBar": True,
-                             "threshold": minimum_coverage
+                             "failThreshold": minimum_coverage
                              }
                         ],
                     }],
@@ -450,7 +451,7 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                 json_dic["fail"] = [{
                     "sample": sample_id,
                     "table": "qc",
-                    "value": fail_msg
+                    "value": [fail_msg]
                 }]
 
             json_report.write(json.dumps(json_dic, separators=(",", ":")))

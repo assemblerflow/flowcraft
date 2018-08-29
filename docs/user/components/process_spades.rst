@@ -57,7 +57,10 @@ Reports JSON
 ^^^^^^^^^^^^
 
 ``tableRow``:
-    - ``Contigs (<assembler>)``: Number of contigs
-    - ``Assembled BP (<assembler>)``: Number of assembled base pairs
+    - ``Contigs (<assembler>)``: Number of contigs.
+    - ``Assembled BP (<assembler>)``: Number of assembled base pairs.
 ``warnings``:
-    - ``process_assembly``: Failure messages
+    - When the number of contigs exceeds a given threshold.
+``fail``:
+    - When the genome size is below 80% or above 150% of the expected genome size.
+ ``process_assembly``: Failure messages

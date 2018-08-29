@@ -505,7 +505,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
                                 assembly_len)
                 logger.warning(warn_msg)
                 warn_fh.write(warn_msg)
-                fails = "Small_genome_size_({})".format(assembly_len)
+                fails = warn_msg
 
         if assembly_len > t_150:
 
@@ -514,7 +514,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
                             assembly_len)
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)
-            fails = "Large_genome_size_({})".format(assembly_len)
+            fails = warn_msg
 
         logger.debug("Checking number of contigs: {}".format(
             len(assembly_obj.contigs)))
@@ -522,12 +522,12 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
         if len(assembly_obj.contigs) > contig_threshold:
 
             warn_msg = "The number of contigs ({}) exceeds the threshold of " \
-                       "100 contigs per 1.5Mb ({})".format(
-                            assembly_obj.contigs, contig_threshold)
+                       "{} contigs per 1.5Mb ({})".format(
+                            assembly_obj.contigs, max_contigs, contig_threshold)
 
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)
-            warnings.append("excessive_contigs:moderate")
+            warnings.append(warn_msg)
 
     # Write filtered assembly
     logger.debug("Renaming old assembly file to: {}".format(
@@ -566,7 +566,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
             json_dic["fail"] = [{
                 "sample": sample_id,
                 "table": "assembly",
-                "value": fails
+                "value": [fails]
             }]
 
         json_report.write(json.dumps(json_dic, separators=(",", ":")))

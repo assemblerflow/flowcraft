@@ -392,7 +392,7 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
                             ncontigs, contig_threshold)
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)
-            warnings.append("excessive_contigs:high")
+            warnings.append(warn_msg)
 
         # If the filtered assembly size falls below the 80% genome size
         # threshold, fail this check and return False
@@ -417,8 +417,8 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
         json_dic = {
             "plotData": [{
                 "sample": sample_id,
-                "data": {"sparkline": total_assembled_bp,
-                          "coverageDist": [x["cov"] for x in coverage_info.values()]
+                "data": {
+                    "sparkline": total_assembled_bp
                 }
             }]
         }

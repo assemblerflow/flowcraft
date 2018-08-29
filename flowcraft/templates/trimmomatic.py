@@ -205,7 +205,7 @@ def write_report(storage_dic, output_file, sample_id):
                 "tableRow": [{
                     "sample": sample_id,
                     "data": [
-                        {"header": "trimmed",
+                        {"header": "Trimmed (%)",
                          "value": vals["total_trim_perc"],
                          "table": "qc",
                          "columnBar": True},

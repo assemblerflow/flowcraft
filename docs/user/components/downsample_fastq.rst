@@ -1,10 +1,10 @@
-sample_fastq
-==========
+downsample_fastq
+================
 
 Purpose
 -------
 
-sample_fastq uses seqtk to subsample fastq read data to a target coverage depth
+downsample_fastq uses seqtk to subsample fastq read data to a target coverage depth
 if the estimated coverage is higher than the provided target depth. When
 no subsample is required, it outputs the original FastQ files.
 
@@ -49,4 +49,4 @@ Reports JSON
 ^^^^^^^^^^^^
 
 ``tableRow``:
-    - ``Coverage``: <typing result>
+    - ``Coverage``: Estimated coverage.

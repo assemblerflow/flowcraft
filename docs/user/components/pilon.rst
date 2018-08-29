@@ -61,9 +61,20 @@ Template
 
 Reports JSON
 ^^^^^^^^^^^^
-
 ``tableRow``:
-    ``Trimmed (%)``: Percentage of trimmed nucleotides
+    - ``Contigs``: Number of contigs.
+    - ``Assembled BP``: Number of assembled base pairs.
 ``plotData``:
-    ``sparkline``: Number of nucleotides after trimming
-``badReads``: Number of discarded reads
+    - ``size_dist``: Distribution of contig size.
+    - ``sparkline``: Number of assembled base pairs.
+    - ``genomeSliding``:
+        - ``gcData``: Genome sliding window of GC content.
+        - ``covData``: Genome sliding window of read coverage depth.
+        - ``window``: Size of sliding window
+        - ``xbars``: Position of contigs along the genome sliding window.
+        - ``assemblyFile``: Name of the input assembly file.
+``warnings``:
+    - When the number of contigs exceeds a given threshold.
+``fail``:
+    - When the genome size is below 80% or above 150% of the expected genome size.
+

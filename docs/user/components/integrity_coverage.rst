@@ -82,9 +82,12 @@ Reports JSON
 ^^^^^^^^^^^^
 
 ``tableRow``:
-    - ``Raw BP``: Number of nucleotides
-    - ``Reads``: Number of reads
-    - ``Coverage (1st)``: Estimated coverage
+    - ``Raw BP``: Number of nucleotides.
+    - ``Reads``: Number of reads.
+    - ``Coverage``: Estimated coverage.
 ``plotData``:
-    - ``sparkline``: Number of nucleotides
-``minCoverage``: Minimum coverage specified for the module
+    - ``sparkline``: Number of nucleotides.
+``warnings``:
+    - When the enconding and/or phred score cannot be inferred from FastQ files.
+``fail``:
+    - When estimated coverage is below the provided threshold.

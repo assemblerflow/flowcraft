@@ -504,12 +504,12 @@ def check_summary_health(summary_file, **kwargs):
         # WARNINGS
         # Check for fail sensitive
         if cat in warning_fail_sensitive and test == "FAIL":
-            warning.append("{}:low".format(cat))
+            warning.append("Failed category: {}".format(cat))
             logger.warning("Category {} flagged at a fail sensitive "
                            "category".format(cat))
 
         if cat in warning_must_pass and test != "PASS":
-            warning.append("{}:low".format(cat))
+            warning.append("Did not pass category: {}".format(cat))
             logger.warning("Category {} flagged at a must pass "
                            "category".format(cat))
 
@@ -606,7 +606,7 @@ def main(sample_id, result_p1, result_p2, opts):
                     json_dic["fail"] = [{
                         "sample": sample_id,
                         "table": "qc",
-                        "value": fail_msg
+                        "value": [fail_msg]
                     }]
                     report_fh.write(
                         json.dumps(json_dic, separators=(",", ":")))
