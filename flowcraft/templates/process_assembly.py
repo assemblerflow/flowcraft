@@ -523,7 +523,9 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
 
             warn_msg = "The number of contigs ({}) exceeds the threshold of " \
                        "{} contigs per 1.5Mb ({})".format(
-                            assembly_obj.contigs, max_contigs, contig_threshold)
+                            len(assembly_obj.contigs),
+                            max_contigs,
+                            contig_threshold)
 
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)
