@@ -1,25 +1,29 @@
+// checks if cutoff value is higher than 0
+if (Float.parseFloat(params.cov_cutoff{{ param_id }}.toString()) == 0) {
+    exit 1, "Cutoff value of 0 will output every plasmid in the database with coverage 0. Provide a value higher than 0."
+}
+
 IN_index_files_{{ pid }} = Channel.value(params.refIndex{{ param_id }})
 IN_samtools_indexes_{{ pid }} = Channel.value(params.samtoolsIndex{{ param_id }})
 IN_length_json_{{ pid }} = Channel.value(params.lengthJson{{ param_id }})
 IN_cov_cutoff_{{ pid }} = Channel.value(params.cov_cutoff{{ param_id }})
 
 
-// process that runs bowtie2
+// process that runs bowtie2 and samtools
 process mappingBowtie_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
     tag { sample_id }
 
-    publishDir 'results/mapping/bowtie2_{{ pid }}/'
-
     input:
     set sample_id, file(reads) from {{ input_channel }}
     val bowtie2Index from IN_index_files_{{ pid }}
+    val samtoolsIdx from IN_samtools_indexes_{{ pid }}
 
     output:
-    set sample_id, file("mappingBowtie*.sam") into bowtieResults
-    {% with task_name="mappingBowtie", sample_id="sample_id" %}
+    set sample_id, file("samtoolsDepthOutput*.txt") into samtoolsResults
+    {% with task_name="mappingBowtie" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
@@ -33,39 +37,13 @@ process mappingBowtie_{{ pid }} {
     //}
 
     """
-    bowtie2 -x ${bowtie2Index} ${readsString} -p ${task.cpus} -k \
-    ${params.max_k{{ param_id }} } -5 ${params.trim5{{ param_id }} } -S \
-    mappingBowtie_${sample_id}.sam
-    """
-}
-
-/**
-* samtools faidx is escaped because index file is already provided in docker
-* image.
-*/
-process samtoolsView_{{ pid }} {
-
-    {% include "post.txt" ignore missing %}
-
-    tag { sample_id }
-
-    publishDir 'results/mapping/samtools_{{ pid }}/'
-
-    input:
-    set sample_id, file(samtoolsFile) from bowtieResults
-    val samtoolsIdx from IN_samtools_indexes_{{ pid }}
-
-    output:
-    set sample_id, file("samtoolsDepthOutput*.txt") into samtoolsResults
-    {% with task_name="samtoolsView", sample_id="sample_id" %}
-    {%- include "compiler_channels.txt" ignore missing -%}
-    {% endwith %}
-
-    """
-    samtools view -b -t ${samtoolsIdx} -@ ${task.cpus} ${samtoolsFile} | \
+    bowtie2 -x ${bowtie2Index} ${readsString} -p ${task.cpus} -a -5 ${params.trim5{{ param_id }}} | \
+    samtools view -b -t ${samtoolsIdx} -@ ${task.cpus} - | \
     samtools sort -@ ${task.cpus} -o samtoolsSorted_${sample_id}.bam
     samtools index samtoolsSorted_${sample_id}.bam
-    samtools depth samtoolsSorted_${sample_id}.bam > samtoolsDepthOutput_${sample_id}.txt
+    samtools depth samtoolsSorted_${sample_id}.bam > \
+    samtoolsDepthOutput_${sample_id}.txt
+    rm samtoolsSorted_${sample_id}.bam*
     """
 }
 
@@ -79,7 +57,7 @@ process jsonDumpingMapping_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir 'results/mapping/mapping_json_{{ pid }}/'
+    publishDir 'results/mapping/mapping_json_{{ pid }}/', mode: 'copy'
 
     input:
     set sample_id, file(depthFile) from samtoolsResults

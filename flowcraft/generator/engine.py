@@ -12,6 +12,7 @@ logger = logging.getLogger("main.{}".format(__name__))
 
 try:
     import generator.process as pc
+    import generator.components.alignment as alignment
     import generator.components.assembly as assembly
     import generator.components.annotation as annotation
     import generator.components.assembly_processing as ap
@@ -20,6 +21,7 @@ try:
     import generator.components.distance_estimation as distest
     import generator.components.metagenomics as meta
     import generator.components.patlas_mapping as mapping_patlas
+    import generator.components.phylogeny as phylogeny
     import generator.components.mlst as mlst
     import generator.components.reads_quality_control as readsqc
     import generator.components.typing as typing
@@ -31,6 +33,7 @@ try:
     from generator.pipeline_parser import guess_process
 except ImportError:
     import flowcraft.generator.process as pc
+    import flowcraft.generator.components.alignment as alignment
     import flowcraft.generator.components.assembly as assembly
     import flowcraft.generator.components.annotation as annotation
     import flowcraft.generator.components.assembly_processing as ap
@@ -40,6 +43,7 @@ except ImportError:
     import flowcraft.generator.components.mlst as mlst
     import flowcraft.generator.components.metagenomics as meta
     import flowcraft.generator.components.patlas_mapping as mapping_patlas
+    import flowcraft.generator.components.phylogeny as phylogeny
     import flowcraft.generator.components.reads_quality_control as readsqc
     import flowcraft.generator.components.typing as typing
     import flowcraft.generator.error_handling as eh
@@ -57,14 +61,20 @@ process_map = {
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
         "chewbbaca": mlst.Chewbbaca,
+        "dengue_typing": typing.DengueTyping,
+        "downsample_fastq": readsqc.DownsampleFastq,
         "fastqc": readsqc.FastQC,
         "fastqc_trimmomatic": readsqc.FastqcTrimmomatic,
         "filter_poly": readsqc.FilterPoly,
         "integrity_coverage": readsqc.IntegrityCoverage,
+        "fasterq_dump": downloads.FasterqDump,
         "kraken": meta.Kraken,
+        "mafft": alignment.Mafft,
         "mapping_patlas": mapping_patlas.PatlasMapping,
         "mash_dist": distest.PatlasMashDist,
         "mash_screen": distest.PatlasMashScreen,
+        "mash_sketch_fasta": distest.MashSketchFasta,
+        "mash_sketch_fastq": distest.MashSketchFastq,
         "maxbin2": meta.MaxBin2,
         "megahit": meta.Megahit,
         "metamlst": mlst.MetaMlst,
@@ -72,11 +82,14 @@ process_map = {
         "metaspades": meta.Metaspades,
         "midas_species": meta.Midas_species,
         "mlst": mlst.Mlst,
+        "momps": typing.Momps,
         "patho_typing": typing.PathoTyping,
         "pilon": ap.Pilon,
         "process_skesa": ap.ProcessSkesa,
         "process_spades": ap.ProcessSpades,
+        "progressive_mauve":alignment.ProgressiveMauve,
         #"prokka": annotation.Prokka,
+        "raxml": phylogeny.Raxml,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
         "retrieve_mapped": mapping.Retrieve_mapped,
@@ -84,8 +97,10 @@ process_map = {
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
         "spades": assembly.Spades,
+        "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
-        "true_coverage": readsqc.TrueCoverage
+        "true_coverage": readsqc.TrueCoverage,
+        "viral_assembly": assembly.ViralAssembly
 }
 
 """
@@ -102,7 +117,7 @@ class NextflowGenerator:
 
     def __init__(self, process_connections, nextflow_file,
                  pipeline_name="flowcraft", ignore_dependencies=False,
-                 auto_dependency=True, merge_params=True):
+                 auto_dependency=True, merge_params=True, export_params=False):
 
         self.processes = []
 
@@ -129,11 +144,22 @@ class NextflowGenerator:
         int: Stores the number of lanes in the pipelines
         """
 
+        self.export_parameters = export_params
+        """
+        bool: Determines whether the build mode is only for the export of 
+        parameters in JSON format. Setting to True will disabled some checks,
+        such as component dependency requirements
+        """
+
+        # When the export_params option is used, disable the auto dependency
+        # feature automatically
+        auto_deps = auto_dependency if not self.export_parameters else False
+
         # Builds the connections in the processes, which parses the
         # process_connections dictionary into the self.processes attribute
         # list.
         self._build_connections(process_connections, ignore_dependencies,
-                                auto_dependency)
+                                auto_deps)
 
         self.nf_file = nextflow_file
         """
@@ -404,7 +430,7 @@ class NextflowGenerator:
                         if auto_dependency:
                             self._add_dependency(
                                 out_process, dep, in_lane, out_lane, p)
-                        else:
+                        elif not self.export_parameters:
                             logger.error(colored_print(
                                 "\nThe following dependency of the process"
                                 " '{}' is missing: {}".format(p_out_name, dep),
@@ -842,6 +868,7 @@ class NextflowGenerator:
             p.set_channels(pid=i)
 
             # If there is no parent lane, set the raw input channel from user
+            logger.debug("{} {} {}".format(p.parent_lane, p.input_type, p.template))
             if not p.parent_lane and p.input_type:
                 self._update_raw_input(p)
 
@@ -1064,7 +1091,8 @@ class NextflowGenerator:
                 else:
                     container += ":latest"
 
-            config_str += '\n\t${}_{}.container = "{}"'.format(p, pid, container)
+            if container:
+                config_str += '\n\t${}_{}.container = "{}"'.format(p, pid, container)
 
         return config_str
 
@@ -1399,6 +1427,22 @@ class NextflowGenerator:
         with open(splitext(self.nf_file)[0] + ".html", "w") as fh:
             fh.write(pipeline_to_json)
 
+    def export_params(self):
+        """Export pipeline params as a JSON to stdout
+
+        This run mode iterates over the pipeline processes and exports the
+        params dictionary of each component as a JSON to stdout.
+        """
+
+        params_json = {}
+
+        # Skip first init process
+        for p in self.processes[1:]:
+            params_json[p.template] = p.params
+
+        # Flush params json to stdout
+        sys.stdout.write(json.dumps(params_json))
+
     def build(self):
         """Main pipeline builder
 
@@ -1439,7 +1483,7 @@ class NextflowGenerator:
             "\tFinished configurations \u2713"))
 
         for p in self.processes:
-            self.template += p.template_str
+            self.template += "\n{}".format(p.template_str)
 
         self._build_footer()
 

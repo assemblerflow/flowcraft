@@ -373,6 +373,9 @@ class NextflowInspector:
         elif s.upper().endswith("GB"):
             return float(s.rstrip("GB")) * 1024
 
+        elif s.upper().endswith("TB"):
+            return float(s.rstrip("TB")) * 1024 * 1024
+
         else:
             return float(s)
 
@@ -554,6 +557,8 @@ class NextflowInspector:
                 if v["status"] in good_status:
                     p["finished"].add(tag)
                 elif v["status"] == "FAILED":
+                    if not v["work_dir"]:
+                        v["work_dir"] = ""
                     self.process_tags[process][tag]["log"] = \
                         self._retrieve_log(join(v["work_dir"], ".command.log"))
                     p["failed"].add(tag)
@@ -643,6 +648,21 @@ class NextflowInspector:
         # The headers that will be used to populate the process
         process_tag_headers = ["realtime", "rss", "rchar", "wchar"]
         for h in process_tag_headers:
+
+            # In the rare occasion the tag is parsed first in the trace
+            # file than the log file, add the new tag.
+            if info["tag"] not in self.process_tags[process]:
+                # If the 'start' tag is present in the trace, use that
+                # information. If not, it will be parsed in the log file.
+                try:
+                    timestart = info["start"].split()[1]
+                except KeyError:
+                    timestart = None
+                self.process_tags[process][info["tag"]] = {
+                    "workdir": self._expand_path(info["hash"]),
+                    "start": timestart
+                }
+
             if h in info and info["tag"] != "-":
                 if h != "realtime" and info[h] != "-":
                     self.process_tags[process][info["tag"]][h] = \
@@ -654,8 +674,11 @@ class NextflowInspector:
         if "cpus" in info and not self.processes[process]["cpus"]:
             self.processes[process]["cpus"] = info["cpus"]
         if "memory" in info and not self.processes[process]["memory"]:
-            self.processes[process]["memory"] = self._size_coverter(
-                info["memory"])
+            try:
+                self.processes[process]["memory"] = self._size_coverter(
+                    info["memory"])
+            except ValueError:
+                self.processes[process]["memory"] = None
 
         if info["hash"] in self.stored_ids:
             return
@@ -865,6 +888,7 @@ class NextflowInspector:
         if size_stamp and size_stamp == self.trace_sizestamp:
             return
         else:
+            logger.debug("Updating trace size stamp to: {}".format(size_stamp))
             self.trace_sizestamp = size_stamp
 
         with open(self.trace_file) as fh:
@@ -906,12 +930,16 @@ class NextflowInspector:
         size_stamp = os.path.getsize(self.log_file)
         self.log_retry = 0
         if size_stamp and size_stamp == self.log_sizestamp:
-            logger.debug("No changes detected in log size stamp. Skipping.")
             return
         else:
             logger.debug("Updating log size stamp to: {}".format(size_stamp))
             self.log_sizestamp = size_stamp
 
+        # Regular expression to catch four groups:
+        # 1. Start timestamp
+        # 2. Work directory hash
+        # 3. Process name
+        # 4. Tag name
         r = ".* (.*) \[.*\].*\[(.*)\].*process > (.*) \((.*)\).*"
 
         with open(self.log_file) as fh:
@@ -929,32 +957,49 @@ class NextflowInspector:
                     process = m.group(3)
                     tag = m.group(4)
 
+                    # Skip if this line has already been parsed
                     if time_start + tag not in self.stored_log_ids:
                         self.stored_log_ids.append(time_start + tag)
                     else:
                         continue
 
+                    # For first time processes
                     if process not in self.processes:
                         continue
                     p = self.processes[process]
+
+                    # Skip is process/tag combination has finished or is retrying
                     if tag in list(p["finished"]) + list(p["retry"]):
                         continue
+
+                    # Update failed process/tags when they have been re-submitted
                     if tag in list(p["failed"]) and \
                             "Re-submitted process >" in line:
                         p["retry"].add(tag)
                         self.send = True
                         continue
 
+                    # Set process barrier to running. Check for barrier status
+                    # are performed at the end of the trace parsing in the
+                    # _update_barrier_status method.
                     p["barrier"] = "R"
                     if tag not in p["submitted"]:
                         p["submitted"].add(tag)
-                        self.process_tags[process][tag] = {
-                            "workdir": self._expand_path(workdir),
-                            "start": time_start
-                        }
-                        self.send = True
-
-        self._update_pipeline_status()
+                        # Update the process_tags attribute with the new tag.
+                        # Update only when the tag does not exist. This may rarely
+                        # occur when the tag is parsed first in the trace file
+                        if tag not in self.process_tags[process]:
+                            self.process_tags[process][tag] = {
+                                "workdir": self._expand_path(workdir),
+                                "start": time_start
+                            }
+                            self.send = True
+                        # When the tag is filled in the trace file parsing,
+                        # the timestamp may not be present in the trace. In
+                        # those cases, fill that information here.
+                        elif not self.process_tags[process][tag]["start"]:
+                            self.process_tags[process][tag]["start"] = time_start
+                            self.send = True
 
         self._update_pipeline_status()
 
@@ -969,7 +1014,6 @@ class NextflowInspector:
         """
 
         try:
-            logger.debug("Started log parsing")
             self.log_parser()
         except (FileNotFoundError, StopIteration) as e:
             logger.debug("ERROR: " + str(sys.exc_info()[0]))
@@ -977,7 +1021,6 @@ class NextflowInspector:
             if self.log_retry == self.MAX_RETRIES:
                 raise e
         try:
-            logger.debug("Started trace parsing")
             self.trace_parser()
         except (FileNotFoundError, StopIteration) as e:
             logger.debug("ERROR: " + str(sys.exc_info()[0]))
@@ -1512,9 +1555,9 @@ class NextflowInspector:
                     self._print_msg(run_hash)
                     _broadcast_sent = True
 
-                logger.debug("Updating inspection")
                 self.update_inspection()
                 if self.send:
+                    logger.debug("Updating inspection")
                     self._send_status_info(run_hash)
                     self.send = False
 
@@ -1525,7 +1568,7 @@ class NextflowInspector:
                 "ERROR: nextflow log and/or trace files are no longer "
                 "reachable!", "red_bold"))
         except Exception:
-            logger.error("ERROR: " + str(sys.exc_info()[0]))
+            logger.exception("ERROR: " + str(sys.exc_info()[0]))
         finally:
             logger.info("Closing connection")
             self._close_connection(run_hash)

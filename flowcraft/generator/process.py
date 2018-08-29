@@ -75,7 +75,6 @@ class Process:
                 "'$params.{0}'\"}}\n"
                 "if (!params.{0}){{ exit 1, \"'{0}' parameter "
                 "missing\"}}"
-
         },
         "accessions": {
             "params": "accessions",

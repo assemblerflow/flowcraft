@@ -14,6 +14,9 @@ Download
 - :doc:`components/reads_download`: Downloads reads from the SRA/ENA public
   databases from a list of accessions.
 
+- :doc:`components/fasterq_dump`: Downloads reads from the SRA public databases
+  from a list of accessions, using ``fasterq-dump``.
+
 Reads Quality Control
 --------------------
 
@@ -34,6 +37,9 @@ Reads Quality Control
   the maximum read length and sequence encoding.
 
 - :doc:`components/trimmomatic`: Runs Trimmomatic on paired-end FastQ files.
+
+- :doc:`components/sample_fastq`: Subsamples fastq files up to a target coverage
+  depth.
 
 
 Assembly
@@ -86,14 +92,18 @@ Distance Estimation
 - :doc:`components/mash_dist`: Executes mash distance against a reference index
   plasmid database and generates a `JSON` for pATLAS. This component calculates
   pairwise distances between sequences (one from the database and the query
-  sequence). However if a
-  different database is provided it can use mash dist for other purposes.
+  sequence). However if a different database is provided it can use mash dist
+  for other purposes.
 
 - :doc:`components/mash_screen`: Performs mash screen against a reference index
   plasmid database and generates a JSON input file for pATLAS. This component
   searches for containment of a given sequence in read sequencing data.
-  However if a different
-  database is provided it can use mash screen for other purporses.
+  However if a different database is provided it can use mash screen for other
+  purporses.
+
+- :doc:`components/mash_sketch_fasta`: Performs mash sketch for fasta files.
+
+- :doc:`components/mash_sketch_fastq`: Performes mash sketch for fastq files.
 
 Mapping
 -------
@@ -142,3 +152,6 @@ Typing
 
 - :doc:`components/sistr`: Serovar predictions from whole-genome sequence assemblies
   by determination of antigen gene and cgMLST gene alleles.
+
+- :doc:`components/momps`: Multi-locus sequence typing for Legionella pneumophila
+  from assemblies and reads.

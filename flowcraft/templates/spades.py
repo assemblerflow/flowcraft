@@ -48,6 +48,7 @@ __build__ = "29062018"
 __template__ = "spades-nf"
 
 import os
+import sys
 import re
 import subprocess
 
@@ -239,7 +240,7 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
     with open(".status", "w") as fh:
         if p.returncode != 0:
             fh.write("error")
-            return
+            sys.exit(p.returncode)
         else:
             fh.write("pass")
 
@@ -255,7 +256,8 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
     logger.info("Setting main assembly file to: {}".format(assembly_file))
 
     # Remove input fastq files when clear option is specified.
-    if clear == "true":
+    # Only remove temporary input when the expected output exists.
+    if clear == "true" and os.path.exists("contigs.fasta"):
         clean_up(fastq_pair)
 
 

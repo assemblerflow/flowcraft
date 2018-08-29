@@ -2,6 +2,54 @@
 
 ## Upcoming release (`dev` branch)
 
+### Components changes
+
+- `mapping_patlas`: refactored to remove temporary files used to create
+sam and bam files and added data to .report.json. Updated databases to pATLAS
+version 1.5.2.
+- `mash_screen` and `mash_dist`: added data to .report.json. Updated databases 
+to pATLAS version 1.5.2.
+
+### New components
+
+- Added component `fasterq_dump`
+- Added component `mash_sketch_fasta`
+- Added component `mash_sketch_fastq`
+- Added component `downsample_fastq` for FastQ read sub sampling using seqtk
+- Added component `momps` for typing of Legionella pneumophila
+- Added component `split_assembly`
+- Added component `mafft`
+- Added component `raxml`
+- Added component `viral_assembly`
+- Added component `progressive_mauve`
+- Added component `dengue_typing`
+
+### Minor/Other changes
+
+- Added check for `params.accessions` that enables to report a proper
+error when it is set to `null`.
+- Added `build` option to export component parameters information in JSON format. 
+- Fixed minor issue preventing the `maxbin2` and `split_assembly` components 
+from being used multiples times in a pipeline
+- Added a catch to the `filter_poly` process for cases where the input file is empty. 
+- spades template now reports the exit code of spades' execution
+
+### Bug fixes
+
+- Removed the need for the nf process templates to have an empty line
+at the beginning of the template files.
+- Fixed issue when the `inspect` mode was executed on a pipeline directory
+with failed processes but with the work directory removed (the log files
+where no longer available).
+- Fixed issue when the `inspect` mode was executed on a pipeline without the 
+memory directory defined.
+- Fixed issue in the `inspect` mode, where there is a rare race condition between
+tags in the log and trace files.
+- Fixed bug on `midas_species` process where the output file was not being 
+linked correctly, causing the process to fail
+- Fixed bug on `bowtie` where the reference parameter was missing the pid
+- Fixed bug on `filter_poly` where the tag was missing
+
 ## 1.2.1
 
 ### Improvements

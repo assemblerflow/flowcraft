@@ -1,7 +1,11 @@
-IN_reference_file_{{ pid }} = Channel.value(params.refFile{{ param_id }})
+if (binding.hasVariable("SIDE_mashSketchOutChannel_{{ pid }}")){
+    IN_reference_file_{{ pid }} = SIDE_mashSketchOutChannel_{{ pid }}
+} else {
+    IN_reference_file_{{ pid }} = Channel.value(params.refFile{{ param_id }})
+}
 
 // check if noWinner is provided or not
-winnerVar = (params.noWinner{{ param_id }}  == false) ? "-w" : ""
+winnerVar = (params.noWinner{{ param_id }} == false) ? "-w" : ""
 
 // process to run mashScreen and sort the output into
 // sortedMashScreenResults_{sampleId}.txt
@@ -10,8 +14,6 @@ process mashScreen_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { sample_id }
-
-    publishDir 'results/mashscreen/mashscreen_{{ pid }}/'
 
     input:
     set sample_id, file(reads) from {{ input_channel }}
@@ -37,7 +39,7 @@ process mashOutputJson_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir 'results/mashscreen/mashscreen_json_{{ pid }}'
+    publishDir 'results/mashscreen/mashscreen_json_{{ pid }}', mode: 'copy'
 
     input:
     set sample_id, file(mashtxt) from mashScreenResults_{{ pid }}

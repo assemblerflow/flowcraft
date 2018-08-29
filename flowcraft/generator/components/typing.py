@@ -97,3 +97,61 @@ class Sistr(Process):
             "container": "ummidock/sistr_cmd",
             "version": "1.0.2"
         }}
+
+
+class Momps(Process):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = None
+
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
+        self.directives = {
+            "momps": {
+                "cpus": 3,
+                "memory": "'4GB'",
+                "container": "flowcraft/momps",
+                "version": "0.1.1-1"
+            }
+        }
+
+
+class DengueTyping(Process):
+    """
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = None
+
+        self.status_channels = []
+
+        self.link_start = None
+
+        self.directives = {"dengue_typing": {
+            "cpus": 4,
+            "memory": "'4GB'",
+            "container": "flowcraft/dengue_typing",
+            "version": "v1.0-1"
+        }}
+
+        self.params = {
+            "BD_sequence_file": {
+                "default": "'/dengue_DB/blast_db/GenotypesDENV_14-05-18.problematic_sequences_corrected.fasta.corrected.fasta.iupac_removed.fasta'",
+                "description":
+                    "Path to the DB sequence file. If Blast DB was already"
+                    "produced only provide the file that doesn't end with '.n*'."
+                    "If no blast DB is found for the DB sequence file, one will"
+                    "be created. If more than one Blast DB file is passed, a type"
+                    "for each file will be determined."
+            }
+        }
+
