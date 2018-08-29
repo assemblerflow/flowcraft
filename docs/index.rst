@@ -46,6 +46,7 @@ A NextFlow pipeline assembler for genomics.
    dev/containers
    dev/process_dotfiles
    dev/pipeline_reporting
+   dev/reports
 
 .. _Source API:
 

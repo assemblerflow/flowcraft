@@ -39,17 +39,17 @@ def write_json(report_json, version_json, trace_file, task_name,
         trace = fh.readlines()
 
     report = {
+        "pipelineId": 1,
+        "processId": pid,
+        "processName": task_name,
+        "projectid": RUN_NAME,
         "reportJson": reports,
+        "runName": RUN_NAME,
+        "scriptId": SCRIPT_ID,
         "versions": versions,
         "trace": trace,
-        "processId": pid,
-        "pipelineId": 1,
-        "projectid": RUN_NAME,
         "userId": 1,
-        "scriptId": SCRIPT_ID,
-        "runName": RUN_NAME,
         "username": "user",
-        "processName": task_name,
         "workdir": dirname(abspath(report_json))
     }
 
