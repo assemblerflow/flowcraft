@@ -52,6 +52,8 @@ process seq_typing_{{ pid }} {
         fi
     } || {
         echo fail > .status
+        json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'NA','table':'typing'}]}]}"
+        echo \$json_str > .report.json
     }
     """
 

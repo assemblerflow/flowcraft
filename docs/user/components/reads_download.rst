@@ -46,3 +46,10 @@ Default directives
 - ``memory``: 1GB
 - ``container``: flowcraft/getseqena
 - ``version``: 0.4.0-2
+
+
+Reports JSON
+^^^^^^^^^^^^
+
+``fail``:
+    - ``str``: Message with the accession that failed the download
