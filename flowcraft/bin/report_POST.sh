@@ -27,14 +27,14 @@ then
     then
         json_str=$(cat $(pwd)/.report.json | sed 's/ //g' | sed s/\"/\'/g)
     else
-        json_str=$(cat $(pwd)/.report.json | sed 's/ /_/g' | sed s/\"/\'/g)
+        json_str=$(cat $(pwd)/.report.json | sed 's/ /%20/g' | sed s/\"/\'/g)
     fi
 fi
 
 # If a .versions file was populated, set the version_str variable
 if [ -s .versions ];
 then
-    version_str=$(< $(pwd)/.versions sed 's/ /_/g' | sed s/\"/\'/g)
+    version_str=$(< $(pwd)/.versions sed 's/ /%20/g' | sed s/\"/\'/g)
 fi
 
 if [ -s .command.trace ];

@@ -36,7 +36,7 @@ def write_json(report_json, version_json, trace_file, task_name,
         trace = fh.readlines()
 
     report = {
-        "pipelineId": 1,
+        "pipelineId": run_name,
         "processId": pid,
         "processName": task_name,
         "projectid": run_name,
