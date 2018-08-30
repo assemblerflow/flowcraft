@@ -525,7 +525,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
                        "{} contigs per 1.5Mb ({})".format(
                             len(assembly_obj.contigs),
                             max_contigs,
-                            contig_threshold)
+                            round(contig_threshold, 1))
 
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)
