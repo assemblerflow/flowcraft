@@ -29,7 +29,8 @@ process compile_reports {
     publishDir "pipeline_report/", mode: "copy"
 
     if ( params.reportHTTP != null ){
-        afterScript "report_POST.sh $params.projectId $params.pipelineId {{ pid }} $params.sampleName $params.reportHTTP $params.currentUserName $params.currentUserId {{ template }}_{{ pid }} \"$params.platformSpecies\" {{ overwrite|default("true") }}"
+        beforeScript "PATH=${workflow.projectDir}/bin:\$PATH; export PATH;
+        afterScript "metadata_POST.sh $params.projectId $params.pipelineId {{ pid }} $params.sampleName $params.reportHTTP $params.currentUserName $params.currentUserId {{ template }}_{{ pid }} \"$params.platformSpecies\" {{ overwrite|default("true") }}"
     }
 
     input:
