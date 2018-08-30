@@ -24,7 +24,7 @@ fi
 if [ ! "$metadata_str" = "{}" ];
 then
     workdir=$(pwd)
-    json="{'projectid':'$projectid','pipelineId':'$pipelineid','processId':'nfMetadata','sample_name':'$sample','nfMetadata':$metadata_str,'username':'$username','userId':'$userid','workdir':'$workdir','task':'nfMetadata','processName':'nfMetadata','species':'$species'}"
+    json="{'projectid':'$projectid','pipelineId':'$pipelineid','processId':'nfMetadata','sample_name':'$sample','nfMetadata':$metadata_str,'username':'$username','userId':'$userid','workdir':'$workdir','task':'nfMetadata','processName':'nfMetadata','species':'$species','overwrite':'false'}"
     echo \"${json}\" > .final.json
     {
         cat .final.json | curl -H  "Content-Type: application/json" -k -L -X POST -d @- $url > /dev/null

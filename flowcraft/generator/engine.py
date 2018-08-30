@@ -1363,7 +1363,7 @@ class NextflowGenerator:
         })
         self.user_config = self._render_config("user.config", {})
 
-    def dag_to_file(self, dict_viz):
+    def dag_to_file(self, dict_viz, output_file=".treeDag.json"):
         """Writes dag to output file
 
         Parameters
@@ -1374,7 +1374,7 @@ class NextflowGenerator:
 
         """
 
-        outfile_dag = open(os.path.join(dirname(self.nf_file), ".treeDag.json")
+        outfile_dag = open(os.path.join(dirname(self.nf_file), output_file)
                            , "w")
         outfile_dag.write(json.dumps(dict_viz))
         outfile_dag.close()
@@ -1423,11 +1423,10 @@ class NextflowGenerator:
 
                 dir_var = ""
                 for k2, v2 in p.directives.items():
-                    dir_var += "<b>&emsp;{}:</b><br>".format(k2)
+                    dir_var += k2
                     for d in v2:
                         try:
-                            dir_var += "&emsp;&emsp;{}: {}</span><br>".\
-                                format(d, v2[d])
+                            dir_var += "{}: {}".format(d, v2[d])
                         except KeyError:
                             pass
 

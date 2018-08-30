@@ -30,7 +30,7 @@ process compile_reports {
 
     if ( params.reportHTTP != null ){
         beforeScript "PATH=${workflow.projectDir}/bin:\$PATH; export PATH;"
-        afterScript "metadata_POST.sh $params.projectId $params.pipelineId 0 $params.sampleName $params.reportHTTP $params.currentUserName $params.currentUserId {{ template }}_{{ pid }} \"$params.platformSpecies\" {{ overwrite|default("true") }}"
+        afterScript "metadata_POST.sh $params.projectId $params.pipelineId 0 $params.sampleName $params.reportHTTP $params.currentUserName $params.currentUserId 0 \"$params.platformSpecies\"
     }
 
     input:
