@@ -6,14 +6,11 @@ import logging
 
 from os.path import dirname, abspath
 
-SCRIPT_ID = '${workflow.scriptId}'
-RUN_NAME = '${workflow.runName}'
-
 logger = logging.getLogger("main.{}".format(__name__))
 
 
 def write_json(report_json, version_json, trace_file, task_name,
-               project_name, sample_name, pid):
+               project_name, sample_name, pid, script_id, run_name):
 
     logging.info("Parsing report JSON")
     try:
@@ -42,10 +39,10 @@ def write_json(report_json, version_json, trace_file, task_name,
         "pipelineId": 1,
         "processId": pid,
         "processName": task_name,
-        "projectid": RUN_NAME,
+        "projectid": run_name,
         "reportJson": reports,
-        "runName": RUN_NAME,
-        "scriptId": SCRIPT_ID,
+        "runName": run_name,
+        "scriptId": script_id,
         "versions": versions,
         "trace": trace,
         "userId": 1,
@@ -71,6 +68,8 @@ def main():
     task_name = args[4]
     project_name = args[5]
     pid = args[6]
+    script_id = args[7]
+    run_name = args[8]
     logging.debug("Report JSON: {}".format(report_json))
     logging.debug("Version JSON: {}".format(version_json))
     logging.debug("Trace file: {}".format(trace))
@@ -78,10 +77,12 @@ def main():
     logging.debug("Task name: {}".format(task_name))
     logging.debug("Project name: {}".format(project_name))
     logging.debug("Process ID: {}".format(pid))
+    logging.debug("Script ID: {}".format(script_id))
+    logging.debug("Run name: {}".format(run_name))
 
     # Write the final report JSON that compiles all information
     write_json(report_json, version_json, trace, task_name,
-               project_name, sample_name, pid)
+               project_name, sample_name, pid, script_id, run_name)
 
 
 main()

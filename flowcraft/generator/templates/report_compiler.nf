@@ -18,7 +18,7 @@ process report {
     file "*" optional true into master_report
 
     """
-    prepare_reports.py $report_json $version_json $trace $sample_id $task_name 1 $pid
+    prepare_reports.py $report_json $version_json $trace $sample_id $task_name 1 $workflow.scriptId $workflow.runName
     """
 
 }
