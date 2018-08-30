@@ -67,9 +67,8 @@ def main():
     sample_name = args[3]
     task_name = args[4]
     project_name = args[5]
-    pid = args[6]
-    script_id = args[7]
-    run_name = args[8]
+    script_id = args[6]
+    run_name = args[7]
     logging.debug("Report JSON: {}".format(report_json))
     logging.debug("Version JSON: {}".format(version_json))
     logging.debug("Trace file: {}".format(trace))
