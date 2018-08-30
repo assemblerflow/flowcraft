@@ -362,7 +362,7 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
                  "{}".format(total_assembled_bp))
 
     warnings = []
-    fails = ""
+    fails = []
     health = True
 
     with open(".warnings", "w") as warn_fh, \
@@ -379,7 +379,7 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
                             assembly_len)
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)
-            fails = "Large_genome_size_({})".format(assembly_len)
+            fails.append("Large_genome_size_({})".format(assembly_len))
 
         # If the number of contigs in the filtered assembly size crosses the
         # max_contigs threshold, issue a warning
@@ -402,7 +402,7 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
                             assembly_len)
             logger.warning(warn_msg)
             warn_fh.write(warn_msg)
-            fails = "Small_genome_size_({})".format(assembly_len)
+            fails.append("Small_genome_size_({})".format(assembly_len))
             assembly_len = sum([v for v in contig_size.values()])
             total_assembled_bp = sum(
                 [sum(coverage_bp[x]) for x in coverage_info if x in
