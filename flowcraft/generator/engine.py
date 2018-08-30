@@ -1425,8 +1425,12 @@ class NextflowGenerator:
                 for k2, v2 in p.directives.items():
                     dir_var += k2
                     for d in v2:
+                        print(v2)
                         try:
-                            dir_var += "{}: {}".format(d, v2[d])
+                            # Remove quotes from string directives
+                            directive = v2[d].replace("'", "") \
+                                if isinstance(v2[d], str) else v2[d]
+                            dir_var += "{}: {}".format(d, directive)
                         except KeyError:
                             pass
 
