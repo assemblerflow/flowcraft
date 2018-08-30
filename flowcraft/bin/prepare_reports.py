@@ -10,7 +10,7 @@ logger = logging.getLogger("main.{}".format(__name__))
 
 
 def write_json(report_json, version_json, trace_file, task_name,
-               project_name, sample_name, pid, script_id, run_name):
+               project_name, sample_name, script_id, run_name):
 
     logging.info("Parsing report JSON")
     try:
@@ -75,13 +75,12 @@ def main():
     logging.debug("Sample name: {}".format(sample_name))
     logging.debug("Task name: {}".format(task_name))
     logging.debug("Project name: {}".format(project_name))
-    logging.debug("Process ID: {}".format(pid))
     logging.debug("Script ID: {}".format(script_id))
     logging.debug("Run name: {}".format(run_name))
 
     # Write the final report JSON that compiles all information
     write_json(report_json, version_json, trace, task_name,
-               project_name, sample_name, pid, script_id, run_name)
+               project_name, sample_name, script_id, run_name)
 
 
 main()
