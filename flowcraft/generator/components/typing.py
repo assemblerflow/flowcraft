@@ -16,8 +16,6 @@ class SeqTyping(Process):
         self.input_type = "fastq"
         self.output_type = None
 
-        self.status_channels = []
-
         self.link_start = None
 
         self.directives = {"seq_typing": {
@@ -58,8 +56,6 @@ class PathoTyping(Process):
         self.output_type = None
 
         self.ignore_type = True
-
-        self.status_channels = []
 
         self.params = {
             "species": {
