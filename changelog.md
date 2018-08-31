@@ -1,6 +1,12 @@
 # Changelog
 
-## Upcoming release (`dev` branch)
+## Changes in upcoming release (`dev` branch)
+
+### Bug fixes
+- Fixed issue where `seq_typing` and `patho_typing` processes were not feeding
+report data to report compiler.
+
+## 1.2.2
 
 ### Components changes
 
@@ -20,6 +26,9 @@ to pATLAS version 1.5.2.
 - Added component `split_assembly`
 - Added component `mafft`
 - Added component `raxml`
+- Added component `viral_assembly`
+- Added component `progressive_mauve`
+- Added component `dengue_typing`
 
 ### Minor/Other changes
 
@@ -28,6 +37,8 @@ error when it is set to `null`.
 - Added `build` option to export component parameters information in JSON format. 
 - Fixed minor issue preventing the `maxbin2` and `split_assembly` components 
 from being used multiples times in a pipeline
+- Added a catch to the `filter_poly` process for cases where the input file is empty. 
+- spades template now reports the exit code of spades' execution
 
 ### Bug fixes
 

@@ -61,6 +61,7 @@ process_map = {
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
         "chewbbaca": mlst.Chewbbaca,
+        "dengue_typing": typing.DengueTyping,
         "downsample_fastq": readsqc.DownsampleFastq,
         "fastqc": readsqc.FastQC,
         "fastqc_trimmomatic": readsqc.FastqcTrimmomatic,
@@ -86,6 +87,7 @@ process_map = {
         "pilon": ap.Pilon,
         "process_skesa": ap.ProcessSkesa,
         "process_spades": ap.ProcessSpades,
+        "progressive_mauve":alignment.ProgressiveMauve,
         #"prokka": annotation.Prokka,
         "raxml": phylogeny.Raxml,
         "reads_download": downloads.DownloadReads,
@@ -97,7 +99,8 @@ process_map = {
         "spades": assembly.Spades,
         "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
-        "true_coverage": readsqc.TrueCoverage
+        "true_coverage": readsqc.TrueCoverage,
+        "viral_assembly": assembly.ViralAssembly
 }
 
 """

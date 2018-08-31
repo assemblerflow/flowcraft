@@ -48,6 +48,7 @@ __build__ = "29062018"
 __template__ = "spades-nf"
 
 import os
+import sys
 import re
 import subprocess
 
@@ -240,7 +241,7 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
     with open(".status", "w") as fh:
         if p.returncode != 0:
             fh.write("error")
-            return
+            sys.exit(p.returncode)
         else:
             fh.write("pass")
 

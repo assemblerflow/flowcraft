@@ -8,6 +8,8 @@ process filter_poly_{{ pid }} {
 
     tag { sample_id }
 
+    errorStrategy { task.exitStatus == 120 ? 'ignore' : 'retry' }
+
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
     val adapter from IN_adapter_{{ pid }}
@@ -22,6 +24,13 @@ process filter_poly_{{ pid }} {
     """
     gunzip -c ${fastq_pair[0]} >  ${sample_id}_1.fq
     gunzip -c ${fastq_pair[1]} >  ${sample_id}_2.fq
+
+    for seqfile in *.fq;
+    do if [ ! -s \$seqfile  ]
+    then
+        echo \$seqfile is empty && exit 120
+    fi
+    done
 
     prinseq-lite.pl --fastq ${sample_id}_1.fq  --fastq2 ${sample_id}_2.fq  --custom_params "${adapter}" -out_format 3 -out_good ${sample_id}_filtered
 
