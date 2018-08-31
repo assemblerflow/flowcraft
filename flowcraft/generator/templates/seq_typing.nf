@@ -17,8 +17,8 @@ process seq_typing_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    file refO from IN_refO_{{ pid }}
-    file refH from IN_refH_{{ pid }}
+    each file(refO) from IN_refO_{{ pid }}
+    each file(refH) from IN_refH_{{ pid }}
 
     output:
     file "seq_typing*"
