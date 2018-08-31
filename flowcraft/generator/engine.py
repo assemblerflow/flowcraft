@@ -1428,7 +1428,6 @@ class NextflowGenerator:
                 for k2, v2 in p.directives.items():
                     dir_var += k2
                     for d in v2:
-                        print(v2)
                         try:
                             # Remove quotes from string directives
                             directive = v2[d].replace("'", "").replace('"', '') \
