@@ -7,6 +7,8 @@ IN_pathoSpecies_{{ pid }} = Channel.value(params.species{{ param_id }})
 
 process patho_typing_{{ pid }} {
 
+    validExitStatus 0, 2
+
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
@@ -19,7 +21,7 @@ process patho_typing_{{ pid }} {
     val species from IN_pathoSpecies_{{ pid }}
 
     output:
-    file "patho_typing*"
+    file "patho_typing*" optional true
     {% with task_name="patho_typing" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -37,7 +39,7 @@ process patho_typing_{{ pid }} {
         # Add information to dotfiles
         json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'pathotyping','value':'\$(cat patho_typing.report.txt)','table':'typing'}]}]}"
         echo \$json_str > .report.json
-        version_str="{'version':[{'program':'patho_typing.py','version':'0.4'}]}"
+        version_str="[{'program':'patho_typing.py','version':'0.4'}]"
         echo \$version_str > .versions
 
         rm -r rematch_temp

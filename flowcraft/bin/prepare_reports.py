@@ -15,7 +15,8 @@ def write_json(report_json, version_json, trace_file, task_name,
     logging.info("Parsing report JSON")
     try:
         with open(report_json) as fh:
-            reports = json.load(fh)
+            _reports = fh.read().replace("'", '"')
+            reports = json.loads(_reports)
             if "task" in reports:
                 del reports["task"]
     except json.JSONDecodeError:
@@ -25,10 +26,11 @@ def write_json(report_json, version_json, trace_file, task_name,
     logging.info("Parsing versions JSON")
     try:
         with open(version_json) as fh:
-            versions = json.load(fh)
+            _version = fh.read().replace("'", '"')
+            versions = json.loads(_version)
     except json.JSONDecodeError:
         logging.warning("Could not parse versions JSON: {}".format(
-            report_json))
+            version_json))
         versions = []
 
     logging.info("Parsing trace file")

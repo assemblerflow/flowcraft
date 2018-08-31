@@ -19,8 +19,11 @@ process sistr_{{ pid }} {
     """
     {
         sistr --qc -vv -t $task.cpus -f tab -o ${sample_id}_sistr.tab ${assembly}
-        json_str="{'typing':{'sistr':'\$(awk \"FNR == 2\" *.tab | cut -f14)'}}"
+        json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'sistr','value':'\$(awk \"FNR == 2\" *.tab | cut -f14)','table':'typing'}]}]}"
         echo \$json_str > .report.json
+        sistr_version=\$(sistr --version | cut -d" " -f2)
+        version_str="[{'program':'sistr','version':'\$sistr_version'}]"
+        echo \$version_str > .versions
 
         if [ -s ${sample_id}_sistr.tab ];
         then
@@ -33,7 +36,6 @@ process sistr_{{ pid }} {
         echo fail > .status
     }
     """
-
 }
 
 {{ forks }}

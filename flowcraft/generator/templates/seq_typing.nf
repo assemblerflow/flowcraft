@@ -39,7 +39,7 @@ process seq_typing_{{ pid }} {
         # Add information to dotfiles
         json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}]}"
         echo \$json_str > .report.json
-        version_str="{'version':[{'program':'seq_typing.py','version':'0.1'}]}"
+        version_str="[{'program':'seq_typing.py','version':'0.1'}]"
         echo \$version_str > .versions
 
         rm -r rematch_temp
