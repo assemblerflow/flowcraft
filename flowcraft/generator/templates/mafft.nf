@@ -20,7 +20,7 @@ process mafft_{{ pid }} {
 
     cat ${assembly} > all_assemblies.fasta
 
-    mafft --thread $task.cpus --auto all_assemblies.fasta > ${workflow.scriptName}.align
+    mafft --adjustdirection --thread $task.cpus --auto all_assemblies.fasta > ${workflow.scriptName}.align
     """
 
 }
