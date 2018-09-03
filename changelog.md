@@ -1,6 +1,12 @@
 # Changelog
 
-## Upcoming release (`dev` branch)
+## Changes in upcoming release (`dev` branch)
+
+### Bug fixes
+- Fixed issue where `seq_typing` and `patho_typing` processes were not feeding
+report data to report compiler.
+
+## 1.2.2
 
 ### Components changes
 
