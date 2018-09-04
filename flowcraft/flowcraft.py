@@ -15,6 +15,7 @@ try:
     from __init__ import __version__, __build__
     from generator.engine import NextflowGenerator, process_map
     from generator.inspect import NextflowInspector
+    from generator.report import FlowcraftReport
     from generator.recipe import brew_recipe, available_recipes
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
@@ -23,6 +24,7 @@ except ImportError:
     from flowcraft import __version__, __build__
     from flowcraft.generator.engine import NextflowGenerator, process_map
     from flowcraft.generator.inspect import NextflowInspector
+    from flowcraft.generator.report import FlowcraftReport
     from flowcraft.generator.recipe import brew_recipe, available_recipes
     from flowcraft.generator.pipeline_parser import parse_pipeline, \
         SanityError
@@ -128,6 +130,20 @@ def get_args(args=None):
     inspect_parser.add_argument(
         "--pretty", dest="pretty", action="store_const", const=True,
         help="Pretty inspection mode that removes usual reporting processes."
+    )
+
+    # INSPECT MODE
+    reports_parser = subparsers.add_parser("report",
+                                           help="Broadcast the report of "
+                                                "a pipeline")
+    reports_parser.add_argument(
+        "-i", dest="report_file",
+        default="pipeline_report/pipeline_report.json",
+        help="Specify the path to the pipeline report JSON file."
+    )
+    reports_parser.add_argument(
+        "-u", "--url", dest="url", default="http://192.92.149.169:80/",
+        help="Specify the URL to where the data should be broadcast"
     )
 
     if len(sys.argv) == 1:
@@ -322,6 +338,17 @@ def inspect(args):
         nf_inspect.broadcast_status()
 
 
+def report(args):
+
+    try:
+        fc_report = FlowcraftReport(args.report_file, args.url)
+    except eh.ReportError as e:
+        logger.error(colored_print(e.value, "red_bold"))
+        sys.exit(1)
+
+    fc_report.broadcast_report()
+
+
 def main():
 
     args = get_args()
@@ -355,6 +382,9 @@ def main():
 
     if args.main_op == "inspect":
         inspect(args)
+
+    if args.main_op == "report":
+        report(args)
 
 
 if __name__ == '__main__':
