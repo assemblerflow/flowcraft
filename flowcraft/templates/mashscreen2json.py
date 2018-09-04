@@ -109,9 +109,15 @@ def main(mash_output, sample_id):
     output_json.close()
 
     json_dic = {
-        "sample_id": sample_id,
-        "patlas_mashscreen": filtered_dic
-        # TODO add information for report webapp
+        "tableRow": [{
+            "sample": sample_id,
+            "data": [{
+                "header": "Mash Screen",
+                "table": "plasmids",
+                "patlas_mashscreen": filtered_dic,
+                "value": len(filtered_dic)
+            }]
+        }],
     }
 
     with open(".report.json", "w") as json_report:

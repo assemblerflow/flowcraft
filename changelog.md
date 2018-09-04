@@ -2,6 +2,11 @@
 
 ## Changes in upcoming release (`dev` branch)
 
+### Minor/Other changes
+
+- Refactored report json for components `mash_dist`, `mash_screen` and 
+`mapping_patlas`
+
 ### Bug fixes
 - Fixed issue where `seq_typing` and `patho_typing` processes were not feeding
 report data to report compiler.
