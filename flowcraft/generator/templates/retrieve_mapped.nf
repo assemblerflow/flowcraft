@@ -19,11 +19,15 @@ process retrieve_mapped_{{ pid }} {
     """
     samtools view -buh -F 12 -o ${sample_id}_samtools.bam -@ $task.cpus ${bam}
 
+    rm ${bam}
+
     samtools fastq -1 ${sample_id}_mapped_1.fq -2 ${sample_id}_mapped_2.fq ${sample_id}_samtools.bam
 
     renamePE_samtoolsFASTQ.py -1 ${sample_id}_mapped_1.fq -2 ${sample_id}_mapped_2.fq
 
     gzip *.headersRenamed_*.fq
+
+    rm *.fq
     """
 }
 
