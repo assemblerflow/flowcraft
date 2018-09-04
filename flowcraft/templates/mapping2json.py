@@ -273,12 +273,12 @@ def main(depth_file, json_dict, cutoff, sample_id):
         }],
         "sample": sample_id,
         "patlas_mapping": percentage_bases_covered,
-        "plotData": {
+        "plotData": [{
             "sample": sample_id,
             "data": {
                 "patlasMappingSliding": dict_cov
             },
-        }
+        }]
     }
 
     logger.debug("Size of dict_cov: {} kb".format(asizeof(json_dic)/1024))
