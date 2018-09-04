@@ -37,8 +37,6 @@ process patho_typing_{{ pid }} {
         patho_typing.py -f \$(pwd)/${fastq_pair[0]} \$(pwd)/${fastq_pair[1]} -o \$(pwd) -j $task.cpus --trueCoverage --species $species
 
         # Add information to dotfiles
-        json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'pathotyping','value':'\$(cat patho_typing.report.txt)','table':'typing'}]}]}"
-        echo \$json_str > .report.json
         version_str="[{'program':'patho_typing.py','version':'0.4'}]"
         echo \$version_str > .versions
 
@@ -47,8 +45,12 @@ process patho_typing_{{ pid }} {
 
         if [ -s patho_typing.report.txt ];
         then
+            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'pathotyping','value':'\$(cat patho_typing.report.txt)','table':'typing'}]}]}"
+            echo \$json_str > .report.json
             echo pass > .status
         else
+            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'pathotyping','value':'NA','table':'typing'}]}]}"
+            echo \$json_str > .report.json
             echo fail > .status
         fi
     } || {
