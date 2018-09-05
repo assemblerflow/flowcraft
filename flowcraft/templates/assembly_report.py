@@ -310,7 +310,7 @@ class Assembly:
             contig_id = self._get_contig_id(contig)
             self.contig_boundaries[contig_id] = [c, c + len(seq)]
             c += len(seq)
-            xbars.append((contig_id, c))
+            xbars.append((contig_id, c, contig))
 
         return xbars
 
