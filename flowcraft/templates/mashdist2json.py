@@ -26,8 +26,8 @@ __version__ = "1.4.0"
 __build__ = "04092018"
 __template__ = "mashsdist2json-nf"
 
-import os
 import json
+import os
 
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
@@ -70,14 +70,15 @@ def send_to_output(master_dict, mash_output, sample_id, assembly_file):
     -------
 
     """
+
+    plot_dict = {}
+
     # create a new file only if master_dict is populated
     if master_dict:
         out_file = open("{}.json".format(
             "".join(mash_output.split(".")[0])), "w")
         out_file.write(json.dumps(master_dict))
         out_file.close()
-
-        plot_dict = {}
 
         # iterate through master_dict in order to make contigs the keys
         for k,v in master_dict.items():
@@ -86,27 +87,31 @@ def send_to_output(master_dict, mash_output, sample_id, assembly_file):
             else:
                 plot_dict[v[2]].append(k)
 
-        json_dic = {
-            "tableRow": [{
-                "sample": sample_id,
-                "data": [{
-                    "header": "Mash Dist",
-                    "table": "plasmids",
-                    "patlas_mashdist": master_dict,
-                    "value": len(master_dict)
-                }]
-            }],
-            "plotData": [{
-                "sample": sample_id,
-                "data": {
-                    "patlasMashDistXrange": plot_dict
-                },
-                "assemblyFile": assembly_file
-            }]
-        }
+        number_hits = len(master_dict)
+    else:
+        number_hits = 0
 
-        with open(".report.json", "w") as json_report:
-            json_report.write(json.dumps(json_dic, separators=(",", ":")))
+    json_dic = {
+        "tableRow": [{
+            "sample": sample_id,
+            "data": [{
+                "header": "Mash Dist",
+                "table": "plasmids",
+                "patlas_mashdist": master_dict,
+                "value": number_hits
+            }]
+        }],
+        "plotData": [{
+            "sample": sample_id,
+            "data": {
+                "patlasMashDistXrange": plot_dict
+            },
+            "assemblyFile": assembly_file
+        }]
+    }
+
+    with open(".report.json", "w") as json_report:
+        json_report.write(json.dumps(json_dic, separators=(",", ":")))
 
 
 @MainWrapper

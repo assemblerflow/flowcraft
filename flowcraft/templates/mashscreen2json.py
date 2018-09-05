@@ -67,11 +67,11 @@ def main(mash_output, sample_id):
     for line in read_mash_output:
         tab_split = line.split("\t")
         identity = tab_split[0]
-        #shared_hashes = tab_split[1]
+        # shared_hashes = tab_split[1]
         median_multiplicity = tab_split[2]
-        #p_value = tab_split[3]
+        # p_value = tab_split[3]
         query_id = tab_split[4]
-        #query-comment should not exist here and it is irrelevant
+        # query-comment should not exist here and it is irrelevant
 
         # here identity is what in fact interests to report to json but
         # median_multiplicity also is important since it gives an rough
@@ -122,6 +122,7 @@ def main(mash_output, sample_id):
 
     with open(".report.json", "w") as json_report:
         json_report.write(json.dumps(json_dic, separators=(",", ":")))
+
 
 if __name__ == "__main__":
 
