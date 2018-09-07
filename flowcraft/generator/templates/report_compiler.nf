@@ -37,9 +37,12 @@ process compile_reports {
     file report from master_report.collect()
     file forks from Channel.fromPath(".forkTree.json")
     file dag from Channel.fromPath(".treeDag.json")
+    file js from Channel.fromPath("${workflow.projectDir}/resources/main.js.zip")
 
     output:
     file "pipeline_report.json"
+    file "pipeline_report.html"
+    file "main.js"
 
     script:
     template "compile_reports.py"

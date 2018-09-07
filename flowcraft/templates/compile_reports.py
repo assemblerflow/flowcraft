@@ -1,14 +1,34 @@
 #!/usr/bin/python3
 import sys
 import json
+import zipfile
 import logging
 
 REPORTS = "${report}".split()
 FORKS = "${forks}"
 DAG = "${dag}"
+MAIN_JS = "${js}"
 
 
-def main(reports, forks, dag):
+html_template = """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>FlowCraft App</title>
+</head>
+<body style="background-color: #f2f2f2">
+    <div id="app"><!-- React --></div>
+</body>
+<script> const _fileReportData = {} </script>
+<script src="./main.js"></script>
+</html>
+"""
+
+
+def main(reports, forks, dag, main_js):
 
     metadata = {
         "nfMetadata": {
@@ -60,10 +80,17 @@ def main(reports, forks, dag):
             print("{}: {}".format(rjson["processName"],
                                   sys.getsizeof(json.dumps(rjson))))
 
+    with open("pipeline_report.html", "w") as html_fh:
+        html_fh.write(html_template.format(
+            json.dumps({"data": {"results": storage}}, separators=(",", ":"))))
+
+    with zipfile.ZipFile(MAIN_JS) as zf:
+        zf.extractall(".")
+
     with open("pipeline_report.json", "w") as rep_fh:
         rep_fh.write(json.dumps({"data": {"results": storage}},
                                 separators=(",", ":")))
 
 
 if __name__ == "__main__":
-    main(REPORTS, FORKS, DAG)
+    main(REPORTS, FORKS, DAG, MAIN_JS)

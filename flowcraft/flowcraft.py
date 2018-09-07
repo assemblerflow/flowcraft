@@ -233,6 +233,9 @@ def copy_project(path):
     # Copy Helper scripts
     copy_tree(join(repo_dir, "lib"), join(target_dir, "lib"))
 
+    # Copy resources dir
+    copy_tree(join(repo_dir, "resources"), join(target_dir, "resources"))
+
     # Copy bin scripts
     copy_tree(join(repo_dir, "bin"), join(target_dir, "bin"))
 
