@@ -42,7 +42,7 @@ process compile_reports {
     output:
     file "pipeline_report.json"
     file "pipeline_report.html"
-    file "main.js"
+    file "src/main.js"
 
     script:
     template "compile_reports.py"

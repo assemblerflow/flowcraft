@@ -52,7 +52,6 @@ class FlowcraftReport:
         # Checks if report file is available
         self._check_required_files()
 
-
         signal.signal(signal.SIGINT, lambda *x: signal_handler())
 
     def _check_required_files(self):
@@ -124,7 +123,8 @@ class FlowcraftReport:
 
     def _print_msg(self, run_id):
 
-        report_address = "{}reports/broadcast/{}".format(self.app_address, run_id)
+        report_address = "{}reports/broadcast/{}".format(self.app_address,
+                                                         run_id)
         logger.info(colored_print(
             "The pipeline reports are available in the following link:",
             "green_bold"))

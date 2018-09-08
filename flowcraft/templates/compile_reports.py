@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import os
 import sys
 import json
 import zipfile
@@ -23,7 +24,7 @@ html_template = """
     <div id="app"><!-- React --></div>
 </body>
 <script> const _fileReportData = {} </script>
-<script src="./main.js"></script>
+<script src="./src/main.js"></script>
 </html>
 """
 
@@ -85,7 +86,8 @@ def main(reports, forks, dag, main_js):
             json.dumps({"data": {"results": storage}}, separators=(",", ":"))))
 
     with zipfile.ZipFile(MAIN_JS) as zf:
-        zf.extractall(".")
+        os.mkdir("src")
+        zf.extractall("./src")
 
     with open("pipeline_report.json", "w") as rep_fh:
         rep_fh.write(json.dumps({"data": {"results": storage}},
