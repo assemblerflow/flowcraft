@@ -433,7 +433,7 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
             json_dic["fail"] = [{
                 "sample": sample_id,
                 "table": "assembly",
-                "value": fails
+                "value": [fails]
             }]
 
         json_report.write(json.dumps(json_dic, separators=(",", ":")))
