@@ -68,8 +68,15 @@ process bowtie_{{ pid }} {
 
 process report_bowtie_{{ pid }} {
 
+    {% include "post.txt" ignore missing %}
+
     input:
     set sample_id, file(bowtie_log) from into_json_{{ pid }}
+
+    output:
+    {% with task_name="report_bowtie" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
 
     script:
     template "process_mapping.py"
