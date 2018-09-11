@@ -15,7 +15,7 @@ process remove_host_{{ pid }} {
 
     output:
     set sample_id , file("${sample_id}*.headersRenamed_*.fq.gz") into {{ output_channel }}
-    file "*_bowtie2.log"
+    set sample_id, file("*_bowtie2.log") into into_json_{{ pid }}
     {% with task_name="remove_host" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -38,6 +38,18 @@ process remove_host_{{ pid }} {
 
     rm *.fq
     """
+}
+
+
+
+process report_remove_host_{{ pid }} {
+
+    input:
+    set sample_id, file(bowtie_log) from into_json_{{ pid }}
+
+    script:
+    template "process_mapping.py"
+
 }
 
 {{ forks }}
