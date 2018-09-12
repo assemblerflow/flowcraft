@@ -136,7 +136,6 @@ class Assembly:
             headerStr = header.__next__()[1:].strip()
             seq = "".join(s.strip() for s in entry.__next__())
             if len(seq) >= int(min_size):
-                print("ORF!!!")
                 ORF += 1
 
         self.nORFs = ORF
