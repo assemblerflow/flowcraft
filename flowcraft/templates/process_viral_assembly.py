@@ -3,6 +3,7 @@
 import os
 import json
 import operator
+from itertools import groupby
 
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
@@ -76,7 +77,7 @@ class Assembly:
     """
 
     def __init__(self, assembly_file, min_contig_len, min_kmer_cov,
-                 sample_id):
+                 sample_id, min_size):
 
         self.contigs = {}
         """
@@ -98,6 +99,11 @@ class Assembly:
         str: The name of the sample for the assembly.
         """
 
+        self.nORFs = 0
+        """
+        int: number of complete ORFs in the assembly.
+        """
+
         self.report = {}
         """
         dict: Will contain the filtering results for each contig.
@@ -115,9 +121,26 @@ class Assembly:
         # Parse assembly and populate self.contigs
         self._parse_assembly(assembly_file)
 
-        # Perform first contig filtering using min_contig_len, min_kmer_cov,
-        # and gc content
-        self.filter_contigs(*self.filters)
+        #Gets the number of ORFs
+        self.getORFs(assembly_file, min_size)
+
+    def getORFs(self, assembly, min_size):
+
+        f_open = open(assembly, "rU")
+
+        entry = (x[1] for x in groupby(f_open, lambda line: line[0] == ">"))
+
+        ORF = 0
+
+        for header in entry:
+            headerStr = header.__next__()[1:].strip()
+            seq = "".join(s.strip() for s in entry.__next__())
+            if len(seq) >= int(min_size):
+                print("ORF!!!")
+                ORF += 1
+
+        self.nORFs = ORF
+
 
     @staticmethod
     def _parse_coverage(header_str):
@@ -448,7 +471,7 @@ def main(sample_id, assembly_file, minsize):
     # Parse the spades assembly file and perform the first filtering.
     logger.info("Starting assembly parsing")
     assembly_obj = Assembly(assembly_file, 0, 0,
-                            sample_id)
+                            sample_id, minsize)
 
     if 'spades' in assembly_file:
         assembler = "SPAdes"
@@ -458,8 +481,8 @@ def main(sample_id, assembly_file, minsize):
     #TODO - adapt to viral assembly
     with open(".warnings", "w") as warn_fh:
 
-        t_80 = minsize * 1000000 * 0.8
-        t_150 = minsize * 1000000 * 1.5
+        t_80 = int(minsize) * 1000000 * 0.8
+        t_150 = int(minsize) * 1000000 * 1.5
         # Check if assembly size of the first assembly is lower than 80% of the
         # estimated genome size - DENV ORF has min 10k nt. If True, redo the filtering without the
         # k-mer coverage filter
@@ -494,6 +517,7 @@ def main(sample_id, assembly_file, minsize):
             warn_fh.write(warn_msg)
             fails = warn_msg
 
+
     # Write json report
     with open(".report.json", "w") as json_report:
         json_dic = {
@@ -507,7 +531,11 @@ def main(sample_id, assembly_file, minsize):
                     {"header": "Assembled BP ({})".format(assembler),
                      "value": assembly_len,
                      "table": "assembly",
-                     "columnBar": True}
+                     "columnBar": True},
+                    {"header": "ORFs",
+                     "value": assembly_obj.nORFs,
+                     "table": "assembly",
+                     "columnBar":False}
                 ]
             }],
         }
