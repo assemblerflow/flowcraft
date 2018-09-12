@@ -401,7 +401,7 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                 }
 
             # Get encoding
-            if len(encoding) > 1:
+            if len(encoding) > 0:
                 encoding = set(encoding)
                 phred = set(phred)
                 # Get encoding and phred as strings
