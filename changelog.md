@@ -2,6 +2,10 @@
 
 ## Changes in upcoming release (`dev` branch)
 
+### Features
+- Added `report` run mode to Flowcraft that displays the report of any given
+pipeline in the Flowcraft's web application. 
+
 ### Minor/Other changes
 
 - Refactored report json for components `mash_dist`, `mash_screen` and 
