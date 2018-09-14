@@ -258,7 +258,8 @@ class RemoveHost(Process):
         }
 
         self.status_channels = [
-            "remove_host"
+            "remove_host",
+            "report_remove_host"
         ]
 
 class MetaProb(Process):

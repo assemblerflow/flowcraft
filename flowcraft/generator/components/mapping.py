@@ -51,7 +51,8 @@ class Bowtie(Process):
         }
 
         self.status_channels = [
-            "bowtie"
+            "bowtie",
+            "report_bowtie"
         ]
 
 class Retrieve_mapped(Process):
