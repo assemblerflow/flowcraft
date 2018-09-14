@@ -132,7 +132,7 @@ def get_args(args=None):
         help="Pretty inspection mode that removes usual reporting processes."
     )
 
-    # INSPECT MODE
+    # REPORT MODE
     reports_parser = subparsers.add_parser("report",
                                            help="Broadcast the report of "
                                                 "a pipeline")
@@ -144,6 +144,22 @@ def get_args(args=None):
     reports_parser.add_argument(
         "-u", "--url", dest="url", default="http://192.92.149.169:80/",
         help="Specify the URL to where the data should be broadcast"
+    )
+    reports_parser.add_argument(
+        "--trace-file", dest="trace_file", default="pipeline_stats.txt",
+        help="Specify the nextflow trace file. Only applicable in combination "
+             "with --watch option."
+    )
+    reports_parser.add_argument(
+        "--log-file", dest="log_file", default=".nextflow.log",
+        help="Specify the nextflow log file. Only applicable in combination "
+             "with --watch option."
+    )
+    reports_parser.add_argument(
+        "-w", "--watch", dest="watch",  action="store_const", const=True,
+        help="Run the report in watch mode. This option will track the "
+             "generation of reports during the execution of the pipeline, "
+             "allowing for the visualization of the reports in real-time"
     )
 
     if len(sys.argv) == 1:
@@ -344,7 +360,12 @@ def inspect(args):
 def report(args):
 
     try:
-        fc_report = FlowcraftReport(args.report_file, args.url)
+        fc_report = FlowcraftReport(
+            report_file=args.report_file,
+            trace_file=args.trace_file,
+            log_file=args.log_file,
+            watch=args.watch,
+            ip_addr=args.url)
     except eh.ReportError as e:
         logger.error(colored_print(e.value, "red_bold"))
         sys.exit(1)
