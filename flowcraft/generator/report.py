@@ -3,6 +3,8 @@ import re
 import sys
 import json
 import signal
+import socket
+import hashlib
 import logging
 import requests
 
@@ -177,19 +179,40 @@ class FlowcraftReport:
         """Returns a hash of the reports JSON file
         """
 
-        with open(self.report_file) as fh:
-            report_json = json.loads(fh.read())
+        if self.watch:
 
-        metadata = report_json["data"]["results"][0]["nfMetadata"]
+            with open(self.log_file) as fh:
+                header = fh.readline()
 
-        try:
-            report_id = metadata["scriptId"] + metadata["sessionId"]
-        except KeyError:
-            raise eh.ReportError("Incomplete or corrupt report JSON file "
-                                 "missing the 'scriptId' and/or 'sessionId' "
-                                 "metadata information")
+            pipeline_path = re.match(
+                ".*nextflow run ([^\s]+).*", header).group(1)
 
-        return report_id
+            # Get hash from the entire pipeline file
+            pipeline_hash = hashlib.md5()
+            with open(pipeline_path, "rb") as fh:
+                for chunk in iter(lambda: fh.read(4096), b""):
+                    pipeline_hash.update(chunk)
+            # Get hash from the current working dir and hostname
+            workdir = os.getcwd().encode("utf8")
+            hostname = socket.gethostname().encode("utf8")
+            dir_hash = hashlib.md5(workdir + hostname)
+
+            return pipeline_hash.hexdigest() + dir_hash.hexdigest()
+
+        else:
+            with open(self.report_file) as fh:
+                report_json = json.loads(fh.read())
+
+            metadata = report_json["data"]["results"][0]["nfMetadata"]
+
+            try:
+                report_id = metadata["scriptId"] + metadata["sessionId"]
+            except KeyError:
+                raise eh.ReportError("Incomplete or corrupt report JSON file "
+                                     "missing the 'scriptId' and/or 'sessionId' "
+                                     "metadata information")
+
+            return report_id
 
     def _update_pipeline_status(self):
         """
