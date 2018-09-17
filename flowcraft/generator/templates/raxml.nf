@@ -25,6 +25,14 @@ process raxml_{{ pid }} {
     script:
     """
     raxmlHPC -s ${alignment} -p 12345 -m ${substitution_model} -T $task.cpus -n $workflow.scriptName -f a -x ${seednumber} -N ${bootstrapnumber}
+
+    # Add information to dotfiles
+    json_str="{'treeData':[{'trees':['\$(cat RAxML_bipartitions.den-im.nf)', 'bootstrap': '${bootstrapnumber}']}]}"
+
+    echo \$json_str > .report.json
+
+    version_str="[{'program':'raxmlHPC','version':'8.2.11'}]"
+    echo \$version_str > .versions
     """
 
 }
