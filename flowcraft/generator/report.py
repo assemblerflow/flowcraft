@@ -449,10 +449,17 @@ class FlowcraftReport:
 
         # When in watch mode,
         if self.watch:
+            logger.info(colored_print("\tFetching pipeline run status",
+                                      "green_bold"))
             self._update_pipeline_status()
+            logger.info(colored_print(
+                "\tSending initial request to test service", "green_bold"))
             self._init_live_reports(report_hash)
+            logger.info(colored_print("Initial parsing of trace file",
+                                      "green_bold"))
+            self.update_trace_watch()
 
-        self._print_msg(report_hash)
+            self._print_msg(report_hash)
 
         logger.debug("Establishing connection...")
 
@@ -464,6 +471,7 @@ class FlowcraftReport:
                 # When not in watch mode, send the report JSON once
                 if not _broadcast_sent and not self.watch:
                     self._send_report(report_hash)
+                    self._print_msg(report_hash)
                     _broadcast_sent = True
 
                 # When in watch mode, continuously monitor the trace file for
