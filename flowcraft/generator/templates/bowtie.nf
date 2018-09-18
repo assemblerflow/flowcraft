@@ -70,6 +70,8 @@ process report_bowtie_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
+    tag { sample_id }
+
     input:
     set sample_id, file(bowtie_log) from into_json_{{ pid }}
 

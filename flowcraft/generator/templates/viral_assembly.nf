@@ -136,6 +136,8 @@ process report_viral_assembly_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
+    tag { sample_id }
+
     input:
     set sample_id, file(assembly) from to_report_{{ pid }}
     val min_size from orf_size
