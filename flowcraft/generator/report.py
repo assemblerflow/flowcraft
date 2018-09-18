@@ -288,8 +288,6 @@ class FlowcraftReport:
                 # skipped in future parsers
                 self.stored_ids.append(fields[hm["task_id"]])
 
-                self._update_pipeline_status()
-
     def update_log_watch(self):
         """Parses nextflow log file and updates the run status
         """
@@ -455,7 +453,7 @@ class FlowcraftReport:
             logger.info(colored_print(
                 "\tSending initial request to test service", "green_bold"))
             self._init_live_reports(report_hash)
-            logger.info(colored_print("Initial parsing of trace file",
+            logger.info(colored_print("\tInitial parsing of trace file",
                                       "green_bold"))
             self.update_trace_watch()
 
