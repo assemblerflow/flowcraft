@@ -316,35 +316,44 @@ class FlowcraftReport:
             Hash of the report JSON as retrieved from :func:`~_get_report_hash`
         """
 
-        reports_compilation = []
+        # Determines the maximum number of reports sent at the same time in
+        # the same payload
+        buffer_size = 100
+        logger.debug("Report buffer size set to: {}".format(buffer_size))
 
-        for report in self.report_queue:
-            report_file = [x for x in os.listdir(report)
-                           if x.endswith(".json")][0]
-            with open(join(report, report_file)) as fh:
-                reports_compilation.append(json.loads(fh.read()))
+        for i in range(0, len(self.report_queue), buffer_size):
 
-        logger.debug("Payload sent with size: {}".format(
-            asizeof(json.dumps(reports_compilation))
-        ))
-        logger.debug("JSON: {}".format(reports_compilation))
+            # Reset the report compilation batch
+            reports_compilation = []
+
+            # Iterate over report JSON batches determined by buffer_size
+            for report in self.report_queue[i: i + buffer_size]:
+                report_file = [x for x in os.listdir(report)
+                               if x.endswith(".json")][0]
+                with open(join(report, report_file)) as fh:
+                    reports_compilation.append(json.loads(fh.read()))
+
+            logger.debug("Payload sent with size: {}".format(
+                asizeof(json.dumps(reports_compilation))
+            ))
+            logger.debug("JSON: {}".format(reports_compilation))
+
+            try:
+                requests.put(
+                    self.broadcast_address,
+                    json={"run_id": report_id,
+                          "report_json": reports_compilation,
+                          "status": self.status_info}
+                )
+            except requests.exceptions.ConnectionError:
+                logger.error(colored_print(
+                    "ERROR: Could not establish connection with server. The server"
+                    " may be down or there is a problem with your internet "
+                    "connection.", "red_bold"))
+                sys.exit(1)
 
         # Reset the report queue after sending the request
         self.report_queue = []
-
-        try:
-            requests.put(
-                self.broadcast_address,
-                json={"run_id": report_id,
-                      "report_json": reports_compilation,
-                      "status": self.status_info}
-            )
-        except requests.exceptions.ConnectionError:
-            logger.error(colored_print(
-                "ERROR: Could not establish connection with server. The server"
-                " may be down or there is a problem with your internet "
-                "connection.", "red_bold"))
-            sys.exit(1)
 
     def _init_live_reports(self, report_id):
         """Sends a POST request to initialize the live reports
