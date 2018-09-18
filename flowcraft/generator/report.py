@@ -326,8 +326,11 @@ class FlowcraftReport:
 
             # Iterate over report JSON batches determined by buffer_size
             for report in self.report_queue[i: i + buffer_size]:
-                report_file = [x for x in os.listdir(report)
-                               if x.endswith(".json")][0]
+                try:
+                    report_file = [x for x in os.listdir(report)
+                                   if x.endswith(".json")][0]
+                except IndexError:
+                    continue
                 with open(join(report, report_file)) as fh:
                     reports_compilation.append(json.loads(fh.read()))
 
