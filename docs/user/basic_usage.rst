@@ -326,7 +326,7 @@ should be run in the folder where the pipeline is running**::
     flowcraft inspect -m broadcast
 
 
-This will output a url to the terminal that can be opened in a browser.
+This will output an URL to the terminal that can be opened in a browser.
 This is an example of the screen that is displayed once the url is opened:
 
 .. image:: ../resources/flowcraft_inspect_broadcast.png
@@ -349,4 +349,55 @@ Want to know more?
 Reports
 -------
 
-Coming soon...
+The reporting of a FlowCraft pipeline is save on a JSON file that is stored
+in ``pipeline_reports/pipeline_report.json``. To visualize the reports you'll just
+need to execute the following command in the folder where the pipeline was executed::
+
+    flowcraft report
+
+This will output an URL to the terminal that can be opened in a browser.
+This is an example of the screen that is displayed once the url is opened:
+
+.. image:: ../resources/flowcraft_report.png
+   :align: center
+
+**The actual layout and content of the reports will depend on the pipeline you
+build and will only provide the information that is directly related to
+your pipeline components.**
+
+.. important::
+    This pipeline report will be available for **anyone** via the provided URL,
+    which means that the URL can be shared with anyone and/or any device with
+    a browser. **However, the report section will only be available while
+    the** ``flowcraft report`` **command is running. Once this command
+    is cancelled, the data will be erased from the service and the URL will
+    no longer be available**.
+
+Real time reports
+:::::::::::::::::
+
+The reports of any FlowCraft pipeline can be monitored in real-time using the
+``--watch`` option::
+
+    flowcraft report --watch
+
+This will output an URL exactly as in the previous section and will render the
+same reports page with a small addition. In the top right of the screen in the
+navigation bar, there will be a new icon that informs the user of when new
+reports are available:
+
+.. image:: ../resources/flowcraft_report_watch.png
+   :align: center
+
+Local visualization
+:::::::::::::::::::
+
+The FlowCraft report JSON file can also be visualized locally by drag and dropping
+it into the FlowCraft web application page, currently hosted at http://192.92.149.169/reports
+
+Offline visualization
+:::::::::::::::::::::
+
+The complete FlowCraft report is also available as a standalone HTML file that
+can be visualized offline. This HTML file, stored in
+``pipeline_reports/pipeline_report.html``, can be opened in any modern browser.
