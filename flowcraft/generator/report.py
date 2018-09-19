@@ -375,7 +375,8 @@ class FlowcraftReport:
         try:
             requests.post(
                 self.broadcast_address,
-                json={"run_id": report_id, "report_json": start_json}
+                json={"run_id": report_id, "report_json": start_json,
+                      "status": self.status_info}
             )
         except requests.exceptions.ConnectionError:
             logger.error(colored_print(
