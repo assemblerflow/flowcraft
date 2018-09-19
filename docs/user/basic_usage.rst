@@ -349,7 +349,7 @@ Want to know more?
 Reports
 -------
 
-The primary report file of a FlowCraft pipeline is a JSON file that is stored
+The reporting of a FlowCraft pipeline is save on a JSON file that is stored
 in ``pipeline_reports/pipeline_report.json``. To visualize the reports you'll just
 need to execute the following command in the folder where the pipeline was executed::
 
@@ -388,3 +388,16 @@ reports are available:
 
 .. image:: ../resources/flowcraft_report_watch.png
    :align: center
+
+Local visualization
+:::::::::::::::::::
+
+The FlowCraft report JSON file can also be visualized locally by drag and dropping
+it into the FlowCraft web application page, currently hosted at http://192.92.149.169/reports
+
+Offline visualization
+:::::::::::::::::::::
+
+The complete FlowCraft report is also available as a standalone HTML file that
+can be visualized offline. This HTML file, stored in
+``pipeline_reports/pipeline_report.html``, can be opened in any modern browser.
