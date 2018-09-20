@@ -133,7 +133,6 @@ class Assembly:
         ORF = 0
 
         for header in entry:
-            headerStr = header.__next__()[1:].strip()
             seq = "".join(s.strip() for s in entry.__next__())
             if len(seq) >= int(min_size):
                 ORF += 1
@@ -480,8 +479,8 @@ def main(sample_id, assembly_file, minsize):
     #TODO - adapt to viral assembly
     with open(".warnings", "w") as warn_fh:
 
-        t_80 = int(minsize) * 1000000 * 0.8
-        t_150 = int(minsize) * 1000000 * 1.5
+        t_80 = int(minsize) * 0.8
+        t_150 = int(minsize) * 1.5
         # Check if assembly size of the first assembly is lower than 80% of the
         # estimated genome size - DENV ORF has min 10k nt. If True, redo the filtering without the
         # k-mer coverage filter
