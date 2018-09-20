@@ -40,14 +40,19 @@ class Raxml(Process):
         self.directives = {
             "raxml": {
                 "container": "flowcraft/raxml",
-                "version": "8.2.11-1",
+                "version": "8.2.11-2",
                 "cpus": 4,
                 "memory": "{ 4.GB * task.attempt }"
+            },
+            "report_raxml": {
+                "container": "flowcraft/raxml",
+                "version": "8.2.11-2"
             }
         }
 
         self.status_channels = [
-            "raxml"
+            "raxml",
+            "report_raxml"
         ]
 
 

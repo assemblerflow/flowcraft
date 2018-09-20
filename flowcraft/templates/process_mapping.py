@@ -142,8 +142,6 @@ class Bowtie:
 
         #Missing parser for unpaired (not implemented in flowcraft yet)
 
-        print(bowtie_log)
-        print(type(bowtie_log))
         with open(bowtie_log, "r") as f:
             #Go through log file line by line
             for l in f:
