@@ -337,7 +337,7 @@ class FlowcraftReport:
             logger.debug("Payload sent with size: {}".format(
                 asizeof(json.dumps(reports_compilation))
             ))
-            logger.debug("JSON: {}".format(reports_compilation))
+            logger.debug("status: {}".format(self.status_info))
 
             try:
                 requests.put(
@@ -351,6 +351,26 @@ class FlowcraftReport:
                     "ERROR: Could not establish connection with server. The server"
                     " may be down or there is a problem with your internet "
                     "connection.", "red_bold"))
+                sys.exit(1)
+
+        # When there is no change in the report queue, but there is a change
+        # in the run status of the pipeline
+        if not self.report_queue:
+
+            logger.debug("status: {}".format(self.status_info))
+
+            try:
+                requests.put(
+                    self.broadcast_address,
+                    json={"run_id": report_id,
+                          "report_json": [],
+                          "status": self.status_info}
+                )
+            except requests.exceptions.ConnectionError:
+                logger.error(colored_print(
+                    "ERROR: Could not establish connection with server. The"
+                    " server may be down or there is a problem with your "
+                    "internet connection.", "red_bold"))
                 sys.exit(1)
 
         # Reset the report queue after sending the request
