@@ -20,6 +20,7 @@ setup(
                                 "profiles.config",
                                 "bin/*",
                                 "lib/*",
+                                "resources/*",
                                 "generator/templates/*"]},
     data_files=[("", ["LICENSE"])],
     install_requires=[
