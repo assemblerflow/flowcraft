@@ -7,7 +7,7 @@ Table data
 AMR table:
     - **<abricate database>**: Number of hits for a particular given database
 
-.. image:: ../../resources/reports/abricate_table.png
+.. image:: ../resources/reports/abricate_table.png
     :scale: 80 %
     :align: center
 
