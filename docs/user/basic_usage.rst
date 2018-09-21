@@ -11,7 +11,7 @@ Build
 Assembling a pipeline
 :::::::::::::::::::::
 
-Pipelines can be generated using the ``build`` execution mode of FlowCraft
+Pipelines are generated using the ``build`` mode of FlowCraft
 and the ``-t`` parameter to specify the :ref:`components <components>` inside quotes::
 
     flowcraft build -t "trimmomatic fastqc spades" -o my_pipe.nf
@@ -19,16 +19,14 @@ and the ``-t`` parameter to specify the :ref:`components <components>` inside qu
 All components should be written inside quotes and be space separated.
 This command will generate a linear pipeline with three components on the
 current working directory (for more features and tips on how pipelines can be
-built, see the :doc:`pipeline building <pipeline_building>` section). A linear pipeline means that
+built, see the :doc:`pipeline building <pipeline_building>` section). **A linear pipeline means that
 there are no bifurcations between components, and the input data will flow
-linearly. In this particular case, the input data of the
-pipeline will be paired-end fastq files, since that is the input data type
-of the first component, :doc:`trimmomatic <components/trimmomatic>`.
+linearly.**
 
 The rationale of how the data flows across the pipeline is simple and intuitive.
 Data enters a component and is processed in some way, which may result on the
-creation of results (stored in the ``results`` directory) and reports (stored
-in the ``reports`` directory) (see `Results and reports`_ below). If that
+creation of result files (stored in the ``results`` directory) and reports
+files (stored in the ``reports`` directory) (see `Results and reports`_ below). If that
 component has an ``output_type``, it will feed the processed data into the
 next component (or components) and this will repeated until the end of the
 pipeline.
@@ -44,8 +42,8 @@ in any browser.
 The ``integrity_coverage`` component is a dependency of ``trimmomatic``, so
 it was automatically added to the pipeline.
 
-.. note::
-    Not all pipeline variations will work. **You always need to ensure
+.. important::
+    Not all pipeline configurations will work. **You always need to ensure
     that the output type of a component matches the input type of the next
     component**, otherwise FlowCraft will exit with an error.
 
@@ -124,21 +122,39 @@ with ``nextflow`` and using the ``--help`` option::
 
 All these parameters are specific to the components of the pipeline. However,
 the main input parameter (or parameters) of the pipeline is always available.
-In this case, since the pipeline started with fastq paired-end files as the
-main input, the ``--fastq`` parameter is available. If the pipeline started
+**In this case, since the pipeline started with fastq paired-end files as the
+main input, the** ``--fastq`` **parameter is available.** If the pipeline started
 with any other input type or with more than one input type, the appropriate
-parameters would appear. These parameters can be provided on run-time or
-edited in the ``params.config`` file.
+parameters will appear (more information in the :ref:`raw input types<rawInput>` section).
 
-The parameters are composed by its name (`adapters`) followed by the ID of
-the process it refers to (`_1_2`). The IDs can be consulted in the DAG tree
-(See `Assembling a pipeline`_). As such, all parameters will be independent
-between different components, **even if the parameter name is the same**. This
+The parameters are composed by their name (``adapters``) followed by the ID of
+the process it refers to (``_1_2``). The IDs can be consulted in the DAG tree
+(See `Assembling a pipeline`_). This is done to prevent issues when duplicating
+components and, as such, **all parameters will be independent between different
+components**. This
 behaviour can be changed when building the pipeline by using the
 ``--merge-params`` option (See :ref:`mergeParams`).
 
-Executing the pipeline
-::::::::::::::::::::::
+.. note::
+    The ``--merge-params`` option of the ``build`` mode will merge all parameters
+    with identical names (`e.g.:` ``--genomeSize_1_1`` and ``--genomeSize_1_5``
+    become simply ``--genomeSize``) . This is usually more appropriate and useful
+    in linear pipelines without component duplication.
+
+
+Providing/modifying parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These parameters can be provided on run-time::
+
+    nextflow run my_pipe.nf --genomeSize_1_1 5 --adapters_1_2 "/path/to/adapters"
+
+or edited in the ``params.config`` file::
+
+    params {
+        genomeSize_1_1 = 5
+        adapters_1_2 = "path/to/adapters"
+    }
 
 Most parameters in FlowCraft's components already come with sensible
 defaults, which means that usually you'll only need to provide a small number
@@ -152,7 +168,7 @@ We'll need to provide the pattern to the fastq files. This pattern is perhaps
 a bit confusing at first, but it's necessary for the correct inference of the
 paired::
 
-    nextflow run my_pipe.nf --fastq "data/*_{1,2}.*"
+    --fastq "data/*_{1,2}.*"
 
 In this case, the pairs are separated by the "_1." or "_2." substring, which leads
 to the pattern ``*_{1,2}.*``. Another common nomenclature for paired fastq
@@ -165,8 +181,16 @@ acceptable pattern would be ``*_R{1,2}_*``.
     to allow nextflow to resolve the pattern, otherwise your shell might try
     to resolve it and provide the wrong input to nextflow.
 
+Execution
+---------
+
+Once you build your pipeline with Flowcraft you have a standard nextflow pipeline
+ready to run. Therefore, all you need to do is::
+
+    nextflow run my_pipe.nf --fastq "data/*_{1,2}.*
+
 Changing executor and container engine
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::::::::::::::::::::::::::::::::::::::
 
 The default run mode of an FlowCraft pipeline is to be executed locally
 and using the singularity container engine. In nextflow terms, this is
@@ -196,7 +220,7 @@ Other container engines are:
 .. _supported by nextflow: https://www.nextflow.io/docs/latest/executor.html
 
 Docker images
-^^^^^^^^^^^^^
+:::::::::::::
 
 All components of FlowCraft are executed in containers, which means that
 the first time they are executed in a machine, **the corresponding image will have
@@ -302,7 +326,7 @@ should be run in the folder where the pipeline is running**::
     flowcraft inspect -m broadcast
 
 
-This will output a url to the terminal that can be opened in a browser.
+This will output an URL to the terminal that can be opened in a browser.
 This is an example of the screen that is displayed once the url is opened:
 
 .. image:: ../resources/flowcraft_inspect_broadcast.png
@@ -325,4 +349,55 @@ Want to know more?
 Reports
 -------
 
-Coming soon...
+The reporting of a FlowCraft pipeline is saved on a JSON file that is stored
+in ``pipeline_reports/pipeline_report.json``. To visualize the reports you'll just
+need to execute the following command in the folder where the pipeline was executed::
+
+    flowcraft report
+
+This will output an URL to the terminal that can be opened in a browser.
+This is an example of the screen that is displayed once the url is opened:
+
+.. image:: ../resources/flowcraft_report.png
+   :align: center
+
+**The actual layout and content of the reports will depend on the pipeline you
+build and it will only provide the information that is directly related to
+your pipeline components.**
+
+.. important::
+    This pipeline report will be available for **anyone** via the provided URL,
+    which means that the URL can be shared with anyone and/or any device with
+    a browser. **However, the report section will only be available while
+    the** ``flowcraft report`` **command is running. Once this command
+    is cancelled, the data will be erased from the service and the URL will
+    no longer be available**.
+
+Real time reports
+:::::::::::::::::
+
+The reports of any FlowCraft pipeline can be monitored in real-time using the
+``--watch`` option::
+
+    flowcraft report --watch
+
+This will output an URL exactly as in the previous section and will render the
+same reports page with a small addition. In the top right of the screen in the
+navigation bar, there will be a new icon that informs the user when new
+reports are available:
+
+.. image:: ../resources/flowcraft_report_watch.png
+   :align: center
+
+Local visualization
+:::::::::::::::::::
+
+The FlowCraft report JSON file can also be visualized locally by drag and dropping
+it into the FlowCraft web application page, currently hosted at http://192.92.149.169/reports
+
+Offline visualization
+:::::::::::::::::::::
+
+The complete FlowCraft report is also available as a standalone HTML file that
+can be visualized offline. This HTML file, stored in
+``pipeline_reports/pipeline_report.html``, can be opened in any modern browser.

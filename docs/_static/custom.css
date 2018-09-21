@@ -5,3 +5,7 @@ div.wy-side-nav-search, div.wy-nav-top {
 .wy-menu > .caption > .caption-text {
   color: #5c6bc0;
 }
+
+.wy-nav-content {
+  max-width: 100%
+}

@@ -45,5 +45,9 @@ Advanced
 Reports JSON
 ^^^^^^^^^^^^
 
-``expectedSpecies``: Name of the expected species
-``species``: Name of inferred species
+``tableRow``:
+    - ``mlst``: Predicted species.
+``expectedSpecies``: Name of the expected species.
+
+``species``: Name of inferred species.
+

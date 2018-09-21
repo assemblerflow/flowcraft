@@ -1,3 +1,3 @@
 set {{ sample_id|default("sample_id") }}, val("{{ pid }}_{{ task_name }}{{ suffix }}"), file(".status"), file(".warning"), file(".fail"), file(".command.log") into STATUS_{{task_name}}_{{ pid }}
-set {{ sample_id|default("sample_id") }}, val("{{ task_name }}_{{ pid }}"), val("{{ pid }}"), file(".report.json") into REPORT_{{task_name}}_{{ pid }}
+set {{ sample_id|default("sample_id") }}, val("{{ task_name }}_{{ pid }}{{ suffix }}"), val("{{ pid }}"), file(".report.json"), file(".versions"), file(".command.trace") into REPORT_{{task_name}}_{{ pid }}
 file ".versions"

@@ -430,24 +430,45 @@ class AbricateReport(Abricate):
             List of JSON/dict objects with the report data.
         """
 
-        json_dic = {"plotData": {}}
+        json_dic = {"plotData": []}
+        sample_dic = {}
+        sample_assembly_map = {}
 
         for entry in self.storage.values():
+
+            sample_id = re.match("(.*)_abr", entry["log_file"]).groups()[0]
+            if sample_id not in sample_dic:
+                sample_dic[sample_id] = {}
+
             # Get contig ID using the same regex as in `assembly_report.py`
             # template
             contig_id = self._get_contig_id(entry["reference"])
             # Get database
             database = entry["database"]
-            if database not in json_dic["plotData"]:
-                json_dic["plotData"][database] = []
+            if database not in sample_dic[sample_id]:
+                sample_dic[sample_id][database] = []
 
-            json_dic["plotData"][database].append(
+            # Update the sample-assembly correspondence dict
+            if sample_id not in sample_assembly_map:
+                sample_assembly_map[sample_id] = entry["infile"]
+
+            sample_dic[sample_id][database].append(
                 {"contig": contig_id,
                  "seqRange": entry["seq_range"],
                  "gene": entry["gene"].replace("'", ""),
                  "accession": entry["accession"],
                  "coverage": entry["coverage"],
-                 "identity": entry["identity"]}
+                 "identity": entry["identity"],
+                 },
+            )
+
+        for sample, data in sample_dic.items():
+            json_dic["plotData"].append(
+                {
+                    "sample": sample,
+                    "data": {"abricateXrange": data},
+                    "assemblyFile": sample_assembly_map[sample]
+                }
             )
 
         return json_dic

@@ -128,8 +128,6 @@ class DengueTyping(Process):
         self.input_type = "fasta"
         self.output_type = None
 
-        self.status_channels = []
-
         self.link_start = None
 
         self.directives = {"dengue_typing": {

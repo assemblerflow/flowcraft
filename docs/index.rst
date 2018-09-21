@@ -32,6 +32,7 @@ A NextFlow pipeline assembler for genomics.
    user/pipeline_building
    user/pipeline_configuration
    user/pipeline_inspect
+   user/pipeline_reports
    user/available_components
 
 .. _Developer Guide:
@@ -45,6 +46,8 @@ A NextFlow pipeline assembler for genomics.
    dev/create_template
    dev/containers
    dev/process_dotfiles
+   dev/pipeline_reporting
+   dev/reports
 
 .. _Source API:
 

@@ -17,11 +17,11 @@ process reads_download_{{ pid }} {
     maxRetries 1
 
     input:
-    val accession_id from {{ input_channel }}.splitText(){ it.trim() }.filter{ it.trim() != "" }
+     set val(accession_id), val(name) from reads_download_in_1_0.splitText(){ it.trim() }.filter{ it != "" }.map{ it.split().length > 1 ? ["accession": it.split()[0], "name": it.split()[1]] : [it.split()[0], null] }
     each file(aspera_key) from IN_asperaKey_{{ pid }}
 
     output:
-    set accession_id, file("${accession_id}/*fq.gz") optional true into {{ output_channel }}
+    set val({ "$name" != "null" ? "$name" : "$accession_id" }), file("${accession_id}/*fq.gz") optional true into {{ output_channel }}
     {% with task_name="reads_download", sample_id="accession_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -39,6 +39,11 @@ process reads_download_{{ pid }} {
         fi
 
         getSeqENA.py -l accession_file.txt \$asperaOpt -o ./ --SRAopt --downloadCramBam
+
+        if [ $name != null ];
+        then
+            echo renaming pattern '${accession_id}' to '${name}' && cd ${accession_id} && rename "s/${accession_id}/${name}/" *.gz
+        fi
     } || {
         # If exit code other than 0
         if [ \$? -eq 0 ]
@@ -49,6 +54,8 @@ process reads_download_{{ pid }} {
             echo "Could not download accession $accession_id" > .fail
         fi
     }
+    version_str="{'version':[{'program':'getSeqENA.py','version':'1.3'}]}"
+    echo \$version_str > .versions
     """
 
 }

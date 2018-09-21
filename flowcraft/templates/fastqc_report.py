@@ -87,6 +87,7 @@ def _get_quality_stats(d, start_str, field_start=1, field_end=2):
 
     """
 
+    min_parsed = False
     parse = False
     report = []
     start_str = start_str
@@ -106,9 +107,25 @@ def _get_quality_stats(d, start_str, field_start=1, field_end=2):
                 return report, status
 
             elif parse:
+
                 fields = line.strip().split()
-                report.append((str(fields[0]),
-                               ";".join(fields[field_start: field_end])))
+
+                # This is triggered when the first value of a line series is
+                # not 1. If the starting point of the series is a number
+                # different from 1, fill the report with 0 until that point
+                if not min_parsed:
+                    if fields[0] != "1":
+                        try:
+                            blank_points = int(fields[0]) - 1
+                            report.extend([0] * blank_points)
+                        except ValueError:
+                            pass
+                    min_parsed = True
+
+                report.append(";".join([
+                    str(round(float(x), 2)) for x in
+                    fields[field_start: field_end]
+                ]))
 
 
 def write_json_report(sample_id, data1, data2):
@@ -487,12 +504,12 @@ def check_summary_health(summary_file, **kwargs):
         # WARNINGS
         # Check for fail sensitive
         if cat in warning_fail_sensitive and test == "FAIL":
-            warning.append("{}:low".format(cat))
+            warning.append("Failed category: {}".format(cat))
             logger.warning("Category {} flagged at a fail sensitive "
                            "category".format(cat))
 
         if cat in warning_must_pass and test != "PASS":
-            warning.append("{}:low".format(cat))
+            warning.append("Did not pass category: {}".format(cat))
             logger.warning("Category {} flagged at a must pass "
                            "category".format(cat))
 
@@ -589,7 +606,7 @@ def main(sample_id, result_p1, result_p2, opts):
                     json_dic["fail"] = [{
                         "sample": sample_id,
                         "table": "qc",
-                        "value": fail_msg
+                        "value": [fail_msg]
                     }]
                     report_fh.write(
                         json.dumps(json_dic, separators=(",", ":")))

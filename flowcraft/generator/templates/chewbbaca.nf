@@ -76,7 +76,7 @@ if (params.chewbbacaBatch{{ param_id }}) {
             echo $assembly | tr " " "\n" >> input_file.txt
             chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results $jsonOpt --cpu $task.cpus $training
             if [ "$jsonOpt" = "--json" ]; then
-                merge_json.py ${params.schemaCore{{ param_id }}} chew_results_*/*/results*
+                merge_json.py ${params.schemaCore{{ param_id }}} chew_results/*/results*
             else
                 cp chew_results*/*/results_alleles.tsv cgMLST.tsv
             fi
@@ -130,7 +130,7 @@ if (params.chewbbacaBatch{{ param_id }}) {
             echo $assembly >> input_file.txt
             chewBBACA.py AlleleCall -i input_file.txt -g \$inputGenomes -o chew_results_${sample_id} $jsonOpt --cpu $task.cpus $training --fc
             if [ "$jsonOpt" = "--json" ]; then
-                merge_json.py ${params.schemaCore{{ param_id }}} chew_results_*/*/results*
+                merge_json.py ${params.schemaCore{{ param_id }}} chew_results_*/*/results* ${sample_id}
             else
                 mv chew_results_*/*/results_alleles.tsv ${sample_id}_cgMLST.tsv
             fi

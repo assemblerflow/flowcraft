@@ -1,6 +1,7 @@
 header = """#!/usr/bin/env nextflow
 
 import Helper
+import CollectInitialMetadata
 
 // Pipeline version
 if (workflow.commitId){
@@ -38,4 +39,5 @@ if (params.containsKey("accessions")){
 }
 
 Help.start_info(infoMap, "$workflow.start", "$workflow.profile")
+CollectInitialMetadata.print_metadata(workflow)
     """

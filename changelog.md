@@ -2,6 +2,15 @@
 
 ## Changes in upcoming release (`dev` branch)
 
+### Features
+- Added `report` run mode to Flowcraft that displays the report of any given
+pipeline in the Flowcraft's web application. 
+
+### Minor/Other changes
+
+- Refactored report json for components `mash_dist`, `mash_screen` and 
+`mapping_patlas`
+
 ### Bug fixes
 - Fixed issue where `seq_typing` and `patho_typing` processes were not feeding
 report data to report compiler.
@@ -15,6 +24,8 @@ sam and bam files and added data to .report.json. Updated databases to pATLAS
 version 1.5.2.
 - `mash_screen` and `mash_dist`: added data to .report.json. Updated databases 
 to pATLAS version 1.5.2.
+- Added new options to `abricate` componente. Users can now provide custom database
+directories, minimum coverage and minimum identity parameters.
 
 ### New components
 

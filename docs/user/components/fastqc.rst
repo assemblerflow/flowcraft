@@ -57,10 +57,17 @@ Template
 Reports JSON
 ^^^^^^^^^^^^
 
-``tableRow``:
-    - ``Contigs``: Number of contigs
-    - ``Assembled BP``: Number of assembled base pairs
 ``plotData``:
-    - ``size_dist``: Distribution of contig size.
-    - ``gcSliding``: Sliding window of the GC content along the genome
-    - ``covSliding``: Sliding window of the coverage along the genome
+    - ``base_sequence_quality``: Per base sequence quality data
+        - (This structure is repeated for the other entries)
+        - ``status``: Status of the category (PASS, WARN, etc)
+        - ``data``: Plot data
+    - ``sequence_quality``: Per sequence quality data
+    - ``base_gc_content``: GC content distribution
+    - ``base_n_content``: Per base N content
+    - ``sequence_length_dist``: Distribution of sequence read length
+    - ``per_base_sequence_content``: Per base sequence content
+``warnings``:
+    - List of failures or warnings for some non-sensitive FastQC categories
+``fail``:
+    - Failure message when sensitive FastQC categories fail or do not pass.

@@ -60,3 +60,31 @@ class Help {
     }
 
 }
+
+class CollectInitialMetadata {
+
+    public static void print_metadata(nextflow.script.WorkflowMetadata workflow){
+
+        def treeDag = new File(".treeDag.json").text
+        def forkTree = new File(".forkTree.json").text
+
+        def metadataJson = "{'nfMetadata':{'scriptId':'${workflow.scriptId}',\
+'scriptName':'${workflow.scriptName}',\
+'profile':'${workflow.profile}',\
+'container':'${workflow.container}',\
+'containerEngine':'${workflow.containerEngine}',\
+'commandLine':'${workflow.commandLine}',\
+'runName':'${workflow.runName}',\
+'sessionId':'${workflow.sessionId}',\
+'projectDir':'${workflow.projectDir}',\
+'launchDir':'${workflow.launchDir}',\
+'startTime':'${workflow.start}',\
+'dag':${treeDag},\
+'forks':${forkTree}}}"
+
+        def json = metadataJson.replaceAll("'", '"')
+
+        def jsonFile = new File(".metadata.json")
+        jsonFile.write json
+    }
+}

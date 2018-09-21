@@ -44,15 +44,22 @@ execution of the process. When this occurs, the ``.status`` channel must have
 the ``fail`` string as well. As in the warning dotfile, there is no
 particular format for the fail message.
 
+.. _report-json:
+
 Report JSON
 -----------
+
+.. important::
+    The general specification of the report JSON changed in version 1.2.2.
+    See the `issue tracker <https://github.com/assemblerflow/flowcraft/issues/96>`_
+    for details.
 
 The ``.report.json`` file stores any information from a given process that is
 deemed worthy of being reported and displayed at the end of the pipeline.
 Any information can be stored in this file, as long as it is in JSON format,
 but there are a couple of recommendations that are necessary to follow
 for them to be processed by a reporting web app (Currently hosted at
-`report-nf <https://github.com/ODiogoSilva/report-nf>`_). However, if
+`flowcraft-webapp <https://github.com/assemblerflow/flowcraft-webapp>`_). However, if
 data processing will be performed with custom scripts, feel free to specify
 your own format.
 
@@ -63,18 +70,33 @@ Information meant to be displayed in tables should be in the following
 format::
 
     json_dic = {
-        "tableRow": [
-            {"header": "Raw BP",
-             "value": chars,
-             "table": "assembly",
-             "columnBar": True},
+        "tableRow": [{
+            "sample": "A",
+            "data": [{
+                "header": "Raw BP",
+                "value": 123,
+                "table": "qc"
+            }, {
+                "header": "Coverage",
+                "value": 32,
+                "table": "qc"
+            }]
+        }, {
+            "sample": "B",
+            "data": [{
+                "header": "Coverage",
+                "value": 35,
+                "table": "qc"
+            }]
+        }]
     }
 
-This means that the ``chars`` variable that is created during the execution
-of the process should appear as a table entry with the specified ``header``
-and ``value``. The ``table`` key specifies in which table of the reports
-it will appear and the ``columnBar`` key informs the report generator to
-create a bar column in that particular cell.
+This provides table information for multiple samples in the same process. In
+this case, data for two samples is provided. For each sample, values for
+one or more headers can be provided. For instance, this report provides
+information about the **Raw BP** and **Coverage** for sample **A** and this
+information should go to the **qc** table. If any other information is relevant
+to build the table, feel free to add more elements to the JSON.
 
 Information for plots
 ^^^^^^^^^^^^^^^^^^^^^
@@ -82,14 +104,19 @@ Information for plots
 Information meant to be displayed in plots should be in the following format::
 
     json_dic = {
-        "plotData":  {
-            "size_dist": size_dist
-        }
+        "plotData": [{
+            "sample": "strainA",
+            "data": {
+                "sparkline": 23123,
+                "otherplot": [1,2,3]
+             }
+        }],
     }
 
-This is a simple key:value pair, where the key is the ID of the plot in the
-reports and the ``size_dist`` contains the plot data that was gathered
-for a particular process.
+As in the table JSON, *plotData* should be an array with an entry for each
+sample. The data for each sample should be another JSON where the keys are
+the *plot signatures*, so that we know to which plot the data belongs. The
+corresponding values are whatever data object you need.
 
 Other information
 ^^^^^^^^^^^^^^^^^
@@ -98,6 +125,8 @@ Other than tables and plots, which have a somewhat predefined format, there
 is not particular format for other information. They will simply store the
 data of interest to report and it will be the job of a downstream report app
 to process that data into an actual visual report.
+
+.. _versions:
 
 Versions
 --------

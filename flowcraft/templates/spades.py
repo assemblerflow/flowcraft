@@ -86,6 +86,7 @@ if __file__.endswith(".command.sh"):
     KMERS = '$kmers'.strip()
     CLEAR = '$clear'
     OPTS = [x.strip() for x in '$opts'.strip("[]").split(",")]
+    CLEAR = '$clear'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))

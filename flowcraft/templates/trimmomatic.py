@@ -49,7 +49,7 @@ Code documentation
 # TODO: What to do when there is encoding failure
 
 __version__ = "1.0.3"
-__build__ = "20062018"
+__build__ = "29062018"
 __template__ = "trimmomatic-nf"
 
 import os
@@ -205,7 +205,7 @@ def write_report(storage_dic, output_file, sample_id):
                 "tableRow": [{
                     "sample": sample_id,
                     "data": [
-                        {"header": "trimmed",
+                        {"header": "Trimmed (%)",
                          "value": vals["total_trim_perc"],
                          "table": "qc",
                          "columnBar": True},

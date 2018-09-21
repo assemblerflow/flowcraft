@@ -262,11 +262,23 @@ def main(depth_file, json_dict, cutoff, sample_id):
         output_json.write(json.dumps(percentage_bases_covered))
 
     json_dic = {
+        "tableRow": [{
+            "sample": sample_id,
+            "data": [{
+                "header": "Mapping",
+                "table": "plasmids",
+                "patlas_mapping": percentage_bases_covered,
+                "value": len(percentage_bases_covered)
+            }]
+        }],
         "sample": sample_id,
         "patlas_mapping": percentage_bases_covered,
-        "plotData": {
-            "mappingPlasmids": dict_cov,
-        }
+        "plotData": [{
+            "sample": sample_id,
+            "data": {
+                "patlasMappingSliding": dict_cov
+            },
+        }]
     }
 
     logger.debug("Size of dict_cov: {} kb".format(asizeof(json_dic)/1024))

@@ -74,8 +74,8 @@ Code documentation
 
 """
 
-__version__ = "1.0.0"
-__build__ = "16012018"
+__version__ = "1.0.1"
+__build__ = "03082018"
 __template__ = "integrity_coverage-nf"
 
 import os
@@ -370,10 +370,12 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                              "value": nreads,
                              "table": "qc",
                              "columnBar": True},
-                            {"header": "Coverage (1st)",
+                            {"header": "Coverage",
                              "value": exp_coverage,
                              "table": "qc",
-                             "columnBar": True}
+                             "columnBar": True,
+                             "failThreshold": minimum_coverage
+                             }
                         ]
                     }],
                     "plotData": [{
@@ -382,24 +384,24 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                             "sparkline": chars
                         }
                     }],
-                    "minCoverage": minimum_coverage
                 }
             else:
                 json_dic = {
                     "tableRow": [{
                         "sample": sample_id,
                         "data": [
-                            {"header": "Coverage (2nd)",
+                            {"header": "Coverage",
                              "value": exp_coverage,
                              "table": "qc",
-                             "columnBar": True}
+                             "columnBar": True,
+                             "failThreshold": minimum_coverage
+                             }
                         ],
                     }],
-                    "minCoverage": minimum_coverage
                 }
 
             # Get encoding
-            if len(encoding) > 1:
+            if len(encoding) > 0:
                 encoding = set(encoding)
                 phred = set(phred)
                 # Get encoding and phred as strings
@@ -414,10 +416,17 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                 phred_fh.write(phred)
             # Encoding not found
             else:
-                logger.warning("Could not guess encoding and phred from "
-                               "FastQ")
-                enc_fh.write("None")
-                phred_fh.write("None")
+                if not skip_encoding:
+                    encoding_msg = "Could not guess encoding and phred from " \
+                                   "FastQ"
+                    logger.warning(encoding_msg)
+                    json_dic["warnings"] = [{
+                        "sample": sample_id,
+                        "table": "qc",
+                        "value": [encoding_msg]
+                    }]
+                    enc_fh.write("None")
+                    phred_fh.write("None")
 
             # Estimate coverage
             logger.info("Estimating coverage based on a genome size of "
@@ -442,7 +451,7 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                 json_dic["fail"] = [{
                     "sample": sample_id,
                     "table": "qc",
-                    "value": fail_msg
+                    "value": [fail_msg]
                 }]
 
             json_report.write(json.dumps(json_dic, separators=(",", ":")))

@@ -62,5 +62,6 @@ Reports JSON
 ^^^^^^^^^^^^
 
 ``tableRow``:
-    - ``Coverage (2nd)``: Estimated coverage
-``minCoverage``: Minimum coverage specified for the module
+    - ``Coverage``: Estimated coverage.
+``fail``:
+    - When estimated coverage is below the provided threshold.
