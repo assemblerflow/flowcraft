@@ -13,7 +13,6 @@ Quality control table:
 
 
 .. image:: ../resources/reports/assembly_table_viral_assembly.png
-    :scale: 80 %
     :align: center
 
 Fails
