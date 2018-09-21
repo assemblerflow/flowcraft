@@ -8,7 +8,6 @@ AMR table:
     - **<abricate database>**: Number of hits for a particular given database
 
 .. image:: ../resources/reports/abricate_table.png
-    :scale: 80 %
     :align: center
 
 Plot data
@@ -18,4 +17,4 @@ Plot data
   each database along the genome. This report component is only available when
   the ``pilon`` component was used downstream of ``abricate``.
 
-.. image:: ../../resources/reports/sliding_window_amr.png
+.. image:: ../resources/reports/sliding_window_amr.png
