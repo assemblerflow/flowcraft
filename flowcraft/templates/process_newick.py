@@ -68,7 +68,7 @@ def main(newick):
 
     tree.reroot_at_midpoint()
 
-    to_write=tree.as_string("newick").strip().replace("[&R] ",'')
+    to_write=tree.as_string("newick").strip().replace("[&R] ", '').replace(' ', '_').replace("'", "")
 
     with open(".report.json", "w") as json_report:
         json_dic = {
