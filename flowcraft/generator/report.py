@@ -368,8 +368,14 @@ class FlowcraftReport:
         logger.debug("Sending initial POST request to {} to start report live"
                      " update".format(self.broadcast_address))
 
+        try:
+            with open(".metadata.json") as fh:
+                metadata = [json.load(fh)]
+        except:
+            metadata = []
+
         start_json = {
-            "data": {"results": []}
+            "data": {"results": metadata}
         }
 
         try:

@@ -34,7 +34,7 @@ def main(reports, forks, dag, main_js):
     metadata = {
         "nfMetadata": {
             "scriptId": "${workflow.scriptId}",
-            "scriptName": "${workflow.scriptId}",
+            "scriptName": "${workflow.scriptName}",
             "profile": "${workflow.profile}",
             "container": "${workflow.container}",
             "containerEngine": "${workflow.containerEngine}",
@@ -43,7 +43,7 @@ def main(reports, forks, dag, main_js):
             "sessionId": "${workflow.sessionId}",
             "projectDir": "${workflow.projectDir}",
             "launchDir": "${workflow.launchDir}",
-            "start_time": "${workflow.start}"
+            "startTime": "${workflow.start}"
         }
     }
 
