@@ -509,7 +509,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
 
         if assembly_len > t_150:
 
-            warn_msg = "Assembly size ({}) smaller than the maximum" \
+            warn_msg = "Assembly size ({}) larger than the maximum" \
                        " threshold of 150% of expected genome size.".format(
                             assembly_len)
             logger.warning(warn_msg)

@@ -4,7 +4,10 @@
 
 ### Features
 - Added `report` run mode to Flowcraft that displays the report of any given
-pipeline in the Flowcraft's web application.
+pipeline in the Flowcraft's web application. The `report` mode can be executed
+after a pipeline ended or during the pipeline execution using the `--watch`
+option.
+- Added standalone report HTML at the end of the pipeline execution.
 - Components with support for the new report system:
     - `abricate`
     - `assembly_mapping`
@@ -34,6 +37,8 @@ pipeline in the Flowcraft's web application.
 ### Bug fixes
 - Fixed issue where `seq_typing` and `patho_typing` processes were not feeding
 report data to report compiler.
+- Fixed fail messages for `process_assembly` and `process_viral_assembly` 
+components
 
 ## 1.2.2
 
