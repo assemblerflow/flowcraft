@@ -68,7 +68,7 @@ class CollectInitialMetadata {
         def treeDag = new File(".treeDag.json").text
         def forkTree = new File(".forkTree.json").text
 
-        def metadataJson = "{'scriptId':'${workflow.scriptId}',\
+        def metadataJson = "{'nfMetadata':{'scriptId':'${workflow.scriptId}',\
 'scriptName':'${workflow.scriptName}',\
 'profile':'${workflow.profile}',\
 'container':'${workflow.container}',\
@@ -79,10 +79,10 @@ class CollectInitialMetadata {
 'projectDir':'${workflow.projectDir}',\
 'launchDir':'${workflow.launchDir}',\
 'startTime':'${workflow.start}',\
-'dag':'${treeDag}',\
-'forks':'${forkTree}'}"
+'dag':${treeDag},\
+'forks':${forkTree}}}"
 
-        def json = metadataJson.tr(/"'/, /'"/)
+        def json = metadataJson.replaceAll("'", '"')
 
         def jsonFile = new File(".metadata.json")
         jsonFile.write json
