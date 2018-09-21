@@ -28,6 +28,12 @@ process dengue_typing_{{ pid }} {
 
         seq_typing.py assembly -f ${assembly} -b ${ params.BD_sequence_file{{ param_id }} } -o ./ -j $task.cpus -t nucl
 
+        # Add information to dotfiles
+        json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
+        echo \$json_str > .report.json
+        version_str="[{'program':'seq_typing.py','version':'0.1'}]"
+        echo \$version_str > .versions
+
         rm -r rematch_temp
 
         if [ -s seq_typing.report.txt ];
@@ -38,6 +44,8 @@ process dengue_typing_{{ pid }} {
         fi
     } || {
         echo fail > .status
+        json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'NA','table':'typing'}]}]}"
+        echo \$json_str > .report.json
     }
     """
 

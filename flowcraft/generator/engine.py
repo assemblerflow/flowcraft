@@ -1173,6 +1173,61 @@ class NextflowGenerator:
             Nextflow params configuration string
         """
 
+        params_str = ""
+
+        for p in self.processes:
+
+            logger.debug("[{}] Adding parameters: {}\n".format(
+                p.template, p.params)
+            )
+
+            # Add an header with the template name to structure the params
+            # configuration
+            if p.params and p.template != "init":
+
+                p.set_param_id("_{}".format(p.pid))
+                params_str += "\n\t/*"
+                params_str += "\n\tComponent '{}_{}'\n".format(p.template,
+                                                               p.pid)
+                params_str += "\t{}\n".format("-" * (len(p.template) + len(p.pid) + 12))
+                params_str += "\t*/\n"
+
+            for param, val in p.params.items():
+
+                if p.template == "init":
+                    param_id = param
+                else:
+                    param_id = "{}_{}".format(param, p.pid)
+
+                params_str += "\t{} = {}\n".format(param_id, val["default"])
+
+        return params_str
+
+    def _get_merged_params_string(self):
+        """Returns the merged nextflow params string from a dictionary object.
+
+        The params dict should be a set of key:value pairs with the
+        parameter name, and the default parameter value::
+
+            self.params = {
+                "genomeSize": 2.1,
+                "minCoverage": 15
+            }
+
+        The values are then added to the string as they are. For instance,
+        a ``2.1`` float will appear as ``param = 2.1`` and a
+        ``"'teste'" string will appear as ``param = 'teste'`` (Note the
+        string).
+
+        Identical parameters in multiple processes will be merged into the same
+        param.
+
+        Returns
+        -------
+        str
+            Nextflow params configuration string
+        """
+
         params_temp = {}
 
         for p in self.processes:
@@ -1311,7 +1366,7 @@ class NextflowGenerator:
         })
         self.user_config = self._render_config("user.config", {})
 
-    def dag_to_file(self, dict_viz):
+    def dag_to_file(self, dict_viz, output_file=".treeDag.json"):
         """Writes dag to output file
 
         Parameters
@@ -1322,7 +1377,7 @@ class NextflowGenerator:
 
         """
 
-        outfile_dag = open(os.path.join(dirname(self.nf_file), ".treeDag.json")
+        outfile_dag = open(os.path.join(dirname(self.nf_file), output_file)
                            , "w")
         outfile_dag.write(json.dumps(dict_viz))
         outfile_dag.close()
@@ -1371,11 +1426,13 @@ class NextflowGenerator:
 
                 dir_var = ""
                 for k2, v2 in p.directives.items():
-                    dir_var += "<b>&emsp;{}:</b><br>".format(k2)
+                    dir_var += k2
                     for d in v2:
                         try:
-                            dir_var += "&emsp;&emsp;{}: {}</span><br>".\
-                                format(d, v2[d])
+                            # Remove quotes from string directives
+                            directive = v2[d].replace("'", "").replace('"', '') \
+                                if isinstance(v2[d], str) else v2[d]
+                            dir_var += "{}: {}".format(d, directive)
                         except KeyError:
                             pass
 
@@ -1390,6 +1447,11 @@ class NextflowGenerator:
 
         # write to file dict_viz
         self.dag_to_file(dict_viz)
+
+        # Write tree forking information for dotfile
+        with open(os.path.join(dirname(self.nf_file),
+                               ".forkTree.json"), "w") as fh:
+            fh.write(json.dumps(self._fork_tree))
 
         # send with jinja to html resource
         return self._render_config("pipeline_graph.html", {"data": dict_viz})

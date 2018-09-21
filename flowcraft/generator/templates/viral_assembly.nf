@@ -128,7 +128,29 @@ process va_megahit_{{ pid }}  {
 }
 
 
-good_assembly.mix(megahit_assembly).set{ {{ output_channel }} }
+good_assembly.mix(megahit_assembly).into{ to_report_{{ pid }} ; {{ output_channel }} }
+orf_size = Channel.value(params.minimumContigSize{{ param_id }})
+
+
+process report_viral_assembly_{{ pid }} {
+
+    {% include "post.txt" ignore missing %}
+
+    tag { sample_id }
+
+    input:
+    set sample_id, file(assembly) from to_report_{{ pid }}
+    val min_size from orf_size
+
+    output:
+    {% with task_name="report_viral_assembly" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    template "process_viral_assembly.py"
+
+}
 
 
 {{ forks }}

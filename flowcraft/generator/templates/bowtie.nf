@@ -54,7 +54,7 @@ process bowtie_{{ pid }} {
 
     output:
     set sample_id , file("*.bam") into {{ output_channel }}
-    file "*_bowtie2.log"
+    set sample_id, file("*_bowtie2.log") into into_json_{{ pid }}
     {% with task_name="bowtie" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -63,6 +63,26 @@ process bowtie_{{ pid }} {
     """
     bowtie2 -x $index -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} -p $task.cpus 1> ${sample_id}.bam 2> ${sample_id}_bowtie2.log
     """
+}
+
+
+process report_bowtie_{{ pid }} {
+
+    {% include "post.txt" ignore missing %}
+
+    tag { sample_id }
+
+    input:
+    set sample_id, file(bowtie_log) from into_json_{{ pid }}
+
+    output:
+    {% with task_name="report_bowtie" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    template "process_mapping.py"
+
 }
 
 {{ forks }}

@@ -3,7 +3,12 @@
 import sys
 import json
 
-core_file, f1, f2 = sys.argv[1:]
+core_file, f1, f2 = sys.argv[1:4]
+
+try:
+    sample_id = sys.argv[4]
+except IndexError:
+    sample_id = None
 
 
 def get_core_genes(core_file):
@@ -49,6 +54,32 @@ def assess_quality(core_array, core_genes):
     return status, perc
 
 
+def get_table_data(data_obj, sample_id=None):
+
+    header_map = dict((p, h) for p, h in enumerate(data_obj["header"]))
+    table_data = []
+
+    for sample, data in data_obj.items():
+
+        if sample == "header":
+            continue
+
+        cur_data = []
+        for pos, d in enumerate(data):
+            cur_data.append({
+                "header": header_map[pos],
+                "value": d,
+                "table": "chewbbaca"
+            })
+
+        table_data.append({
+            "sample": sample_id if sample_id else sample,
+            "data": cur_data
+        })
+
+    return table_data
+
+
 def main():
     core_genes = get_core_genes(core_file)
 
@@ -57,14 +88,24 @@ def main():
         j1 = json.load(f1h)
         j2 = json.load(f2h)
 
-        current_result = [v for k, v in j1.items()
-                          if "polished.fasta" in k][0]
+        sample_info = [(k, v) for k, v in j1.items() if "header" not in k]
         current_array = j1["header"]
-        core_results = filter_core_genes(current_result, current_array,
-                                         core_genes)
-        status, perc = assess_quality(core_results, core_genes)
+        status_info = []
+        for sample, info in sample_info:
 
-        res = {"cagao": [j1, j2], "status": status, 'lnfPercentage': perc}
+            sample_name = sample_id if sample_id else sample
+
+            core_results = filter_core_genes(info, current_array, core_genes)
+            status, perc = assess_quality(core_results, core_genes)
+            status_info.append({
+                "sample": sample_name,
+                "status": status,
+                "lnfPercentage": perc
+            })
+
+        table_data = get_table_data(j2, sample_name)
+        res = {"cagao": [j1, j2], "status": status_info,
+               "tableRow": table_data}
 
         with open(".report.json", "w") as fh:
             fh.write(json.dumps(res, separators=(",", ":")))

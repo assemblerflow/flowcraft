@@ -95,7 +95,7 @@ class ViralAssembly(Process):
 
         self.dependencies = ["integrity_coverage"]
 
-        self.status_channels = ["va_spades" , "va_megahit"]
+        self.status_channels = ["va_spades" , "va_megahit", "report_viral_assembly"]
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
 

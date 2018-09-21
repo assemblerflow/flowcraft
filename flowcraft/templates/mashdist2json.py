@@ -22,12 +22,12 @@ Code documentation
 
 """
 
-__version__ = "1.3.0"
-__build__ = "04072018"
+__version__ = "1.4.0"
+__build__ = "04092018"
 __template__ = "mashsdist2json-nf"
 
-import os
 import json
+import os
 
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
@@ -37,14 +37,16 @@ if __file__.endswith(".command.sh"):
     MASH_TXT = '$mashtxt'
     HASH_CUTOFF = '$shared_hashes'
     SAMPLE_ID = '$sample_id'
+    ASSEMBLY_IN = '$fasta'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("MASH_TXT: {}".format(MASH_TXT))
     logger.debug("HASH_CUTOFF: {}".format(HASH_CUTOFF))
     logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))
+    logger.debug("ASSEMBLY_IN: {}".format(ASSEMBLY_IN))
 
 
-def send_to_output(master_dict, mash_output, sample_id):
+def send_to_output(master_dict, mash_output, sample_id, assembly_file):
     """Send dictionary to output json file
     This function sends master_dict dictionary to a json file if master_dict is
     populated with entries, otherwise it won't create the file
@@ -68,6 +70,9 @@ def send_to_output(master_dict, mash_output, sample_id):
     -------
 
     """
+
+    plot_dict = {}
+
     # create a new file only if master_dict is populated
     if master_dict:
         out_file = open("{}.json".format(
@@ -75,18 +80,43 @@ def send_to_output(master_dict, mash_output, sample_id):
         out_file.write(json.dumps(master_dict))
         out_file.close()
 
-        json_dic = {
-            "sample": sample_id,
-            "patlas_mashdist": master_dict
-        }
+        # iterate through master_dict in order to make contigs the keys
+        for k,v in master_dict.items():
+            if not v[2] in plot_dict:
+                plot_dict[v[2]] = [k]
+            else:
+                plot_dict[v[2]].append(k)
 
-        with open(".report.json", "w") as json_report:
-            json_report.write(json.dumps(json_dic, separators=(",", ":")))
+        number_hits = len(master_dict)
+    else:
+        number_hits = 0
+
+    json_dic = {
+        "tableRow": [{
+            "sample": sample_id,
+            "data": [{
+                "header": "Mash Dist",
+                "table": "plasmids",
+                "patlas_mashdist": master_dict,
+                "value": number_hits
+            }]
+        }],
+        "plotData": [{
+            "sample": sample_id,
+            "data": {
+                "patlasMashDistXrange": plot_dict
+            },
+            "assemblyFile": assembly_file
+        }]
+    }
+
+    with open(".report.json", "w") as json_report:
+        json_report.write(json.dumps(json_dic, separators=(",", ":")))
 
 
 @MainWrapper
-def main(mash_output, hash_cutoff, sample_id):
-    '''
+def main(mash_output, hash_cutoff, sample_id, assembly_file):
+    """
     Main function that allows to dump a mash dist txt file to a json file
 
     Parameters
@@ -99,7 +129,7 @@ def main(mash_output, hash_cutoff, sample_id):
         to the results outputs
     sample_id: str
         The name of the sample.
-    '''
+    """
 
     input_f = open(mash_output, "r")
 
@@ -133,8 +163,8 @@ def main(mash_output, hash_cutoff, sample_id):
             ]
 
     # assures that file is closed in last iteration of the loop
-    send_to_output(master_dict, mash_output, sample_id)
+    send_to_output(master_dict, mash_output, sample_id, assembly_file)
 
 if __name__ == "__main__":
 
-    main(MASH_TXT, HASH_CUTOFF, SAMPLE_ID)
+    main(MASH_TXT, HASH_CUTOFF, SAMPLE_ID, ASSEMBLY_IN)

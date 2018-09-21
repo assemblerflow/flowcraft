@@ -24,6 +24,8 @@ Generated output
 
 - ``${sample_id}_*.assembly.fasta`` : Main output of skesawith the assembly
     - e.g.: ``sample_1_skesa.fasta``
+- ``clear`` : If 'true', remove the input fastq files at the end of the
+    component run, IF THE FILES ARE IN THE WORK DIRECTORY
 
 Code documentation
 ------------------
@@ -63,7 +65,7 @@ def __get_version_skesa():
         version = "undefined"
 
     return {
-        "program": "SPAdes",
+        "program": "skesa",
         "version": version,
     }
 

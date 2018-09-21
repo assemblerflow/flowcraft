@@ -38,7 +38,7 @@ Reads Quality Control
 
 - :doc:`components/trimmomatic`: Runs Trimmomatic on paired-end FastQ files.
 
-- :doc:`components/sample_fastq`: Subsamples fastq files up to a target coverage
+- :doc:`components/downsample_fastq`: Subsamples fastq files up to a target coverage
   depth.
 
 

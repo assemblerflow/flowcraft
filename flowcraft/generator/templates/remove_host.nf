@@ -15,7 +15,7 @@ process remove_host_{{ pid }} {
 
     output:
     set sample_id , file("${sample_id}*.headersRenamed_*.fq.gz") into {{ output_channel }}
-    file "*_bowtie2.log"
+    set sample_id, file("*_bowtie2.log") into into_json_{{ pid }}
     {% with task_name="remove_host" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -26,12 +26,39 @@ process remove_host_{{ pid }} {
 
     samtools view -buh -f 12 -o ${sample_id}_samtools.bam -@ $task.cpus ${sample_id}.bam
 
+    rm ${sample_id}.bam
+
     samtools fastq -1 ${sample_id}_unmapped_1.fq -2 ${sample_id}_unmapped_2.fq ${sample_id}_samtools.bam
+
+    rm ${sample_id}_samtools.bam
 
     renamePE_samtoolsFASTQ.py -1 ${sample_id}_unmapped_1.fq -2 ${sample_id}_unmapped_2.fq
 
     gzip *.headersRenamed_*.fq
+
+    rm *.fq
     """
+}
+
+
+
+process report_remove_host_{{ pid }} {
+
+    {% include "post.txt" ignore missing %}
+
+    tag { sample_id }
+
+    input:
+    set sample_id, file(bowtie_log) from into_json_{{ pid }}
+
+    output:
+    {% with task_name="report_remove_host" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    template "process_mapping.py"
+
 }
 
 {{ forks }}

@@ -1,5 +1,45 @@
 # Changelog
 
+## 1.3.0
+
+### Features
+- Added `report` run mode to Flowcraft that displays the report of any given
+pipeline in the Flowcraft's web application. The `report` mode can be executed
+after a pipeline ended or during the pipeline execution using the `--watch`
+option.
+- Added standalone report HTML at the end of the pipeline execution.
+- Components with support for the new report system:
+    - `abricate`
+    - `assembly_mapping`
+    - `check_coverage`
+    - `chewbbaca`
+    - `dengue_typing`
+    - `fastqc`
+    - `fastqc_trimmomatic`
+    - `integrity_coverage`
+    - `mlst`
+    - `patho_typing`
+    - `pilon`
+    - `process_mapping`
+    - `process_newick`
+    - `process_skesa`
+    - `process_spades`
+    - `process_viral_assembly`
+    - `seq_typing`
+    - `trimmomatic`
+    - `true_coverage`
+
+### Minor/Other changes
+
+- Refactored report json for components `mash_dist`, `mash_screen` and 
+`mapping_patlas`
+
+### Bug fixes
+- Fixed issue where `seq_typing` and `patho_typing` processes were not feeding
+report data to report compiler.
+- Fixed fail messages for `process_assembly` and `process_viral_assembly` 
+components
+
 ## 1.2.2
 
 ### Components changes
@@ -9,6 +49,8 @@ sam and bam files and added data to .report.json. Updated databases to pATLAS
 version 1.5.2.
 - `mash_screen` and `mash_dist`: added data to .report.json. Updated databases 
 to pATLAS version 1.5.2.
+- Added new options to `abricate` componente. Users can now provide custom database
+directories, minimum coverage and minimum identity parameters.
 
 ### New components
 

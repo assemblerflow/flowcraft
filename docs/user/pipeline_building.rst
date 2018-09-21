@@ -4,6 +4,8 @@ Pipeline building
 FlowCraft offers a few extra features when building pipelines using the
 ``build`` execution mode.
 
+.. _rawInput:
+
 Raw input types
 ---------------
 

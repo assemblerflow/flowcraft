@@ -116,6 +116,8 @@ must be used **only once**. Like in the input channel, this channel should
 be defined with a two element tuple with the sample ID and the data. The
 sample ID must match the one specified in the ``input_channel``.
 
+.. _compiler:
+
 {% include "compiler_channels.txt %}
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
