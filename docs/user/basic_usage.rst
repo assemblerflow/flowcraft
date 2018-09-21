@@ -349,7 +349,7 @@ Want to know more?
 Reports
 -------
 
-The reporting of a FlowCraft pipeline is save on a JSON file that is stored
+The reporting of a FlowCraft pipeline is saved on a JSON file that is stored
 in ``pipeline_reports/pipeline_report.json``. To visualize the reports you'll just
 need to execute the following command in the folder where the pipeline was executed::
 
@@ -362,7 +362,7 @@ This is an example of the screen that is displayed once the url is opened:
    :align: center
 
 **The actual layout and content of the reports will depend on the pipeline you
-build and will only provide the information that is directly related to
+build and it will only provide the information that is directly related to
 your pipeline components.**
 
 .. important::
@@ -383,7 +383,7 @@ The reports of any FlowCraft pipeline can be monitored in real-time using the
 
 This will output an URL exactly as in the previous section and will render the
 same reports page with a small addition. In the top right of the screen in the
-navigation bar, there will be a new icon that informs the user of when new
+navigation bar, there will be a new icon that informs the user when new
 reports are available:
 
 .. image:: ../resources/flowcraft_report_watch.png
