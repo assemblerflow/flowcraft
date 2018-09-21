@@ -476,7 +476,6 @@ def main(sample_id, assembly_file, minsize):
     else:
         assembler = "MEGAHIT"
 
-    #TODO - adapt to viral assembly
     with open(".warnings", "w") as warn_fh:
 
         t_80 = int(minsize) * 0.8
