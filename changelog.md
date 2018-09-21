@@ -1,10 +1,30 @@
 # Changelog
 
-## Changes in upcoming release (`dev` branch)
+## 1.3.0
 
 ### Features
 - Added `report` run mode to Flowcraft that displays the report of any given
-pipeline in the Flowcraft's web application. 
+pipeline in the Flowcraft's web application.
+- Components with support for the new report system:
+    - `abricate`
+    - `assembly_mapping`
+    - `check_coverage`
+    - `chewbbaca`
+    - `dengue_typing`
+    - `fastqc`
+    - `fastqc_trimmomatic`
+    - `integrity_coverage`
+    - `mlst`
+    - `patho_typing`
+    - `pilon`
+    - `process_mapping`
+    - `process_newick`
+    - `process_skesa`
+    - `process_spades`
+    - `process_viral_assembly`
+    - `seq_typing`
+    - `trimmomatic`
+    - `true_coverage`
 
 ### Minor/Other changes
 
