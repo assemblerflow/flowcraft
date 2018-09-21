@@ -8,7 +8,7 @@ Quality control table:
     - **Contigs (spades)**: Number of assembled contigs.
     - **Assembled BP**: Total number of assembled base pairs.
 
-.. image:: ../../../resources/reports/assembly_table_spades.png
+.. image:: ../resources/reports/assembly_table_spades.png
     :scale: 80 %
     :align: center
 

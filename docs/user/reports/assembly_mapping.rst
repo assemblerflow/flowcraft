@@ -7,7 +7,7 @@ Plot data
 - **Data loss chart**: Gives a trend of the data loss
   (in total number of base pairs) across components that may filter this data.
 
-.. image:: ../../../resources/reports/sparkline.png
+.. image:: ../resources/reports/sparkline.png
 
 Warnings
 ^^^^^^^^

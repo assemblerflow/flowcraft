@@ -10,8 +10,7 @@ Quality control table:
     - **Coverage**: Estimated coverage based on the number of base pairs and the expected
       genome size.
 
-.. image:: ../../../resources/reports/quality_control_table.png
-    :scale: 80 %
+.. image:: ../resources/reports/quality_control_table.png
     :align: center
 
 Plot data
@@ -20,7 +19,7 @@ Plot data
 - **Data loss chart**: Gives a trend of the data loss
   (in total number of base pairs) across components that may filter this data.
 
-.. image:: ../../../resources/reports/sparkline.png
+.. image:: ../resources/reports/sparkline.png
 
 Warnings
 ^^^^^^^^

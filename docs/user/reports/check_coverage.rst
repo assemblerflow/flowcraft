@@ -8,8 +8,7 @@ Quality control table:
     - **Coverage**: Estimated coverage based on the number of base pairs and the expected
       genome size.
 
-.. image:: ../../../resources/reports/quality_control_table.png
-    :scale: 80 %
+.. image:: ../resources/reports/quality_control_table.png
     :align: center
 
 Warnings

@@ -6,23 +6,23 @@ Plot data
 
 - **Base sequence quality**: The average quality score across the read length.
 
-.. image:: ../../../resources/reports/fastqc_base_sequence_quality.png
+.. image:: ../resources/reports/fastqc_base_sequence_quality.png
 
 - **Sequence quality**: Distribution of the mean sequence quality score.
 
-.. image:: ../../../resources/reports/fastqc_per_base_sequence_quality.png
+.. image:: ../resources/reports/fastqc_per_base_sequence_quality.png
 
 - **Base GC content**: Distribution of the GC content of each sequence.
 
-.. image:: ../../../resources/reports/fastqc_base_gc_content.png
+.. image:: ../resources/reports/fastqc_base_gc_content.png
 
 - **Sequence length**: Distribution of the read sequence length.
 
-.. image:: ../../../resources/reports/fastqc_sequence_length.png
+.. image:: ../resources/reports/fastqc_sequence_length.png
 
 - **Missing data**: Normalized count of missing data across the read length.
 
-.. image:: ../../../resources/reports/fastqc_missing_data.png
+.. image:: ../resources/reports/fastqc_missing_data.png
 
 
 Warnings

@@ -8,7 +8,7 @@ Quality control table:
     - **Contigs (skesa)**: Number of assembled contigs.
     - **Assembled BP**: Total number of assembled base pairs.
 
-.. image:: ../../../resources/reports/assembly_table_skesa.png
+.. image:: ../resources/reports/assembly_table_skesa.png
     :scale: 80 %
     :align: center
 
