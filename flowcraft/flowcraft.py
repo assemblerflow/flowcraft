@@ -16,7 +16,7 @@ try:
     from generator.engine import NextflowGenerator, process_map
     from generator.inspect import NextflowInspector
     from generator.report import FlowcraftReport
-    from generator.recipe import brew_recipe, available_recipes
+    from generator.recipe import brew_recipe, brew_recipe
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
     import generator.error_handling as eh
@@ -25,7 +25,8 @@ except ImportError:
     from flowcraft.generator.engine import NextflowGenerator, process_map
     from flowcraft.generator.inspect import NextflowInspector
     from flowcraft.generator.report import FlowcraftReport
-    from flowcraft.generator.recipe import brew_recipe, available_recipes
+    from flowcraft.generator.recipe import brew_innuendo, \
+        brew_recipe
     from flowcraft.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from flowcraft.generator.process_details import proc_collector, \
@@ -266,7 +267,8 @@ def copy_project(path):
 
 def build(args):
 
-    # Disable standard logging for stdout when the following modes are executed:
+    # Disable standard logging for stdout when the following modes are
+    #  executed:
     if args.export_params:
         logger.setLevel(logging.ERROR)
 
@@ -286,9 +288,10 @@ def build(args):
     # appropriate recipe
     if args.recipe:
         if args.recipe == "innuendo":
-            pipeline_string = brew_recipe(args, available_recipes)
+            pipeline_string = brew_innuendo(args, available_recipes)
         else:
-            pipeline_string = available_recipes[args.recipe]
+            # pipeline_string = available_recipes[args.recipe]
+            pipeline_string = brew_recipe(args.recipe)
             if args.tasks:
                 logger.warning(colored_print(
                     "-t parameter will be ignored for recipe: {}\n"

@@ -1,16 +1,20 @@
 try:
     from generator.process_details import colored_print
+    from generator import recipes
 except ImportError:
     from flowcraft.generator.process_details import colored_print
+    from flowcraft.generator import recipes
 
 from collections import OrderedDict
 import sys
+import json
 import logging
+import pkgutil
 
 logger = logging.getLogger("main.{}".format(__name__))
 
 
-class Recipe:
+class InnuendoRecipe:
 
     def __init__(self):
         """Class to build automatic pipelines based on the processes provided.
@@ -482,7 +486,7 @@ class Recipe:
     #     return list(self.process_descriptions.keys())
 
 
-class Innuendo(Recipe):
+class Innuendo(InnuendoRecipe):
     """
     Recipe class for the INNUENDO Project. It has all the available in the
     platform for quick use of the processes in the scope of the project.
@@ -517,7 +521,7 @@ class Innuendo(Recipe):
         }
 
 
-def brew_recipe(args, available_recipes):
+def brew_innuendo(args, available_recipes):
     """Brews a given list of processes according to the recipe
 
     Parameters
@@ -560,14 +564,133 @@ def brew_recipe(args, available_recipes):
     return pipeline_string
 
 
+class Recipe:
+
+    def __init__(self):
+
+        self.pipeline_str = None
+        """
+        str: The raw pipeline string, with no attribute or directives, except
+        for number indicators for when there are duplicate components.
+        
+        e.g.: "fastqc trimmomatic spades"
+        e.g.: "fastqc trimmomatic (spades#1 | spades#2)
+        """
+
+        self.directives = None
+        """
+        dict: Dictionary with the parameters and directives for each component
+        in the pipeline_str attribute. Missing components will be left with
+        the default parameters and directives. 
+        """
+
+    def brew(self):
+
+        for component, vals in self.directives.items():
+
+            params = vals.get("params", None)
+            directives = vals.get("directives", None)
+
+            # Check for component number symbol
+            if "#" in component:
+                _component = component.split("#")[0]
+            else:
+                _component = component
+
+            component_str = self._get_component_str(_component, params,
+                                                    directives)
+
+            self.pipeline_str = self.pipeline_str.replace(component,
+                                                          component_str)
+
+        return self.pipeline_str
+
+    @staticmethod
+    def _get_component_str(component, params=None, directives=None):
+        """ Generates a component string based on the provided parametes and
+        directives
+
+        Parameters
+        ----------
+        component : str
+            Component name
+        params : dict
+            Dictionary with parameter information
+        directives : dict
+            Dictionary with directives information
+
+        Returns
+        -------
+        str
+            Component string with the parameters and directives, ready for
+            parsing by flowcraft engine
+        """
+
+        final_directives = {}
+
+        if directives:
+            final_directives = directives
+
+        if params:
+            final_directives["params"] = params
+
+        if final_directives:
+            return "{}={}".format(
+                component, json.dumps(final_directives, separators=(",", ":")))
+        else:
+            return component
+
+
+def brew_recipe(recipe_name):
+    """Returns a pipeline string from a recipe name.
+
+    Parameters
+    ----------
+    recipe_name : str
+        Name of the recipe. Must match the name attribute in one of the classes
+        defined in :mod:`flowcraft.generator.recipes`
+
+    Returns
+    -------
+    str
+        Pipeline string ready for parsing and processing by flowcraft engine
+    """
+
+    # This will iterate over all modules included in the recipes subpackage
+    # It will return the import class and the module name, algon with the
+    # correct prefix
+    prefix = "{}.".format(recipes.__name__)
+    for importer, modname, _ in pkgutil.iter_modules(recipes.__path__, prefix):
+
+        # Import the current module
+        _module = importer.find_module(modname).load_module(modname)
+
+        # Fetch all available classes in module
+        _recipe_classes = [cls for cls in _module.__dict__.values() if
+                           isinstance(cls, type)]
+
+        # Iterate over each Recipe class, and check for a match with the
+        # provided recipe name.
+        for cls in _recipe_classes:
+            # Create instance of class to allow fetching the name attribute
+            recipe_cls = cls()
+            if getattr(recipe_cls, "name", None) == recipe_name:
+                return recipe_cls.brew()
+
+    logger.error(
+        colored_print("Recipe name '{}' does not exist.".format(recipe_name))
+    )
+    sys.exit(1)
+
+
 # A dictionary of quick recipes
-available_recipes = {
-    "innuendo": Innuendo,
-    "plasmids": "integrity_coverage fastqc_trimmomatic (spades pilon "
-              "(mash_dist | abricate) | mash_screen | mapping_patlas)",
-    "plasmids_mapping": "integrity_coverage fastqc_trimmomatic mapping_patlas",
-    "plasmids_assembly": "integrity_coverage fastqc_trimmomatic (spades pilon"
-                         " mash_dist)",
-    "plasmids_mash": "integrity_coverage fastqc_trimmomatic mash_screen",
-    "den-im": "integrity_coverage fastqc_trimmomatic filter_poly remove_host bowtie retrieve_mapped viral_assembly assembly_mapping pilon split_assembly (dengue_typing | mafft raxml)",
-}
+# available_recipes = {
+#     "innuendo": Innuendo,
+#     "plasmids": "integrity_coverage fastqc_trimmomatic (spades pilon "
+#               "(mash_dist | abricate) | mash_screen | mapping_patlas)",
+#     "plasmids_mapping": "integrity_coverage fastqc_trimmomatic mapping_patlas",
+#     "plasmids_assembly": "integrity_coverage fastqc_trimmomatic (spades pilon"
+#                          " mash_dist)",
+#     "plasmids_mash": "integrity_coverage fastqc_trimmomatic mash_screen",
+#     "den-im": "integrity_coverage fastqc_trimmomatic filter_poly remove_host bowtie retrieve_mapped viral_assembly assembly_mapping pilon split_assembly (dengue_typing | mafft raxml)",
+# }
