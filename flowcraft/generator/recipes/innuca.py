@@ -7,6 +7,7 @@ except ImportError:
 class Innuca(Recipe):
 
     def __init__(self):
+        super().__init__()
 
         # Recipe name
         self.name = "innuca"

@@ -16,7 +16,7 @@ try:
     from generator.engine import NextflowGenerator, process_map
     from generator.inspect import NextflowInspector
     from generator.report import FlowcraftReport
-    from generator.recipe import brew_recipe, brew_recipe
+    from generator.recipe import brew_innuendo, brew_recipe
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
     import generator.error_handling as eh
@@ -288,7 +288,7 @@ def build(args):
     # appropriate recipe
     if args.recipe:
         if args.recipe == "innuendo":
-            pipeline_string = brew_innuendo(args, available_recipes)
+            pipeline_string = brew_innuendo(args)
         else:
             # pipeline_string = available_recipes[args.recipe]
             pipeline_string = brew_recipe(args.recipe)

@@ -521,7 +521,7 @@ class Innuendo(InnuendoRecipe):
         }
 
 
-def brew_innuendo(args, available_recipes):
+def brew_innuendo(args):
     """Brews a given list of processes according to the recipe
 
     Parameters
@@ -538,15 +538,8 @@ def brew_innuendo(args, available_recipes):
         List of process strings.
     """
 
-    # Exit if recipe does not exist
-    if args.recipe not in available_recipes:
-        logger.error(
-            colored_print("Please provide a recipe to use in automatic "
-                          "mode.", "red_bold"))
-        sys.exit(1)
-
     # Create recipe class instance
-    automatic_pipeline = available_recipes[args.recipe]()
+    automatic_pipeline = Innuendo()
 
     if not args.tasks:
         input_processes = " ".join(
@@ -577,7 +570,7 @@ class Recipe:
         e.g.: "fastqc trimmomatic (spades#1 | spades#2)
         """
 
-        self.directives = None
+        self.directives = {}
         """
         dict: Dictionary with the parameters and directives for each component
         in the pipeline_str attribute. Missing components will be left with
@@ -607,7 +600,7 @@ class Recipe:
 
     @staticmethod
     def _get_component_str(component, params=None, directives=None):
-        """ Generates a component string based on the provided parametes and
+        """ Generates a component string based on the provided parameters and
         directives
 
         Parameters
