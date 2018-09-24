@@ -5,6 +5,11 @@ except ImportError:
 
 
 class Innuca(Recipe):
+    """
+    Bacterial genome assembly pipeline based on the SPAdes assembler and using
+    pre-assembly quality control and read trimming and post-assembly polishing
+    with Pilon
+    """
 
     def __init__(self):
         super().__init__()

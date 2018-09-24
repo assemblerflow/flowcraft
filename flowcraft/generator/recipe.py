@@ -685,3 +685,44 @@ def brew_recipe(recipe_name):
     )
     sys.exit(1)
 
+
+def list_recipes(full=False):
+    """Method that iterates over all available recipes and prints their
+    information to the standard output
+
+    Parameters
+    ----------
+    full : bool
+        If true, it will provide the pipeline string along with the recipe name
+    """
+
+    logger.info(colored_print(
+        "\n===== L I S T   O F   R E C I P E S =====\n",
+        "green_bold"))
+
+    # This will iterate over all modules included in the recipes subpackage
+    # It will return the import class and the module name, algon with the
+    # correct prefix
+    prefix = "{}.".format(recipes.__name__)
+    for importer, modname, _ in pkgutil.iter_modules(recipes.__path__, prefix):
+
+        # Import the current module
+        _module = importer.find_module(modname).load_module(modname)
+
+        # Fetch all available classes in module
+        _recipe_classes = [cls for cls in _module.__dict__.values() if
+                           isinstance(cls, type)]
+
+        # Iterate over each Recipe class, and check for a match with the
+        # provided recipe name.
+        for cls in _recipe_classes:
+
+            recipe_cls = cls()
+
+            if hasattr(recipe_cls, "name"):
+                logger.info(colored_print("=> {}".format(recipe_cls.name), "blue_bold"))
+                if full:
+                    logger.info(colored_print("\t {}".format(recipe_cls.__doc__), "purple_bold"))
+                    logger.info(colored_print("Pipeline string: {}\n".format(recipe_cls.pipeline_str), "yellow_bold"))
+
+    sys.exit(0)

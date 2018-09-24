@@ -5,7 +5,12 @@ except ImportError:
 
 
 class Denim(Recipe):
+    """
+
+    """
 
     def __init__(self):
 
         self.name = "denim"
+
+        self.pipeline_str = ""

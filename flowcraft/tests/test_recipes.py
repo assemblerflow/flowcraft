@@ -189,3 +189,14 @@ def test_innuendo_partial_recipe():
     args = Namespace(tasks="integrity_coverage")
 
     recipe.brew_innuendo(args)
+
+
+def test_list_recipes():
+
+    with pytest.raises(SystemExit):
+        recipe.list_recipes()
+
+def test_list_recipes_full():
+
+    with pytest.raises(SystemExit):
+        recipe.list_recipes(True)

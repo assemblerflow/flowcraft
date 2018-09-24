@@ -5,6 +5,9 @@ except ImportError:
 
 
 class Plasmids(Recipe):
+    """
+
+    """
 
     def __init__(self):
         super().__init__()
@@ -19,6 +22,9 @@ class Plasmids(Recipe):
 
 
 class PlasmidsMapping(Recipe):
+    """
+
+    """
 
     def __init__(self):
         super().__init__()
@@ -31,6 +37,9 @@ class PlasmidsMapping(Recipe):
 
 
 class PlasmidsAssembly(Recipe):
+    """
+
+    """
 
     def __init__(self):
         super().__init__()
@@ -45,6 +54,9 @@ class PlasmidsAssembly(Recipe):
 
 
 class PlasmidsMash(Recipe):
+    """
+
+    """
 
     def __init__(self):
         super().__init__()

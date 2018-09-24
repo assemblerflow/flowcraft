@@ -16,7 +16,7 @@ try:
     from generator.engine import NextflowGenerator, process_map
     from generator.inspect import NextflowInspector
     from generator.report import FlowcraftReport
-    from generator.recipe import brew_innuendo, brew_recipe
+    from generator.recipe import brew_innuendo, brew_recipe, list_recipes
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
     import generator.error_handling as eh
@@ -26,7 +26,7 @@ except ImportError:
     from flowcraft.generator.inspect import NextflowInspector
     from flowcraft.generator.report import FlowcraftReport
     from flowcraft.generator.recipe import brew_innuendo, \
-        brew_recipe
+        brew_recipe, list_recipes
     from flowcraft.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from flowcraft.generator.process_details import proc_collector, \
@@ -78,13 +78,22 @@ def get_args(args=None):
         const=True, help="Check only the validity of the pipeline "
                          "string and exit.")
     group_lists.add_argument(
-        "-L", "--detailed-list", action="store_const", dest="detailed_list",
+        "-L", "--component-list", action="store_const", dest="detailed_list",
         const=True, help="Print a detailed description for all the "
-                         "currently available processes")
+                         "currently available processes.")
     group_lists.add_argument(
-        "-l", "--short-list", action="store_const", dest="short_list",
+        "-l", "--component-list-short", action="store_const", dest="short_list",
         const=True, help="Print a short list of the currently "
-                         "available processes")
+                         "available processes.")
+    group_lists.add_argument(
+        "--recipe-list", dest="recipe_list", action="store_const", const=True,
+        help="Print a short list of the currently available recipes."
+    )
+    group_lists.add_argument(
+        "--recipe-list-short", dest="recipe_list_short", action="store_const",
+        const=True, help="Print a condensed list of the currently available "
+                         "recipes"
+    )
     build_parser.add_argument(
         "-cr", "--check-recipe", dest="check_recipe",
         action="store_const", const=True,
@@ -271,6 +280,12 @@ def build(args):
     #  executed:
     if args.export_params:
         logger.setLevel(logging.ERROR)
+
+    if args.recipe_list_short:
+        list_recipes()
+
+    if args.recipe_list:
+        list_recipes(full=True)
 
     welcome = [
         "========= F L O W C R A F T =========",
