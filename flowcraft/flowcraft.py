@@ -294,8 +294,8 @@ def build(args):
             pipeline_string = brew_recipe(args.recipe)
             if args.tasks:
                 logger.warning(colored_print(
-                    "-t parameter will be ignored for recipe: {}\n"
-                        .format(args.recipe), "yellow_bold")
+                    "-t parameter will be ignored for recipe: {}\n".format(
+                        args.recipe), "yellow_bold")
                 )
 
         if args.check_recipe:

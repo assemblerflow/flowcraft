@@ -675,15 +675,3 @@ def brew_recipe(recipe_name):
     )
     sys.exit(1)
 
-
-# A dictionary of quick recipes
-# available_recipes = {
-#     "innuendo": Innuendo,
-#     "plasmids": "integrity_coverage fastqc_trimmomatic (spades pilon "
-#               "(mash_dist | abricate) | mash_screen | mapping_patlas)",
-#     "plasmids_mapping": "integrity_coverage fastqc_trimmomatic mapping_patlas",
-#     "plasmids_assembly": "integrity_coverage fastqc_trimmomatic (spades pilon"
-#                          " mash_dist)",
-#     "plasmids_mash": "integrity_coverage fastqc_trimmomatic mash_screen",
-#     "den-im": "integrity_coverage fastqc_trimmomatic filter_poly remove_host bowtie retrieve_mapped viral_assembly assembly_mapping pilon split_assembly (dengue_typing | mafft raxml)",
-# }
