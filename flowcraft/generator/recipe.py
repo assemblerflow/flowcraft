@@ -1,8 +1,10 @@
 try:
     from generator.process_details import colored_print
+    import generator.error_handling as eh
     from generator import recipes
 except ImportError:
     from flowcraft.generator.process_details import colored_print
+    import flowcraft.generator.error_handling as eh
     from flowcraft.generator import recipes
 
 from collections import OrderedDict
@@ -578,6 +580,14 @@ class Recipe:
         """
 
     def brew(self):
+
+        if not hasattr(self, "name"):
+            raise eh.RecipeError("Recipe class '{}' does not have a 'name' "
+                                 "attribute set".format(self.__class__))
+
+        if not self.pipeline_str:
+            raise eh.RecipeError("Recipe with name '{}' does not have a "
+                                 "pipeline_str attribute set".format(self.name))
 
         for component, vals in self.directives.items():
 
