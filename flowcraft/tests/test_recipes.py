@@ -1,6 +1,8 @@
 import pytest
 import pkgutil
 
+from argparse import Namespace
+
 from flowcraft.generator import error_handling as eh
 from flowcraft.generator import recipes
 from flowcraft.generator import recipe
@@ -173,3 +175,17 @@ def test_all_recipes():
 
         for cls in _recipe_classes:
             cls()
+
+
+def test_innuendo_recipe():
+
+    args = Namespace(tasks=None)
+
+    recipe.brew_innuendo(args)
+
+
+def test_innuendo_partial_recipe():
+
+    args = Namespace(tasks="integrity_coverage")
+
+    recipe.brew_innuendo(args)
