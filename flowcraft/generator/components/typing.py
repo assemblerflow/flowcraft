@@ -22,7 +22,7 @@ class SeqTyping(Process):
             "cpus": 4,
             "memory": "'4GB'",
             "container": "flowcraft/seq_typing",
-            "version": "0.1.0-1"
+            "version": "2.0-1"
         }}
 
         self.params = {
