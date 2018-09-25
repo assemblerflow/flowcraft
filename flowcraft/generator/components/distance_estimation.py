@@ -200,3 +200,32 @@ class MashSketchFastq(MashSketchFasta):
         self.status_channels = [
             "mashSketchFastq",
         ]
+
+
+class FastAniMatrix(Process):
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+
+        self.params = {
+            "fragLen": {
+                "default": 3000,
+                "description": "Set size of fragment. Default: 3000."
+            }
+        }
+
+        self.directives = {
+            "fastAniMatrix": {
+                "container": "flowcraft/fast_ani",
+                "version": "1.1.0-2",
+                "cpus": 20,
+                "memory": "{ 30.GB * task.attempt }"
+            },
+        }
+
+        self.status_channels = [
+            "fastAniMatrix",
+        ]

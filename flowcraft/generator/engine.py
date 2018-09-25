@@ -68,6 +68,7 @@ process_map = {
         "filter_poly": readsqc.FilterPoly,
         "integrity_coverage": readsqc.IntegrityCoverage,
         "fasterq_dump": downloads.FasterqDump,
+        "fast_ani": distest.FastAniMatrix,
         "kraken": meta.Kraken,
         "mafft": alignment.Mafft,
         "mapping_patlas": mapping_patlas.PatlasMapping,
