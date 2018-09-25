@@ -17,9 +17,9 @@ class Denim(Recipe):
         self.pipeline_str = "integrity_coverage " \
                             "fastqc_trimmomatic " \
                             "filter_poly " \
-                            "remove_host " \
                             "bowtie " \
                             "retrieve_mapped " \
+                            "remove_host " \
                             "viral_assembly " \
                             "assembly_mapping " \
                             "pilon " \

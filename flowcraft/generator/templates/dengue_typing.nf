@@ -1,5 +1,3 @@
-file(params.BD_sequence_file{{ param_id }}) ? params.BD_sequence_file{{ param_id }} : exit(1, "'BD_sequence_file{{ param_id }}' parameter missing")
-
 process dengue_typing_{{ pid }} {
 
     // Send POST request to platform
@@ -26,7 +24,7 @@ process dengue_typing_{{ pid }} {
         cp -r /NGStools/ReMatCh rematch_temp
         export PATH="\$(pwd)/rematch_temp/ReMatCh:\$PATH"
 
-        seq_typing.py assembly -f ${assembly} -b ${ params.BD_sequence_file{{ param_id }} } -o ./ -j $task.cpus -t nucl
+        seq_typing.py assembly --org Dengue Virus -f ${assembly} -o ./ -j $task.cpus -t nucl
 
         # Add information to dotfiles
         json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
