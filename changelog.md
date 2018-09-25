@@ -1,5 +1,12 @@
 # Changelog
 
+## Changes in upcoming release (dev branch) 
+
+### Components changes
+
+Updated images for components `mash_dist`, `mash_screen` and 
+`mapping_patlas`
+
 ## 1.3.0
 
 ### Features

@@ -65,7 +65,7 @@ Default directives
 
 - ``runMashDist``:
     - ``container``: flowcraft/mash-patlas
-    - ``version``: 1.4.1
+    - ``version``: 1.6.0-1
 - ``mashDistOutputJson``:
     - ``container``: flowcraft/mash-patlas
-    - ``version``: 1.4.1
+    - ``version``: 1.6.0-1

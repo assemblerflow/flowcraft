@@ -43,13 +43,13 @@ class PatlasMashDist(Process):
         self.directives = {
             "runMashDist": {
                 "container": "flowcraft/mash-patlas",
-                "version": "1.5.2-1",
+                "version": "1.6.0-1",
                 "cpus": 1,
                 "memory": "{ 4.GB * task.attempt }"
             },
             "mashDistOutputJson": {
                 "container": "flowcraft/mash-patlas",
-                "version": "1.5.2-1",
+                "version": "1.6.0-1",
                 "cpus": 1,
                 "memory": "'4GB'"
             }
