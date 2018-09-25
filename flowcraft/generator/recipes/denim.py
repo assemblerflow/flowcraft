@@ -6,7 +6,8 @@ except ImportError:
 
 class Denim(Recipe):
     """
-
+    DEN-IM: Dengue Virus Identification from Metagenomic and Targeted Sequencing
+    Standalone version available at https://github.com/assemblerflow/DEN-IM
     """
 
     def __init__(self):
