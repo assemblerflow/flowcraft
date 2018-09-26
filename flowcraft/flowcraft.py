@@ -97,6 +97,12 @@ def get_args(args=None):
                          "components (via -t option) in JSON format to stdout. "
                          "No pipeline will be generated with this option."
     )
+    build_parser.add_argument(
+        "--export-directives", dest="export_directives", action="store_const",
+        const=True, help="Only export the directives for the provided "
+                         "components (via -t option) in JSON format to stdout. "
+                         "No pipeline will be generated with this option."
+    )
 
     # GENERAL OPTIONS
     parser.add_argument(
@@ -177,7 +183,7 @@ def validate_build_arguments(args):
 
     # Skill all checks when exporting parameters AND providing at least one
     # component
-    if args.export_params:
+    if args.export_params or args.export_directives:
         # Check if components provided
         if not args.tasks:
             logger.error(colored_print(
@@ -266,8 +272,9 @@ def copy_project(path):
 
 def build(args):
 
-    # Disable standard logging for stdout when the following modes are executed:
-    if args.export_params:
+    # Disable standard logging for stdout when the following modes are
+    #  executed:
+    if args.export_params or args.export_directives:
         logger.setLevel(logging.ERROR)
 
     welcome = [
@@ -329,6 +336,9 @@ def build(args):
 
     if args.export_params:
         nfg.export_params()
+        sys.exit(0)
+    elif args.export_directives:
+        nfg.export_directives()
         sys.exit(0)
     else:
         # building the actual pipeline nf file

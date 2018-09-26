@@ -1,6 +1,6 @@
 # Changelog
 
-## Changes in upcoming release (dev branch) 
+## Changes in upcoming release (`dev` branch) 
 
 ### Components changes
 
@@ -10,6 +10,10 @@ Updated images for components `mash_dist`, `mash_screen` and
 ### New components
 - Added component `fast_ani`.
 
+### Minor/Other changes
+
+- Added `--export-directives` option to `build` mode to export component's 
+directives in JSON format to standard output.
 
 ## 1.3.0
 
