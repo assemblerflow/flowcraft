@@ -6,7 +6,9 @@ except ImportError:
 
 class Plasmids(Recipe):
     """
-
+    Plasmid detection pipeline using mapping, mash_screen and assembly with
+    SPAdes, with gene annotations with abricate. Outputs json files that
+    can be imported into pATLAS.
     """
 
     def __init__(self):
@@ -23,7 +25,8 @@ class Plasmids(Recipe):
 
 class PlasmidsMapping(Recipe):
     """
-
+    Plasmid detection pipeline using mapping with bowtie2. Outputs json
+    files that can be imported into pATLAS.
     """
 
     def __init__(self):
@@ -38,7 +41,8 @@ class PlasmidsMapping(Recipe):
 
 class PlasmidsAssembly(Recipe):
     """
-
+    Plasmid detection pipeline using assembly with SPAdes and mash dist.
+    Outputs json files that can be imported into pATLAS.
     """
 
     def __init__(self):
@@ -55,7 +59,8 @@ class PlasmidsAssembly(Recipe):
 
 class PlasmidsMash(Recipe):
     """
-
+    Plasmid detection pipeline using mash screen. Outputs json files that can
+    be imported into pATLAS.
     """
 
     def __init__(self):
