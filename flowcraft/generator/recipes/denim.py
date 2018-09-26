@@ -31,9 +31,11 @@ class Denim(Recipe):
             "integrity_coverage": {
                 "params": {"genomeSize": "0.012", "minCoverage": "15"}
             },
-            "bowtie":{
-                "directives": {"container": "flowcraft/bowtie_dengue", "version": "2-1"},
-                "params": {"reference": "\"/ref/1_GenotypesDENV_14-05-18.fasta\""}
+            "bowtie": {
+                "directives": {"container": "flowcraft/bowtie_dengue",
+                               "version": "2-1"},
+                "params": {
+                    "reference": "\"/ref/1_GenotypesDENV_14-05-18.fasta\""}
             },
             "assembly_mapping": {
                 "params": {"AMaxContigs": "1000", "genomeSize": "0.01"}
