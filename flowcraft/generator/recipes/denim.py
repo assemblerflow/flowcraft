@@ -33,7 +33,7 @@ class Denim(Recipe):
             },
             "bowtie":{
                 "directives": {"container": "flowcraft/bowtie_dengue", "version": "2-1"},
-                "params": {"reference": "'/ref/1_GenotypesDENV_14-05-18.fasta'"}
+                "params": {"reference": "\"/ref/1_GenotypesDENV_14-05-18.fasta\""}
             },
             "assembly_mapping": {
                 "params": {"AMaxContigs": "1000", "genomeSize": "0.01"}
