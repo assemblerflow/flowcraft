@@ -2,6 +2,8 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+## 1.3.1
+
 ### Features
 
 - Added a new `clearInput` parameter to components that change their input.
