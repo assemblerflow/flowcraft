@@ -17,7 +17,7 @@ process reads_download_{{ pid }} {
     maxRetries 1
 
     input:
-    set val(accession_id), val(name) from reads_download_in_1_0.splitText(){ it.trim() }.filter{ it != "" }.map{ it.split().length > 1 ? ["accession": it.split()[0], "name": it.split()[1]] : [it.split()[0], null] }
+    set val(accession_id), val(name) from reads_download_in_1_0.splitText(){ it.trim() }.unique().filter{ it != "" }.map{ it.split().length > 1 ? ["accession": it.split()[0], "name": it.split()[1]] : [it.split()[0], null] }
     each file(aspera_key) from IN_asperaKey_{{ pid }}
 
     output:

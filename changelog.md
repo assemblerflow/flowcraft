@@ -2,6 +2,10 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+### Minor/Other changes
+
+- Added removal of duplicate IDs from `reads_download` component input.
+
 ## 1.3.1
 
 ### Features
