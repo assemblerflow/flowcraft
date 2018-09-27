@@ -17,7 +17,7 @@ process reads_download_{{ pid }} {
     maxRetries 1
 
     input:
-     set val(accession_id), val(name) from reads_download_in_1_0.splitText(){ it.trim() }.filter{ it != "" }.map{ it.split().length > 1 ? ["accession": it.split()[0], "name": it.split()[1]] : [it.split()[0], null] }
+    set val(accession_id), val(name) from reads_download_in_1_0.splitText(){ it.trim() }.filter{ it != "" }.map{ it.split().length > 1 ? ["accession": it.split()[0], "name": it.split()[1]] : [it.split()[0], null] }
     each file(aspera_key) from IN_asperaKey_{{ pid }}
 
     output:
@@ -29,7 +29,9 @@ process reads_download_{{ pid }} {
     script:
     """
     {
+        # getSeqENA requires accession numbers to be provided as a text file
         echo "${accession_id}" >> accession_file.txt
+        # Set default status value. It will be overwritten if anything goes wrong
         echo "pass" > ".status"
 
         if [ -f $aspera_key ]; then
@@ -40,6 +42,8 @@ process reads_download_{{ pid }} {
 
         getSeqENA.py -l accession_file.txt \$asperaOpt -o ./ --SRAopt --downloadCramBam
 
+        # If a name has been provided along with the accession, rename the
+        # fastq files.
         if [ $name != null ];
         then
             echo renaming pattern '${accession_id}' to '${name}' && cd ${accession_id} && rename "s/${accession_id}/${name}/" *.gz

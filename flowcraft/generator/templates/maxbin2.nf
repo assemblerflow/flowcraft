@@ -2,6 +2,9 @@ IN_min_contig_lenght_{{ pid }} = Channel.value(params.min_contig_lenght{{ param_
 IN_max_iteration_{{ pid }} = Channel.value(params.max_iteration{{ param_id }})
 IN_prob_threshold_{{ pid }} = Channel.value(params.prob_threshold{{ param_id }})
 
+clear = params.clearInput{{ param_id }} ? "true" : "false"
+checkpointClear_{{ pid }} = Channel.value(clear)
+
 process maxbin2_{{ pid }} {
 
     // Send POST request to platform
@@ -16,7 +19,7 @@ process maxbin2_{{ pid }} {
     val minContigLenght from IN_min_contig_lenght_{{ pid }}
     val maxIterations from IN_max_iteration_{{ pid }}
     val probThreshold from IN_prob_threshold_{{ pid }}
-
+    val clear from checkpointClear_{{ pid }}
 
     output:
     file '*_maxbin.*.fasta' into binCh_{{ pid }}
@@ -27,7 +30,23 @@ process maxbin2_{{ pid }} {
 
     script:
     """
-    run_MaxBin.pl -contig ${assembly} -out ${sample_id}_maxbin -reads ${fastq[0]} -reads2 ${fastq[1]} -thread $task.cpus -min_contig_length ${minContigLenght} -max_iteration ${maxIterations} -prob_threshold ${probThreshold}
+    {
+        run_MaxBin.pl -contig ${assembly} -out ${sample_id}_maxbin -reads ${fastq[0]} -reads2 ${fastq[1]} -thread $task.cpus -min_contig_length ${minContigLenght} -max_iteration ${maxIterations} -prob_threshold ${probThreshold}
+        echo pass > .status
+
+        if [ "$clear" = "true" ];
+        then
+            work_regex=".*/work/.{2}/.{30}/.*"
+            file_source1=\$(readlink -f \$(pwd)/${fastq[0]})
+            file_source2=\$(readlink -f \$(pwd)/${fastq[1]})
+            assembly_file=\$(readlink -f \$(pwd)/${assembly})
+            if [[ "\$file_source1" =~ \$work_regex ]]; then
+                rm \$file_source1 \$file_source2 \$assembly_file
+            fi
+        fi
+    } || {
+        echo fail > .status
+    }
     """
 }
 

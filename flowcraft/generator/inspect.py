@@ -1,6 +1,7 @@
 import re
 import os
 import sys
+import time
 import curses
 import signal
 import locale
@@ -1378,6 +1379,13 @@ class NextflowInspector:
         general_details = self._prepare_general_details()
         status_data = self._prepare_run_status_data()
 
+        # Add current year to start and stop dates
+        time_start = "{} {}".format(time.strftime("%Y"), self.time_start)
+        time_stop = "{} {}".format(time.strftime("%Y"), self.time_stop) \
+            if self.time_stop else "-"
+        # Get enconding for proper parsing of time
+        time_locale = locale.getlocale()[0]
+
         status_json = {
             "generalOverview": overview_data,
             "generalDetails": general_details,
@@ -1386,8 +1394,9 @@ class NextflowInspector:
             "processInfo": self._convert_process_dict(),
             "processTags": self.process_tags,
             "runStatus": status_data,
-            "timeStart": str(self.time_start),
-            "timeStop": str(self.time_stop) if self.time_stop else "-",
+            "timeStart": time_start,
+            "timeStop": time_stop,
+            "timeLocale": time_locale,
             "processes": list(self.processes)
         }
 

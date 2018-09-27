@@ -15,7 +15,7 @@ if ( !params.trimMinLength{{ param_id}}.toString().isNumber() ){
 IN_trimmomatic_opts_{{ pid }} = Channel.value([params.trimSlidingWindow{{ param_id}},params.trimLeading{{ param_id}},params.trimTrailing{{ param_id}},params.trimMinLength{{ param_id}}])
 IN_adapters_{{ pid }} = Channel.value(params.adapters{{ param_id}})
 
-clear = params.clearAtCheckpoint ? "true" : "false"
+clear = params.clearInput{{ param_id }} ? "true" : "false"
 checkpointClear_{{ pid }} = Channel.value(clear)
 
 process trimmomatic_{{ pid }} {

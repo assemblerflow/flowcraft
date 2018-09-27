@@ -50,6 +50,14 @@ class Spades(Process):
                     "If 'auto' the SPAdes k-mer lengths will be determined "
                     "from the maximum read length of each assembly. If "
                     "'default', SPAdes will use the default k-mer lengths. "
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 
@@ -81,6 +89,18 @@ class Skesa(Process):
             "scratch": "true"
         }}
 
+        self.params = {
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+            }
+        }
+
+
 class ViralAssembly(Process):
     """
     Process to assemble viral genomes, based on SPAdes and megahit
@@ -95,7 +115,8 @@ class ViralAssembly(Process):
 
         self.dependencies = ["integrity_coverage"]
 
-        self.status_channels = ["va_spades" , "va_megahit", "report_viral_assembly"]
+        self.status_channels = ["va_spades", "va_megahit",
+                                "report_viral_assembly"]
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
 
@@ -105,7 +126,7 @@ class ViralAssembly(Process):
             "container": "flowcraft/viral_assembly",
             "version": "0.1-1",
             "scratch": "true"
-        },"va_megahit": {
+        }, "va_megahit": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "flowcraft/viral_assembly",
@@ -146,5 +167,13 @@ class ViralAssembly(Process):
                     "from the maximum read length of each assembly. If "
                     "'default', megahit will use the default k-mer lengths. "
                     "(default: $params.megahitKmers)"
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }

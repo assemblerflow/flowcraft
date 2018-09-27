@@ -1,4 +1,7 @@
 
+clear = params.clearInput{{ param_id }} ? "true" : "false"
+checkpointClear_{{ pid }} = Channel.value(clear)
+
 process pilon_{{ pid }} {
 
     // Send POST request to platform
@@ -10,6 +13,7 @@ process pilon_{{ pid }} {
 
     input:
     set sample_id, file(assembly), file(bam_file), file(bam_index) from {{ input_channel }}
+    val clear from checkpointClear_{{ pid }}
 
     output:
     set sample_id, '*_polished.fasta' into {{ output_channel }}, pilon_report_{{ pid }}
@@ -23,6 +27,17 @@ process pilon_{{ pid }} {
         pilon_mem=${String.valueOf(task.memory).substring(0, String.valueOf(task.memory).length() - 1).replaceAll("\\s", "")}
         java -jar -Xms256m -Xmx\${pilon_mem} /NGStools/pilon-1.22.jar --genome $assembly --frags $bam_file --output ${assembly.name.replaceFirst(~/\.[^\.]+$/, '')}_polished --changes --threads $task.cpus >> .command.log 2>&1
         echo pass > .status
+
+        if [ "$clear" = "true" ];
+        then
+            work_regex=".*/work/.{2}/.{30}/.*"
+            assembly_file=\$(readlink -f \$(pwd)/${assembly})
+            bam_file=\$(readlink -f \$(pwd)/${bam_file})
+            if [[ "\$assembly_file" =~ \$work_regex ]]; then
+                rm \$assembly_file \$bam_file
+            fi
+        fi
+
     } || {
         echo fail > .status
     }

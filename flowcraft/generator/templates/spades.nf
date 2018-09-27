@@ -14,7 +14,7 @@ if ( params.spadesKmers{{ param_id }}.toString().split(" ").size() <= 1 ){
 }
 IN_spades_kmers_{{pid}} = Channel.value(params.spadesKmers{{ param_id }})
 
-clear = params.clearAtCheckpoint ? "true" : "false"
+clear = params.clearInput{{ param_id }} ? "true" : "false"
 checkpointClear_{{ pid }} = Channel.value(clear)
 
 process spades_{{ pid }} {
