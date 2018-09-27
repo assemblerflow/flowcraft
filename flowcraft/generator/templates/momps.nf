@@ -1,4 +1,7 @@
 
+clear = params.clearInput{{ param_id }} ? "true" : "false"
+checkpointClear_{{ pid }} = Channel.value(clear)
+
 process momps_{{ pid }} {
 
     // Send POST request to platform
@@ -8,6 +11,7 @@ process momps_{{ pid }} {
 
     input:
     set sample_id, file(assembly), file(fastq) from {{ input_channel }}.join(_LAST_fastq_{{ pid }})
+    val clear from checkpointClear_{{ pid }}
 
     output:
     file("*_st.tsv") into momps_st_{{ pid }}
@@ -39,6 +43,17 @@ process momps_{{ pid }} {
             # Get the profile for the sample
             echo $sample_id\t\$(awk "NR == 7" res/*.MLST_res.txt) > ${sample_id}_profile.tsv
             rm -r res
+
+            # Remove temporary input files when the clearInput option is used
+            if [ "$clear" = "true" ];
+            then
+                work_regex=".*/work/.{2}/.{30}/.*"
+                file_source1=\$(readlink -f \$(pwd)/${fastq_pair[0]})
+                file_source2=\$(readlink -f \$(pwd)/${fastq_pair[1]})
+                if [[ "\$file_source1" =~ \$work_regex ]]; then
+                    rm \$file_source1 \$file_source2
+                fi
+            fi
         else
             echo fail > .status
             rm -r res

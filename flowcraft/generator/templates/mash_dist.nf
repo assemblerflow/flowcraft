@@ -38,7 +38,7 @@ process mashDistOutputJson_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir 'results/mashdist/mashdist_json_{{ pid }}/', mode: 'copy'
+    publishDir 'results/mashdist/mashdist_json_{{ pid }}/'
 
     input:
     set sample_id, fasta, file(mashtxt) from mashDistOutChannel_{{ pid }}

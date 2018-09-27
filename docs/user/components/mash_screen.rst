@@ -60,7 +60,7 @@ Default directives
 
 - ``mashScreen``:
     - ``container``: flowcraft/mash-patlas
-    - ``version``: 1.4.1
+    - ``version``: 1.6.0-1
 - ``mashOutputJson``:
     - ``container``: flowcraft/mash-patlas
-    - ``version``: 1.4.1
+    - ``version``: 1.6.0-1

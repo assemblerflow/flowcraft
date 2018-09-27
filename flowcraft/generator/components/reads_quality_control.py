@@ -215,6 +215,14 @@ class Trimmomatic(Process):
                 "default": "55",
                 "description":
                     "Drop the read if it is below a specified length "
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 
@@ -292,6 +300,14 @@ class FastqcTrimmomatic(Process):
                 "default": "55",
                 "description":
                     "Drop the read if it is below a specified length."
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 
@@ -334,9 +350,18 @@ class FilterPoly(Process):
                 "default": "'A 50%; T 50%; N 50%'",
                 "description":
                     "Pattern to filter the reads. Please separate parameter"
-                    "values with a space and separate new parameter sets with semicolon (;)."
-                    "Parameters are defined by two values: the pattern (any combination of the"
-                    "letters ATCGN), and the number of repeats or percentage of occurence."
+                    "values with a space and separate new parameter sets with"
+                    " semicolon (;). Parameters are defined by two values: "
+                    "the pattern (any combination of the letters ATCGN), and "
+                    "the number of repeats or percentage of occurence."
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 
@@ -381,6 +406,14 @@ class DownsampleFastq(Process):
                 "description":
                     "Maximum estimated depth coverage allowed. FastQ with "
                     "higher estimated depth will be subsampled to this value."
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 

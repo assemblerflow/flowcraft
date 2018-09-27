@@ -22,8 +22,9 @@ if ( params.spadesKmers{{ param_id }}.toString().split(" ").size() <= 1 ){
     }
 }
 
-clear = params.clearAtCheckpoint ? "true" : "false"
-checkpointClear_{{ pid }} = Channel.value(clear)
+clear = params.clearInput{{ param_id }} ? "true" : "false"
+checkpointClearSpades_{{ pid }} = Channel.value(clear)
+checkpointClearMegahit_{{ pid }} = Channel.value(clear)
 
 //MEGAHIT OPTIONS
 if ( params.megahitKmers{{ param_id }}.toString().split(" ").size() <= 1 ){
@@ -57,7 +58,7 @@ process va_spades_{{ pid }} {
     set sample_id, file(fastq_pair), max_len from spades_in.join(SIDE_max_len_spades)
     val opts from IN_spades_opts_{{ pid }}
     val kmers from IN_spades_kmers_{{ pid }}
-    val clear from checkpointClear_{{ pid }}
+    val clear from checkpointClearSpades_{{ pid }}
 
     output:
     set sample_id, file({task.exitStatus == 1 ? ".exitcode" : '*_spades*.fasta'}) into assembly_spades
@@ -115,6 +116,7 @@ process va_megahit_{{ pid }}  {
     input:
     set sample_id, file(fastq_pair), max_len from megahit_in.join(megahit).map{ ot -> [ot[0], ot[1]] }.join(SIDE_max_len_megahit)
     val kmers from IN_megahit_kmers_{{ pid }}
+    val clear from checkpointClearSpades_{{ pid }}
 
     output:
     set sample_id, file('*megahit*.fasta') into megahit_assembly

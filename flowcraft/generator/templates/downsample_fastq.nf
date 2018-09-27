@@ -5,7 +5,7 @@ IN_genome_size_{{ pid }} = Channel.value(params.genomeSize{{ param_id }})
 IN_depth_{{ pid }} = Channel.value(params.depth{{ param_id }})
     .map{it -> it.toString().isNumber() ? it : exit(1, "The depth parameter must be a number or a float. Provided value: '${params.depth{{ param_id }}}'")}
 
-clear = params.clearAtCheckpoint ? "true" : "false"
+clear = params.clearInput{{ param_id }} ? "true" : "false"
 checkpointClear_{{ pid }} = Channel.value(clear)
 
 process downsample_fastq_{{ pid }} {

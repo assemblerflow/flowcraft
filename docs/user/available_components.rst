@@ -99,7 +99,13 @@ Distance Estimation
   plasmid database and generates a JSON input file for pATLAS. This component
   searches for containment of a given sequence in read sequencing data.
   However if a different database is provided it can use mash screen for other
-  purporses.
+  purposes.
+
+- :doc:`components/fast_ani`: Performs pairwise comparisons between fastas,
+given a multifasta as input for fastANI. It will split the multifasta into
+single fastas that will then be provided as a matrix. The output will be the
+all pairwise comparisons that pass the minimum of 50 aligned sequences with a
+default length of 200 bp.
 
 - :doc:`components/mash_sketch_fasta`: Performs mash sketch for fasta files.
 

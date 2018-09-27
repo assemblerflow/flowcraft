@@ -1,5 +1,28 @@
 # Changelog
 
+## Changes in upcoming release (`dev` branch) 
+
+### Features
+
+- Added a new `clearInput` parameter to components that change their input.
+The aim of this option is to allow the controlled removal of temporary files,
+which is particularly useful in very large workflows.
+
+### Components changes
+
+- Updated images for components `mash_dist`, `mash_screen` and 
+`mapping_patlas`.
+
+### New components
+- Added component `fast_ani`.
+
+### Minor/Other changes
+
+- Added `--export-directives` option to `build` mode to export component's 
+directives in JSON format to standard output.
+- Added more date information in `inspect` mode, including the year and the
+locale of the executing system.
+
 ## 1.3.0
 
 ### Features

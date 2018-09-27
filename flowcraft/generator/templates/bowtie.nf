@@ -5,6 +5,8 @@ if (params.index{{ param_id }} == null && params.reference{{ param_id }} == null
     exit 1, "Provide only an index OR a reference fasta file."
 }
 
+clear = params.clearInput{{ param_id }} ? "true" : "false"
+checkpointClear_{{ pid }} = Channel.value(clear)
 
 if (params.reference{{ param_id }}){
 
@@ -61,7 +63,23 @@ process bowtie_{{ pid }} {
 
     script:
     """
-    bowtie2 -x $index -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} -p $task.cpus 1> ${sample_id}.bam 2> ${sample_id}_bowtie2.log
+    {
+        bowtie2 -x $index -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} -p $task.cpus 1> ${sample_id}.bam 2> ${sample_id}_bowtie2.log
+
+        if [ "$clear" = "true" ];
+        then
+            work_regex=".*/work/.{2}/.{30}/.*"
+            file_source1=\$(readlink -f \$(pwd)/${fastq_pair[0]})
+            file_source2=\$(readlink -f \$(pwd)/${fastq_pair[1]})
+            if [[ "\$file_source1" =~ \$work_regex ]]; then
+                rm \$file_source1 \$file_source2
+            fi
+        fi
+
+        echo pass > .status
+    } || {
+        echo fail > .status
+    }
     """
 }
 

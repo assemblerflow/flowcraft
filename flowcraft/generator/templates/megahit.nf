@@ -5,6 +5,8 @@ if ( params.megahitKmers{{ param_id }}.toString().split(" ").size() <= 1 ){
 }
 IN_megahit_kmers_{{ pid }} = Channel.value(params.megahitKmers{{ param_id }})
 
+clear = params.clearInput{{ param_id }} ? "true" : "false"
+checkpointClear_{{ pid }} = Channel.value(clear)
 
 process megahit_{{ pid }} {
 
@@ -17,6 +19,7 @@ process megahit_{{ pid }} {
     input:
     set sample_id, file(fastq_pair), max_len from {{ input_channel }}.join(SIDE_max_len_{{ pid }})
     val kmers from IN_megahit_kmers_{{ pid }}
+    val clear from checkpointClear_{{ pid }}
 
     output:
     set sample_id, file('*megahit*.fasta') into {{ output_channel }}

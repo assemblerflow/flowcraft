@@ -68,6 +68,7 @@ process_map = {
         "filter_poly": readsqc.FilterPoly,
         "integrity_coverage": readsqc.IntegrityCoverage,
         "fasterq_dump": downloads.FasterqDump,
+        "fast_ani": distest.FastAniMatrix,
         "kraken": meta.Kraken,
         "mafft": alignment.Mafft,
         "mapping_patlas": mapping_patlas.PatlasMapping,
@@ -1504,6 +1505,19 @@ class NextflowGenerator:
 
         # Flush params json to stdout
         sys.stdout.write(json.dumps(params_json))
+
+    def export_directives(self):
+        """Export pipeline directives as a JSON to stdout
+        """
+
+        directives_json = {}
+
+        # Skip first init process
+        for p in self.processes[1:]:
+            directives_json[p.template] = p.directives
+
+        # Flush params json to stdout
+        sys.stdout.write(json.dumps(directives_json))
 
     def build(self):
         """Main pipeline builder
