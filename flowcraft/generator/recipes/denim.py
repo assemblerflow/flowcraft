@@ -19,7 +19,6 @@ class Denim(Recipe):
                             "filter_poly " \
                             "bowtie " \
                             "retrieve_mapped " \
-                            "remove_host " \
                             "viral_assembly " \
                             "assembly_mapping " \
                             "pilon " \
