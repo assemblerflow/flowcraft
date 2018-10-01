@@ -22,6 +22,13 @@ class Plasmids(Recipe):
                             "mash_screen | " \
                             "mapping_patlas)"
 
+        # Recipe parameters and directives
+        self.directives = {
+            "integrity_coverage": {
+                "params": {"genomeSize": "0"}
+            }
+        }
+
 
 class PlasmidsMapping(Recipe):
     """
@@ -37,6 +44,13 @@ class PlasmidsMapping(Recipe):
         self.pipeline_str = "integrity_coverage " \
                             "fastqc_trimmomatic " \
                             "mapping_patlas"
+
+        # Recipe parameters and directives
+        self.directives = {
+            "integrity_coverage": {
+                "params": {"genomeSize": "0"}
+            }
+        }
 
 
 class PlasmidsAssembly(Recipe):
@@ -54,7 +68,14 @@ class PlasmidsAssembly(Recipe):
                             "fastqc_trimmomatic " \
                             "spades " \
                             "pilon " \
-                            "mash_dist "
+                            "mash_dist"
+
+        # Recipe parameters and directives
+        self.directives = {
+            "integrity_coverage": {
+                "params": {"genomeSize": "0"}
+            }
+        }
 
 
 class PlasmidsMash(Recipe):
@@ -71,3 +92,10 @@ class PlasmidsMash(Recipe):
         self.pipeline_str = "integrity_coverage " \
                             "fastqc_trimmomatic " \
                             "mash_screen"
+
+        # Recipe parameters and directives
+        self.directives = {
+            "integrity_coverage": {
+                "params": {"genomeSize": "0"}
+            }
+        }
