@@ -78,6 +78,8 @@ process_map = {
         "maxbin2": meta.MaxBin2,
         "megahit": meta.Megahit,
         "metamlst": mlst.MetaMlst,
+        "metaphlan":meta.Metaphlan,
+        "metaphlan_to_krona": meta.Metaphlan_to_Krona,
         "metaprob": meta.MetaProb,
         "metaspades": meta.Metaspades,
         "midas_species": meta.Midas_species,
