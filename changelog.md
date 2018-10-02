@@ -5,6 +5,7 @@
 ### Minor/Other changes
 
 - Added removal of duplicate IDs from `reads_download` component input.
+- Added seed parameter to `downsample_fastq` component.
 
 ## 1.3.1
 

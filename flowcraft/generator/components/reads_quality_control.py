@@ -407,6 +407,12 @@ class DownsampleFastq(Process):
                     "Maximum estimated depth coverage allowed. FastQ with "
                     "higher estimated depth will be subsampled to this value."
             },
+            "seed":{
+                "default": 100,
+                "description": "The seed number for seqtk. By default it is 100"
+                               "and should be equal for both pairs of "
+                               "reads."
+            },
             "clearInput": {
                 "default": "false",
                 "description":

@@ -23,6 +23,7 @@ Parameters
 - ``genomeSize``: Genome size estimate for the samples. It is used to
   estimate the coverage.
 - ``depth``: The target depth to which the reads should be subsampled.
+- ``seed``: The seed number for seqtk. By default it is 100.
 
 Published results
 -----------------
