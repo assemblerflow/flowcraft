@@ -11,7 +11,7 @@ process metaphlan_{{ pid }} {
     set sample_id, file(fastq_pair) from {{ input_channel }}
 
     output:
-    file("${sample_id}_profiled_metagenome.txt")
+     set sample_id, file("${sample_id}_profiled_metagenome.txt") into {{ output_channel }}
     {% with task_name="metaphlan" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

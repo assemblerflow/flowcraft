@@ -401,3 +401,31 @@ class Metaphlan_to_Krona(Process):
         self.status_channels = [
             "metaphlan_to_krona"
         ]
+
+class Krona(Process):
+    """krona process template interface
+
+            This process is set with:
+
+                - ``input_type``: txt
+                - ``output_type``: html
+                - ``ptype``: taxonomic classification
+    """
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "txt"
+        self.output_type = "html"
+
+        self.directives = {
+            "krona": {
+                "container": "flowcraft/krona",
+                "version": "2.7-1",
+
+            }
+        }
+
+        self.status_channels = [
+            "krona"
+        ]

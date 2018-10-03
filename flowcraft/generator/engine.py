@@ -69,6 +69,7 @@ process_map = {
         "integrity_coverage": readsqc.IntegrityCoverage,
         "fasterq_dump": downloads.FasterqDump,
         "kraken": meta.Kraken,
+        "krona": meta.Krona,
         "mafft": alignment.Mafft,
         "mapping_patlas": mapping_patlas.PatlasMapping,
         "mash_dist": distest.PatlasMashDist,
