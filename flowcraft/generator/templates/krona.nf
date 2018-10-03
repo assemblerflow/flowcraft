@@ -19,6 +19,10 @@ process krona_{{ pid }} {
     script:
     """
     ktImportText ${krona_file} -o ${sample_id}_krona.html
+
+    json_str={'kronaPlot':[{'sample':'${sample_id}','value':'\$(cat ${sample_id}_krona.html)'}]}
+    echo \$json_str > .report.json
+
     """
 }
 
