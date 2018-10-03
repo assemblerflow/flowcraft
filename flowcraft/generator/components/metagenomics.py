@@ -345,7 +345,7 @@ class SplitAssembly(Process):
             "split_assembly"
         ]
 
-class Metaphlan(Process):
+class Metaphlan_fq(Process):
     """metaphlan2 process template interface
 
             This process is set with:
@@ -362,7 +362,7 @@ class Metaphlan(Process):
         self.output_type = "txt"
 
         self.directives = {
-            "metaphlan": {
+            "metaphlan_fq": {
                 "container": "flowcraft/metaphlan",
                 "version": "2.7.7-1",
                 "memory": "{5.Gb*task.attempt}",
@@ -371,7 +371,36 @@ class Metaphlan(Process):
         }
 
         self.status_channels = [
-            "metaphlan"
+            "metaphlan_fq"
+        ]
+
+class Metaphlan_fa(Process):
+    """metaphlan2 process template interface
+
+            This process is set with:
+
+                - ``input_type``: fasta
+                - ``output_type``: txt
+                - ``ptype``: taxonomic classification
+    """
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "txt"
+
+        self.directives = {
+            "metaphlan_fa": {
+                "container": "flowcraft/metaphlan",
+                "version": "2.7.7-1",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 4
+            }
+        }
+
+        self.status_channels = [
+            "metaphlan_fa"
         ]
 
 class Metaphlan_to_Krona(Process):

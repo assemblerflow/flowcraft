@@ -1,4 +1,4 @@
-process metaphlan_{{ pid }} {
+process metaphlan_fq_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
@@ -12,15 +12,13 @@ process metaphlan_{{ pid }} {
 
     output:
      set sample_id, file("${sample_id}_profiled_metagenome.txt") into {{ output_channel }}
-    {% with task_name="metaphlan" %}
+    {% with task_name="metaphlan_fq" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
     script:
     """
-    metaphlan2.py ${fastq_pair[0]},${fastq_pair[1]} --bowtie2out metagenome.bowtie2.bz2 --nproc 5 --input_type fastq > profiled_metagenome.txt
-
-    mv profiled_metagenome.txt ${sample_id}_profiled_metagenome.txt
+    metaphlan2.py ${fastq_pair[0]},${fastq_pair[1]} --bowtie2out metagenome.bowtie2.bz2 --nproc $task.cpus --input_type fastq > ${sample_id}_profiled_metagenome.txt
     """
 }
 
