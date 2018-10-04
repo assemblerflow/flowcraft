@@ -83,6 +83,7 @@ def remove_inner_forks(text):
 
     return text
 
+
 def empty_tasks(p_string):
     """
     Function to check if pipeline string is empty or has an empty string
@@ -141,7 +142,8 @@ def brackets_insanity_check(p_string):
         raise SanityError(
             "A different number of '(' and ')' was specified. There are "
             "{} extra '{}'. The number of '(' and ')'should be equal.".format(
-                str(abs(p_string.count(FORK_TOKEN) - p_string.count(CLOSE_TOKEN))),
+                str(abs(
+                    p_string.count(FORK_TOKEN) - p_string.count(CLOSE_TOKEN))),
                 max_bracket))
 
 
@@ -261,7 +263,7 @@ def inner_fork_insanity_checks(pipeline_string):
 
     # first lets get all forks to a list.
     list_of_forks = []  # stores forks
-    left_indexes = []   # stores indexes of left brackets
+    left_indexes = []  # stores indexes of left brackets
 
     # iterate through the string looking for '(' and ')'.
     for pos, char in enumerate(pipeline_string):
@@ -385,7 +387,8 @@ def parse_pipeline(pipeline_str):
         pipeline_links.extend(linear_connection(linear_pipeline, lane))
         # Removes unique identifiers used for correctly assign fork parents with
         #  a possible same process name
-        pipeline_links = remove_unique_identifiers(identifiers_to_tags, pipeline_links)
+        pipeline_links = remove_unique_identifiers(identifiers_to_tags,
+                                                   pipeline_links)
         return pipeline_links
 
     for i in range(nforks):
@@ -439,7 +442,8 @@ def parse_pipeline(pipeline_str):
 
         lane += len(fork_sink)
 
-    pipeline_links = remove_unique_identifiers(identifiers_to_tags, pipeline_links)
+    pipeline_links = remove_unique_identifiers(identifiers_to_tags,
+                                               pipeline_links)
     return pipeline_links
 
 
@@ -673,17 +677,18 @@ def add_unique_identifiers(pipeline_str):
 
     # Regex to get all process names. Catch all words without spaces and that
     # are not fork tokens or pipes
-    process_names = re.findall(r"[^\s()|]+", pipeline_str_modified)
+    reg_find_proc = r"[^\s{}{}{}]+".format(LANE_TOKEN, FORK_TOKEN, CLOSE_TOKEN)
+    process_names = re.findall(reg_find_proc, pipeline_str_modified)
 
     identifiers_to_tags = {}
     """
-    Dictionary to match new process names (identifiers) with original process 
+    dict: Matches new process names (identifiers) with original process 
     names
     """
 
     new_process_names = []
     """
-    List of new process names used to replace in the pipeline string
+    list: New process names used to replace in the pipeline string
     """
 
     # Assigns the new process names by appending a numeric id at the end of
@@ -706,7 +711,7 @@ def add_unique_identifiers(pipeline_str):
 
     # force to add a space between each token so that regex modification can
     # be applied
-    find = r'[)(|]+'
+    find = r'[{}{}{}]+'.format(FORK_TOKEN, LANE_TOKEN, CLOSE_TOKEN)
     pipeline_str_modified = re.sub(find, match_result, pipeline_str_modified)
 
     # Replace original process names by the unique identifiers
@@ -742,8 +747,10 @@ def remove_unique_identifiers(identifiers_to_tags, pipeline_links):
     # Replaces the unique identifiers by the original process names
     for index, val in enumerate(pipeline_links):
         if val["input"]["process"] != "__init__":
-            val["input"]["process"] = identifiers_to_tags[val["input"]["process"]]
+            val["input"]["process"] = identifiers_to_tags[
+                val["input"]["process"]]
         if val["output"]["process"] != "__init__":
-            val["output"]["process"] = identifiers_to_tags[val["output"]["process"]]
+            val["output"]["process"] = identifiers_to_tags[
+                val["output"]["process"]]
 
     return pipeline_links
