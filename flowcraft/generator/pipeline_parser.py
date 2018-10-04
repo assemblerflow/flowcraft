@@ -369,18 +369,19 @@ def parse_pipeline(pipeline_str):
     lane = 1
 
     # Add unique identifiers to each process to allow a correct connection
-    # between forks
-    pipeline_str, identifiers_to_tags = add_unique_identifiers(pipeline_str)
+    # between forks with same processes
+    pipeline_str_modified, identifiers_to_tags = add_unique_identifiers(
+        pipeline_str)
 
     # Get number of forks in the pipeline
-    nforks = pipeline_str.count(FORK_TOKEN)
+    nforks = pipeline_str_modified.count(FORK_TOKEN)
     logger.debug("Found {} fork(s)".format(nforks))
 
     # If there are no forks, connect the pipeline as purely linear
     if not nforks:
         logger.debug("Detected linear pipeline string : {}".format(
             pipeline_str))
-        linear_pipeline = ["__init__"] + pipeline_str.split()
+        linear_pipeline = ["__init__"] + pipeline_str_modified.split()
         pipeline_links.extend(linear_connection(linear_pipeline, lane))
         # Removes unique identifiers used for correctly assign fork parents with
         #  a possible same process name
@@ -393,7 +394,7 @@ def parse_pipeline(pipeline_str):
         # Split the pipeline at each fork start position. fields[-1] will
         # hold the process after the fork. fields[-2] will hold the processes
         # before the fork.
-        fields = pipeline_str.split(FORK_TOKEN, i + 1)
+        fields = pipeline_str_modified.split(FORK_TOKEN, i + 1)
 
         # Get the processes before the fork. This may be empty when the
         # fork is at the beginning of the pipeline.
@@ -572,7 +573,7 @@ def linear_connection(plist, lane):
 
 def fork_connection(source, sink, source_lane, lane):
     """Makes the connection between a process and the first processes in the
-    lanes to wich it forks.
+    lanes to which it forks.
 
     The ``lane`` argument should correspond to the lane of the source process.
     For each lane in ``sink``, the lane counter will increase.
@@ -665,16 +666,25 @@ def add_unique_identifiers(pipeline_str):
     dict
         Match between process unique values and original names
     """
-    identifiers_to_tags = {}
 
     # Add space at beginning and end of pipeline to allow regex mapping of final
-    #  process in linear pipelines
-    pipeline_str = " {} ".format(pipeline_str)
+    # process in linear pipelines
+    pipeline_str_modified = " {} ".format(pipeline_str)
 
     # Regex to get all process names. Catch all words without spaces and that
     # are not fork tokens or pipes
-    process_names = re.findall(r"[^\s()|]+", pipeline_str)
+    process_names = re.findall(r"[^\s()|]+", pipeline_str_modified)
+
+    identifiers_to_tags = {}
+    """
+    Dictionary to match new process names (identifiers) with original process 
+    names
+    """
+
     new_process_names = []
+    """
+    List of new process names used to replace in the pipeline string
+    """
 
     # Assigns the new process names by appending a numeric id at the end of
     # the process name
@@ -682,28 +692,34 @@ def add_unique_identifiers(pipeline_str):
         if "=" in val:
             parts = val.split("=")
             new_id = "{}_{}={}".format(parts[0], index, parts[1])
-            new_process_names.append(new_id)
         else:
             new_id = "{}_{}".format(val, index)
-            new_process_names.append(new_id)
 
+        # add new process with id
+        new_process_names.append(new_id)
+        # makes a match between new process name and original process name
         identifiers_to_tags[new_id] = val
 
     # Add space between forks, pipes and the process names for the replace
     # regex to work
     match_result = lambda match: " {} ".format(match.group())
 
+    # force to add a space between each token so that regex modification can
+    # be applied
     find = r'[)(|]+'
-    pipeline_str = re.sub(find, match_result, pipeline_str)
+    pipeline_str_modified = re.sub(find, match_result, pipeline_str_modified)
 
     # Replace original process names by the unique identifiers
     for index, val in enumerate(process_names):
-        find = r'{}[^_)(|]'.format(val)
-        find = find.replace("\\", "\\\\")
-        pipeline_str = re.sub(find, new_process_names[index] + " ",
-                              pipeline_str, 1)
+        # regex to replace process names with non assigned process ids
+        # escape characters are required to match to the dict keys
+        # (identifiers_to_tags), since python keys with escape characters
+        # must be escaped
+        find = r'{}[^_]'.format(val).replace("\\", "\\\\")
+        pipeline_str_modified = re.sub(find, new_process_names[index] + " ",
+                                       pipeline_str_modified, 1)
 
-    return pipeline_str, identifiers_to_tags
+    return pipeline_str_modified, identifiers_to_tags
 
 
 def remove_unique_identifiers(identifiers_to_tags, pipeline_links):
