@@ -337,8 +337,8 @@ def insanity_checks(pipeline_str):
 
 
 def parse_pipeline(pipeline_str):
-    """Parses a pipeline string into a dictionary with the connections between
-    process
+    """Parses a pipeline string into a list of dictionaries with the connections
+     between processes
 
     Parameters
     ----------
@@ -368,6 +368,10 @@ def parse_pipeline(pipeline_str):
     pipeline_links = []
     lane = 1
 
+    # Add unique identifiers to each process to allow a correct connection
+    # between forks
+    pipeline_str, identifiers_to_tags = add_unique_identifiers(pipeline_str)
+
     # Get number of forks in the pipeline
     nforks = pipeline_str.count(FORK_TOKEN)
     logger.debug("Found {} fork(s)".format(nforks))
@@ -378,6 +382,9 @@ def parse_pipeline(pipeline_str):
             pipeline_str))
         linear_pipeline = ["__init__"] + pipeline_str.split()
         pipeline_links.extend(linear_connection(linear_pipeline, lane))
+        # Removes unique identifiers used for correctly assign fork parents with
+        #  a possible same process name
+        pipeline_links = remove_unique_identifiers(identifiers_to_tags, pipeline_links)
         return pipeline_links
 
     for i in range(nforks):
@@ -431,6 +438,7 @@ def parse_pipeline(pipeline_str):
 
         lane += len(fork_sink)
 
+    pipeline_links = remove_unique_identifiers(identifiers_to_tags, pipeline_links)
     return pipeline_links
 
 
@@ -498,7 +506,6 @@ def get_lanes(lanes_str):
     # Flag used to determined whether the cursor is inside or outside the
     # right fork
     infork = 0
-
     for i in lanes_str:
 
         # Nested fork started
@@ -640,3 +647,87 @@ def linear_lane_connection(lane_list, lane):
         lane += 1
 
     return res
+
+
+def add_unique_identifiers(pipeline_str):
+    """Returns the pipeline string with unique identifiers and a dictionary with
+     references between the unique keys and the original values
+
+    Parameters
+    ----------
+    pipeline_str : str
+        Pipeline string
+
+    Returns
+    -------
+    str
+        Pipeline string with unique identifiers
+    dict
+        Match between process unique values and original names
+    """
+    identifiers_to_tags = {}
+
+    # Add space at beginning and end of pipeline to allow regex mapping of final
+    #  process in linear pipelines
+    pipeline_str = " {} ".format(pipeline_str)
+
+    # Regex to get all process names. Catch all words without spaces and that
+    # are not fork tokens or pipes
+    process_names = re.findall(r"[^\s()|]+", pipeline_str)
+    new_process_names = []
+
+    # Assigns the new process names by appending a numeric id at the end of
+    # the process name
+    for index, val in enumerate(process_names):
+        if "=" in val:
+            parts = val.split("=")
+            new_id = "{}_{}={}".format(parts[0], index, parts[1])
+            new_process_names.append(new_id)
+        else:
+            new_id = "{}_{}".format(val, index)
+            new_process_names.append(new_id)
+
+        identifiers_to_tags[new_id] = val
+
+    # Add space between forks, pipes and the process names for the replace
+    # regex to work
+    match_result = lambda match: " {} ".format(match.group())
+
+    find = r'[)(|]+'
+    pipeline_str = re.sub(find, match_result, pipeline_str)
+
+    # Replace original process names by the unique identifiers
+    for index, val in enumerate(process_names):
+        find = r'{}[^_)(|]'.format(val)
+        find = find.replace("\\", "\\\\")
+        pipeline_str = re.sub(find, new_process_names[index] + " ",
+                              pipeline_str, 1)
+
+    return pipeline_str, identifiers_to_tags
+
+
+def remove_unique_identifiers(identifiers_to_tags, pipeline_links):
+    """Removes unique identifiers and add the original process names to the
+    already parsed pipelines
+
+    Parameters
+    ----------
+    identifiers_to_tags : dict
+        Match between unique process identifiers and process names
+    pipeline_links: list
+        Parsed pipeline list with unique identifiers
+
+    Returns
+    -------
+    list
+        Pipeline list with original identifiers
+    """
+
+    # Replaces the unique identifiers by the original process names
+    for index, val in enumerate(pipeline_links):
+        if val["input"]["process"] != "__init__":
+            val["input"]["process"] = identifiers_to_tags[val["input"]["process"]]
+        if val["output"]["process"] != "__init__":
+            val["output"]["process"] = identifiers_to_tags[val["output"]["process"]]
+
+    return pipeline_links
