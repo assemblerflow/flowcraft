@@ -403,34 +403,6 @@ class Metaphlan_fa(Process):
             "metaphlan_fa"
         ]
 
-class Metaphlan_to_Krona(Process):
-    """metaphlan2 to krona process template interface
-
-            This process is set with:
-
-                - ``input_type``: txt
-                - ``output_type``: txt
-                - ``ptype``: taxonomic classification
-    """
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.input_type = "txt"
-        self.output_type = "txt"
-
-        self.directives = {
-            "metaphlan_to_krona": {
-                "container": "flowcraft/metaphlan",
-                "version": "2.7.7-1",
-                "cpus": 1
-            }
-        }
-
-        self.status_channels = [
-            "metaphlan_to_krona"
-        ]
-
 class Krona(Process):
     """krona process template interface
 

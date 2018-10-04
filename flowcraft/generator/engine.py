@@ -81,7 +81,6 @@ process_map = {
         "metamlst": mlst.MetaMlst,
         "metaphlan_fa": meta.Metaphlan_fa,
         "metaphlan_fq":meta.Metaphlan_fq,
-        "metaphlan_to_krona": meta.Metaphlan_to_Krona,
         "metaprob": meta.MetaProb,
         "metaspades": meta.Metaspades,
         "midas_species": meta.Midas_species,

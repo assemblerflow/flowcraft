@@ -11,7 +11,8 @@ process metaphlan_fa_{{ pid }} {
     set sample_id, file(fasta) from {{ input_channel }}
 
     output:
-     set sample_id, file("${sample_id}_profiled_metagenome.txt") into {{ output_channel }}
+    set sample_id, file("${sample_id}_krona.txt") into {{ output_channel }}
+    file("${sample_id}_profiled_metagenome.txt")
     {% with task_name="metaphlan_fa" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -20,6 +21,10 @@ process metaphlan_fa_{{ pid }} {
     """
     metaphlan2.py ${fasta} --nproc $task.cpus --input_type fasta > ${sample_id}_profiled_metagenome.txt
 
+    metaphlan2krona.py -p ${sample_id}_profiled_metagenome.txt -k ${sample_id}_krona.txt
+
+    json_str="{'kronaPlot':[{'sample':'${sample_id}','value':'\$(cat ${sample_id}_krona.txt)'}]}"
+    echo \$json_str > .report.json
     """
 }
 
