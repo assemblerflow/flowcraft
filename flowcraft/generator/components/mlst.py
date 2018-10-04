@@ -179,4 +179,6 @@ class MetaMlst(Process):
             }
         }
 
-
+        self.status_channels = [
+            "metamlst"
+        ]

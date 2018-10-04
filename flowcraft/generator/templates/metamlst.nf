@@ -16,7 +16,8 @@ process metamlst_{{ pid }} {
     val metamlstDB_index from IN_metamlstDB_index_{{ pid }}
 
     output:
-    file 'out/merged/*.txt' optional true
+    file 'out/merged/*.txt' optional true into out_report_{{ pid }}
+
     {% with task_name="metamlst" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -28,8 +29,25 @@ process metamlst_{{ pid }} {
     metamlst.py -d ${metamlstDB} ${sample_id}.bam
 
     metamlst-merge.py -d ${metamlstDB} out/
-    """
 
+    json_str="{'tableRow':[{'sample':'${sample_id}','data':["
+
+    count=1
+
+    for species in \$(ls out/merged/*_report.txt); do
+        ST=\$(awk 'NR == 2 {print \$1}' \$species);
+        mlstSpecies=\$(basename \$species | cut -d '_' -f1);
+        json_str+="{'header':'MLST species \$count','value':'\$mlstSpecies','table':'typing'},{'header':'MLST ST \$count','value':'\$ST','table':'typing'},"
+        count=\$((count+1))
+    done
+
+    json_str=\$(echo \${json_str::-1})
+
+    json_str+="]}]}"
+
+    echo \$json_str > .report.json
+
+    """
 }
 
 {{ forks }}
