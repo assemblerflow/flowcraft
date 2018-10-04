@@ -10,6 +10,7 @@
 ### Bug fixes
 
 - Fixed forks with same source process name.
+- Fixed `inspect` issue when tasks took more than a day in duration.
 
 ## 1.3.1
 
