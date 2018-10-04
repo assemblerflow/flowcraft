@@ -7,6 +7,10 @@
 - Added removal of duplicate IDs from `reads_download` component input.
 - Added seed parameter to `downsample_fastq` component.
 
+### Bug fixes
+
+- Fixed `inspect` issue when tasks took more than a day in duration.
+
 ## 1.3.1
 
 ### Features

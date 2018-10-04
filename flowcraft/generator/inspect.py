@@ -338,7 +338,10 @@ class NextflowInspector:
         if s.endswith("ms"):
             return float(s.rstrip("ms")) / 1000
 
-        fields = list(map(float, re.split("[hms]", s)[:-1]))
+        fields = list(map(float, re.split("[dhms]", s)[:-1]))
+        if len(fields) == 4:
+            return fields[0] * 24 * 3600 + fields[1] * 3600 + fields[2] * 60 +\
+                fields[3]
         if len(fields) == 3:
             return fields[0] * 3600 + fields[1] * 60 + fields[2]
         elif len(fields) == 2:
