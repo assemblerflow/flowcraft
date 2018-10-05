@@ -93,7 +93,8 @@ class MaxBin2(Process):
         }
 
         self.status_channels = [
-            "maxbin2"
+            "maxbin2",
+            "report_maxbin2"
         ]
 
 

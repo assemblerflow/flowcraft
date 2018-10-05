@@ -21,6 +21,7 @@ process maxbin2_{{ pid }} {
     output:
     file '*_maxbin.*.fasta' into binCh_{{ pid }}
     file '*_maxbin.{abundance,log,summary}'
+    set sample_id, file("*_maxbin.summary") into intoReport_{{ pid }}
     {% with task_name="maxbin2" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -29,6 +30,27 @@ process maxbin2_{{ pid }} {
     """
     run_MaxBin.pl -contig ${assembly} -out ${sample_id}_maxbin -reads ${fastq[0]} -reads2 ${fastq[1]} -thread $task.cpus -min_contig_length ${minContigLenght} -max_iteration ${maxIterations} -prob_threshold ${probThreshold}
     """
+}
+
+
+process report_maxbin2_{{ pid }}{
+
+    // Send POST request to platform
+    {% include "post.txt" ignore missing %}
+
+    tag { sample_id }
+
+    input:
+    set sample_id, file(tsv) from  intoReport_{{ pid }}
+
+    output:
+    {% with task_name="report_maxbin2" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    template "process_tsv.py"
+
 }
 
 {{ output_channel }} = Channel.create()
