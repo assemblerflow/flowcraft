@@ -371,7 +371,8 @@ class Metaphlan_fq(Process):
         }
 
         self.status_channels = [
-            "metaphlan_fq"
+            "metaphlan_fq",
+            "report_metaphlan_fq"
         ]
 
 class Metaphlan_fa(Process):
@@ -400,7 +401,8 @@ class Metaphlan_fa(Process):
         }
 
         self.status_channels = [
-            "metaphlan_fa"
+            "metaphlan_fa",
+            "report_metaphlan_fa"
         ]
 
 class Krona(Process):

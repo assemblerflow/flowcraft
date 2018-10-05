@@ -13,6 +13,7 @@ process metaphlan_fq_{{ pid }} {
     output:
     set sample_id, file("${sample_id}_krona.txt") into {{ output_channel }}
     file("${sample_id}_profiled_metagenome.txt")
+    set sample_id, file("${sample_id}_krona.txt") into intoReport{{ pid }}
     {% with task_name="metaphlan_fq" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -29,6 +30,26 @@ process metaphlan_fq_{{ pid }} {
 
     echo \$json_str > .report.json
     """
+}
+
+process report_metaphlan_fq_{{ pid }} {
+
+    // Send POST request to platform
+    {% include "post.txt" ignore missing %}
+
+    tag { sample_id }
+
+    input:
+    set sample_id, file(metaphlan) from {{ pid }}
+
+    output:
+    {% with task_name="report_metaphlan_fq" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    template "process_metaphlan.py"
+
 }
 
 {{ forks }}
