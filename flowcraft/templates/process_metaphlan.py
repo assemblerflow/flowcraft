@@ -39,27 +39,83 @@ logger = get_logger(__file__)
 
 if __file__.endswith(".command.sh"):
     FILE = '$metaphlan'
+    SAMPLE_ID = '$sample_id'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("FILE: {}".format(FILE))
+    logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))
 
 
-def main(file_path):
 
 
-    # Parse krona TSV results file
-    file_parsed = list(csv.reader(open(file_path, 'r'), delimiter='\t'))
+def main(file_path, sample_id):
+    parsed_file = parse_file(file_path)
+    get_results(parsed_file,sample_id)
 
+
+def parse_file(file_path):
+    """Parse classifications tab from krona or kraken and returns the results
+    without duplicated statements
+
+    :param file_path:
+    :return: dict
+    """
+
+    classifier_match = {}
+    """
+    dict: Match between line keys and their values. Used to merge similar 
+    results
+    """
+
+    pattern = re.compile(r'\s+')
+
+    # Remove spaces and add tabs since results are not \t separated by default.
+    # Adds keys and values to the classifiers_match dictionary
+    with open(file_path, 'r') as file_parsed:
+        for line in file_parsed:
+            new_line = re.sub(pattern, "\t", line.strip()).split("\t")
+            classifier_match[",".join(new_line)] = new_line
+
+        classifier_keys = list(classifier_match.keys())
+        to_remove = []
+
+        # Check entries that are contained in others and mark them for removal
+        for key1 in classifier_keys:
+            for key2 in classifier_keys:
+                if key1 in key2 and key1 != key2:
+                    to_remove.append(key1)
+
+        # Remove marked entries
+        for remove in to_remove:
+            del classifier_match[remove]
+
+        new_file_parsed = []
+
+        for key in classifier_match:
+            new_file_parsed.append(classifier_match[key])
+
+    return new_file_parsed
+
+
+def get_results(parsed_file, sample_id):
+    """crete json tree data structure with kraken or krona classifications.
+    Writes a results file
+
+    :param parsed_file:
+    """
+
+    # Parse kraken or krona CSV results file
     dict_keys = {}
     """
     dict: Used to count the total number of results for each key level
     """
+
     levels = []
     """
     list: List of the resulting levels, with values, keys, and children
     """
 
-    for line in file_parsed:
+    for line in parsed_file:
         value = 0
         # Count total number of results for each level. If line only has a
         # value, it is classifier as Unclassified
@@ -78,7 +134,7 @@ def main(file_path):
             else:
                 value = level_to_use
 
-    for line in file_parsed:
+    for line in parsed_file:
         current_level = {}
         # Reads the array reversed and creates the dictionary tree of
         # classification of children. Last element has and empty object has
@@ -95,10 +151,11 @@ def main(file_path):
 
         levels.append(current_level)
 
-    with open("parsed_krona.txt", "w") as k:
+    with open(".report.json", "w") as k:
+        k.write('{"kronaPlot":[{"sample":"' + sample_id + '", "value":')
         k.write(json.dumps(levels))
-
+        k.write('}]}')
 
 if __name__ == "__main__":
-    main(FILE)
+    main(FILE, SAMPLE_ID)
 
