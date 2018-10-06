@@ -67,13 +67,13 @@ def parse_file(file_path):
     results
     """
 
-    pattern = re.compile(r'\s+')
+    pattern = re.compile(r'\\s+')
 
     # Remove spaces and add tabs since results are not \t separated by default.
     # Adds keys and values to the classifiers_match dictionary
     with open(file_path, 'r') as file_parsed:
         for line in file_parsed:
-            new_line = re.sub(pattern, "\t", line.strip()).split("\t")
+            new_line = re.sub(pattern, "\\t", line.strip()).split("\\t")
             classifier_match[",".join(new_line)] = new_line
 
         classifier_keys = list(classifier_match.keys())
