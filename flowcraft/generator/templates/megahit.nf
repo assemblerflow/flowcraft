@@ -23,12 +23,45 @@ process megahit_{{ pid }} {
 
     output:
     set sample_id, file('*megahit*.fasta') into {{ output_channel }}
+    set sample_id, file('megahit/intermediate_contigs/k*.contigs.fa') into toProcess_{{ pid }}
     {% with task_name="megahit" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
     script:
     template "megahit.py"
+
+}
+
+process megahit_fastg_{{ pid }}{
+
+    // Send POST request to platform
+    {% include "post.txt" ignore missing %}
+
+    tag { sample_id }
+    publishDir 'results/assembly/megahit_{{ pid }}/$sample_id/'
+
+    input:
+    set sample_id, file(kmer_files) from toProcess_{{ pid }}
+
+    output:
+    file "*.fastg"
+    {% with task_name="megahit_fastg" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    """
+    for kmer_file in ${kmer_files};
+    do
+        echo \$kmer_file
+        k=\$(echo \$kmer_file | cut -d '.' -f 1);
+        echo \$k
+        megahit_toolkit contig2fastg \$k \$kmer_file > \$kmer_file'.fastg';
+    done
+
+    """
+
 
 }
 

@@ -155,7 +155,17 @@ class Megahit(Process):
             "container": "flowcraft/megahit",
             "version": "1.1.3-0.1",
             "scratch": "true"
-        }}
+        },
+            "megahit_fastg": {
+                "container": "flowcraft/megahit",
+                "version": "1.1.3-0.1",
+            }
+        }
+
+        self.status_channels = [
+            "megahit",
+            "megahit_fastg"
+        ]
 
 
 class Metaspades(Process):
