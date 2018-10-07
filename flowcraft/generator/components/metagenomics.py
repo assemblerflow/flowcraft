@@ -139,6 +139,12 @@ class Megahit(Process):
                     "'default', megahit will use the default k-mer lengths. "
                     "(default: $params.megahitKmers)"
             },
+            "fastg": {
+                "default": "false",
+                "description":
+                    "Converts megahit intermediate contigs to fastg"
+
+            },
             "clearInput": {
                 "default": "false",
                 "description":

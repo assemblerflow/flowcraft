@@ -23,7 +23,7 @@ process megahit_{{ pid }} {
 
     output:
     set sample_id, file('*megahit*.fasta') into {{ output_channel }}
-    set sample_id, file('megahit/intermediate_contigs/k*.contigs.fa') into toProcess_{{ pid }}
+    set sample_id, file('megahit/intermediate_contigs/k*.contigs.fa') into toValidate_{{ pid }}
     {% with task_name="megahit" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -32,6 +32,12 @@ process megahit_{{ pid }} {
     template "megahit.py"
 
 }
+IN_fastg = Channel.create()
+
+fastg = params.fastg{{ param_id }} ? "true" : "false"
+if (fastg) {
+    toValidate_{{ pid }}.set{IN_fastg}
+}
 
 process megahit_fastg_{{ pid }}{
 
@@ -39,10 +45,10 @@ process megahit_fastg_{{ pid }}{
     {% include "post.txt" ignore missing %}
 
     tag { sample_id }
-    publishDir 'results/assembly/megahit_{{ pid }}/$sample_id/'
+    publishDir "results/assembly/megahit_{{ pid }}/$sample_id", pattern: "*.fastg"
 
     input:
-    set sample_id, file(kmer_files) from toProcess_{{ pid }}
+    set sample_id, file(kmer_files) from IN_fastg
 
     output:
     file "*.fastg"
@@ -59,13 +65,9 @@ process megahit_fastg_{{ pid }}{
         echo \$k
         megahit_toolkit contig2fastg \$k \$kmer_file > \$kmer_file'.fastg';
     done
-
     """
 
 
 }
 
 {{ forks }}
-
-
-
