@@ -50,7 +50,7 @@ if __file__.endswith(".command.sh"):
 def main(sample_id, tsv_file):
 
     with open(".report.json", "w") as k:
-        k.write('{"tsvData":[{"sample":"' + sample_id + '", "value":')
+        k.write('{"tsvData":[{"sample":"' + sample_id + '", "data":')
         k.write(json.dumps(list(csv.reader(open(tsv_file), delimiter='\t'))))
         k.write('}]}')
 
