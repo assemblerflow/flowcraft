@@ -24,6 +24,8 @@ process spades_{{ pid }} {
 
     tag { sample_id }
     publishDir 'results/assembly/spades_{{ pid }}/', pattern: '*_spades*.fasta', mode: 'copy'
+    publishDir "reports/assembly/spades_{{ pid }}/$sample_id", pattern: "*.gfa", mode: "copy"
+    publishDir "reports/assembly/spades_{{ pid }}/$sample_id", pattern: "*.fastg", mode: "copy"
 
     input:
     set sample_id, file(fastq_pair), max_len from {{ input_channel }}.join(SIDE_max_len_{{ pid }})
@@ -33,6 +35,8 @@ process spades_{{ pid }} {
 
     output:
     set sample_id, file('*_spades*.fasta') into {{ output_channel }}
+    file "*.fastg"
+    file "*.gfa"
     {% with task_name="spades" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
