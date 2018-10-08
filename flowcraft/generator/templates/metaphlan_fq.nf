@@ -40,7 +40,7 @@ process report_metaphlan_fq_{{ pid }} {
     tag { sample_id }
 
     input:
-    set sample_id, file(metaphlan) from {{ pid }}
+    set sample_id, file(metaphlan) from intoReport{{ pid }}
 
     output:
     {% with task_name="report_metaphlan_fq" %}
