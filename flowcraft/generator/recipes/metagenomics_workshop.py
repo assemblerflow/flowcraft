@@ -17,6 +17,8 @@ class Metagenomics_workshop(Recipe):
                             "remove_host " \
                             "fastqc_trimmomatic " \
                             "(megahit " \
+                            "assembly_mapping " \
+                            "pilon " \
                             "maxbin2 "\
                             "(metaphlan_fa | " \
                             "abricate | " \
@@ -27,6 +29,8 @@ class Metagenomics_workshop(Recipe):
         # Recipe parameters and directives
         self.directives = {
             "abricate": {
-                "params": {"abricateDatabases": "resfinder"}
+                "params": {
+                    "abricateDatabases": "\"resfinder\""
+                }
             }
         }

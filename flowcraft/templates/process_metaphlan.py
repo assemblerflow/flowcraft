@@ -152,9 +152,9 @@ def get_results(parsed_file, sample_id):
         levels.append(current_level)
 
     with open(".report.json", "w") as k:
-        k.write('{"kronaPlot":[{"sample":"' + sample_id + '", "value":')
+        k.write('{"plotData":[{"sample":"' + sample_id + '", "data": { "kronaPlot":')
         k.write(json.dumps(levels))
-        k.write('}]}')
+        k.write('}}]}')
 
 if __name__ == "__main__":
     main(FILE, SAMPLE_ID)
