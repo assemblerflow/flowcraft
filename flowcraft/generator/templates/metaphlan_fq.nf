@@ -24,11 +24,6 @@ process metaphlan_fq_{{ pid }} {
 
     metaphlan2krona.py -p ${sample_id}_profiled_metagenome.txt -k ${sample_id}_krona.txt
 
-    parse_krona.py ${sample_id}_krona.txt
-
-    json_str="{'kronaPlot':[{'sample':'${sample_id}','value':\$(cat parsed_krona.txt)}]}"
-
-    echo \$json_str > .report.json
     """
 }
 
