@@ -130,6 +130,14 @@ class DengueTyping(Process):
 
         self.link_start = None
 
+        self.params = {
+            "reference": {
+                "default": "false",
+                "description":
+                    "Retrieves the sequence of the closest reference."
+            }
+        }
+
         self.directives = {"dengue_typing": {
             "cpus": 4,
             "memory": "'4GB'",

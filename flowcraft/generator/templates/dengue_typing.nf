@@ -1,3 +1,7 @@
+
+getRef = params.reference ? "true" : "false"
+getRef_{{ pid }} = Channel.value(getRef)
+
 process dengue_typing_{{ pid }} {
 
     // Send POST request to platform
@@ -9,10 +13,11 @@ process dengue_typing_{{ pid }} {
 
     input:
     set sample_id, file(assembly) from {{ input_channel }}
+    val ref from getRef_{{ pid }}
 
     output:
     file "seq_typing*"
-    file "*.fa"
+    file "*.fa" into _ref_seqTyping, optional True
     {% with task_name="dengue_typing" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -27,8 +32,12 @@ process dengue_typing_{{ pid }} {
 
         seq_typing.py assembly --org Dengue Virus -f ${assembly} -o ./ -j $task.cpus -t nucl
 
-        awk 'NR == 2 { print \$4 }' seq_typing.report_types.tab > reference
-        parse_fasta.py -t \$(cat reference)  -f /NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta
+
+        if [ $ref = "cool" ]
+        then
+            awk 'NR == 2 { print \$4 }' seq_typing.report_types.tab > reference
+            parse_fasta.py -t \$(cat reference)  -f /NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta
+        fi
 
         # Add information to dotfiles
         json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"

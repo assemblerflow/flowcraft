@@ -5,6 +5,12 @@ import argparse
 from itertools import groupby
 import os
 
+
+def replace_char(text):
+    for ch in ['/', '`', '*', '{', '}', '[', ']', '(', ')', '#', '+', '-', '.', '!', '$', ':']:
+        text = text.replace(ch, "_")
+    return text
+
 def getSequence(ref, fasta):
 
     entry = (x[1] for x in groupby(fasta, lambda line: line[0] == ">"))
@@ -15,8 +21,9 @@ def getSequence(ref, fasta):
 
         if ref == headerStr.replace('>',''):
             filename = os.path.join(os.getcwd(), ref.replace('/','_').split('|')[0])
-            output_file = open(filename + '.fa', "w+")
-            output_file.write(">" + headerStr + "\\n" + seq + "\\n")
+            fasta_header = replace_char(headerStr)
+            output_file = open(filename + '.fa', "w")
+            output_file.write(">" + fasta_header + "\n" + seq.upper() + "\n")
             output_file.close()
 
 def main():
