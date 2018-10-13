@@ -2,6 +2,15 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+### Components changes
+
+- Added new `disableRR` param in the `spades` component that disables repeat
+resolution
+
+### New components
+
+- Added component `abyss`.
+
 ### Minor/Other changes
 
 - Added removal of duplicate IDs from `reads_download` component input.
@@ -27,6 +36,7 @@ which is particularly useful in very large workflows.
 `mapping_patlas`.
 
 ### New components
+
 - Added component `fast_ani`.
 
 ### Minor/Other changes

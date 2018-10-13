@@ -58,6 +58,11 @@ class Spades(Process):
                     "is only useful to remove temporary files in large "
                     "workflows and prevents nextflow's resume functionality. "
                     "Use with caution."
+            },
+            "disableRR": {
+                "default": "false",
+                "description":
+                    "disables repeat resolution stage of assembling."
             }
         }
 
@@ -177,3 +182,37 @@ class ViralAssembly(Process):
                     "Use with caution."
             }
         }
+
+class Abyss(Process):
+    """ABySS process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.params = {
+            "abyssKmer": {
+                "default": "96",
+                "description":
+                    "kmer size for assembly."
+            }
+        }
+
+        self.directives = {"abyss": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "flowcraft/abyss",
+            "version": "2.1.1",
+            "scratch": "true"
+        }}
