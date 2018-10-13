@@ -97,6 +97,7 @@ process_map = {
         "seq_typing": typing.SeqTyping,
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
+        "bcalm": assembly.Bcalm,
         "spades": assembly.Spades,
         "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,

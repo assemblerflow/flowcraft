@@ -4,6 +4,50 @@ try:
 except ImportError:
     from flowcraft.generator.process import Process
 
+class Bcalm(Process):
+    """Bcalm process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.dependencies = ["integrity_coverage"]
+
+        self.params = {
+            "bcalmKmerSize": {
+                "default": 31,
+                "description":
+                    "size of a kmer"
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+	    }
+        }
+
+        self.directives = {"bcalm": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "quay.io/biocontainers/quast",
+            "version": "2.2.0",
+            "scratch": "true"
+        }}
+
 
 class Spades(Process):
     """Spades process template interface
