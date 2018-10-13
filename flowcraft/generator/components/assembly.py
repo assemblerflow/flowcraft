@@ -201,8 +201,6 @@ class Abyss(Process):
         self.input_type = "fastq"
         self.output_type = "fasta"
 
-        # self.dependencies = ["integrity_coverage"]
-
         self.params = {
             "abyssKmer": {
                 "default": "96",
