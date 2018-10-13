@@ -185,9 +185,8 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear, disable_rr):
         Can be either 'true' or 'false'. If 'true', the input fastq files will
         be removed at the end of the run, IF they are in the working directory
     disable_rr : str
-        Can either be 'true' or 'false'. If 'true', disables repeat resolution 
+        Can either be 'true' or 'false'. If 'true', disables repeat resolution
         stage of assembling
-
     """
 
     logger.info("Starting spades")
