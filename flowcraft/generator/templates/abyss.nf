@@ -1,6 +1,5 @@
 
 IN_abyss_kmer_{{ pid }} = Channel.value(params.abyssKmer{{ param_id }})
-// IN_abyss_name_{{ pid }} = Channel.value(params.abyssName{{ param_id }})
 
 process abyss_{{ pid }} {
     
@@ -13,7 +12,6 @@ process abyss_{{ pid }} {
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
     val kmer from IN_abyss_kmer_{{ pid }}
-    // val name from IN_abyss_name_{{ pid }}
 
     output:
     set sample_id, file('*.fa') into {{ output_channel }}
@@ -23,7 +21,6 @@ process abyss_{{ pid }} {
 
     script:
     "abyss-pe in=\"${fastq_pair[0]} ${fastq_pair[1]}\" k=${kmer} name=${sample_id}"
-    //template "abyss.py"
 }
 
 {{ forks }}
