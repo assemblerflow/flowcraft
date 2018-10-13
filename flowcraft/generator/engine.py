@@ -90,6 +90,7 @@ process_map = {
         "process_spades": ap.ProcessSpades,
         "progressive_mauve":alignment.ProgressiveMauve,
         #"prokka": annotation.Prokka,
+        "quast": ap.Quast,
         "raxml": phylogeny.Raxml,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
