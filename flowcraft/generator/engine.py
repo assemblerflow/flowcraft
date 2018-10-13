@@ -55,6 +55,7 @@ except ImportError:
 
 
 process_map = {
+        "abyss": assembly.Abyss,
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
         "bowtie": mapping.Bowtie,
@@ -101,8 +102,7 @@ process_map = {
         "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
         "true_coverage": readsqc.TrueCoverage,
-        "viral_assembly": assembly.ViralAssembly,
-        "abyss": assembly.Abyss
+        "viral_assembly": assembly.ViralAssembly
 }
 
 """
