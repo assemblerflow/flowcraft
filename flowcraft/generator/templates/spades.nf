@@ -24,8 +24,8 @@ process spades_{{ pid }} {
 
     tag { sample_id }
     publishDir 'results/assembly/spades_{{ pid }}/', pattern: '*_spades*.fasta', mode: 'copy'
-    publishDir "reports/assembly/spades_{{ pid }}/$sample_id", pattern: "*.gfa", mode: "copy"
-    publishDir "reports/assembly/spades_{{ pid }}/$sample_id", pattern: "*.fastg", mode: "copy"
+    publishDir "results/assembly/spades_{{ pid }}/$sample_id", pattern: "*.gfa", mode: "copy"
+    publishDir "results/assembly/spades_{{ pid }}/$sample_id", pattern: "*.fastg", mode: "copy"
 
     input:
     set sample_id, file(fastq_pair), max_len from {{ input_channel }}.join(SIDE_max_len_{{ pid }})
