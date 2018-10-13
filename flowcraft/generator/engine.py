@@ -102,7 +102,8 @@ process_map = {
         "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
         "true_coverage": readsqc.TrueCoverage,
-        "viral_assembly": assembly.ViralAssembly
+        "viral_assembly": assembly.ViralAssembly,
+        "abyss": assembly.Abyss
 }
 
 """
