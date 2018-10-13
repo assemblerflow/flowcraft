@@ -58,6 +58,11 @@ class Spades(Process):
                     "is only useful to remove temporary files in large "
                     "workflows and prevents nextflow's resume functionality. "
                     "Use with caution."
+            },
+            "disableRR": {
+                "default": "false",
+                "description":
+                    "disables repeat resolution stage of assembling."
             }
         }
 
