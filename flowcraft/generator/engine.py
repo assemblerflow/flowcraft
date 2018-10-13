@@ -103,7 +103,6 @@ process_map = {
         "trimmomatic": readsqc.Trimmomatic,
         "true_coverage": readsqc.TrueCoverage,
         "viral_assembly": assembly.ViralAssembly,
-        "abyss": assembly.Abyss
 }
 
 """
