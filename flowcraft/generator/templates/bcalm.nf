@@ -11,6 +11,7 @@ process bcalm_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { sample_id }
+    publishDir "reports/assembly/quast_{{pid}}/$sample_id"
 
     input:
     set sample_id, file(fastq) from {{input_channel}}
