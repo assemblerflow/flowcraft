@@ -57,6 +57,7 @@ except ImportError:
 process_map = {
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
+        "bcalm": assembly.Bcalm,
         "bowtie": mapping.Bowtie,
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
@@ -97,7 +98,6 @@ process_map = {
         "seq_typing": typing.SeqTyping,
         "sistr": typing.Sistr,
         "skesa": assembly.Skesa,
-        "bcalm": assembly.Bcalm,
         "spades": assembly.Spades,
         "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
