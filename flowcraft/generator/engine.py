@@ -58,6 +58,7 @@ process_map = {
         "abyss": assembly.Abyss,
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
+        "bandage": ap.Bandage,
         "bowtie": mapping.Bowtie,
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
