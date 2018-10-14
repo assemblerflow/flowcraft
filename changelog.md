@@ -17,6 +17,7 @@ which is particularly useful in very large workflows.
 
 ### New components
 - Added component `fast_ani`.
+- Added component `bcalm`.
 
 ### Minor/Other changes
 
