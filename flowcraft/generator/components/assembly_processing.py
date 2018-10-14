@@ -230,6 +230,37 @@ class Pilon(Process):
             }
         }
 
+class Bandage(Process):
+    """Visualize the assembly using Bandage
+
+    This process is set with:
+
+        - ``input_type``: assembly
+        - ``output_type``: none
+        - ``ptype``: post_assembly
+
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = None
+
+        self.params = {
+            "reference": {
+                "default": "null",
+                "description": "Align the assembly to this reference genome using BLAST"
+            },
+        }
+
+        self.directives = {
+            "bandage": {
+                "container": "flowcraft/bandage",
+                "version": "0.8.1"
+            }
+        }
+
 class Quast(Process):
     """Assess assembly quality using QUAST
 
