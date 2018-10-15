@@ -1,4 +1,4 @@
-import flowcraft.templates.mapping2json as templates_fc
+import flowcraft.templates.mapping2json as mapping2json
 
 depth_dict_coverage = {
     "ACC1": {
@@ -32,7 +32,7 @@ plasmid_length = {
 
 
 def test_depth_file_reader():
-    perc_bases_cov, dict_cov = templates_fc.generate_jsons(depth_dict_coverage,
+    perc_bases_cov, dict_cov = mapping2json.generate_jsons(depth_dict_coverage,
                                                            plasmid_length, 0.9)
 
     # asserts if all the returned values are the expected ones
@@ -44,4 +44,3 @@ def test_depth_file_reader():
             "values": [20, 30, 50, 40, 30, 20, 20, 40, 30, 20]
         }}
     )
-
