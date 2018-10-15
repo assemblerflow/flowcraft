@@ -2,6 +2,13 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+### New features
+
+- Added new `recipe` system to flowcraft along with 6 starting recipes.
+Recipes are pre-made and curated pipelines that address specific questions.
+To create a recipe, the `-r <recipe_name>` can be used. To list available
+recipes, the `--recipe-list` and `--recipe-list-short` options were added. 
+
 ### Components changes
 
 - Added new `disableRR` param in the `spades` component that disables repeat

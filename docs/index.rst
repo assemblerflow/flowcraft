@@ -44,6 +44,7 @@ A NextFlow pipeline assembler for genomics.
    dev/general_orientation
    dev/create_process
    dev/create_template
+   dev/create_recipe
    dev/containers
    dev/process_dotfiles
    dev/pipeline_reporting

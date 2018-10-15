@@ -22,7 +22,7 @@ class SeqTyping(Process):
             "cpus": 4,
             "memory": "'4GB'",
             "container": "flowcraft/seq_typing",
-            "version": "0.1.0-1"
+            "version": "2.0-1"
         }}
 
         self.params = {
@@ -141,22 +141,19 @@ class DengueTyping(Process):
 
         self.link_start = None
 
+        self.params = {
+            "reference": {
+                "default": "false",
+                "description":
+                    "Retrieves the sequence of the closest reference."
+            }
+        }
+
         self.directives = {"dengue_typing": {
             "cpus": 4,
             "memory": "'4GB'",
-            "container": "flowcraft/dengue_typing",
-            "version": "v1.0-1"
+            "container": "flowcraft/seq_typing",
+            "version": "2.0-1"
         }}
 
-        self.params = {
-            "BD_sequence_file": {
-                "default": "'/dengue_DB/blast_db/GenotypesDENV_14-05-18.problematic_sequences_corrected.fasta.corrected.fasta.iupac_removed.fasta'",
-                "description":
-                    "Path to the DB sequence file. If Blast DB was already"
-                    "produced only provide the file that doesn't end with '.n*'."
-                    "If no blast DB is found for the DB sequence file, one will"
-                    "be created. If more than one Blast DB file is passed, a type"
-                    "for each file will be determined."
-            }
-        }
 
