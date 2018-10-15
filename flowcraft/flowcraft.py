@@ -130,7 +130,7 @@ def get_args(args=None):
         help="Specify the inspection run mode."
     )
     inspect_parser.add_argument(
-        "-u", "--url", dest="url", default="http://192.92.149.169:80/",
+        "-u", "--url", dest="url", default="http://www.flowcraft.live:80/",
         help="Specify the URL to where the data should be broadcast"
     )
     inspect_parser.add_argument(
@@ -148,7 +148,7 @@ def get_args(args=None):
         help="Specify the path to the pipeline report JSON file."
     )
     reports_parser.add_argument(
-        "-u", "--url", dest="url", default="http://192.92.149.169:80/",
+        "-u", "--url", dest="url", default="http://www.flowcraft.live:80/",
         help="Specify the URL to where the data should be broadcast"
     )
     reports_parser.add_argument(

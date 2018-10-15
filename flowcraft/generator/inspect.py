@@ -196,7 +196,7 @@ class NextflowInspector:
         """
 
         if not ip_addr:
-            self.app_address = "http://192.92.149.169:80/"
+            self.app_address = "http://www.flowcraft.live:80/"
         else:
             self.app_address = ip_addr
             """

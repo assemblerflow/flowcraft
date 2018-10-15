@@ -393,7 +393,7 @@ Local visualization
 :::::::::::::::::::
 
 The FlowCraft report JSON file can also be visualized locally by drag and dropping
-it into the FlowCraft web application page, currently hosted at http://192.92.149.169/reports
+it into the FlowCraft web application page, currently hosted at http://www.flowcraft.live/reports
 
 Offline visualization
 :::::::::::::::::::::
