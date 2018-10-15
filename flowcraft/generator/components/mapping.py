@@ -32,6 +32,14 @@ class Bowtie(Process):
                 "default": "null",
                 "description": "Specifies the reference indexes to be provided "
                                "to bowtie2."
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 
@@ -55,8 +63,10 @@ class Bowtie(Process):
             "report_bowtie"
         ]
 
+
 class Retrieve_mapped(Process):
-    """Samtools process to  to align short paired-end sequencing reads to long reference sequences
+    """Samtools process to  to align short paired-end sequencing reads to
+    long reference sequences
 
         This process is set with:
 
@@ -74,6 +84,14 @@ class Retrieve_mapped(Process):
         self.output_type = "fastq"
 
         self.params = {
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+            }
         }
 
         self.dependencies = ["bowtie"]

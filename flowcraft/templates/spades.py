@@ -85,6 +85,7 @@ if __file__.endswith(".command.sh"):
     MAX_LEN = int('$max_len'.strip())
     KMERS = '$kmers'.strip()
     CLEAR = '$clear'
+    DISABLE_RR = '$disable_rr'
     OPTS = [x.strip() for x in '$opts'.strip("[]").split(",")]
     CLEAR = '$clear'
     logger.debug("Running {} with parameters:".format(
@@ -95,6 +96,7 @@ if __file__.endswith(".command.sh"):
     logger.debug("KMERS: {}".format(KMERS))
     logger.debug("OPTS: {}".format(OPTS))
     logger.debug("CLEAR: {}".format(CLEAR))
+    logger.debug("DISABLE_RR: {}".format(DISABLE_RR))
 
 
 def set_kmers(kmer_opt, max_read_len):
@@ -163,7 +165,7 @@ def clean_up(fastq):
 
 
 @MainWrapper
-def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
+def main(sample_id, fastq_pair, max_len, kmer, opts, clear, disable_rr):
     """Main executor of the spades template.
 
     Parameters
@@ -182,7 +184,9 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
     clear : str
         Can be either 'true' or 'false'. If 'true', the input fastq files will
         be removed at the end of the run, IF they are in the working directory
-
+    disable_rr : str
+        Can either be 'true' or 'false'. If 'true', disables repeat resolution 
+        stage of assembling
     """
 
     logger.info("Starting spades")
@@ -216,6 +220,10 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
         "-2",
         fastq_pair[1]
     ]
+
+    # Disable RR?
+    if disable_rr == 'true':
+        cli += ['--disable-rr']
 
     logger.debug("Running SPAdes subprocess with command: {}".format(cli))
 
@@ -258,10 +266,9 @@ def main(sample_id, fastq_pair, max_len, kmer, opts, clear):
 
     # Remove input fastq files when clear option is specified.
     # Only remove temporary input when the expected output exists.
-    if clear == "true" and os.path.exists("contigs.fasta"):
+    if clear == "true" and os.path.exists(assembly_file):
         clean_up(fastq_pair)
 
 
 if __name__ == '__main__':
-
-    main(SAMPLE_ID, FASTQ_PAIR, MAX_LEN, KMERS, OPTS, CLEAR)
+    main(SAMPLE_ID, FASTQ_PAIR, MAX_LEN, KMERS, OPTS, CLEAR, DISABLE_RR)

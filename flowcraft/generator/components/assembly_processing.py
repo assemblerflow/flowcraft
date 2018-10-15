@@ -204,6 +204,17 @@ class Pilon(Process):
         self.link_end.append({"link": "SIDE_BpCoverage",
                               "alias": "SIDE_BpCoverage"})
 
+        self.params = {
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+            }
+        }
+
         self.directives = {
             "pilon": {
                 "cpus": 4,
@@ -216,5 +227,71 @@ class Pilon(Process):
                 "memory": "{ 7.GB * task.attempt }",
                 "container": "flowcraft/pilon",
                 "version": "1.22.0-1"
+            }
+        }
+
+class Bandage(Process):
+    """Visualize the assembly using Bandage
+
+    This process is set with:
+
+        - ``input_type``: assembly
+        - ``output_type``: none
+        - ``ptype``: post_assembly
+
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = None
+
+        self.params = {
+            "reference": {
+                "default": "null",
+                "description": "Align the assembly to this reference genome using BLAST"
+            },
+        }
+
+        self.directives = {
+            "bandage": {
+                "container": "flowcraft/bandage",
+                "version": "0.8.1"
+            }
+        }
+
+class Quast(Process):
+    """Assess assembly quality using QUAST
+
+    This process is set with:
+
+        - ``input_type``: assembly
+        - ``output_type``: tsv
+        - ``ptype``: post_assembly
+
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "tsv"
+
+        self.params = {
+            "reference": {
+                "default": "null",
+                "description": "Compare the assembly to this reference genome"
+            },
+            "genomeSizeBp": {
+                "default": "null",
+                "description": "Expected genome size (bp)"
+            },
+        }
+
+        self.directives = {
+            "quast": {
+                "container": "quay.io/biocontainers/quast",
+                "version": "5.0.0--py27pl526ha92aebf_1"
             }
         }

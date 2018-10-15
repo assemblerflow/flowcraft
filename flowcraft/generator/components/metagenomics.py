@@ -4,6 +4,7 @@ try:
 except ImportError:
     from flowcraft.generator.process import Process
 
+
 class Kraken(Process):
     """kraken process template interface
 
@@ -80,6 +81,14 @@ class MaxBin2(Process):
                 "default": 0.9,
                 "description": "probability threshold for EM final classification."
                                "Default: 0.9"
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 
@@ -129,6 +138,20 @@ class Megahit(Process):
                     "from the maximum read length of each assembly. If "
                     "'default', megahit will use the default k-mer lengths. "
                     "(default: $params.megahitKmers)"
+            },
+            "fastg": {
+                "default": "false",
+                "description":
+                    "Converts megahit intermediate contigs to fastg"
+
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 
@@ -138,7 +161,17 @@ class Megahit(Process):
             "container": "flowcraft/megahit",
             "version": "1.1.3-0.1",
             "scratch": "true"
-        }}
+        },
+            "megahit_fastg": {
+                "container": "flowcraft/megahit",
+                "version": "1.1.3-0.1",
+            }
+        }
+
+        self.status_channels = [
+            "megahit",
+            "megahit_fastg"
+        ]
 
 
 class Metaspades(Process):
@@ -173,6 +206,14 @@ class Metaspades(Process):
                     "from the maximum read length of each assembly. If "
                     "'default', metaSPAdes will use the default k-mer lengths. "
                     "(default: $params.metaspadesKmers)"
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 
@@ -245,6 +286,14 @@ class RemoveHost(Process):
                 "default": "'/index_hg19/hg19'",
                 "description": "Specifies the reference indexes to be provided "
                                "to bowtie2."
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
             }
         }
 

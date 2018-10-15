@@ -107,6 +107,12 @@ def get_args(args=None):
                          "components (via -t option) in JSON format to stdout. "
                          "No pipeline will be generated with this option."
     )
+    build_parser.add_argument(
+        "--export-directives", dest="export_directives", action="store_const",
+        const=True, help="Only export the directives for the provided "
+                         "components (via -t option) in JSON format to stdout. "
+                         "No pipeline will be generated with this option."
+    )
 
     # GENERAL OPTIONS
     parser.add_argument(
@@ -134,7 +140,7 @@ def get_args(args=None):
         help="Specify the inspection run mode."
     )
     inspect_parser.add_argument(
-        "-u", "--url", dest="url", default="http://192.92.149.169:80/",
+        "-u", "--url", dest="url", default="http://www.flowcraft.live:80/",
         help="Specify the URL to where the data should be broadcast"
     )
     inspect_parser.add_argument(
@@ -152,7 +158,7 @@ def get_args(args=None):
         help="Specify the path to the pipeline report JSON file."
     )
     reports_parser.add_argument(
-        "-u", "--url", dest="url", default="http://192.92.149.169:80/",
+        "-u", "--url", dest="url", default="http://www.flowcraft.live:80/",
         help="Specify the URL to where the data should be broadcast"
     )
     reports_parser.add_argument(
@@ -187,7 +193,7 @@ def validate_build_arguments(args):
 
     # Skill all checks when exporting parameters AND providing at least one
     # component
-    if args.export_params:
+    if args.export_params or args.export_directives:
         # Check if components provided
         if not args.tasks:
             logger.error(colored_print(
@@ -278,7 +284,7 @@ def build(args):
 
     # Disable standard logging for stdout when the following modes are
     #  executed:
-    if args.export_params:
+    if args.export_params or args.export_directives:
         logger.setLevel(logging.ERROR)
 
     if args.recipe_list_short:
@@ -347,6 +353,9 @@ def build(args):
 
     if args.export_params:
         nfg.export_params()
+        sys.exit(0)
+    elif args.export_directives:
+        nfg.export_directives()
         sys.exit(0)
     else:
         # building the actual pipeline nf file

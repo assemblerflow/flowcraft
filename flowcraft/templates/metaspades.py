@@ -40,6 +40,7 @@ __build__ = "16012018"
 __template__ = "metaspades-nf"
 
 import os
+import re
 import subprocess
 
 from subprocess import PIPE
@@ -74,12 +75,33 @@ if __file__.endswith(".command.sh"):
     FASTQ_PAIR = '$fastq_pair'.split()
     MAX_LEN = int('$max_len'.strip())
     KMERS = '$kmers'.strip()
+    CLEAR = '$clear'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))
     logger.debug("FASTQ_PAIR: {}".format(FASTQ_PAIR))
     logger.debug("MAX_LEN: {}".format(MAX_LEN))
     logger.debug("KMERS: {}".format(KMERS))
+    logger.debug("CLEAR: {}".format(CLEAR))
+
+
+def clean_up(fastq):
+    """
+    Cleans the temporary fastq files. If they are symlinks, the link
+    source is removed
+
+    Parameters
+    ----------
+    fastq : list
+        List of fastq files.
+    """
+
+    for fq in fastq:
+        # Get real path of fastq files, following symlinks
+        rp = os.path.realpath(fq)
+        logger.debug("Removing temporary fastq file path: {}".format(rp))
+        if re.match(".*/work/.{2}/.{30}/.*", rp):
+            os.remove(rp)
 
 
 def set_kmers(kmer_opt, max_read_len):
@@ -129,7 +151,7 @@ def set_kmers(kmer_opt, max_read_len):
 
 
 @MainWrapper
-def main(sample_id, fastq_pair, max_len, kmer):
+def main(sample_id, fastq_pair, max_len, kmer, clear):
     """Main executor of the spades template.
 
     Parameters
@@ -211,7 +233,12 @@ def main(sample_id, fastq_pair, max_len, kmer):
     os.rename("contigs.fasta", assembly_file)
     logger.info("Setting main assembly file to: {}".format(assembly_file))
 
+    # Remove input fastq files when clear option is specified.
+    # Only remove temporary input when the expected output exists.
+    if clear == "true" and os.path.exists(assembly_file):
+        clean_up(fastq_pair)
+
 
 if __name__ == '__main__':
 
-    main(SAMPLE_ID, FASTQ_PAIR, MAX_LEN, KMERS)
+    main(SAMPLE_ID, FASTQ_PAIR, MAX_LEN, KMERS, CLEAR)

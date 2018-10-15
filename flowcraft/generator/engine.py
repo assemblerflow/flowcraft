@@ -55,8 +55,10 @@ except ImportError:
 
 
 process_map = {
+        "abyss": assembly.Abyss,
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
+        "bandage": ap.Bandage,
         "bowtie": mapping.Bowtie,
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
@@ -68,6 +70,7 @@ process_map = {
         "filter_poly": readsqc.FilterPoly,
         "integrity_coverage": readsqc.IntegrityCoverage,
         "fasterq_dump": downloads.FasterqDump,
+        "fast_ani": distest.FastAniMatrix,
         "kraken": meta.Kraken,
         "mafft": alignment.Mafft,
         "mapping_patlas": mapping_patlas.PatlasMapping,
@@ -89,6 +92,7 @@ process_map = {
         "process_spades": ap.ProcessSpades,
         "progressive_mauve":alignment.ProgressiveMauve,
         #"prokka": annotation.Prokka,
+        "quast": ap.Quast,
         "raxml": phylogeny.Raxml,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
@@ -100,7 +104,7 @@ process_map = {
         "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
         "true_coverage": readsqc.TrueCoverage,
-        "viral_assembly": assembly.ViralAssembly
+        "viral_assembly": assembly.ViralAssembly,
 }
 
 """
@@ -1504,6 +1508,19 @@ class NextflowGenerator:
 
         # Flush params json to stdout
         sys.stdout.write(json.dumps(params_json))
+
+    def export_directives(self):
+        """Export pipeline directives as a JSON to stdout
+        """
+
+        directives_json = {}
+
+        # Skip first init process
+        for p in self.processes[1:]:
+            directives_json[p.template] = p.directives
+
+        # Flush params json to stdout
+        sys.stdout.write(json.dumps(directives_json))
 
     def build(self):
         """Main pipeline builder

@@ -1,5 +1,5 @@
 
-clear = params.clearAtCheckpoint ? "true" : "false"
+clear = params.clearInput{{ param_id }} ? "true" : "false"
 checkpointClear_{{ pid }} = Channel.value(clear)
 
 process skesa_{{ pid }} {

@@ -392,7 +392,9 @@ def main(sample_id, fastq_pair, trim_range, trim_opts, phred, adapters_file,
 
     trimmomatic_log("{}_trimlog.txt".format(sample_id), sample_id)
 
-    clean_up(fastq_pair, clear)
+    if p.returncode == 0 and os.path.exists("{}_1_trim.fastq.gz".format(
+            SAMPLE_ID)):
+        clean_up(fastq_pair, clear)
 
     # Check if trimmomatic ran successfully. If not, write the error message
     # to the status channel and exit.

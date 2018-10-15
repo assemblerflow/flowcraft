@@ -58,6 +58,7 @@ if __file__.endswith(".command.sh"):
     GSIZE = float('$gsize'.strip())
     DEPTH = float('$depth'.strip())
     CLEAR = '$clear'
+    SEED = '$seed'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))
@@ -65,6 +66,7 @@ if __file__.endswith(".command.sh"):
     logger.debug("GENOME_SIZE: {}".format(GSIZE))
     logger.debug("DEPTH: {}".format(DEPTH))
     logger.debug("CLEAR: {}".format(CLEAR))
+    logger.debug("SEED: {}".format(SEED))
 
 
 def __get_version_spades():
@@ -94,7 +96,7 @@ def __get_version_spades():
 
 
 @MainWrapper
-def main(sample_id, fastq_pair, genome_size, depth, clear):
+def main(sample_id, fastq_pair, genome_size, depth, clear, seed):
 
     genome_size = genome_size
     target_depth = depth
@@ -118,9 +120,18 @@ def main(sample_id, fastq_pair, genome_size, depth, clear):
     ratio = target_depth/estimated_coverage
     logger.debug("Estimated ration: {}".format(ratio))
 
+    # if seed param is specified then use it, otherwise use the default -s100
+    if seed:
+        # through flowcraft everything should pass through here
+        parsed_seed = "-s{}".format(str(seed))
+        logger.info("Using seed parameter: {}.".format(parsed_seed))
+    else:
+        logger.debug("Seed parameter not specified. Using default value -s100.")
+        parsed_seed = "-s100"
+
     if ratio < 1:
         # print ("Writing R1.fq.gz")
-        ps = subprocess.Popen(('seqtk', 'sample', '-s100', p1, str(ratio)),
+        ps = subprocess.Popen(('seqtk', 'sample', parsed_seed, p1, str(ratio)),
                               stdout=subprocess.PIPE)
         with open('{}_ss.fq.gz'.format(bn1), 'w') as outfile:
             subprocess.Popen(('gzip', '--fast', '-c'),
@@ -128,7 +139,7 @@ def main(sample_id, fastq_pair, genome_size, depth, clear):
         ps.wait()
 
         # print ("Writing R2.fq.gz")
-        ps = subprocess.Popen(('seqtk', 'sample', '-s100', p2, str(ratio)),
+        ps = subprocess.Popen(('seqtk', 'sample', parsed_seed, p2, str(ratio)),
                               stdout=subprocess.PIPE)
         with open('{}_ss.fq.gz'.format(bn2), 'w') as outfile:
             subprocess.Popen(('gzip', '--fast', '-c'),
@@ -166,4 +177,4 @@ def main(sample_id, fastq_pair, genome_size, depth, clear):
 
 
 if __name__ == "__main__":
-        main(SAMPLE_ID, FASTQ_PAIR, GSIZE, DEPTH, CLEAR)
+        main(SAMPLE_ID, FASTQ_PAIR, GSIZE, DEPTH, CLEAR, SEED)

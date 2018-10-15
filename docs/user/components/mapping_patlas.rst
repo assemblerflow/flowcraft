@@ -60,10 +60,10 @@ Default directives
 
 - ``mappingBowtie``:
     - ``container``: flowcraft/mapping-patlas
-    - ``version``: 1.4.1
+    - ``version``: 1.6.0-1
 - ``samtoolsView``:
     - ``container``: flowcraft/mapping-patlas
-    - ``version``: 1.4.1
+    - ``version``: 1.6.0-1
 - ``jsonDumpingMapping``:
     - ``container``: flowcraft/mapping-patlas
-    - ``version``: 1.4.1
+    - ``version``: 1.6.0-1

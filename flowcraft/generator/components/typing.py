@@ -106,6 +106,17 @@ class Momps(Process):
 
         self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
 
+        self.params = {
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+            }
+        }
+
         self.directives = {
             "momps": {
                 "cpus": 3,

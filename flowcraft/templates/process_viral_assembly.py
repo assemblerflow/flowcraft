@@ -486,6 +486,11 @@ def main(sample_id, assembly_file, minsize):
         assembly_len = assembly_obj.get_assembly_length()
         logger.debug("Checking assembly length: {}".format(assembly_len))
 
+        if assembly_obj.nORFs < 1:
+            warn_msg = "No complete ORFs found."
+            warn_fh.write(warn_msg)
+            fails = warn_msg
+
         if assembly_len < t_80:
 
             logger.warning("Assembly size ({}) smaller than the minimum "

@@ -1,6 +1,7 @@
 import re
 import os
 import sys
+import time
 import curses
 import signal
 import locale
@@ -199,7 +200,7 @@ class NextflowInspector:
         """
 
         if not ip_addr:
-            self.app_address = "http://192.92.149.169:80/"
+            self.app_address = "http://www.flowcraft.live:80/"
         else:
             self.app_address = ip_addr
             """
@@ -341,7 +342,10 @@ class NextflowInspector:
         if s.endswith("ms"):
             return float(s.rstrip("ms")) / 1000
 
-        fields = list(map(float, re.split("[hms]", s)[:-1]))
+        fields = list(map(float, re.split("[dhms]", s)[:-1]))
+        if len(fields) == 4:
+            return fields[0] * 24 * 3600 + fields[1] * 3600 + fields[2] * 60 +\
+                fields[3]
         if len(fields) == 3:
             return fields[0] * 3600 + fields[1] * 60 + fields[2]
         elif len(fields) == 2:
@@ -1382,6 +1386,13 @@ class NextflowInspector:
         general_details = self._prepare_general_details()
         status_data = self._prepare_run_status_data()
 
+        # Add current year to start and stop dates
+        time_start = "{} {}".format(time.strftime("%Y"), self.time_start)
+        time_stop = "{} {}".format(time.strftime("%Y"), self.time_stop) \
+            if self.time_stop else "-"
+        # Get enconding for proper parsing of time
+        time_locale = locale.getlocale()[0]
+
         status_json = {
             "generalOverview": overview_data,
             "generalDetails": general_details,
@@ -1390,8 +1401,9 @@ class NextflowInspector:
             "processInfo": self._convert_process_dict(),
             "processTags": self.process_tags,
             "runStatus": status_data,
-            "timeStart": str(self.time_start),
-            "timeStop": str(self.time_stop) if self.time_stop else "-",
+            "timeStart": time_start,
+            "timeStop": time_stop,
+            "timeLocale": time_locale,
             "processes": list(self.processes)
         }
 
