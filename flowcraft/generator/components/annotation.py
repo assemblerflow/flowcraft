@@ -34,7 +34,7 @@ class Abricate(Process):
         self.params = {
             "abricateDatabases": {
                 "default": '["resfinder", "card", "vfdb", "plasmidfinder", '
-                           '"virulencefinder"]',
+                           '"virulencefinder", "bacmet"]',
                 "description": "Specify the databases for abricate."
             },
             "abricateDataDir": {
@@ -59,11 +59,11 @@ class Abricate(Process):
         self.directives = {
             "abricate": {
                 "container": "flowcraft/abricate",
-                "version": "0.8.0-1"
+                "version": "0.8.0-3"
             },
             "process_abricate": {
                 "container": "flowcraft/abricate",
-                "version": "0.8.0-1"
+                "version": "0.8.0-3"
             }
         }
 
