@@ -16,6 +16,7 @@ def not_raises(exception, msg):
     except exception:
         raise pytest.fail(msg)
 
+
 def test_empty_tasks():
     pipeline_strs = [
         "   ",
