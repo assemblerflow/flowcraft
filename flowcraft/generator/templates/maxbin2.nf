@@ -72,7 +72,7 @@ chanB.map{ it -> [it[2].toString().tokenize('/').last().tokenize('.')[0..-2].joi
     .map{it -> [it[1].toString().tokenize('/').last().tokenize('.')[0..-2].join('.'),it[1]]}
     .into(OUT_binned)
 
-OUT_binned.mix(OUT_unbinned).into{ {{ output_channel }} }
+OUT_binned.mix(OUT_unbinned).set{ {{ output_channel }} }
 
 
 {{ forks }}
