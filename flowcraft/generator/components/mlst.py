@@ -162,7 +162,8 @@ class MetaMlst(Process):
         self.directives = {"metamlst": {
             "container": "flowcraft/metamlst",
             "version": "1.1-1",
-            "memory": "{4.Gb*task.attempt}"
+            "memory": "{6.Gb*task.attempt}",
+            "cpus": "4"
             }
         }
 
