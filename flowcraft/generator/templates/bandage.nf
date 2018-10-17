@@ -10,7 +10,8 @@ if (params.reference{{param_id}} != null) {
         file reference from Channel.fromPath(params.reference{{param_id}})
 
         output:
-        file "*.png *.svg"
+        file "*.png"
+        file "*.svg"
         {% with task_name="bandage" %}
         {%- include "compiler_channels.txt" ignore missing -%}
         {% endwith %}
@@ -34,7 +35,8 @@ if (params.reference{{param_id}} != null) {
         set sample_id, file(assembly) from {{input_channel}}
 
         output:
-        file "*.png *.svg"
+        file "*.png"
+        file "*.svg"
         {% with task_name="bandage" %}
         {%- include "compiler_channels.txt" ignore missing -%}
         {% endwith %}
