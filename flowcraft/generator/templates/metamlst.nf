@@ -24,7 +24,7 @@ process metamlst_{{ pid }} {
 
     script:
     """
-    bowtie2 --very-sensitive-local -a --no-unal -x ${metamlstDB_index} -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} | samtools view -bS - > ${sample_id}.bam
+    bowtie2 --very-sensitive-local -a --no-unal -x ${metamlstDB_index} -p $task.cpus -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} | samtools view -bS - > ${sample_id}.bam
 
     metamlst.py -d ${metamlstDB} ${sample_id}.bam
 
