@@ -11,6 +11,8 @@ process maxbin2_{{ pid }} {
 
     publishDir "results/maxbin2_{{ pid }}/${sample_id}/"
 
+    errorStrategy { 'ignore' }
+
     input:
     set sample_id, file(assembly), file(fastq) from {{ input_channel }}.join(_LAST_fastq_{{ pid }})
     val minContigLenght from IN_min_contig_lenght_{{ pid }}
