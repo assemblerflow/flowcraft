@@ -5,7 +5,7 @@ process metaphlan_fa_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir "results/annotation/metaphlan/", pattern: "*.txt"
+    publishDir "results/taxonomy/metaphlan/", pattern: "*.txt"
 
     input:
     set sample_id, file(fasta) from {{ input_channel }}
