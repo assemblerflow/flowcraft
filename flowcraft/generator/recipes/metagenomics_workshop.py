@@ -30,7 +30,8 @@ class Metagenomics_workshop(Recipe):
         self.directives = {
             "abricate": {
                 "params": {
-                    "abricateDatabases": "\"resfinder\""
+                    "abricateDatabases": "\"resfinder\"",
+                    "abricateMinCov": '60'
                 }
             }
         }
