@@ -433,3 +433,40 @@ class Krona(Process):
         self.status_channels = [
             "krona"
         ]
+
+class Kraken_fa(Process):
+    """kraken process template interface
+
+            This process is set with:
+
+                - ``input_type``: fasta
+                - ``output_type``: txt
+                - ``ptype``: taxonomic classification
+    """
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "txt"
+
+        self.params = {
+            "krakenDB": {
+                "default": "'minikraken_20171013_4GB'",
+                "description": "Specifies kraken database."
+            }
+        }
+
+        self.directives = {
+            "kraken_fa": {
+                "container": "flowcraft/kraken",
+                "version": "1.0-0.1",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 3
+            }
+        }
+
+        self.status_channels = [
+            "kraken_fa",
+            "process_kraken_fa"
+        ]
