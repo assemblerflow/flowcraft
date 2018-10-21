@@ -20,8 +20,7 @@ class Metagenomics_workshop(Recipe):
                             "assembly_mapping " \
                             "pilon " \
                             "maxbin2 "\
-                            "(metaphlan_fa | " \
-                            "abricate | " \
+                            "(abricate | " \
                             "mlst ) " \
                             "| metaphlan_fq | " \
                             "metamlst )"
