@@ -16,7 +16,9 @@ resolution
 
 ### New components
 
-- Added components `abyss`, `bandage`, and `unicycler.
+- Added component `abyss`.
+- Added component `bandage`.
+- Added component `unicycler`.
 
 ### Minor/Other changes
 
