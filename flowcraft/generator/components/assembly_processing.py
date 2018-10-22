@@ -247,6 +247,8 @@ class Bandage(Process):
         self.input_type = "fasta"
         self.output_type = None
 
+        self.link_end.append({"link": "gfa1", "alias": "gfa1"})
+
         self.params = {
             "reference": {
                 "default": "null",

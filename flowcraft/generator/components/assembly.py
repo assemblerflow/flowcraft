@@ -27,6 +27,7 @@ class Spades(Process):
         self.output_type = "fasta"
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
+        self.link_start.append("gfa1")
 
         self.dependencies = ["integrity_coverage"]
 
@@ -200,6 +201,7 @@ class Abyss(Process):
 
         self.input_type = "fastq"
         self.output_type = "fasta"
+        self.link_start.append("gfa1")
 
         self.params = {
             "abyssKmer": {
