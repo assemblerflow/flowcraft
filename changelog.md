@@ -99,6 +99,7 @@ resolution
 
 - Added component `abyss`.
 - Added component `bandage`.
+- Added component `porechop`.
 - Added component `unicycler`.
 - Added component `prokka`.
 - Added component `bcalm`.
