@@ -281,7 +281,16 @@ class Unicycler(Process):
 
         self.input_type = "fastq"
         self.output_type = "fasta"
+
+        self.link_end.append({"link": "long_reads", "alias": "long_reads"})
         self.link_start.append("gfa1")
+
+        self.params = {
+            "long_reads": {
+                "default": "null",
+                "description": "FASTQ or FASTA file of long reads"
+            },
+        }
 
         self.directives = {"unicycler": {
             "cpus": 4,

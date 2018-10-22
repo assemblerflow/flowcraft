@@ -93,6 +93,7 @@ resolution
   or GFA from a secondary channel.
 - Updated skesa to version 2.3.0.
 - Updated mash based components for the latest version - 1.6.0-1.
+- The new `unicycler` component can accept long reads from a secondary channel.
 
 ### New components
 
