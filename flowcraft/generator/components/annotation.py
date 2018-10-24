@@ -134,10 +134,27 @@ class Prokka(Process):
         self.link_end.append({"link": "MAIN_assembly",
                               "alias": "MAIN_assembly"})
 
+        self.params = {
+            "centre": {
+                "default": "'UMMI'",
+                "description": "sequencing centre ID"
+            },
+            "kingdom": {
+                "default": "'Bacteria'",
+                "description": "Annotation mode: Archaea|Bacteria|Mitochondria"
+                               "|Viruses (default 'Bacteria')"
+            },
+            "genus": {
+                "default": "false",
+                "description": "Genus name (default 'Genus'). This also adds"
+                               "the --usegenus flag to prokka"
+            },
+        }
+
         self.directives = {
             "prokka": {
                 "cpus": 2,
-                "container": "ummidock/prokka-nf",
-                "version": "1.12.0-2"
+                "container": "ummidock/prokka",
+                "version": "1.12"
             }
         }

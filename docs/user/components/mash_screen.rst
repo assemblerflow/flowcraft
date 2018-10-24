@@ -1,11 +1,11 @@
 mash_screen
-==============
+===========
 
 Purpose
 -------
 
 This component performes mash screen to find plasmids
-contained in high throughoput sequencing data, using as inputs read files
+contained in high throughout sequencing data, using as inputs read files
 (FastQ files). Then, the resulting file can
 be imported into `pATLAS <http://www.patlas.site/>`_.
 This component searches for containment of a given sequence in read sequencing
