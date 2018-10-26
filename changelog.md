@@ -2,6 +2,8 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+- Added component `bcalm`.
+
 ## 1.3.1
 
 ### Features
@@ -17,7 +19,6 @@ which is particularly useful in very large workflows.
 
 ### New components
 - Added component `fast_ani`.
-- Added component `bcalm`.
 
 ### Minor/Other changes
 
