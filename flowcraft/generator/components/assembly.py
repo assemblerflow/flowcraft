@@ -22,8 +22,6 @@ class Bcalm(Process):
         self.input_type = "fastq"
         self.output_type = "fasta"
 
-        self.dependencies = ["integrity_coverage"]
-
         self.params = {
             "bcalmKmerSize": {
                 "default": 31,
@@ -43,8 +41,8 @@ class Bcalm(Process):
         self.directives = {"bcalm": {
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
-            "container": "quay.io/biocontainers/quast",
-            "version": "2.2.0",
+            "container": "quay.io/biocontainers/bcalm",
+            "version": "2.2.0--hd28b015_2",
             "scratch": "true"
         }}
 
