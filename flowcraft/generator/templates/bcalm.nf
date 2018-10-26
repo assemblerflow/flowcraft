@@ -24,6 +24,15 @@ output:
     {% endwith %}
 
     script:
-    "bcalm -in $fastq -out unitig -kmer-size $KmerSize"
+    """
+    {
+	bcalm -in $fastq -out unitig -kmer-size $KmerSize"
+
+  	if [ "$clear" = "true" ];
+	then
+    	    find . -type f  -print | egrep "work/.*(h5)|(glue)" | xargs -L 1 rm
+	fi
+    }
+    """
 }
 
