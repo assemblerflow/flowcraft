@@ -23,6 +23,7 @@ resolution
 - Added component `bandage`.
 - Added component `unicycler`.
 - Added component `prokka`.
+- Added component `bcalm`.
 
 ### Minor/Other changes
 
