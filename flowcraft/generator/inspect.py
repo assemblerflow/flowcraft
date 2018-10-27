@@ -50,6 +50,10 @@ def signal_handler(screen):
 class NextflowInspector:
 
     MAX_RETRIES = 1000
+    """
+    int: Number of retries for parsing trace and log files. Only exit with non-0
+    error code after these retries.
+    """
 
     def __init__(self, trace_file, refresh_rate, pretty=False, ip_addr=None):
 
@@ -196,7 +200,7 @@ class NextflowInspector:
         """
 
         if not ip_addr:
-            self.app_address = "http://192.92.149.169:80/"
+            self.app_address = "http://www.flowcraft.live:80/"
         else:
             self.app_address = ip_addr
             """
@@ -338,7 +342,10 @@ class NextflowInspector:
         if s.endswith("ms"):
             return float(s.rstrip("ms")) / 1000
 
-        fields = list(map(float, re.split("[hms]", s)[:-1]))
+        fields = list(map(float, re.split("[dhms]", s)[:-1]))
+        if len(fields) == 4:
+            return fields[0] * 24 * 3600 + fields[1] * 3600 + fields[2] * 60 +\
+                fields[3]
         if len(fields) == 3:
             return fields[0] * 3600 + fields[1] * 60 + fields[2]
         elif len(fields) == 2:

@@ -36,10 +36,7 @@ process filter_poly_{{ pid }} {
     fi
     done
 
-    #prinseq-lite.pl --fastq ${sample_id}_1.fq  --fastq2 ${sample_id}_2.fq  --custom_params "${adapter}" -out_format 3 -out_good ${sample_id}_filtered
-    touch ${sample_id}_filtered_1.fastq
-    touch ${sample_id}_filtered_2.fastq
-    touch "somerhin.fastq"
+    prinseq-lite.pl --fastq ${sample_id}_1.fq  --fastq2 ${sample_id}_2.fq  --custom_params "${adapter}" -out_format 3 -out_good ${sample_id}_filtered
 
     gzip ${sample_id}_filtered_*.fastq
 

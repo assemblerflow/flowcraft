@@ -55,9 +55,11 @@ except ImportError:
 
 
 process_map = {
+        "abyss": assembly.Abyss,
         "abricate": annotation.Abricate,
         "assembly_mapping": ap.AssemblyMapping,
         "bcalm": assembly.Bcalm,
+        "bandage": ap.Bandage,
         "bowtie": mapping.Bowtie,
         "card_rgi": annotation.CardRgi,
         "check_coverage": readsqc.CheckCoverage,
@@ -89,8 +91,9 @@ process_map = {
         "pilon": ap.Pilon,
         "process_skesa": ap.ProcessSkesa,
         "process_spades": ap.ProcessSpades,
-        "progressive_mauve":alignment.ProgressiveMauve,
-        #"prokka": annotation.Prokka,
+        "progressive_mauve": alignment.ProgressiveMauve,
+        "prokka": annotation.Prokka,
+        "quast": ap.Quast,
         "raxml": phylogeny.Raxml,
         "reads_download": downloads.DownloadReads,
         "remove_host": meta.RemoveHost,
@@ -102,7 +105,8 @@ process_map = {
         "split_assembly": meta.SplitAssembly,
         "trimmomatic": readsqc.Trimmomatic,
         "true_coverage": readsqc.TrueCoverage,
-        "viral_assembly": assembly.ViralAssembly
+        "unicycler": assembly.Unicycler,
+        "viral_assembly": assembly.ViralAssembly,
 }
 
 """
