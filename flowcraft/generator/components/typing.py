@@ -137,13 +137,13 @@ class DengueTyping(Process):
         super().__init__(**kwargs)
 
         self.input_type = "fasta"
-        self.output_type = None
+        self.output_type = "fasta"
 
-        self.link_start = None
+        self.link_start.extend(["_ref_seqTyping"])
 
         self.params = {
             "reference": {
-                "default": "false",
+                "default": "true",
                 "description":
                     "Retrieves the sequence of the closest reference."
             }
@@ -155,5 +155,10 @@ class DengueTyping(Process):
             "container": "flowcraft/seq_typing",
             "version": "2.0-1"
         }}
+
+        self.status_channels = [
+            "dengue_typing"
+        ]
+
 
 
