@@ -141,7 +141,7 @@ class Chewbbaca(Process):
         }
 
 
-class MetaMlst(Process):
+class Metamlst(Process):
     """MetaMlst mapping process template interface
 
     This process is set with:

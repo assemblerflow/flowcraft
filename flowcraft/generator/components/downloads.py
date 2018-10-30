@@ -5,7 +5,7 @@ except ImportError:
     from flowcraft.generator.process import Process
 
 
-class DownloadReads(Process):
+class ReadsDownload(Process):
     """Process template interface for reads downloading from SRA and NCBI
 
     This process is set with:

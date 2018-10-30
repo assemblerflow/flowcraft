@@ -64,7 +64,7 @@ class Bowtie(Process):
         ]
 
 
-class Retrieve_mapped(Process):
+class RetrieveMapped(Process):
     """Samtools process to  to align short paired-end sequencing reads to
     long reference sequences
 
