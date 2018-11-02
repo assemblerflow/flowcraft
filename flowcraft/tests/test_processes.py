@@ -7,7 +7,9 @@ import flowcraft.generator.components.assembly_processing as ap
 import flowcraft.generator.components.reads_quality_control as readsqc
 import flowcraft.generator.error_handling as eh
 
-from flowcraft.generator.engine import process_map
+from flowcraft.generator.process_collector import collect_process_map
+
+process_map = collect_process_map()
 
 
 @pytest.fixture
@@ -336,7 +338,7 @@ def test_directive_update():
 
 def test_directive_update2():
 
-    p = readsqc.FastQC(template="fastqc")
+    p = readsqc.Fastqc(template="fastqc")
 
     p.update_attributes({"cpus": "3", "memory": "4GB"})
 

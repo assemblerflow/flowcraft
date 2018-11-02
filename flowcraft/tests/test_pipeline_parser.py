@@ -260,6 +260,7 @@ def test_parse_pipeline_file():
         print(res)
         assert res == expected
 
+
 def test_unique_id_len():
 
     pip_list = [

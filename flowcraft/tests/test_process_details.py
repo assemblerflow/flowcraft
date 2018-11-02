@@ -3,8 +3,10 @@ import pytest
 import flowcraft.generator.process_details as pd
 import flowcraft.flowcraft as af
 
-from flowcraft.generator.engine import process_map
+from flowcraft.generator.process_collector import collect_process_map
 from flowcraft.generator.process_details import COLORS
+
+process_map = collect_process_map()
 
 
 def test_color_print():
@@ -33,4 +35,3 @@ def test_short_list():
 
     with pytest.raises(SystemExit):
         pd.proc_collector(process_map, arguments, pipeline_string)
-        

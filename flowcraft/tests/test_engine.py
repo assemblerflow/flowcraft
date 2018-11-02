@@ -6,7 +6,9 @@ import flowcraft.generator.engine as eg
 import flowcraft.generator.process as pc
 import flowcraft.generator.error_handling as eh
 
-from flowcraft.generator.engine import process_map
+from flowcraft.generator.process_collector import collect_process_map
+
+process_map = collect_process_map()
 
 
 @pytest.fixture
@@ -18,7 +20,7 @@ def single_con():
             "output": {"process": "fastqc", "lane": 1}}
            ]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    return eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 @pytest.fixture
@@ -27,7 +29,7 @@ def single_status():
     con = [{"input": {"process": "__init__", "lane": 1},
             "output": {"process": "skesa", "lane": 1}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    return eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 @pytest.fixture
@@ -36,7 +38,7 @@ def single_con_fasta():
     con = [{"input": {"process": "__init__", "lane": 1},
             "output": {"process": "abricate", "lane": 1}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    return eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 @pytest.fixture
@@ -47,7 +49,7 @@ def single_con_multi_raw():
            {"input": {"process": "assembly_mapping", "lane": 1},
             "output": {"process": "pilon", "lane": 1}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    return eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 @pytest.fixture
@@ -62,7 +64,7 @@ def implicit_link():
            {"input": {"process": "spades", "lane": 1},
             "output": {"process": "assembly_mapping", "lane": 1}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    return eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 @pytest.fixture
@@ -75,7 +77,7 @@ def implicit_link_2():
            {"input": {"process": "spades", "lane": 1},
             "output": {"process": "assembly_mapping", "lane": 1}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    return eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 @pytest.fixture
@@ -92,7 +94,7 @@ def single_fork():
            {'input': {'process': 'skesa', 'lane': 3},
             'output': {'process': 'abricate', 'lane': 3}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    return eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 @pytest.fixture
@@ -107,7 +109,7 @@ def raw_forks():
            {"input": {"process": "__init__", "lane": 0},
             "output": {"process": "seq_typing", "lane": 3}}]
 
-    return eg.NextflowGenerator(con, "teste.nf")
+    return eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 @pytest.fixture
@@ -131,7 +133,8 @@ def multi_forks():
             "output": {"process": "skesa", "lane": 7}}]
 
     os.mkdir(".temp")
-    yield eg.NextflowGenerator(con, os.path.join(".temp", "teste.nf"))
+    yield eg.NextflowGenerator(con, os.path.join(".temp", "teste.nf"),
+                               process_map)
     shutil.rmtree(".temp")
 
 
@@ -143,7 +146,7 @@ def test_simple_init():
     for p in process_map:
 
         con[0]["output"]["process"] = p
-        nf = eg.NextflowGenerator(con, "teste/teste.nf",
+        nf = eg.NextflowGenerator(con, "teste/teste.nf", process_map,
                                   ignore_dependencies=True)
 
         assert [len(nf.processes), nf.processes[1].template] == \
@@ -156,7 +159,7 @@ def test_invalid_process():
             "output": {"process": "invalid", "lane": 1}}]
 
     with pytest.raises(SystemExit):
-        eg.NextflowGenerator(con, "teste.nf")
+        eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 def test_connections_single_process_channels(single_con):
@@ -178,7 +181,7 @@ def test_connections_invalid():
            ]
 
     with pytest.raises(SystemExit):
-        eg.NextflowGenerator(con, "teste.nf")
+        eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 def test_connections_ignore_type():
@@ -189,7 +192,7 @@ def test_connections_ignore_type():
             "output": {"process": "patho_typing", "lane": 1}}
            ]
 
-    eg.NextflowGenerator(con, "teste.nf")
+    eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 def test_build_header(single_con):
@@ -514,7 +517,7 @@ def test_extra_inputs_1():
            {"input": {"process": "integrity_coverage", "lane": 1},
             "output": {"process": "fastqc={'extra_input':'teste'}", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert nf.processes[2].extra_input == "teste"
 
@@ -529,7 +532,7 @@ def test_extra_inputs_2():
             "output": {"process": "abricate={'extra_input':'teste'}", "lane": 1}}
            ]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert nf.processes[3].extra_input == "teste"
 
@@ -541,7 +544,7 @@ def test_extra_inputs_3():
            {"input": {"process": "integrity_coverage", "lane": 1},
             "output": {"process": "fastqc={'extra_input':'teste'}", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
     nf._set_channels()
 
     assert [list(nf.extra_inputs.keys())[0],
@@ -560,7 +563,7 @@ def test_extra_inputs_default():
             "output": {"process": "abricate={'extra_input':'default'}", "lane": 1}}
            ]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
     nf._set_channels()
 
     assert [list(nf.extra_inputs.keys())[0],
@@ -576,7 +579,7 @@ def test_extra_inputs_invalid():
            {"input": {"process": "integrity_coverage", "lane": 1},
             "output": {"process": "fastqc={'extra_input':'default'}", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     with pytest.raises(SystemExit):
         nf._set_channels()
@@ -592,7 +595,7 @@ def test_extra_inputs_invalid_2():
             "output": {"process": "abricate={'extra_input':'teste'}", "lane": 1}}
            ]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     with pytest.raises(SystemExit):
         nf._set_channels()
@@ -605,7 +608,7 @@ def test_run_time_directives():
            {"input": {"process": "integrity_coverage", "lane": 1},
             "output": {"process": "fastqc={'cpus':'3'}", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert nf.processes[2].directives["fastqc2"]["cpus"] == "3"
 
@@ -619,7 +622,7 @@ def test_run_time_directives_full():
                                   "'container':'img','version':'1'}",
                        "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert [nf.processes[2].directives["fastqc2"]["cpus"],
             nf.processes[2].directives["fastqc2"]["memory"],
@@ -636,7 +639,7 @@ def test_run_time_directives_invalid():
             "output": {"process": "fastqc={'cpus'", "lane": 1}}]
 
     with pytest.raises(SystemExit):
-        eg.NextflowGenerator(con, "teste.nf")
+        eg.NextflowGenerator(con, "teste.nf", process_map)
 
 
 def test_not_automatic_dependency():
@@ -645,7 +648,8 @@ def test_not_automatic_dependency():
             "output": {"process": "spades", "lane": 1}}]
 
     with pytest.raises(SystemExit):
-        eg.NextflowGenerator(con, "teste.nf", auto_dependency=False)
+        eg.NextflowGenerator(con, "teste.nf", process_map,
+                             auto_dependency=False)
 
 
 def test_automatic_dependency():
@@ -653,7 +657,7 @@ def test_automatic_dependency():
     con = [{"input": {"process": "__init__", "lane": 1},
             "output": {"process": "spades", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert nf.processes[1].template == "integrity_coverage"
 
@@ -663,7 +667,7 @@ def test_automatic_dependency_2():
     con = [{"input": {"process": "__init__", "lane": 1},
             "output": {"process": "spades", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert nf.processes[1].output_channel == nf.processes[2].input_channel
 
@@ -673,7 +677,7 @@ def test_automatic_dependency_3():
     con = [{"input": {"process": "__init__", "lane": 1},
             "output": {"process": "spades", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert [nf.processes[1].parent_lane, nf.processes[2].parent_lane] == \
            [None, 1]
@@ -686,7 +690,7 @@ def test_automatic_dependency_wfork():
            {"input": {"process": "__init__", "lane": 0},
             "output": {"process": "integrity_coverage", "lane": 2}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert nf.processes[1].template == "integrity_coverage"
 
@@ -698,7 +702,7 @@ def test_automatic_dependency_wfork_2():
            {"input": {"process": "__init__", "lane": 0},
             "output": {"process": "integrity_coverage", "lane": 2}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
     nf._set_channels()
 
     assert len(nf.main_raw_inputs["fastq"]["raw_forks"]) == 2
@@ -714,7 +718,7 @@ def test_automatic_dependency_wfork_3():
             "output": {"process": "spades", "lane": 3}}
            ]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
     nf._set_channels()
 
     assert nf.processes[3].parent_lane == 1
@@ -730,7 +734,7 @@ def test_automatic_dependency_wfork_4():
             "output": {"process": "spades", "lane": 3}}
            ]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
     nf._set_channels()
 
     assert nf.processes[4].parent_lane == 3
@@ -743,7 +747,7 @@ def test_automatic_dependency_multi():
            {"input": {"process": "trimmomatic", "lane": 1},
             "output": {"process": "spades", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert len([x for x in nf.processes
                 if x.template == "integrity_coverage"]) == 1
@@ -756,7 +760,7 @@ def test_automatic_dependency_non_raw():
            {"input": {"process": "spades", "lane": 1},
             "output": {"process": "pilon", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     assert nf.processes[2].parent_lane == 1
 
@@ -768,7 +772,7 @@ def test_patlas_compiler_channels():
            {"input": {"process": "__init__", "lane": 0},
             "output": {"process": "mapping_patlas", "lane": 2}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     nf._set_channels()
     nf._set_compiler_channels()
@@ -781,7 +785,7 @@ def test_patlas_compiler_channels_2():
     con = [{"input": {"process": "__init__", "lane": 1},
             "output": {"process": "mash_screen", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     nf._set_channels()
     nf._set_compiler_channels()
@@ -794,7 +798,7 @@ def test_patlas_compiler_channels_empty():
     con = [{"input": {"process": "__init__", "lane": 1},
             "output": {"process": "trimmomatic", "lane": 1}}]
 
-    nf = eg.NextflowGenerator(con, "teste.nf")
+    nf = eg.NextflowGenerator(con, "teste.nf", process_map)
 
     nf._set_channels()
     nf._set_compiler_channels()
