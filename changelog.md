@@ -7,7 +7,10 @@
 - Added new `recipe` system to flowcraft along with 6 starting recipes.
 Recipes are pre-made and curated pipelines that address specific questions.
 To create a recipe, the `-r <recipe_name>` can be used. To list available
-recipes, the `--recipe-list` and `--recipe-list-short` options were added. 
+recipes, the `--recipe-list` and `--recipe-list-short` options were added.
+- Added function to collect all the components from the components classes,
+replacing the current process_map dictionary implementation. Now, it will be
+generated from the engine rather than hardcoded into the dict.
 
 ### Components changes
 
