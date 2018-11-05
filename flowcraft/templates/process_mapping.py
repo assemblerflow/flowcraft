@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
 
-import re
-import os
-import json
-
-from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
-
-
-
 """
 Purpose
 -------
@@ -35,6 +27,16 @@ Code documentation
 ------------------
 
 """
+
+import re
+import os
+import json
+
+try:
+    from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
+except ImportError:
+    from flowcraft.templates.flowcraft_utils.flowcraft_base import get_logger, \
+        MainWrapper
 
 __version__ = "1.0.1"
 __build__ = "10.09.2018"

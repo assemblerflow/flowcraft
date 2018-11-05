@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
 
-import os
-import json
-import operator
-from itertools import groupby
-
-from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
-
-
-
 """
 Purpose
 -------
@@ -37,6 +28,17 @@ Code documentation
 ------------------
 
 """
+
+import os
+import json
+import operator
+from itertools import groupby
+
+try:
+    from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
+except ImportError:
+    from flowcraft.templates.flowcraft_utils.flowcraft_base import get_logger, \
+        MainWrapper
 
 __version__ = "1.0.1"
 __build__ = "11.09.2018"

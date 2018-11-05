@@ -86,7 +86,11 @@ import zipfile
 
 from itertools import chain
 
-from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
+try:
+    from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
+except ImportError:
+    from flowcraft.templates.flowcraft_utils.flowcraft_base import get_logger, \
+        MainWrapper
 
 logger = get_logger(__file__)
 
