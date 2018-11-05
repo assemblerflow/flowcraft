@@ -59,10 +59,8 @@ def send_to_output(master_dict, mash_output, sample_id, assembly_file):
     master_dict: dict
         dictionary that stores all entries for a specific query sequence
         in multi-fasta given to mash dist as input against patlas database
-    last_seq: str
-        string that stores the last sequence that was parsed before writing to
-        file and therefore after the change of query sequence between different
-        rows on the input file
+    assembly_file: str
+        the string with the assembly file name
     mash_output: str
         the name/path of input file to main function, i.e., the name/path of
         the mash dist output txt file.
@@ -167,6 +165,7 @@ def main(mash_output, hash_cutoff, sample_id, assembly_file):
 
     # assures that file is closed in last iteration of the loop
     send_to_output(master_dict, mash_output, sample_id, assembly_file)
+
 
 if __name__ == "__main__":
 
