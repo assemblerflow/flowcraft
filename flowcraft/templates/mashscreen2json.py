@@ -33,7 +33,8 @@ import json
 try:
     from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 except ImportError:
-    from flowcraft.templates.flowcraft_utils.flowcraft_base import get_logger, MainWrapper
+    from flowcraft.templates.flowcraft_utils.flowcraft_base import get_logger, \
+        MainWrapper
 
 logger = get_logger(__file__)
 
@@ -45,9 +46,10 @@ if __file__.endswith(".command.sh"):
     logger.debug("MASH_TXT: {}".format(MASH_TXT))
     logger.debug("SAMPLE_ID: {}".format(MASH_TXT))
 
+
 @MainWrapper
 def main(mash_output, sample_id):
-    '''
+    """
     converts top results from mash screen txt output to json format
 
     Parameters
@@ -58,7 +60,7 @@ def main(mash_output, sample_id):
     sample_id: str
         sample name
 
-    '''
+    """
     logger.info("Reading file : {}".format(mash_output))
     read_mash_output = open(mash_output)
 
@@ -106,7 +108,8 @@ def main(mash_output, sample_id):
             "Exported dictionary has {} entries".format(len(filtered_dic)))
     else:
         # if no entries were found raise an error
-        logger.error("No matches were found using mash screen for the queried reads")
+        logger.error("No matches were found using mash screen for the queried "
+                     "reads")
 
     output_json.write(json.dumps(filtered_dic))
     output_json.close()

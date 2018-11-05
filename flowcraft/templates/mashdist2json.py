@@ -130,6 +130,8 @@ def main(mash_output, hash_cutoff, sample_id, assembly_file):
         to the results outputs
     sample_id: str
         The name of the sample.
+    assembly_file: str
+        The name of the assembly file
     """
 
     input_f = open(mash_output, "r")

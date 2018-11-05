@@ -90,6 +90,9 @@ def test_generate_file(tmpdir):
     if not os.path.isfile(".report.json"):
         assert_message.append(".report.json file was not created")
 
+    # remove the .report.json file
+    os.remove(".report.json")
+
     assert not assert_message, "errors occurred:\n{}".format(
         "\n".join(assert_message)
     )
