@@ -8,6 +8,7 @@ process mafft_{{ pid }} {
 
     input:
     file(assembly) from {{ input_channel }}.map{ it[1] }.collect()
+    file(refs) from _ref_seqTyping.collect().unique()
 
     output:
     file ("*.align") into {{ output_channel }}
@@ -18,7 +19,9 @@ process mafft_{{ pid }} {
     script:
     """
 
-    cat ${assembly} > all_assemblies.fasta
+
+
+    cat ${assembly} ${refs} > all_assemblies.fasta
 
     mafft --adjustdirection --thread $task.cpus --auto all_assemblies.fasta > ${workflow.scriptName}.align
     """

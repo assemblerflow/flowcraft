@@ -9,6 +9,7 @@ Pipeline reports
 .. include:: reports/fastqc.rst
 .. include:: reports/fastqc_trimmomatic.rst
 .. include:: reports/integrity_coverage.rst
+.. include:: reports/mash_dist.rst
 .. include:: reports/mlst.rst
 .. include:: reports/patho_typing.rst
 .. include:: reports/pilon.rst
@@ -18,6 +19,7 @@ Pipeline reports
 .. include:: reports/process_spades.rst
 .. include:: reports/process_viral_assembly.rst
 .. include:: reports/seq_typing.rst
+.. include:: reports/sistr.rst
 .. include:: reports/trimmomatic.rst
 .. include:: reports/true_coverage.rst
 

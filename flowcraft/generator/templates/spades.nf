@@ -43,7 +43,7 @@ process spades_{{ pid }} {
     output:
     set sample_id, file('*_spades*.fasta') into {{ output_channel }}
     file "*.fastg" optional true
-    file "*.gfa" optional true
+    file "*.gfa" into gfa1_{{ pid }}
     {% with task_name="spades" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
