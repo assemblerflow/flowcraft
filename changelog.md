@@ -16,6 +16,8 @@ resolution
 - Added removal of duplicate IDs from `reads_download` component input.
 - Added seed parameter to `downsample_fastq` component.
 - Added default docker option to avoid docker permission errors.
+- Added tests for `mash_screen`, `mash_dist`, `mapping_patlas` related python 
+templates
 
 ### Bug fixes
 

@@ -85,13 +85,16 @@ Versioning and logging
 FlowCraft has a specific ``logger``
 (:func:`~flowcraft.templates.flowcraft_utils.flowcraft_base.get_logger`) and
 versioning system that can be imported from
-:mod:`flowcraft.templates.flowcraft_utils`: ::
+:mod:`flowcraft.templates.flowcraft_utils` as follows: ::
 
     # the module that imports the logger and the decorator class for versioning
     # of the script itself and other software used in the script
-    from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
+    try:
+        from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
+    except ImportError:
+        from flowcraft.templates.flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
-
+The ``try/except`` is used for test purposes.
 
 Logger
 ^^^^^^
