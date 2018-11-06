@@ -1,5 +1,4 @@
 import os
-import re
 import json
 import flowcraft.templates.pATLAS_consensus_json as pATLAS_consensus_json
 
@@ -102,6 +101,10 @@ def test_generated_dict(tmpdir):
                               "element".format(" ".join(
             [str(x + 1) for x, el in enumerate(list_of_checks) if not el]
         )))
+
+    # remove the .report.json file
+    os.remove(".report.json")
+    os.remove("consensus_file.json")
 
     assert not assert_message, "Errors occurred:\n{}".format(
         "\n".join(assert_message)
