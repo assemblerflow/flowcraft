@@ -83,7 +83,6 @@ def main(list_of_jsons):
 
     json_dic = {
         "patlas_mashscreen": json_dict
-        # TODO add information for report webapp
     }
 
     with open(".report.json", "w") as json_report:
