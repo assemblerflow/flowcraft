@@ -1,6 +1,7 @@
 import re
 import os
 import sys
+import uuid
 import time
 import curses
 import signal
@@ -1540,7 +1541,8 @@ class NextflowInspector:
         # Get hash from the current working dir and hostname
         workdir = self.workdir.encode("utf8")
         hostname = socket.gethostname().encode("utf8")
-        dir_hash = hashlib.md5(workdir + hostname)
+        hardware_addr = str(uuid.getnode()).encode("utf8")
+        dir_hash = hashlib.md5(workdir + hostname + hardware_addr)
 
         return pipeline_hash.hexdigest() + dir_hash.hexdigest()
 
