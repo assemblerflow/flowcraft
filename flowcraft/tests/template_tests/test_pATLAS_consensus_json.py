@@ -3,14 +3,6 @@ import json
 import pytest
 import flowcraft.templates.pATLAS_consensus_json as pATLAS_consensus_json
 
-# the expected result from loading the dictionary in the generated file
-expected_dict = {"ACC1":
-                     {"/tmp/pytest-of-tiago/pytest-1/test_generated_dict0/"
-                      "mash_file.txt": ["0.9", "1"],
-                      "/tmp/pytest-of-tiago/pytest-1/test_generated_dict0/"
-                      "test_depth_file.txt": 0.9}
-                 }
-
 
 @pytest.fixture
 def fetch_file(tmpdir, request):
@@ -60,7 +52,7 @@ def test_generated_dict_contents1(fetch_file):
     Checks if accession in both expected and result dict is the same
     """
     result_dict = fetch_file
-    assert list(result_dict.keys())[0] == list(expected_dict.keys())[0]
+    assert list(result_dict.keys())[0] == "ACC1"
 
 
 def test_generated_dict_contents2(fetch_file):
