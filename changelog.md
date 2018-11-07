@@ -16,6 +16,7 @@ resolution
 - The `abyss` and `spades` components emit GFA in a secondary channel.
 - The new `bandage` component can accept either FASTA from a primary channel
   or GFA from a secondary channel.
+- Updated skesa to version 2.3.0
 
 ### New components
 
