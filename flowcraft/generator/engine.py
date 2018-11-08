@@ -47,8 +47,8 @@ class NextflowGenerator:
 
         self.process_map = process_map
         """
-        dict: Maps the nextflow template name to the corresponding Process 
-        class of the component. 
+        dict: Maps the nextflow template name to the corresponding Process
+        class of the component.
         """
 
         # Create the processes attribute with the first special init process.
