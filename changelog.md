@@ -25,6 +25,7 @@ resolution
 - Added component `unicycler`.
 - Added component `prokka`.
 - Added component `bcalm`.
+- Added component `diamond`.
 
 ### Minor/Other changes
 

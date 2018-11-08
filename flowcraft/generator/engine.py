@@ -65,6 +65,7 @@ process_map = {
         "check_coverage": readsqc.CheckCoverage,
         "chewbbaca": mlst.Chewbbaca,
         "dengue_typing": typing.DengueTyping,
+        "diamond": annotation.Diamond,
         "downsample_fastq": readsqc.DownsampleFastq,
         "fastqc": readsqc.FastQC,
         "fastqc_trimmomatic": readsqc.FastqcTrimmomatic,
