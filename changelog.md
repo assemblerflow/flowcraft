@@ -7,7 +7,7 @@
 - Added new `recipe` system to flowcraft along with 6 starting recipes.
 Recipes are pre-made and curated pipelines that address specific questions.
 To create a recipe, the `-r <recipe_name>` can be used. To list available
-recipes, the `--recipe-list` and `--recipe-list-short` options were added. 
+recipes, the `--recipe-list` and `--recipe-list-short` options were added.
 
 ### Components changes
 
@@ -16,7 +16,8 @@ resolution
 - The `abyss` and `spades` components emit GFA in a secondary channel.
 - The new `bandage` component can accept either FASTA from a primary channel
   or GFA from a secondary channel.
-- Updated skesa to version 2.3.0
+- Updated skesa to version 2.3.0.
+- Updated mash based components for the latest version - 1.6.0-1.
 
 ### New components
 
