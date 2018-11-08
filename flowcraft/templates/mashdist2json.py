@@ -165,6 +165,7 @@ def main(mash_output, hash_cutoff, sample_id, assembly_file):
     # assures that file is closed in last iteration of the loop
     send_to_output(master_dict, mash_output, sample_id, assembly_file)
 
+
 if __name__ == "__main__":
 
     main(MASH_TXT, HASH_CUTOFF, SAMPLE_ID, ASSEMBLY_IN)
