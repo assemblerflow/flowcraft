@@ -113,6 +113,12 @@ def get_args(args=None):
                          "components (via -t option) in JSON format to stdout. "
                          "No pipeline will be generated with this option."
     )
+    build_parser.add_argument(
+        "-ft", "--fetch-tags", dest="fetch_docker_tags",
+        action="store_const", const=True, help="Allows to fetch all docker tags"
+                                               " for the components listed with"
+                                               " the -t flag."
+    )
 
     # GENERAL OPTIONS
     parser.add_argument(
@@ -191,9 +197,9 @@ def validate_build_arguments(args):
     if args.detailed_list or args.short_list:
         return
 
-    # Skill all checks when exporting parameters AND providing at least one
+    # Skip all checks when exporting parameters AND providing at least one
     # component
-    if args.export_params or args.export_directives:
+    if args.export_params or args.export_directives or args.fetch_docker_tags:
         # Check if components provided
         if not args.tasks:
             logger.error(colored_print(
@@ -284,7 +290,7 @@ def build(args):
 
     # Disable standard logging for stdout when the following modes are
     #  executed:
-    if args.export_params or args.export_directives:
+    if args.export_params or args.export_directives or args.fetch_docker_tags:
         logger.setLevel(logging.ERROR)
 
     if args.recipe_list_short:
@@ -356,6 +362,9 @@ def build(args):
         sys.exit(0)
     elif args.export_directives:
         nfg.export_directives()
+        sys.exit(0)
+    elif args.fetch_docker_tags:
+        nfg.fetch_docker_tags()
         sys.exit(0)
     else:
         # building the actual pipeline nf file

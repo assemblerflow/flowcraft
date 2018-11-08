@@ -7,7 +7,9 @@
 - Added new `recipe` system to flowcraft along with 6 starting recipes.
 Recipes are pre-made and curated pipelines that address specific questions.
 To create a recipe, the `-r <recipe_name>` can be used. To list available
-recipes, the `--recipe-list` and `--recipe-list-short` options were added.
+recipes, the `--recipe-list` and `--recipe-list-short` options were added. 
+- Added `-ft` or `--fetch-tags` which allows to retrieve all DockerHub 
+container tags.
 
 ### Components changes
 

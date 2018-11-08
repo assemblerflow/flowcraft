@@ -6,7 +6,7 @@ logger = logging.getLogger("main.{}".format(__name__))
 COLORS = {
     "green_bold": "1;32m",
     "red_bold": "1;31m",
-    "white": "2;38m",
+    "white": "0;38m",
     "white_bold": "1;38m",
     "white_underline": "4;38m",
     "blue_bold": "1;36m",
@@ -37,7 +37,12 @@ def colored_print(msg, color_label="white_bold"):
     if sys.stdout.encoding != "UTF-8":
         msg = "".join([i if ord(i) < 128 else "" for i in msg])
 
-    col = COLORS[color_label]
+    # try except first looks for the color in COLORS dictionary, otherwise use
+    # color_label as the color.
+    try:
+        col = COLORS[color_label]
+    except KeyError:
+        col = color_label
 
     return "\x1b[{}{}\x1b[0m".format(col, msg)
 
