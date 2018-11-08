@@ -1533,9 +1533,10 @@ class NextflowGenerator:
         the -t flag.
         """
 
-        # fetches terminal width and subtracts 1 because we always add a
-        # new line character
-        terminal_width = shutil.get_terminal_size().columns - 1
+        # fetches terminal width and subtracts 3 because we always add a
+        # new line character and we want a space at the beggining and at the end
+        # of each line
+        terminal_width = shutil.get_terminal_size().columns - 3
 
         # first header
         center_string = " Selected container tags "
@@ -1602,7 +1603,7 @@ class NextflowGenerator:
             ]
             # writes the string to the stdout
             sys.stdout.write(
-                colored_print("\n{0: <{3}} {1: ^{4}} {2: >{5}}".format(
+                colored_print("\n {0: <{3}} {1: ^{4}} {2: >{5}}".format(
                     *entry, *final_width), color)
             )
         # assures that the entire line gets the same color
