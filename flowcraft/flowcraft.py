@@ -119,6 +119,15 @@ def get_args(args=None):
                                                " for the components listed with"
                                                " the -t flag."
     )
+    build_parser.add_argument(
+        "-sc", "--singularity-cache", dest="singularity_cache",
+        action="store_const", const=True,
+        help="If provided this variable will override the default flowcraft"
+             "singularity cache and instead it will attempt to use "
+             "SINGULARITY_CACHEDIR and NXF_SINGULARITY_CACHEDIR environmental "
+             "variables. It will write the respective path to singularity.cache"
+             " in the user.config"
+    )
 
     # GENERAL OPTIONS
     parser.add_argument(
@@ -286,6 +295,48 @@ def copy_project(path):
                 join(target_dir, "profiles.config"))
 
 
+def add_cache_dir():
+    """
+    Function that checks if SINGULARITY_CACHEDIR or NXF_SINGULARITY_CACHEDIR
+    are defined and if so writes the path to the user.config overriding the
+    default flowcraft singularity.cacheDir defined in nextflow.config
+    """
+
+    env_var = False
+    # Checks whether the environmental variables are defined or not. If they
+    # aren't then raise a warning and use the default.
+    try:
+        env_var = os.environ.get("SINGULARITY_CACHEDIR")
+    except KeyError:
+        try:
+            env_var = os.environ.get("NXF_SINGULARITY_CACHEDIR")
+        except KeyError:
+            logger.error(colored_print("No environmental variables set with "
+                                       "the names: SINGULARITY_CACHEDIR or "
+                                       "NXF_SINGULARITY_CACHEDIR. Default cache"
+                                       " dir will be used instead (see "
+                                       "nextflow.config for more details)",
+                                       "red_bold"))
+
+    # if env_var is different from False then read the user.config and write to
+    # the new singularity.cacheDir fetched from the os.environ respective
+    # key
+    if env_var:
+        with open("user.config", "r+") as user_config:
+            new_cache_dir = True
+            # iterates through the file looking for the singularity.cacheDir
+            for line in user_config:
+                # checks if line already exists and if so set new_cache_dir to
+                # False in order not to write it again.
+                if "singularity.cacheDir" in line.strip():
+                    new_cache_dir = False
+
+            if new_cache_dir:
+                user_config.write(
+                    "singularity.cacheDir = '{}'".format(env_var)
+                )
+
+
 def build(args):
 
     # Disable standard logging for stdout when the following modes are
@@ -373,6 +424,9 @@ def build(args):
     # copy template to cwd, to allow for immediate execution
     if not args.pipeline_only:
         copy_project(parsed_output_nf)
+
+    if args.singularity_cache:
+        add_cache_dir()
 
     logger.info(colored_print("DONE!", "green_bold"))
 
