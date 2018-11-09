@@ -71,7 +71,7 @@ def get_args(args=None):
         help="Write only the pipeline files and not the templates, bin, and"
              " lib folders.")
     build_parser.add_argument(
-        "-nd", "--no-dependecy", dest="no_dep", action="store_false",
+        "-nd", "--no-dependency", dest="no_dep", action="store_false",
         help="Do not automatically add dependencies to the pipeline.")
     build_parser.add_argument(
         "-c", "--check-pipeline", dest="check_only", action="store_const",
@@ -295,12 +295,21 @@ def copy_project(path):
                 join(target_dir, "profiles.config"))
 
 
-def add_cache_dir():
+def add_cache_dir(path):
     """
     Function that checks if SINGULARITY_CACHEDIR or NXF_SINGULARITY_CACHEDIR
     are defined and if so writes the path to the custom.config overriding the
     default flowcraft singularity.cacheDir defined in nextflow.config
+
+    Parameters
+    ----------
+    path: str
+        path to the directory where the file will be written
+
     """
+
+    # Get target directory
+    target_dir = dirname(path)
 
     env_var = False
     # Checks whether the environmental variables are defined or not. If they
@@ -322,7 +331,8 @@ def add_cache_dir():
     # the new singularity.cacheDir fetched from the os.environ respective
     # key
     if env_var:
-        with open("custom.config", "r+") as user_config:
+        with open(os.path.join(target_dir, "custom.config"), "r+") as \
+                user_config:
             new_cache_dir = True
             # iterates through the file looking for the singularity.cacheDir
             for line in user_config:
@@ -426,7 +436,7 @@ def build(args):
         copy_project(parsed_output_nf)
 
     if args.singularity_cache:
-        add_cache_dir()
+        add_cache_dir(parsed_output_nf)
 
     logger.info(colored_print("DONE!", "green_bold"))
 
