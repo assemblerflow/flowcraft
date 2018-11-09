@@ -10,6 +10,9 @@ To create a recipe, the `-r <recipe_name>` can be used. To list available
 recipes, the `--recipe-list` and `--recipe-list-short` options were added. 
 - Added `-ft` or `--fetch-tags` which allows to retrieve all DockerHub 
 container tags.
+- Added a `-sc` or `--singularity-cache` option that allows to use 
+`SINGULARITY_CACHEDIR` or `NXF_SINGULARITY_CACHEDIR` instead of the default
+flowcraft `singularity.cacheDir`.
 
 ### Components changes
 

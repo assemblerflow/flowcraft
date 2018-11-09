@@ -236,6 +236,12 @@ class NextflowGenerator:
         See :func:`NextflowGenerator._get_params_string`
         """
 
+        self.custom_config = ""
+        """
+        str: Stores the custom singularity configuration for environmental 
+        variables, overriding the default flowcraft cache dir
+        """
+
         self.user_config = ""
         """
         str: Stores the user configuration file placeholder. This is an
@@ -258,7 +264,6 @@ class NextflowGenerator:
             - ``cls``: The reference to the compiler class object.
             - ``template``: The nextflow template file of the process.
         """
-
 
     @staticmethod
     def _parse_process_name(name_str):
@@ -1373,6 +1378,9 @@ class NextflowGenerator:
             "version": __version__,
             "pipeline_name": " ".join([x.upper() for x in self.pipeline_name])
         })
+
+        self.custom_config = self._render_config("custom.config", {})
+
         self.user_config = self._render_config("user.config", {})
 
     def dag_to_file(self, dict_viz, output_file=".treeDag.json"):
@@ -1481,6 +1489,10 @@ class NextflowGenerator:
         # Write containers config
         with open(join(project_root, "params.config"), "w") as fh:
             fh.write(self.params)
+
+        # Write containers config
+        with open(join(project_root, "custom.config"), "w") as fh:
+            fh.write(self.custom_config)
 
         # Write user config if not present in the project directory
         if not exists(join(project_root, "user.config")):

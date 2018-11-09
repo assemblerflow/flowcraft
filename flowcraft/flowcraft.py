@@ -298,7 +298,7 @@ def copy_project(path):
 def add_cache_dir():
     """
     Function that checks if SINGULARITY_CACHEDIR or NXF_SINGULARITY_CACHEDIR
-    are defined and if so writes the path to the user.config overriding the
+    are defined and if so writes the path to the custom.config overriding the
     default flowcraft singularity.cacheDir defined in nextflow.config
     """
 
@@ -322,7 +322,7 @@ def add_cache_dir():
     # the new singularity.cacheDir fetched from the os.environ respective
     # key
     if env_var:
-        with open("user.config", "r+") as user_config:
+        with open("custom.config", "r+") as user_config:
             new_cache_dir = True
             # iterates through the file looking for the singularity.cacheDir
             for line in user_config:
@@ -333,7 +333,7 @@ def add_cache_dir():
 
             if new_cache_dir:
                 user_config.write(
-                    "singularity.cacheDir = '{}'".format(env_var)
+                    "\nsingularity.cacheDir = '{}'".format(env_var)
                 )
 
 
