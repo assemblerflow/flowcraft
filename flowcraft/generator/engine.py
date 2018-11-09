@@ -238,7 +238,7 @@ class NextflowGenerator:
 
         self.custom_config = ""
         """
-        str: Stores the custom singularity configuration for environmental 
+        str: Stores the custom singularity configuration for environmental
         variables, overriding the default flowcraft cache dir
         """
 
