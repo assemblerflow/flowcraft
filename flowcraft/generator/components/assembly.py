@@ -4,6 +4,7 @@ try:
 except ImportError:
     from flowcraft.generator.process import Process
 
+
 class Bcalm(Process):
     """Bcalm process template interface
 
@@ -35,7 +36,7 @@ class Bcalm(Process):
                     "is only useful to remove temporary files in large "
                     "workflows and prevents nextflow's resume functionality. "
                     "Use with caution."
-	    }
+            }
         }
 
         self.directives = {"bcalm": {
@@ -226,6 +227,7 @@ class ViralAssembly(Process):
             }
         }
 
+
 class Abyss(Process):
     """ABySS process template interface
 
@@ -260,6 +262,7 @@ class Abyss(Process):
             "version": "2.1.1",
             "scratch": "true"
         }}
+
 
 class Unicycler(Process):
     """Unicycler process template interface

@@ -13,16 +13,17 @@ from os.path import join, dirname
 
 try:
     from __init__ import __version__, __build__
-    from generator.engine import NextflowGenerator, process_map
+    from generator.engine import NextflowGenerator
     from generator.inspect import NextflowInspector
     from generator.report import FlowcraftReport
+    from generator.process_collector import collect_process_map
     from generator.recipe import brew_innuendo, brew_recipe, list_recipes
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
     import generator.error_handling as eh
-except ImportError:
+except ImportError as e:
     from flowcraft import __version__, __build__
-    from flowcraft.generator.engine import NextflowGenerator, process_map
+    from flowcraft.generator.engine import NextflowGenerator
     from flowcraft.generator.inspect import NextflowInspector
     from flowcraft.generator.report import FlowcraftReport
     from flowcraft.generator.recipe import brew_innuendo, \
@@ -32,6 +33,7 @@ except ImportError:
     from flowcraft.generator.process_details import proc_collector, \
         colored_print
     import flowcraft.generator.error_handling as eh
+    from flowcraft.generator.process_collector import collect_process_map
 
 logger = logging.getLogger("main")
 
@@ -333,6 +335,8 @@ def build(args):
     else:
         pipeline_string = args.tasks
 
+    process_map = collect_process_map()
+
     # used for lists print
     proc_collector(process_map, args, pipeline_string)
 
@@ -350,6 +354,7 @@ def build(args):
 
     nfg = NextflowGenerator(process_connections=pipeline_list,
                             nextflow_file=parsed_output_nf,
+                            process_map=process_map,
                             pipeline_name=args.pipeline_name,
                             auto_dependency=args.no_dep,
                             merge_params=args.merge_params,

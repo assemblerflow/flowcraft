@@ -42,7 +42,7 @@ class Kraken(Process):
         ]
 
 
-class MaxBin2(Process):
+class Maxbin2(Process):
     """MaxBin2, a metagenomics binning software
 
             This process is set with:
@@ -311,7 +311,7 @@ class RemoveHost(Process):
             "report_remove_host"
         ]
 
-class MetaProb(Process):
+class Metaprob(Process):
     """MetaProb to bin metagenomic reads interface
 
             This process is set with:
