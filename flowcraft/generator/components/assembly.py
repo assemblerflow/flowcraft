@@ -134,7 +134,7 @@ class Skesa(Process):
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "flowcraft/skesa",
-            "version": "2.1-1",
+            "version": "2.3.0-1",
             "scratch": "true"
         }}
 

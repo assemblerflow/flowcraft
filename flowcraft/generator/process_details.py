@@ -6,7 +6,7 @@ logger = logging.getLogger("main.{}".format(__name__))
 COLORS = {
     "green_bold": "1;32m",
     "red_bold": "1;31m",
-    "white": "2;38m",
+    "white": "0;38m",
     "white_bold": "1;38m",
     "white_underline": "4;38m",
     "blue_bold": "1;36m",
@@ -37,7 +37,12 @@ def colored_print(msg, color_label="white_bold"):
     if sys.stdout.encoding != "UTF-8":
         msg = "".join([i if ord(i) < 128 else "" for i in msg])
 
-    col = COLORS[color_label]
+    # try except first looks for the color in COLORS dictionary, otherwise use
+    # color_label as the color.
+    try:
+        col = COLORS[color_label]
+    except KeyError:
+        col = color_label
 
     return "\x1b[{}{}\x1b[0m".format(col, msg)
 
@@ -45,15 +50,19 @@ def colored_print(msg, color_label="white_bold"):
 def procs_dict_parser(procs_dict):
     """
     This function handles the dictionary of attributes of each Process class
-    to print to stdout.
+    to print to stdout lists of all the components or the components which the
+    user specifies in the -t flag.
 
     Parameters
     ----------
     procs_dict: dict
-        A dictionary with the class attributes used by the argument that prints
-        the lists of processes, both for short_list and for detailed_list.
-
-
+        A dictionary with the class attributes for all the components (or
+        components that are used by the -t flag), that allow to create
+        both the short_list and detailed_list. Dictionary example:
+        {"abyss": {'input_type': 'fastq', 'output_type': 'fasta',
+        'dependencies': [], 'directives': {'abyss': {'cpus': 4,
+        'memory': '{ 5.GB * task.attempt }', 'container': 'flowcraft/abyss',
+        'version': '2.1.1', 'scratch': 'true'}}}
     """
 
     logger.info(colored_print(
@@ -67,10 +76,26 @@ def procs_dict_parser(procs_dict):
             info_str = "{}:".format(info)
 
             if isinstance(dict_proc_info[info], list):
-                if len(dict_proc_info[info]) == 0:
+                if not dict_proc_info[info]:
                     arg_msg = "None"
                 else:
                     arg_msg = ", ".join(dict_proc_info[info])
+            elif info == "directives":
+                # this is used for the "directives", which is a dict
+                if not dict_proc_info[info]:
+                    # if dict is empty then add None to the message
+                    arg_msg = "None"
+                else:
+                    # otherwise fetch all template names within a component
+                    # and all the directives for each template to a list
+                    list_msg = ["\n      {}: {}".format(
+                        templt,
+                        " , ".join(["{}: {}".format(dr, val)
+                                    for dr, val in drs.items()]))
+                                for templt, drs in dict_proc_info[info].items()
+                    ]
+                    # write list to a str
+                    arg_msg = "".join(list_msg)
             else:
                 arg_msg = dict_proc_info[info]
 
@@ -108,7 +133,8 @@ def proc_collector(process_map, args, pipeline_string):
             "output_type",
             "description",
             "dependencies",
-            "conflicts"
+            "conflicts",
+            "directives"
         ]
 
     # prints a short list with each process and the corresponding description

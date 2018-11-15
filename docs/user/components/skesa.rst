@@ -37,8 +37,8 @@ Default directives
 
 - ``cpus``: 4
 - ``memory``: 5GB (dynamically increased on retry)
-- ``container``: ummidock/skesa
-- ``version``: 0.2.0-3
+- ``container``: flowcraft/skesa
+- ``version``: 2.3.0-1
 - ``scratch``: true
 
 Advanced

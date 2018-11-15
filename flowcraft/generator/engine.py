@@ -2,7 +2,9 @@ import os
 import sys
 import json
 import jinja2
+import shutil
 import logging
+import requests
 
 from collections import defaultdict
 from os.path import dirname, join, abspath, split, splitext, exists, basename
@@ -26,15 +28,6 @@ except ImportError:
     from flowcraft.generator import footer_skeleton as fs
     from flowcraft.generator.process_details import colored_print
     from flowcraft.generator.pipeline_parser import guess_process
-
-"""
-dict: Maps the process ids to the corresponding template interface class wit
-the format::
-
-    {
-        "<template_string>": module.TemplateClass
-    }
-"""
 
 
 class NextflowGenerator:
@@ -1447,6 +1440,104 @@ class NextflowGenerator:
 
         # Flush params json to stdout
         sys.stdout.write(json.dumps(directives_json))
+
+    def fetch_docker_tags(self):
+        """
+        Export all dockerhub tags associated with each component given by
+        the -t flag.
+        """
+
+        # list to store the already parsed components (useful when forks are
+        # given to the pipeline string via -t flag
+        list_of_parsed = []
+
+        # fetches terminal width and subtracts 3 because we always add a
+        # new line character and we want a space at the beggining and at the end
+        # of each line
+        terminal_width = shutil.get_terminal_size().columns - 3
+
+        # first header
+        center_string = " Selected container tags "
+
+        # starts a list with the headers
+        tags_list = [
+            [
+                "=" * int(terminal_width / 4),
+                "{0}{1}{0}".format(
+                    "=" * int(((terminal_width/2 - len(center_string)) / 2)),
+                    center_string)
+                ,
+                "{}\n".format("=" * int(terminal_width / 4))
+            ],
+            ["component", "container", "tags"],
+            [
+                "=" * int(terminal_width / 4),
+                "=" * int(terminal_width / 2),
+                "=" * int(terminal_width / 4)
+            ]
+        ]
+
+        # Skip first init process and iterate through the others
+        for p in self.processes[1:]:
+            template = p.template
+            # if component has already been printed then skip and don't print
+            # again
+            if template in list_of_parsed:
+                continue
+
+            list_of_parsed.append(template)
+
+            # fetch repo name from directives of the template. Since some
+            # components like integrity_coverage doesn't have a directives with
+            # container, thus if no directive there the script will skip this
+            # template
+            try:
+                repo = p.directives[template]["container"]
+                default_version = p.directives[template]["version"]
+            except KeyError:
+                continue
+            # make the request to docker hub
+            r = requests.get(
+                "https://hub.docker.com/v2/repositories/{}/tags/".format(
+                    repo
+                ))
+            # checks the status code of the request, if it is 200 then parses
+            # docker hub entry, otherwise retrieve no tags but alerts the user
+            if r.status_code != 404:
+                # parse response content to dict and fetch results key
+                r_content = json.loads(r.content)["results"]
+                for version in r_content:
+                    printed_version = (version["name"] + "*") \
+                        if version["name"] == default_version \
+                        else version["name"]
+                    tags_list.append([template, repo, printed_version])
+            else:
+                tags_list.append([template, repo, "No DockerHub tags"])
+
+        # iterate through each entry in tags_list and print the list of tags
+        # for each component. Each entry (excluding the headers) contains
+        # 3 elements (component name, container and tag version)
+        for x, entry in enumerate(tags_list):
+            # adds different color to the header in the first list and
+            # if row is pair add one color and if is even add another (different
+            # background)
+            color = "blue_bold" if x < 3 else \
+                ("white" if x % 2 != 0 else "0;37;40m")
+            # generates a small list with the terminal width for each column,
+            # this will be given to string formatting as the 3, 4 and 5 element
+            final_width = [
+                int(terminal_width/4),
+                int(terminal_width/2),
+                int(terminal_width/4)
+            ]
+            # writes the string to the stdout
+            sys.stdout.write(
+                colored_print("\n {0: <{3}} {1: ^{4}} {2: >{5}}".format(
+                    *entry, *final_width), color)
+            )
+        # assures that the entire line gets the same color
+        sys.stdout.write("\n{0: >{1}}\n".format("(* = default)",
+                                                terminal_width + 3))
 
     def build(self):
         """Main pipeline builder
