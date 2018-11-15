@@ -61,7 +61,7 @@ def test_depth_file_reader(tmpdir):
     """
 
     # create a temporary file to make a dict from
-    file = tmpdir.join("test_depth_file.txt")
+    file_handle = tmpdir.join("test_depth_file.txt")
     file.write("seq1\t1\t30")
 
     # execute the function to get the dict
