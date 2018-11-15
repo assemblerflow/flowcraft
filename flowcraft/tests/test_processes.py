@@ -2,10 +2,11 @@ import os
 import pytest
 
 import flowcraft.generator.process as pc
-import flowcraft.generator.components.assembly as assembly
-import flowcraft.generator.components.assembly_processing as ap
-import flowcraft.generator.components.reads_quality_control as readsqc
 import flowcraft.generator.error_handling as eh
+
+from flowcraft.generator.components import assembly
+from flowcraft.generator.components import assembly_processing as ap
+from flowcraft.generator.components import reads_quality_control as readsqc
 
 from flowcraft.generator.process_collector import collect_process_map
 
