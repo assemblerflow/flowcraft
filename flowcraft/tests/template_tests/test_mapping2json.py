@@ -61,7 +61,7 @@ def test_depth_file_reader(tmpdir):
     file_handle.write("seq1\t1\t30")
 
     # execute the function to get the dict
-    result_dict = mapping2json.depth_file_reader(open(str(file)))
+    result_dict = mapping2json.depth_file_reader(open(str(file_handle)))
 
     assert result_dict == {"seq1": {"1": 30}}
 
