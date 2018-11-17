@@ -4,7 +4,7 @@ except ImportError:
     from flowcraft.generator.process import Process
 
 
-class PatlasMapping(Process):
+class MappingPatlas(Process):
 
     def __init__(self, **kwargs):
 
