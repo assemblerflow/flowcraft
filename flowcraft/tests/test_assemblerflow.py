@@ -56,3 +56,23 @@ def test_build_file_2(tmp):
                                        "lib", "params.config",
                                        "resources.config", "teste.html",
                                        "teste.nf", "user.config"]
+
+
+def test_build_recipe(tmp):
+
+    sys.argv.append(1)
+    p = os.path.join(os.path.abspath(tmp), "teste.nf")
+
+    args = af.get_args(["build", "-r", "innuca", "-o",
+                        "{}".format(p), "--pipeline-only"])
+    af.build(args)
+
+
+def test_build_recipe_innuendo(tmp):
+
+    sys.argv.append(1)
+    p = os.path.join(os.path.abspath(tmp), "teste.nf")
+
+    args = af.get_args(["build", "-r", "innuendo", "-o",
+                        "{}".format(p), "--pipeline-only"])
+    af.build(args)

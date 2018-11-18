@@ -268,7 +268,9 @@ class Process:
         of the current process.
         """
 
-        self.directives = {}
+        self.directives = {
+            self.template: {}
+        }
         """
         dict: Specifies the directives (cpus, memory, container) for each
         nextflow process in the template. If specified, this directives
@@ -581,7 +583,7 @@ class Process:
         # Update directives
         # Allowed attributes to write
         valid_directives = ["pid", "ignore_type", "ignore_pid", "extra_input",
-                            "group"]
+                            "group", "input_type"]
 
         for attribute, val in attr_dict.items():
 
@@ -589,6 +591,17 @@ class Process:
             # directive
             if attribute in valid_directives and hasattr(self, attribute):
                 setattr(self, attribute, val)
+
+            # The params attribute is special, in the sense that it provides
+            # information for the self.params attribute.
+            elif attribute == "params":
+                for name, value in val.items():
+                    if name in self.params:
+                        self.params[name]["default"] = value
+                    else:
+                        raise eh.ProcessError(
+                            "The parameter name '{}' does not exist for "
+                            "component '{}'".format(name, self.template))
 
             else:
                 for p in self.directives:

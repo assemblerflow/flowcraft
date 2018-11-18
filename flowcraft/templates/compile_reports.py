@@ -85,7 +85,7 @@ def main(reports, forks, dag, main_js):
         html_fh.write(html_template.format(
             json.dumps({"data": {"results": storage}}, separators=(",", ":"))))
 
-    with zipfile.ZipFile(MAIN_JS) as zf:
+    with zipfile.ZipFile(main_js) as zf:
         os.mkdir("src")
         zf.extractall("./src")
 

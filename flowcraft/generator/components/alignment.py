@@ -38,6 +38,7 @@ class Mafft(Process):
             "mafft"
         ]
 
+
 class ProgressiveMauve(Process):
     """Mauve to align sequences
 

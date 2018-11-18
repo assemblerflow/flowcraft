@@ -13,24 +13,27 @@ from os.path import join, dirname
 
 try:
     from __init__ import __version__, __build__
-    from generator.engine import NextflowGenerator, process_map
+    from generator.engine import NextflowGenerator
     from generator.inspect import NextflowInspector
     from generator.report import FlowcraftReport
-    from generator.recipe import brew_recipe, available_recipes
+    from generator.process_collector import collect_process_map
+    from generator.recipe import brew_innuendo, brew_recipe, list_recipes
     from generator.pipeline_parser import parse_pipeline, SanityError
     from generator.process_details import proc_collector, colored_print
     import generator.error_handling as eh
-except ImportError:
+except ImportError as e:
     from flowcraft import __version__, __build__
-    from flowcraft.generator.engine import NextflowGenerator, process_map
+    from flowcraft.generator.engine import NextflowGenerator
     from flowcraft.generator.inspect import NextflowInspector
     from flowcraft.generator.report import FlowcraftReport
-    from flowcraft.generator.recipe import brew_recipe, available_recipes
+    from flowcraft.generator.recipe import brew_innuendo, \
+        brew_recipe, list_recipes
     from flowcraft.generator.pipeline_parser import parse_pipeline, \
         SanityError
     from flowcraft.generator.process_details import proc_collector, \
         colored_print
     import flowcraft.generator.error_handling as eh
+    from flowcraft.generator.process_collector import collect_process_map
 
 logger = logging.getLogger("main")
 
@@ -77,13 +80,22 @@ def get_args(args=None):
         const=True, help="Check only the validity of the pipeline "
                          "string and exit.")
     group_lists.add_argument(
-        "-L", "--detailed-list", action="store_const", dest="detailed_list",
+        "-L", "--component-list", action="store_const", dest="detailed_list",
         const=True, help="Print a detailed description for all the "
-                         "currently available processes")
+                         "currently available processes.")
     group_lists.add_argument(
-        "-l", "--short-list", action="store_const", dest="short_list",
+        "-l", "--component-list-short", action="store_const", dest="short_list",
         const=True, help="Print a short list of the currently "
-                         "available processes")
+                         "available processes.")
+    group_lists.add_argument(
+        "--recipe-list", dest="recipe_list", action="store_const", const=True,
+        help="Print a short list of the currently available recipes."
+    )
+    group_lists.add_argument(
+        "--recipe-list-short", dest="recipe_list_short", action="store_const",
+        const=True, help="Print a condensed list of the currently available "
+                         "recipes"
+    )
     build_parser.add_argument(
         "-cr", "--check-recipe", dest="check_recipe",
         action="store_const", const=True,
@@ -102,6 +114,12 @@ def get_args(args=None):
         const=True, help="Only export the directives for the provided "
                          "components (via -t option) in JSON format to stdout. "
                          "No pipeline will be generated with this option."
+    )
+    build_parser.add_argument(
+        "-ft", "--fetch-tags", dest="fetch_docker_tags",
+        action="store_const", const=True, help="Allows to fetch all docker tags"
+                                               " for the components listed with"
+                                               " the -t flag."
     )
 
     # GENERAL OPTIONS
@@ -130,7 +148,7 @@ def get_args(args=None):
         help="Specify the inspection run mode."
     )
     inspect_parser.add_argument(
-        "-u", "--url", dest="url", default="http://192.92.149.169:80/",
+        "-u", "--url", dest="url", default="http://www.flowcraft.live:80/",
         help="Specify the URL to where the data should be broadcast"
     )
     inspect_parser.add_argument(
@@ -148,7 +166,7 @@ def get_args(args=None):
         help="Specify the path to the pipeline report JSON file."
     )
     reports_parser.add_argument(
-        "-u", "--url", dest="url", default="http://192.92.149.169:80/",
+        "-u", "--url", dest="url", default="http://www.flowcraft.live:80/",
         help="Specify the URL to where the data should be broadcast"
     )
     reports_parser.add_argument(
@@ -181,9 +199,9 @@ def validate_build_arguments(args):
     if args.detailed_list or args.short_list:
         return
 
-    # Skill all checks when exporting parameters AND providing at least one
+    # Skip all checks when exporting parameters AND providing at least one
     # component
-    if args.export_params or args.export_directives:
+    if args.export_params or args.export_directives or args.fetch_docker_tags:
         # Check if components provided
         if not args.tasks:
             logger.error(colored_print(
@@ -274,8 +292,14 @@ def build(args):
 
     # Disable standard logging for stdout when the following modes are
     #  executed:
-    if args.export_params or args.export_directives:
+    if args.export_params or args.export_directives or args.fetch_docker_tags:
         logger.setLevel(logging.ERROR)
+
+    if args.recipe_list_short:
+        list_recipes()
+
+    if args.recipe_list:
+        list_recipes(full=True)
 
     welcome = [
         "========= F L O W C R A F T =========",
@@ -293,13 +317,14 @@ def build(args):
     # appropriate recipe
     if args.recipe:
         if args.recipe == "innuendo":
-            pipeline_string = brew_recipe(args, available_recipes)
+            pipeline_string = brew_innuendo(args)
         else:
-            pipeline_string = available_recipes[args.recipe]
+            # pipeline_string = available_recipes[args.recipe]
+            pipeline_string = brew_recipe(args.recipe)
             if args.tasks:
                 logger.warning(colored_print(
-                    "-t parameter will be ignored for recipe: {}\n"
-                        .format(args.recipe), "yellow_bold")
+                    "-t parameter will be ignored for recipe: {}\n".format(
+                        args.recipe), "yellow_bold")
                 )
 
         if args.check_recipe:
@@ -309,6 +334,8 @@ def build(args):
             sys.exit(0)
     else:
         pipeline_string = args.tasks
+
+    process_map = collect_process_map()
 
     # used for lists print
     proc_collector(process_map, args, pipeline_string)
@@ -327,6 +354,7 @@ def build(args):
 
     nfg = NextflowGenerator(process_connections=pipeline_list,
                             nextflow_file=parsed_output_nf,
+                            process_map=process_map,
                             pipeline_name=args.pipeline_name,
                             auto_dependency=args.no_dep,
                             merge_params=args.merge_params,
@@ -339,6 +367,9 @@ def build(args):
         sys.exit(0)
     elif args.export_directives:
         nfg.export_directives()
+        sys.exit(0)
+    elif args.fetch_docker_tags:
+        nfg.fetch_docker_tags()
         sys.exit(0)
     else:
         # building the actual pipeline nf file

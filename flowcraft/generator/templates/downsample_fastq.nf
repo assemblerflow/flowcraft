@@ -5,6 +5,9 @@ IN_genome_size_{{ pid }} = Channel.value(params.genomeSize{{ param_id }})
 IN_depth_{{ pid }} = Channel.value(params.depth{{ param_id }})
     .map{it -> it.toString().isNumber() ? it : exit(1, "The depth parameter must be a number or a float. Provided value: '${params.depth{{ param_id }}}'")}
 
+IN_seed_{{ pid }} = Channel.value(params.seed{{ param_id }})
+    .map{it -> it.toString().isNumber() ? it : exit(1, "The seed parameter must be a number or a float. Provided value: '${params.seed{{ param_id }}}'")}
+
 clear = params.clearInput{{ param_id }} ? "true" : "false"
 checkpointClear_{{ pid }} = Channel.value(clear)
 
@@ -20,6 +23,7 @@ process downsample_fastq_{{ pid }} {
     set sample_id, file(fastq_pair) from {{ input_channel }}
     val gsize from IN_genome_size_{{ pid }}
     val depth from IN_depth_{{ pid }}
+    val seed from IN_seed_{{ pid }}
     val clear from checkpointClear_{{ pid }}
 
     output:

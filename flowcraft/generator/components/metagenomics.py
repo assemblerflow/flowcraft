@@ -42,7 +42,7 @@ class Kraken(Process):
         ]
 
 
-class MaxBin2(Process):
+class Maxbin2(Process):
     """MaxBin2, a metagenomics binning software
 
             This process is set with:
@@ -139,6 +139,12 @@ class Megahit(Process):
                     "'default', megahit will use the default k-mer lengths. "
                     "(default: $params.megahitKmers)"
             },
+            "fastg": {
+                "default": "false",
+                "description":
+                    "Converts megahit intermediate contigs to fastg"
+
+            },
             "clearInput": {
                 "default": "false",
                 "description":
@@ -155,7 +161,17 @@ class Megahit(Process):
             "container": "flowcraft/megahit",
             "version": "1.1.3-0.1",
             "scratch": "true"
-        }}
+        },
+            "megahit_fastg": {
+                "container": "flowcraft/megahit",
+                "version": "1.1.3-0.1",
+            }
+        }
+
+        self.status_channels = [
+            "megahit",
+            "megahit_fastg"
+        ]
 
 
 class Metaspades(Process):
@@ -295,7 +311,7 @@ class RemoveHost(Process):
             "report_remove_host"
         ]
 
-class MetaProb(Process):
+class Metaprob(Process):
     """MetaProb to bin metagenomic reads interface
 
             This process is set with:

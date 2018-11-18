@@ -5,7 +5,7 @@ except ImportError:
     from flowcraft.generator.process import Process
 
 
-class PatlasMashDist(Process):
+class MashDist(Process):
 
     def __init__(self, **kwargs):
 
@@ -66,7 +66,7 @@ class PatlasMashDist(Process):
         })
 
 
-class PatlasMashScreen(Process):
+class MashScreen(Process):
 
     def __init__(self, **kwargs):
 
@@ -103,13 +103,13 @@ class PatlasMashScreen(Process):
         self.directives = {
             "mashScreen": {
                 "container": "flowcraft/mash-patlas",
-                "version": "1.5.2-1",
+                "version": "1.6.0-1",
                 "cpus": 1,
                 "memory": "{ 4.GB * task.attempt }"
             },
             "mashOutputJson": {
                 "container": "flowcraft/mash-patlas",
-                "version": "1.5.2-1",
+                "version": "1.6.0-1",
                 "cpus": 1,
                 "memory": "'4GB'"
             }
@@ -154,7 +154,7 @@ class MashSketchFasta(Process):
         self.directives = {
             "mashSketchFasta": {
                 "container": "flowcraft/mash-patlas",
-                "version": "1.4.1",
+                "version": "1.6.0-1",
                 "cpus": 1,
                 "memory": "{ 4.GB * task.attempt }"
             },
@@ -202,7 +202,7 @@ class MashSketchFastq(MashSketchFasta):
         ]
 
 
-class FastAniMatrix(Process):
+class FastAni(Process):
 
     def __init__(self, **kwargs):
 

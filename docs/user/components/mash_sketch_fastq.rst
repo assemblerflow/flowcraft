@@ -4,7 +4,9 @@ mash_sketch_fastq
 Purpose
 -------
 
-This component performs mash sketch for fastq input files.
+This component performs mash sketch for fastq input files. These sketches can
+be used by ``mash_dist`` and ``mash_screen`` components to fetch the
+reference file for mash.
 
 .. note::
     - MASH documentation can be found `here <https://mash.readthedocs.io/en/latest/>`_.
@@ -52,4 +54,4 @@ Default directives
 
 - ``mashSketchFastq``:
     - ``container``: flowcraft/mash-patlas
-    - ``version``: 1.4.1
+    - ``version``: 1.6.0-1

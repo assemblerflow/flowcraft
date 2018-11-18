@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import json
+import uuid
 import signal
 import socket
 import hashlib
@@ -42,7 +43,7 @@ class FlowcraftReport:
         """
 
         if not ip_addr:
-            self.app_address = "http://192.92.149.169:80/"
+            self.app_address = "http://www.flowcraft.live:80/"
         else:
             self.app_address = ip_addr
             """
@@ -195,7 +196,8 @@ class FlowcraftReport:
             # Get hash from the current working dir and hostname
             workdir = os.getcwd().encode("utf8")
             hostname = socket.gethostname().encode("utf8")
-            dir_hash = hashlib.md5(workdir + hostname)
+            hardware_addr = str(uuid.getnode()).encode("utf8")
+            dir_hash = hashlib.md5(workdir + hostname + hardware_addr)
 
             return pipeline_hash.hexdigest() + dir_hash.hexdigest()
 

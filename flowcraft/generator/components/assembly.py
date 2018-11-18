@@ -5,6 +5,49 @@ except ImportError:
     from flowcraft.generator.process import Process
 
 
+class Bcalm(Process):
+    """Bcalm process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.params = {
+            "bcalmKmerSize": {
+                "default": 31,
+                "description":
+                    "size of a kmer"
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+            }
+        }
+
+        self.directives = {"bcalm": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "quay.io/biocontainers/bcalm",
+            "version": "2.2.0--hd28b015_2",
+            "scratch": "true"
+        }}
+
+
 class Spades(Process):
     """Spades process template interface
 
@@ -27,6 +70,7 @@ class Spades(Process):
         self.output_type = "fasta"
 
         self.link_end.append({"link": "SIDE_max_len", "alias": "SIDE_max_len"})
+        self.link_start.append("gfa1")
 
         self.dependencies = ["integrity_coverage"]
 
@@ -58,6 +102,11 @@ class Spades(Process):
                     "is only useful to remove temporary files in large "
                     "workflows and prevents nextflow's resume functionality. "
                     "Use with caution."
+            },
+            "disableRR": {
+                "default": "false",
+                "description":
+                    "disables repeat resolution stage of assembling."
             }
         }
 
@@ -85,7 +134,7 @@ class Skesa(Process):
             "cpus": 4,
             "memory": "{ 5.GB * task.attempt }",
             "container": "flowcraft/skesa",
-            "version": "2.1-1",
+            "version": "2.3.0-1",
             "scratch": "true"
         }}
 
@@ -177,3 +226,66 @@ class ViralAssembly(Process):
                     "Use with caution."
             }
         }
+
+
+class Abyss(Process):
+    """ABySS process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+        self.link_start.append("gfa1")
+
+        self.params = {
+            "abyssKmer": {
+                "default": "96",
+                "description":
+                    "kmer size for assembly."
+            }
+        }
+
+        self.directives = {"abyss": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "flowcraft/abyss",
+            "version": "2.1.1",
+            "scratch": "true"
+        }}
+
+
+class Unicycler(Process):
+    """Unicycler process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+        self.link_start.append("gfa1")
+
+        self.directives = {"unicycler": {
+            "cpus": 4,
+            "container": "quay.io/biocontainers/unicycler",
+            "version": "0.4.7--py36hdbcaa40_0",
+            "scratch": "true"
+        }}

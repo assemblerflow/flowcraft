@@ -1,16 +1,22 @@
 try:
     from generator.process_details import colored_print
+    import generator.error_handling as eh
+    from generator import recipes
 except ImportError:
     from flowcraft.generator.process_details import colored_print
+    import flowcraft.generator.error_handling as eh
+    from flowcraft.generator import recipes
 
 from collections import OrderedDict
 import sys
+import json
 import logging
+import pkgutil
 
 logger = logging.getLogger("main.{}".format(__name__))
 
 
-class Recipe:
+class InnuendoRecipe:
 
     def __init__(self):
         """Class to build automatic pipelines based on the processes provided.
@@ -482,7 +488,7 @@ class Recipe:
     #     return list(self.process_descriptions.keys())
 
 
-class Innuendo(Recipe):
+class Innuendo(InnuendoRecipe):
     """
     Recipe class for the INNUENDO Project. It has all the available in the
     platform for quick use of the processes in the scope of the project.
@@ -517,7 +523,7 @@ class Innuendo(Recipe):
         }
 
 
-def brew_recipe(args, available_recipes):
+def brew_innuendo(args):
     """Brews a given list of processes according to the recipe
 
     Parameters
@@ -534,15 +540,8 @@ def brew_recipe(args, available_recipes):
         List of process strings.
     """
 
-    # Exit if recipe does not exist
-    if args.recipe not in available_recipes:
-        logger.error(
-            colored_print("Please provide a recipe to use in automatic "
-                          "mode.", "red_bold"))
-        sys.exit(1)
-
     # Create recipe class instance
-    automatic_pipeline = available_recipes[args.recipe]()
+    automatic_pipeline = Innuendo()
 
     if not args.tasks:
         input_processes = " ".join(
@@ -560,14 +559,170 @@ def brew_recipe(args, available_recipes):
     return pipeline_string
 
 
-# A dictionary of quick recipes
-available_recipes = {
-    "innuendo": Innuendo,
-    "plasmids": "integrity_coverage fastqc_trimmomatic (spades pilon "
-              "(mash_dist | abricate) | mash_screen | mapping_patlas)",
-    "plasmids_mapping": "integrity_coverage fastqc_trimmomatic mapping_patlas",
-    "plasmids_assembly": "integrity_coverage fastqc_trimmomatic (spades pilon"
-                         " mash_dist)",
-    "plasmids_mash": "integrity_coverage fastqc_trimmomatic mash_screen",
-    "den-im": "integrity_coverage fastqc_trimmomatic filter_poly remove_host bowtie retrieve_mapped viral_assembly assembly_mapping pilon split_assembly (dengue_typing | mafft raxml)",
-}
+class Recipe:
+
+    def __init__(self):
+
+        self.pipeline_str = None
+        """
+        str: The raw pipeline string, with no attribute or directives, except
+        for number indicators for when there are duplicate components.
+        
+        e.g.: "fastqc trimmomatic spades"
+        e.g.: "fastqc trimmomatic (spades#1 | spades#2)
+        """
+
+        self.directives = {}
+        """
+        dict: Dictionary with the parameters and directives for each component
+        in the pipeline_str attribute. Missing components will be left with
+        the default parameters and directives. 
+        """
+
+    def brew(self):
+
+        if not hasattr(self, "name"):
+            raise eh.RecipeError("Recipe class '{}' does not have a 'name' "
+                                 "attribute set".format(self.__class__))
+
+        if not self.pipeline_str:
+            raise eh.RecipeError("Recipe with name '{}' does not have a "
+                                 "pipeline_str attribute set".format(self.name))
+
+        for component, vals in self.directives.items():
+
+            params = vals.get("params", None)
+            directives = vals.get("directives", None)
+
+            # Check for component number symbol
+            if "#" in component:
+                _component = component.split("#")[0]
+            else:
+                _component = component
+
+            component_str = self._get_component_str(_component, params,
+                                                    directives)
+
+            self.pipeline_str = self.pipeline_str.replace(component,
+                                                          component_str)
+
+        return self.pipeline_str
+
+    @staticmethod
+    def _get_component_str(component, params=None, directives=None):
+        """ Generates a component string based on the provided parameters and
+        directives
+
+        Parameters
+        ----------
+        component : str
+            Component name
+        params : dict
+            Dictionary with parameter information
+        directives : dict
+            Dictionary with directives information
+
+        Returns
+        -------
+        str
+            Component string with the parameters and directives, ready for
+            parsing by flowcraft engine
+        """
+
+        final_directives = {}
+
+        if directives:
+            final_directives = directives
+
+        if params:
+            final_directives["params"] = params
+
+        if final_directives:
+            return "{}={}".format(
+                component, json.dumps(final_directives, separators=(",", ":")))
+        else:
+            return component
+
+
+def brew_recipe(recipe_name):
+    """Returns a pipeline string from a recipe name.
+
+    Parameters
+    ----------
+    recipe_name : str
+        Name of the recipe. Must match the name attribute in one of the classes
+        defined in :mod:`flowcraft.generator.recipes`
+
+    Returns
+    -------
+    str
+        Pipeline string ready for parsing and processing by flowcraft engine
+    """
+
+    # This will iterate over all modules included in the recipes subpackage
+    # It will return the import class and the module name, algon with the
+    # correct prefix
+    prefix = "{}.".format(recipes.__name__)
+    for importer, modname, _ in pkgutil.iter_modules(recipes.__path__, prefix):
+
+        # Import the current module
+        _module = importer.find_module(modname).load_module(modname)
+
+        # Fetch all available classes in module
+        _recipe_classes = [cls for cls in _module.__dict__.values() if
+                           isinstance(cls, type)]
+
+        # Iterate over each Recipe class, and check for a match with the
+        # provided recipe name.
+        for cls in _recipe_classes:
+            # Create instance of class to allow fetching the name attribute
+            recipe_cls = cls()
+            if getattr(recipe_cls, "name", None) == recipe_name:
+                return recipe_cls.brew()
+
+    logger.error(
+        colored_print("Recipe name '{}' does not exist.".format(recipe_name))
+    )
+    sys.exit(1)
+
+
+def list_recipes(full=False):
+    """Method that iterates over all available recipes and prints their
+    information to the standard output
+
+    Parameters
+    ----------
+    full : bool
+        If true, it will provide the pipeline string along with the recipe name
+    """
+
+    logger.info(colored_print(
+        "\n===== L I S T   O F   R E C I P E S =====\n",
+        "green_bold"))
+
+    # This will iterate over all modules included in the recipes subpackage
+    # It will return the import class and the module name, algon with the
+    # correct prefix
+    prefix = "{}.".format(recipes.__name__)
+    for importer, modname, _ in pkgutil.iter_modules(recipes.__path__, prefix):
+
+        # Import the current module
+        _module = importer.find_module(modname).load_module(modname)
+
+        # Fetch all available classes in module
+        _recipe_classes = [cls for cls in _module.__dict__.values() if
+                           isinstance(cls, type)]
+
+        # Iterate over each Recipe class, and check for a match with the
+        # provided recipe name.
+        for cls in _recipe_classes:
+
+            recipe_cls = cls()
+
+            if hasattr(recipe_cls, "name"):
+                logger.info(colored_print("=> {}".format(recipe_cls.name), "blue_bold"))
+                if full:
+                    logger.info(colored_print("\t {}".format(recipe_cls.__doc__), "purple_bold"))
+                    logger.info(colored_print("Pipeline string: {}\n".format(recipe_cls.pipeline_str), "yellow_bold"))
+
+    sys.exit(0)
