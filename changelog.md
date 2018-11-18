@@ -2,6 +2,8 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+## 1.4.0
+
 ### New features
 
 - Added new `recipe` system to flowcraft along with 6 starting recipes.
