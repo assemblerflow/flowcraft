@@ -21,7 +21,7 @@ process mafft_{{ pid }} {
     file(assembly) from mafft_input.collect()
 
     output:
-    file ("*.align") into {{ output_channel }}q
+    file ("*.align") into {{ output_channel }}
     {% with task_name="mafft", sample_id="val('single')" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
