@@ -25,7 +25,7 @@ class Denim(Recipe):
                             "split_assembly " \
                             "dengue_typing " \
                             "mafft " \
-                            "raxmlfow   "
+                            "raxml"
 
         # Recipe parameters and directives
         self.directives = {
