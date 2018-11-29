@@ -2,6 +2,10 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+### Bug fixes
+
+- Fix bug in `momps`componentrelated to added in the introduction of the clean input parameter
+
 ## 1.4.0
 
 ### New features
