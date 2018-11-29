@@ -4,7 +4,7 @@
 
 ### Bug fixes
 
-- Fix bug in `momps`componentrelated to added in the introduction of the clean input parameter
+- Fix bug in `momps`component related to added in the introduction of the clear input parameter
 
 ## 1.4.0
 
