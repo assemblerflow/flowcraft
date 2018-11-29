@@ -2,6 +2,11 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+### Bug fixes
+
+- Fixed bug with the `-ft` parameters not retrieving the dockerhub tags for 
+all the components.
+
 ## 1.4.0
 
 ### New features
