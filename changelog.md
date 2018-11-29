@@ -4,8 +4,10 @@
 
 ### Bug fixes
 
+- Fix bug in `momps`component related to added in the introduction of the clear input parameter
 - Fixed bug with the `-ft` parameters not retrieving the dockerhub tags for 
 all the components.
+
 
 ## 1.4.0
 

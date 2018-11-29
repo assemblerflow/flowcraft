@@ -48,8 +48,8 @@ process momps_{{ pid }} {
             if [ "$clear" = "true" ];
             then
                 work_regex=".*/work/.{2}/.{30}/.*"
-                file_source1=\$(readlink -f \$(pwd)/${fastq_pair[0]})
-                file_source2=\$(readlink -f \$(pwd)/${fastq_pair[1]})
+                file_source1=\$(readlink -f \$(pwd)/${fastq[0]})
+                file_source2=\$(readlink -f \$(pwd)/${fastq[1]})
                 if [[ "\$file_source1" =~ \$work_regex ]]; then
                     rm \$file_source1 \$file_source2
                 fi
