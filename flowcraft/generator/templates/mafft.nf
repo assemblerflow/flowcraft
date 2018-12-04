@@ -1,8 +1,8 @@
 // True when a dengue_typing secondary channel is connected
-has_ref_{{pid}} = binding.hasVariable('_ref_seqTyping_{{pid}}')
+has_ref_{{pid}} = binding.hasVariable('_ref_seqTyping_{{ pid }}')
 
 if ( has_ref_{{pid}} ){
-    {{ input_channel }}.map{ it[1] }.collect().mix(_ref_seqTyping_{{pid}}.unique()).set{mafft_input}
+    {{ input_channel }}.map{ it[1] }.collect().mix(_ref_seqTyping_{{pid}}.unique{it.name}).set{mafft_input}
 } else {
     {{ input_channel }}.map{ it[1] }.collect().set{mafft_input}
 }

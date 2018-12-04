@@ -33,7 +33,6 @@ process dengue_typing_{{ pid }} {
             parse_fasta.py -t \$(cat reference)  -f /NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta
             json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'},{'sample':'\$(cat header.txt)','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
         else
-            echo "coco com xixi"
             json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
         fi
 
