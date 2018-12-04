@@ -1531,7 +1531,9 @@ class NextflowInspector:
         # Get name of the pipeline from the log file
         with open(self.log_file) as fh:
             header = fh.readline()
-        pipeline_path = re.match(".*nextflow run ([^\s]+).*", header).group(1)
+
+        # Regex supports absolute paths and relative paths
+        pipeline_path = re.match(".*\s([/\w/]*\w*.nf).*", header).group(1)
 
         # Get hash from the entire pipeline file
         pipeline_hash = hashlib.md5()
