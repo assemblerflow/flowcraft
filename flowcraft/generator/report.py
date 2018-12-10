@@ -185,8 +185,7 @@ class FlowcraftReport:
             with open(self.log_file) as fh:
                 header = fh.readline()
 
-            pipeline_path = re.match(
-                ".*nextflow run ([^\s]+).*", header).group(1)
+            pipeline_path = re.match(".*\s([/\w/]*\w*.nf).*", header).group(1)
 
             # Get hash from the entire pipeline file
             pipeline_hash = hashlib.md5()
