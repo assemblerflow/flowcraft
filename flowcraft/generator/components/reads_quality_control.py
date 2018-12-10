@@ -117,7 +117,7 @@ class TrueCoverage(Process):
         }
 
 
-class FastQC(Process):
+class Fastqc(Process):
     """FastQC process template interface
 
     This process is set with:

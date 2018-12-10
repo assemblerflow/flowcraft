@@ -1,6 +1,7 @@
 import re
 import os
 import sys
+import uuid
 import time
 import curses
 import signal
@@ -1530,7 +1531,9 @@ class NextflowInspector:
         # Get name of the pipeline from the log file
         with open(self.log_file) as fh:
             header = fh.readline()
-        pipeline_path = re.match(".*nextflow run ([^\s]+).*", header).group(1)
+
+        # Regex supports absolute paths and relative paths
+        pipeline_path = re.match(".*\s([/\w/]*\w*.nf).*", header).group(1)
 
         # Get hash from the entire pipeline file
         pipeline_hash = hashlib.md5()
@@ -1540,7 +1543,8 @@ class NextflowInspector:
         # Get hash from the current working dir and hostname
         workdir = self.workdir.encode("utf8")
         hostname = socket.gethostname().encode("utf8")
-        dir_hash = hashlib.md5(workdir + hostname)
+        hardware_addr = str(uuid.getnode()).encode("utf8")
+        dir_hash = hashlib.md5(workdir + hostname + hardware_addr)
 
         return pipeline_hash.hexdigest() + dir_hash.hexdigest()
 
