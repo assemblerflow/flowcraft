@@ -12,7 +12,6 @@ if (params.reference{{ param_id }}){
 
     reference_in_{{ pid }} = Channel.fromPath(params.reference{{ param_id }})
         .map{it -> file(it).exists() ? [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.') ,it] : null}
-        .ifEmpty{ exit 1, "No fasta file was provided"}
 
     process bowtie_build_{{ pid }} {
 
@@ -32,6 +31,13 @@ if (params.reference{{ param_id }}){
 
         script:
         """
+        # checking if reference file is empty. Moved here due to allow reference file to be inside the container.
+        if [ ! -f "$fasta" ]
+        then
+            echo "Error: ${fasta} file not found."
+            exit 1
+        fi
+
         bowtie2-build ${fasta} $build_id > ${build_id}_bowtie2_build.log
         """
     }

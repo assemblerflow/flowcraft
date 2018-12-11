@@ -23,7 +23,9 @@ class Denim(Recipe):
                             "assembly_mapping " \
                             "pilon " \
                             "split_assembly " \
-                            "(dengue_typing | mafft raxml)"
+                            "dengue_typing " \
+                            "mafft " \
+                            "raxml"
 
         # Recipe parameters and directives
         self.directives = {

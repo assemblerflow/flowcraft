@@ -44,6 +44,8 @@ SIDE_max_len_spades = Channel.create()
 SIDE_max_len_megahit = Channel.create()
 SIDE_max_len_{{ pid }}.into{SIDE_max_len_spades ; SIDE_max_len_megahit}
 
+disableRR_{{ pid }} = "false"
+
 process va_spades_{{ pid }} {
 
     // Send POST request to platform
@@ -59,6 +61,7 @@ process va_spades_{{ pid }} {
     val opts from IN_spades_opts_{{ pid }}
     val kmers from IN_spades_kmers_{{ pid }}
     val clear from checkpointClearSpades_{{ pid }}
+    val disable_rr from disableRR_{{ pid }}
 
     output:
     set sample_id, file({task.exitStatus == 1 ? ".exitcode" : '*_spades*.fasta'}) into assembly_spades
