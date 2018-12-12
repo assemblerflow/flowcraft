@@ -35,8 +35,8 @@ process compile_reports {
 
     input:
     file report from master_report.collect()
-    file forks from Channel.fromPath(".forkTree.json")
-    file dag from Channel.fromPath(".treeDag.json")
+    file forks from Channel.fromPath("${workflow.projectDir}/.forkTree.json")
+    file dag from Channel.fromPath("${workflow.projectDir}/.treeDag.json")
     file js from Channel.fromPath("${workflow.projectDir}/resources/main.js.zip")
 
     output:
