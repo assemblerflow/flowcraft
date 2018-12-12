@@ -183,9 +183,19 @@ class FlowcraftReport:
         if self.watch:
 
             with open(self.log_file) as fh:
-                header = fh.readline()
 
-            pipeline_path = re.match(".*\s([/\w/]*\w*.nf).*", header).group(1)
+                # Searches for the first occurence of the nextflow pipeline
+                # file name in the .nextflow.log file
+                while 1:
+                    line = fh.readline()
+                    if not line:
+                        break
+                    try:
+                        pipeline_path = re.match(".*\s([/\w/]*\w*.nf).*", line)\
+                            .group(1)
+                        break
+                    except AttributeError:
+                        continue
 
             # Get hash from the entire pipeline file
             pipeline_hash = hashlib.md5()
