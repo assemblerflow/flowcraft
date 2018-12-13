@@ -7,6 +7,10 @@
 - Fix bug in `momps`component related to added in the introduction of the clear input parameter
 - Fixed bug with the `-ft` parameters not retrieving the dockerhub tags for 
 all the components.
+- Fix inspect and report mode to fetch the nextflow file independently of its 
+position in the `nextflow run` command inside the .nextflow.log file.
+- Fix parsing of .nextflow.log file when searching for `nextflow run` command.
+
 
 ### Minor/Other changes
 
