@@ -1,0 +1,2 @@
+Log with command
+nextflow run file.nf -profile docker

@@ -16,9 +16,11 @@ from pympler.asizeof import asizeof
 try:
     import generator.error_handling as eh
     from generator.process_details import colored_print
+    from generator.utils import get_nextflow_filepath
 except ImportError:
     import flowcraft.generator.error_handling as eh
     from flowcraft.generator.process_details import colored_print
+    from flowcraft.generator.utils import get_nextflow_filepath
 
 logger = logging.getLogger("main.{}".format(__name__))
 
@@ -182,20 +184,9 @@ class FlowcraftReport:
 
         if self.watch:
 
-            with open(self.log_file) as fh:
-
-                # Searches for the first occurence of the nextflow pipeline
-                # file name in the .nextflow.log file
-                while 1:
-                    line = fh.readline()
-                    if not line:
-                        break
-                    try:
-                        pipeline_path = re.match(".*\s([/\w/]*\w*.nf).*", line)\
-                            .group(1)
-                        break
-                    except AttributeError:
-                        continue
+            # Searches for the first occurence of the nextflow pipeline
+            # file name in the .nextflow.log file
+            pipeline_path = get_nextflow_filepath(self.log_file)
 
             # Get hash from the entire pipeline file
             pipeline_hash = hashlib.md5()
