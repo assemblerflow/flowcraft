@@ -376,12 +376,15 @@ class SplitAssembly(Process):
         self.input_type = "fasta"
         self.output_type = "fasta"
 
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
         self.params = {
             "size": {
                 "default": "null",
                 "description": "Minimum contig size"
             }
         }
+
 
         self.directives = {
             "split_assembly": {

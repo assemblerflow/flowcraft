@@ -4,11 +4,12 @@ process dengue_typing_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { sample_id }
-    errorStrategy "ignore"
+    errorStrategy { task.exitStatus == 120 ? 'ignore' : 'ignore' }
     publishDir "results/dengue_typing/${sample_id}/"
 
+
     input:
-    set sample_id, file(assembly) from {{ input_channel }}
+    set sample_id, file(assembly), file(fastq) from {{ input_channel }}
 
     output:
     file "seq_typing*"
@@ -25,15 +26,29 @@ process dengue_typing_{{ pid }} {
         mkdir rematch_temp
         cp -r /NGStools/ReMatCh rematch_temp
         export PATH="\$(pwd)/rematch_temp/ReMatCh:\$PATH"
-        seq_typing.py assembly --org Dengue Virus -f ${assembly} -o ./ -j $task.cpus -t nucl
 
-        if [ ${params.reference{{ param_id}} } == "true" ];
+        echo \$(cat ${assembly})
+
+        if [ \$(cat ${assembly}) == "fail" ];
         then
-            awk 'NR == 2 { print \$4 }' seq_typing.report_types.tab > reference
-            parse_fasta.py -t \$(cat reference)  -f /NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta
-            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'},{'sample':'\$(cat header.txt)','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
+            seq_typing.py reads --org Dengue Virus  -o ./ -j $task.cpus -f ${fastq[0]} ${fastq[1]}
+
+            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'column':'typing'}]}"
+
+            rm ${assembly} && exit 120
+
         else
-            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
+            seq_typing.py assembly --org Dengue Virus -f ${assembly} -o ./ -j $task.cpus -t nucl
+
+            if [ ${params.reference{{ param_id}} } == "true" ];
+            then
+                awk 'NR == 2 { print \$4 }' seq_typing.report_types.tab > reference
+                parse_fasta.py -t \$(cat reference)  -f /NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta
+                json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'},{'sample':'\$(cat header.txt)','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
+            else
+                json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
+            fi
+
         fi
 
 
