@@ -34,8 +34,8 @@ Code documentation
 
 """
 
-__version__ = "1.0.1"
-__build__ = "20.09.2018"
+__version__ = "1.0.2"
+__build__ = "28.12.2018"
 __template__ = "raxml-nf"
 
 logger = get_logger(__file__)
@@ -43,6 +43,7 @@ logger = get_logger(__file__)
 
 if __file__.endswith(".command.sh"):
     NEWICK = '$newick'
+    LABELS = bool('$label')
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("NEWICK: {}".format(NEWICK))
@@ -50,7 +51,7 @@ if __file__.endswith(".command.sh"):
 
 
 @MainWrapper
-def main(newick):
+def main(newick, labels):
     """Main executor of the process_newick template.
 
     Parameters
@@ -62,19 +63,45 @@ def main(newick):
 
     logger.info("Starting newick file processing")
 
-    print(newick)
+    #load tree and midpoint root
 
     tree = dendropy.Tree.get(file=open(newick, 'r'), schema="newick")
 
     tree.reroot_at_midpoint()
 
-    to_write=tree.as_string("newick").strip().replace("[&R] ", '').replace(' ', '_').replace("'", "")
+    to_write_trees=tree.as_string("newick").strip().replace("[&R] ", '').replace(' ', '_').replace("'", "")
 
+    #add labels to replace taxon names in phylocanvas
+    labels_dict = {}
+
+    if labels:
+
+        original_labels = tree.update_taxon_namespace()
+
+        print(original_labels)
+
+        for item in original_labels:
+
+            original_name = str(item).strip().replace("[&R] ", '').replace(' ', '_').replace("'", "")
+
+            # if it's a reference sequence
+            if '|' in original_name:
+                new_name = original_name.split('|')[0]
+            else:
+                #in case it's a reversed complement sequence
+                new_name = original_name.replace("_R_","").split('_')[0]
+
+            labels_dict[original_name] = new_name
+
+    # write report in json format
     with open(".report.json", "w") as json_report:
         json_dic = {
             "treeData": [{
                 "trees": [
-                    to_write
+                    to_write_trees
+                ],
+                "labels":[
+                    labels_dict
                 ]
             }],
         }
@@ -86,6 +113,6 @@ def main(newick):
 
 
 if __name__ == '__main__':
-
-    main(NEWICK)
+    main(NEWICK, LABELS)
+    #main("/home/ines/temp/RAxML_bipartitionsBranchLabels.denim.nf", "True")
 
