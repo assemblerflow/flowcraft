@@ -114,5 +114,4 @@ def main(newick, labels):
 
 if __name__ == '__main__':
     main(NEWICK, LABELS)
-    #main("/home/ines/temp/RAxML_bipartitionsBranchLabels.denim.nf", "True")
 
