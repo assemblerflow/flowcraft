@@ -53,7 +53,7 @@ def test_build_file_2(tmp):
 
     assert sorted(os.listdir(tmp)) == [".forkTree.json", ".treeDag.json",
                                        "containers.config",
-                                       "lib", "params.config",
+                                       "lib", "manifest.config", "params.config",
                                        "resources.config", "teste.html",
                                        "teste.nf", "user.config"]
 

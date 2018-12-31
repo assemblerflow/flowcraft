@@ -150,6 +150,12 @@ class NextflowGenerator:
         See :func:`NextflowGenerator._get_params_string`
         """
 
+        self.manifest = ""
+        """
+        str: Stores de manifest directives string for the nextflow pipeline.
+        See :func:`NextflowGenerator._get_manifest_string`
+        """
+
         self.user_config = ""
         """
         str: Stores the user configuration file placeholder. This is an
@@ -1228,6 +1234,24 @@ class NextflowGenerator:
 
         return help_list
 
+    def _get_manifest_string(self):
+        """Returns the nextflow manifest config string to include in the
+        config file from the information on the pipeline.
+
+        Returns
+        -------
+        str
+            Nextflow manifest configuration string
+        """
+
+        config_str = ""
+
+        config_str += '\n\tname = "{}"'.format(self.pipeline_name)
+        config_str += '\n\tmainScript = "{}"'.format(self.nf_file)
+
+        return config_str
+
+
     @staticmethod
     def _render_config(template, context):
 
@@ -1253,6 +1277,7 @@ class NextflowGenerator:
         resources = ""
         containers = ""
         params = ""
+        manifest = ""
 
         if self.merge_params:
             params += self._get_merged_params_string()
@@ -1272,6 +1297,8 @@ class NextflowGenerator:
             resources += self._get_resources_string(p.directives, p.pid)
             containers += self._get_container_string(p.directives, p.pid)
 
+        manifest = self._get_manifest_string()
+
         self.resources = self._render_config("resources.config", {
             "process_info": resources
         })
@@ -1280,6 +1307,9 @@ class NextflowGenerator:
         })
         self.params = self._render_config("params.config", {
             "params_info": params
+        })
+        self.manifest = self._render_config("manifest.config", {
+            "manifest_info": manifest
         })
         self.help = self._render_config("Helper.groovy", {
             "nf_file": basename(self.nf_file),
@@ -1395,6 +1425,10 @@ class NextflowGenerator:
         # Write containers config
         with open(join(project_root, "params.config"), "w") as fh:
             fh.write(self.params)
+
+        # Write manifest config
+        with open(join(project_root, "manifest.config"), "w") as fh:
+            fh.write(self.manifest)
 
         # Write user config if not present in the project directory
         if not exists(join(project_root, "user.config")):

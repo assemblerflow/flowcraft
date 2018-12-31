@@ -2,6 +2,11 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+### New features
+
+- Added new `manifest.config` with the pipeline metadata
+
+
 ### Bug fixes
 
 - Fix bug in `momps`component related to added in the introduction of the clear input parameter
