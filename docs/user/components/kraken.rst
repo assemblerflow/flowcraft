@@ -27,7 +27,7 @@ Parameters
 Published results
 -----------------
 
-- ``results/annotation/kraken``: Stores the results of the screening
+- ``results/taxonomy/kraken``: Stores the results of the screening
   for each sample.
 
 Published reports
