@@ -45,6 +45,12 @@ class IntegrityCoverage(Process):
 
         self.link_start.extend(["SIDE_phred", "SIDE_max_len"])
 
+        #TODO - Alter container to dockerhub
+        self.directives = {"integrity_coverage": {
+            "container": "integrity_coverage",
+            "version": "1.0-1"
+        }}
+
 
 class CheckCoverage(Process):
     """Process template interface for additional integrity_coverage process

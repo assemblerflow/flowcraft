@@ -74,16 +74,19 @@ Code documentation
 
 """
 
-__version__ = "1.0.1"
-__build__ = "03082018"
+__version__ = "1.0.2"
+__build__ = "08012019"
 __template__ = "integrity_coverage-nf"
 
+import sys
 import os
 import bz2
 import gzip
 import json
 import zipfile
+import subprocess
 
+from subprocess import PIPE
 from itertools import chain
 
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
@@ -124,6 +127,12 @@ COPEN = {
     "gz": gzip.open,
     "bz2": bz2.open,
     "zip": zipfile.ZipFile
+}
+
+CTEST = {
+    "gz": ["gzip", "-t"],
+    "bz2": ["gzip", "-t"],
+    "zip": ["zip", "-T"]
 }
 
 MAGIC_DICT = {
@@ -178,6 +187,42 @@ def guess_file_compression(file_path, magic_dict=None):
             return file_type
 
     return None
+
+
+def uncompress_fastq(fastq_files, compression_type):
+    """Method to test fastq integrity using the shell command.
+
+    It uses the determined compression obtained in :py:func:`guess_file_compression`
+    and tests the integrity with the appropriate command. The command is stored
+    in the :py:data:`CTEST` dictionary. If the exit code if different than 0, the
+    file is corrupted and the method returns ``False``, otherwise returns ``True``.
+
+    Parameters
+    ----------
+    file_path : list
+        list containing the path to input files.
+    compression_type : str
+        File compression format.
+
+    Returns
+    -------
+    corrupted : True or False
+        If the uncompress test fails, it returns ``False``, otherwise,
+        returns ``True``.
+    """
+
+    for file_path in fastq_files:
+
+        compression_command = CTEST[compression_type]
+        cli = compression_command + [file_path]
+
+        p = subprocess.Popen(cli, stdout=PIPE)
+        p.communicate()
+
+        if p.returncode > 0:
+            return False
+
+    return True
 
 
 def get_qual_range(qual_str):
@@ -268,6 +313,7 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
     gmin, gmax = 99, 0
     encoding = []
     phred = None
+    ftype = None
 
     # Information for coverage estimation
     chars = 0
@@ -296,8 +342,6 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
                         "uncompressed file".format(fastq))
             file_objects.append(open(fastq))
 
-    logger.info("Starting FastQ file parsing")
-
     # The '*_encoding' file stores a string with the encoding ('Sanger')
     # If no encoding is guessed, 'None' should be stored
     # The '*_phred' file stores a string with the phred score ('33')
@@ -315,6 +359,13 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
             open(".fail", "w") as fail_fh:
 
         try:
+
+            logger.info("Testing uncompressing the files")
+
+            if not uncompress_fastq(fastq_pair,ftype):
+                raise EOFError
+
+            logger.info("Starting FastQ file parsing")
             # Iterate over both pair files sequentially using itertools.chain
             for i, line in enumerate(chain(*file_objects)):
 
