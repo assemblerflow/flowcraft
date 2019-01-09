@@ -1,3 +1,4 @@
+IN_expected_species_{{ pid }} = Channel.value(params.mlstSpecies{{ param_id }}})
 
 process mlst_{{ pid }} {
 
@@ -10,6 +11,7 @@ process mlst_{{ pid }} {
 
     input:
     set sample_id, file(assembly) from {{ input_channel }}
+    val expected_species from IN_expected_species_{{ pid }}
 
     output:
     file '*.mlst.txt' into LOG_mlst_{{ pid }}
@@ -19,30 +21,8 @@ process mlst_{{ pid }} {
     {% endwith %}
 
     script:
-    """
-    {
-        expectedSpecies=${params.mlstSpecies{{ param_id }}}
-        mlst $assembly >> ${sample_id}.mlst.txt
-        mlstSpecies=\$(cat *.mlst.txt | cut -f2)
-        json_str="{'expectedSpecies':\'\$expectedSpecies\',\
-            'species':'\$mlstSpecies',\
-            'st':'\$(cat *.mlst.txt | cut -f3)',\
-            'tableRow':[{'sample':'${sample_id}','data':[\
-                {'header':'MLST species','value':'\$mlstSpecies','table':'typing'},\
-                {'header':'MLST ST','value':'\$(cat *.mlst.txt | cut -f3)','table':'typing'}]}]}"
-        echo \$json_str > .report.json
+    mlst.py
 
-        if [ ! \$mlstSpecies = \$expectedSpecies ];
-        then
-            printf fail > .status
-        else
-            printf pass > .status
-        fi
-
-    } || {
-        printf fail > .status
-    }
-    """
 }
 
 process compile_mlst_{{ pid }} {

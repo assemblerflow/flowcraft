@@ -24,6 +24,7 @@ with a secondary channel into `mafft`
 - New version of DEN-IM recipe
 - `integrity_coverage` now checks the integrity of the compressed read files with the 
 appropriate software. 
+- `mlst` components now has it's own process template
 
 
 ## 1.4.0
