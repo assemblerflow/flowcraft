@@ -212,7 +212,7 @@ def main(sample_id, fastq_pair, max_len, kmer, clear):
 
     logger.info("Finished metaSPAdes subprocess with STDOUT:\\n"
                 "======================================\\n{}".format(stdout))
-    logger.info("Fished metaSPAdes subprocesswith STDERR:\\n"
+    logger.info("Fished metaSPAdes subprocess with STDERR:\\n"
                 "======================================\\n{}".format(stderr))
     logger.info("Finished metaSPAdes with return code: {}".format(
         p.returncode))

@@ -362,7 +362,7 @@ def main(sample_id, fastq_pair, gsize, minimum_coverage, opts):
 
             logger.info("Testing uncompressing the files")
 
-            if not uncompress_fastq(fastq_pair,ftype):
+            if not uncompress_fastq(fastq_pair, ftype):
                 raise EOFError
 
             logger.info("Starting FastQ file parsing")
