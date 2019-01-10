@@ -299,7 +299,7 @@ def main(sample_id, assembly, expected_species):
 
     pass_qc = False
 
-    novel_alleles = 'mlst_novel_alleles.fasta'
+    novel_alleles = '{}_mlst_novel_alleles.fasta'.format(sample_id)
 
     cli = [
         'mlst',

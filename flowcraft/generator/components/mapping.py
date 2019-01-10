@@ -5,7 +5,8 @@ except ImportError:
 
 
 class Bowtie(Process):
-    """bowtie2 to align short paired-end sequencing reads to long reference sequences
+    """
+    bowtie2 to align short paired-end sequencing reads to long reference sequences
 
         This process is set with:
 
@@ -13,7 +14,7 @@ class Bowtie(Process):
             - ``output_type``: bam
             - ``ptype``: mapping
 
-        """
+    """
 
     def __init__(self, **kwargs):
 
@@ -65,7 +66,8 @@ class Bowtie(Process):
 
 
 class RetrieveMapped(Process):
-    """Samtools process to  to align short paired-end sequencing reads to
+    """
+    Samtools process to  to align short paired-end sequencing reads to
     long reference sequences
 
         This process is set with:
@@ -74,7 +76,7 @@ class RetrieveMapped(Process):
             - ``output_type``: fastq
             - ``ptype``: mapping
 
-        """
+    """
 
     def __init__(self, **kwargs):
 
@@ -107,4 +109,65 @@ class RetrieveMapped(Process):
 
         self.status_channels = [
             "retrieve_mapped"
+        ]
+
+
+class InsertSize(Process):
+    """
+    Determines the sequencing insert size by reads mapping
+    to an assembly file
+
+        This process is set with:
+
+            - ``input_type``: fasta
+            - ``output_type``:
+            - ``ptype``: mapping
+
+        It contains one **secondary channel link end**:
+
+        - ``MAIN_fq`` (alias: ``_MAIN_assembly``): Receives the FastQ files
+        from the last process with ``fastq`` output type.
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = None
+
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
+        self.params = {
+            "distribution_plot": {
+                "default": "false",
+                "description": "Produces a distribution plot of the insert sizes."
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+            }
+        }
+
+        self.directives = {
+            "assembly_mapping_statistics": {
+                "container": "flowcraft/bowtie2_samtools",
+                "version": "1.0.0-1",
+                "memory": "{1.Gb*task.cpus*task.attempt}",
+                "cpus": 1
+            },
+            "insert_size": {
+                "container": "flowcraft/plotly",
+                "version": "3.5.0-1"
+            }
+        }
+
+        self.status_channels = [
+            "assembly_mapping_statistics",
+            "insert_size"
         ]

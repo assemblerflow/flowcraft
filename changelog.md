@@ -7,6 +7,10 @@
 - Added new `manifest.config` with the pipeline metadata
 
 
+### New components
+
+- Added component `insert_size`.
+
 ### Bug fixes
 
 - Fix bug in `momps`component related to added in the introduction of the clear input parameter

@@ -15,6 +15,7 @@ process mlst_{{ pid }} {
 
     output:
     file '*.mlst.txt' into LOG_mlst_{{ pid }}
+    file '*_mlst_novel_alleles.fasta' optinal true
     set sample_id, file(assembly), file(".status") into MAIN_mlst_out_{{ pid }}
     {% with task_name="mlst" %}
     {%- include "compiler_channels.txt" ignore missing -%}
