@@ -303,7 +303,7 @@ def filter_bam(coverage_info, bam_file, min_coverage, output_bam):
 
 def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
                             genome_size, contig_size, max_contigs,
-                            sample_id):
+                            sample_id, total_reads, total_mapped_reads):
     """Checks whether a filtered assembly passes a size threshold
 
     Given a minimum coverage threshold, this function evaluates whether an
@@ -327,12 +327,16 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
         Expected genome size.
     contig_size : dict
         Dictionary with the len of each contig. Contig headers as keys and
-        the corresponding lenght as values.
+        the corresponding length as values.
     max_contigs : int
         Maximum threshold for contig number. A warning is issued if this
         threshold is crossed.
     sample_id : str
         Id or name of the current sample
+    total_reads: int
+        Number of reads in the sample
+    total_mapped_reads: int
+        Number of reads that mapped to the assembly
 
     Returns
     -------
@@ -341,6 +345,8 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
         expected genome size.
 
     """
+
+    min_mapping = 0.95
 
     # Get size of assembly after filtering contigs below minimum_coverage
     assembly_len = sum([v for k, v in contig_size.items()
@@ -367,6 +373,22 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
 
     with open(".warnings", "w") as warn_fh, \
             open(".report.json", "w") as json_report:
+
+        logger.debug("Checking mapping statistics")
+
+        if total_mapped_reads > 0 and total_reads > 0:
+            if round((float(total_mapped_reads) / float(total_reads)), 2) >= min_mapping:
+                logger.debug("Mapped reads: {}%".format(
+                    round((float(total_mapped_reads) / float(total_reads)), 2) * 100))
+            else:
+                warn_msg = "Mapped reads: {}% (lower than {}%)".format(
+                            round((float(total_mapped_reads) / float(total_reads)), 2) * 100, min_mapping * 100)
+                logger.warning(warn_msg)
+                warn_fh.write(warn_msg)
+                fails.append("Mapped reads: {}%".format(
+                    round((float(total_mapped_reads) / float(total_reads)), 2) * 100))
+        else:
+            fails.append("No reads were mapped.")
 
         logger.debug("Checking assembly size after filtering : {}".format(
             assembly_len))
@@ -556,6 +578,76 @@ def get_assembly_size(assembly_file):
     return assembly_size, contig_size
 
 
+def get_mapping_statistics(mapping_file):
+    """Through stamtools flagstats, obtains the mapping statistic form a
+    mapping file.
+
+    Parameters
+    ----------
+    mapping_file : str
+        Path to mapping file (sam or bam).
+
+    Returns
+    -------
+    total_reads: int
+        Number of reads in the sample
+    total_mapped_reads: int
+        Number of reads that map to the assembly file
+    """
+
+    cli = ["samtools", "flagstats", mapping_file]
+
+    logger.debug("Runnig samtools flagstats subprocess with command: {}".format(
+        cli))
+
+    p = subprocess.Popen(cli, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = p.communicate()
+
+    # Attempt to decode STDERR output from bytes. If unsuccessful, coerce to
+    # string
+    try:
+        stderr = stderr.decode("utf8")
+        stdout = stdout.decode("utf8")
+    except (UnicodeDecodeError, AttributeError):
+        stderr = str(stderr)
+        stdout = str(stdout)
+
+    logger.info("Finished samtools flagstats subprocess with STDOUT:\\n"
+                "======================================\\n{}".format(stdout))
+    logger.info("Fished samtools flagstats subprocesswith STDERR:\\n"
+                "======================================\\n{}".format(stderr))
+    logger.info("Finished samtools flagstats with return code: {}".format(
+        p.returncode))
+
+    mapping_stats = {}
+
+    total_reads = 0
+    total_mapped_reads = 0
+
+    if not p.returncode:
+        stdout = stdout.splitlines()
+        for line in stdout:
+            line = line.splitlines()[0]
+            if len(line) > 0:
+                line = line.split(' ', 3)
+                field = line[3].split('(', 1)
+                if len(field) == 0:
+                    field = field[0].replace(' ', '_')
+                else:
+                    field = field[0].rsplit(' ', 1)[0].replace(' ', '_')
+                #mapped and unmapped reads?
+                mapping_stats[field] = {'qc_passed': int(line[0]), 'qc_failed': int(line[2])}
+
+    for field in sorted(mapping_stats):
+        if field == 'in_total':
+            total_reads = mapping_stats[field]['qc_passed'] + mapping_stats[field]['qc_failed']
+        elif field == 'mapped':
+            total_mapped_reads = mapping_stats[field]['qc_passed'] + mapping_stats[field][
+                'qc_failed']
+
+    return total_reads, total_mapped_reads
+
+
 @MainWrapper
 def main(sample_id, assembly_file, coverage_file, coverage_bp_file, bam_file,
          opts, gsize):
@@ -581,6 +673,10 @@ def main(sample_id, assembly_file, coverage_file, coverage_bp_file, bam_file,
     """
 
     min_assembly_coverage, max_contigs = opts
+
+    logger.info("Getting mapping statistics")
+
+    total_reads, total_mapped_reads = get_mapping_statistics(bam_file)
 
     logger.info("Starting assembly mapping processing")
 
@@ -608,7 +704,7 @@ def main(sample_id, assembly_file, coverage_file, coverage_bp_file, bam_file,
     logger.info("Checking filtered assembly")
     if check_filtered_assembly(coverage_info, coverage_bp_data, min_coverage,
                                gsize, contig_size, int(max_contigs),
-                               sample_id):
+                               sample_id, total_reads, total_mapped_reads):
         # Filter assembly contigs based on the minimum coverage.
         logger.info("Filtered assembly passed minimum size threshold")
         logger.info("Writting filtered assembly")

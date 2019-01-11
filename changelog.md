@@ -29,6 +29,8 @@ with a secondary channel into `mafft`
 - `integrity_coverage` now checks the integrity of the compressed read files with the 
 appropriate software. 
 - `mlst` components now has it's own process template
+- `assembly_mapping` now verifies the percentage of mapped reads, issuing a quality 
+control warning when it falls bellow 95% 
 
 
 ## 1.4.0
