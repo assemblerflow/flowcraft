@@ -479,6 +479,7 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
     with open(".warnings", "w") as warn_fh:
         t_80 = gsize * 1000000 * 0.8
         t_150 = gsize * 1000000 * 1.5
+
         # Check if assembly size of the first assembly is lower than 80% of the
         # estimated genome size. If True, redo the filtering without the
         # k-mer coverage filter
@@ -499,13 +500,22 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
             logger.debug("Checking updated assembly length: "
                          "{}".format(assembly_len))
             if assembly_len < t_80:
+                # The assembly size is still lower than 80% of the
+                # estimated genome size. Redoing the filtering without
+                # the k-mer coverage filter and the length filer.
+                assembly_obj.filter_contigs(*[])
 
-                warn_msg = "Assembly size smaller than the minimum" \
-                           " threshold of 80% of expected genome size: {}".format(
-                                assembly_len)
-                logger.warning(warn_msg)
-                warn_fh.write(warn_msg)
-                fails = warn_msg
+                assembly_len = assembly_obj.get_assembly_length()
+                logger.debug("Checking updated assembly length: "
+                             "{}".format(assembly_len))
+
+                if assembly_len < t_80:
+                    warn_msg = "Assembly size smaller than the minimum" \
+                               " threshold of 80% of expected genome size: {}".format(
+                                    assembly_len)
+                    logger.warning(warn_msg)
+                    warn_fh.write(warn_msg)
+                    fails = warn_msg
 
         if assembly_len > t_150:
 
@@ -536,9 +546,11 @@ def main(sample_id, assembly_file, gsize, opts, assembler):
         "{}.old".format(assembly_file)))
     assembly_obj.write_assembly("{}_proc.fasta".format(
         os.path.splitext(assembly_file)[0]))
+
     # Write report
     output_report = "{}.report.csv".format(sample_id)
     assembly_obj.write_report(output_report)
+
     # Write json report
     with open(".report.json", "w") as json_report:
         json_dic = {

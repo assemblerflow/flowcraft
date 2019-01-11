@@ -84,7 +84,6 @@ if __file__.endswith(".command.sh"):
     FASTQ_PAIR = '$fastq_pair'.split()
     MAX_LEN = int('$max_len'.strip())
     KMERS = '$kmers'.strip()
-    CLEAR = '$clear'
     DISABLE_RR = '$disable_rr'
     OPTS = [x.strip() for x in '$opts'.strip("[]").split(",")]
     CLEAR = '$clear'
