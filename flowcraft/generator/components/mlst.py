@@ -27,7 +27,8 @@ class Mlst(Process):
         self.output_type = "fasta"
 
         self.directives = {"mlst": {
-            "container": "ummidock/mlst",
+            "container": "flowcraft/mlst",
+            "version": "2.15.1-1"
         }}
 
         self.params = {
