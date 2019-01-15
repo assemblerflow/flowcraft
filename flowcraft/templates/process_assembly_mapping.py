@@ -376,6 +376,9 @@ def check_filtered_assembly(coverage_info, coverage_bp, minimum_coverage,
 
         logger.debug("Checking mapping statistics")
 
+        logger.debug("Number of mapped reads: {}".format(total_mapped_reads))
+        logger.debug("Total number of reads: {}".format(total_reads))
+
         if total_mapped_reads > 0 and total_reads > 0:
             if round((float(total_mapped_reads) / float(total_reads)), 2) >= min_mapping:
                 logger.debug("Mapped reads: {}%".format(
@@ -595,9 +598,9 @@ def get_mapping_statistics(mapping_file):
         Number of reads that map to the assembly file
     """
 
-    cli = ["samtools", "flagstats", mapping_file]
+    cli = ["samtools", "flagstat", mapping_file]
 
-    logger.debug("Runnig samtools flagstats subprocess with command: {}".format(
+    logger.debug("Runnig samtools flagstat subprocess with command: {}".format(
         cli))
 
     p = subprocess.Popen(cli, stdout=PIPE, stderr=PIPE)
