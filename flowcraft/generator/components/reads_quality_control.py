@@ -117,7 +117,7 @@ class TrueCoverage(Process):
                 "cpus": 4,
                 "memory": "'1GB'",
                 "container": "flowcraft/true_coverage",
-                "version": "3.2-1"
+                "version": "3.3-1"
             }
         }
 
