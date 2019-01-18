@@ -161,4 +161,59 @@ class DengueTyping(Process):
         ]
 
 
+class SeqSero2Reads(Process):
+    """SeqSero2 for reads process template interface
 
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: None
+        - ``ptype``: typing
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = None
+
+        self.directives = {
+            "seqsero2_reads": {
+                "cpus": 1,
+                "memory": "{ 1.GB * task.cpus * task.attempt }",
+                "container": "ummidock/seqsero2",
+                "version": "alpha-test-1",
+                "cache": "false",
+                "scratch": "true"
+            }
+        }
+
+
+class SeqSero2Assembly(Process):
+    """SeqSero2 for assembly process template interface
+
+    This process is set with:
+
+        - ``input_type``: fasta
+        - ``output_type``: None
+        - ``ptype``: typing
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = None
+
+        self.directives = {
+            "seqsero2_assembly": {
+                "cpus": 1,
+                "memory": "{ 1.GB * task.cpus * task.attempt }",
+                "container": "ummidock/seqsero2",
+                "version": "alpha-test-1",
+                "cache": "false",
+                "scratch": "true"
+            }
+        }

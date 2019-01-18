@@ -504,6 +504,7 @@ class Innuendo(InnuendoRecipe):
             "reads_download": [False, None,"integrity_coverage|seq_typing|patho_typing"],
             "patho_typing": [True, None, None],
             "seq_typing": [True, None, None],
+            "seqsero2_reads": [True, None, None],
             "integrity_coverage": [True, None, "fastqc_trimmomatic"],
             "fastqc_trimmomatic": [False, "integrity_coverage",
                                    "true_coverage"],
@@ -517,8 +518,9 @@ class Innuendo(InnuendoRecipe):
             "process_skesa": [False, "skesa", "assembly_mapping"],
             "assembly_mapping": [False, "process_spades", "pilon"],
             "pilon": [False, "assembly_mapping", "mlst"],
-            "mlst": [False, "pilon", "abricate|prokka|chewbbaca|sistr"],
+            "mlst": [False, "pilon", "abricate|prokka|chewbbaca|sistr|seqsero2_assembly"],
             "sistr": [True, "mlst", None],
+            "seqsero2_assembly": [True, "mlst", None],
             "abricate": [True, "mlst", None],
             #"prokka": [True, "mlst", None],
             "chewbbaca": [True, "mlst", None]
