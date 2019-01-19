@@ -161,7 +161,7 @@ class DengueTyping(Process):
         ]
 
 
-class SeqSero2Reads(Process):
+class Seqsero2Reads(Process):
     """SeqSero2 for reads process template interface
 
     This process is set with:
@@ -190,7 +190,7 @@ class SeqSero2Reads(Process):
         }
 
 
-class SeqSero2Assembly(Process):
+class Seqsero2Assembly(Process):
     """SeqSero2 for assembly process template interface
 
     This process is set with:
