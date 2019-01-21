@@ -23,7 +23,7 @@ process seqsero2_assembly_{{ pid }} {
     echo \$version_str > .versions
 
     status='error'
-    report_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqsero2_assembly','value':'NA','table':'typing'}]}]}"
+    report_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'serotype_seqsero2_assembly','value':'NA','table':'typing'}]}]}"
 
     {
       SeqSero2_package.py -m k -p $task.cpus -t 4 -i ${fasta[0]} -d ./seqsero2_out/
@@ -41,7 +41,7 @@ process seqsero2_assembly_{{ pid }} {
         sero='ND'
       fi
 
-      report_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqsero2_assembly','value':'\$sero','table':'typing'}]}]}"
+      report_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'serotype_seqsero2_assembly','value':'\$sero','table':'typing'}]}]}"
     fi
 
     echo \$status > .status

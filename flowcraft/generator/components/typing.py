@@ -217,3 +217,45 @@ class Seqsero2Assembly(Process):
                 "scratch": "true"
             }
         }
+
+
+class StxSeqtypingReads(Process):
+    """ecoli_stx_subtyping.py for reads process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: None
+        - ``ptype``: typing
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = None
+
+        self.params = {
+            "stx2covered": {
+                "default": 'null',
+                "description": "Minimal percentage of sequence covered to consider "
+                               "extra stx2 subtypes (value between [0, 100]) (default: 100)."
+            },
+            "stx2identity": {
+                "default": 'null',
+                "description": "Minimal sequence identity to consider extra stx2 "
+                               "subtypes (value between [0, 100]) (default: 99.5)."
+            }
+        }
+
+        self.directives = {
+            "stx_seqtyping_reads": {
+                "cpus": 4,
+                "memory": "{ 1.GB * task.cpus * task.attempt }",
+                "container": "ummidock/seq_typing",
+                "version": "2.2-01",
+                "cache": "false",
+                "scratch": "true"
+            }
+        }

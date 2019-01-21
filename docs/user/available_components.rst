@@ -165,6 +165,9 @@ Typing
 - :doc:`components/seq_typing`: Determines the type of a given sample from a set
   of reference sequences.
 
+- :doc:`components/stx_seqtyping_reads`: Gets Escherichia coli stx subtypes from raw
+  reads via seq_typing.
+
 - :doc:`components/sistr`: Serovar predictions from whole-genome sequence assemblies
   by determination of antigen gene and cgMLST gene alleles.
 

@@ -505,6 +505,7 @@ class Innuendo(InnuendoRecipe):
             "patho_typing": [True, None, None],
             "seq_typing": [True, None, None],
             "seqsero2_reads": [True, None, None],
+            "stx_seqtyping_reads": [True, None, None],
             "integrity_coverage": [True, None, "fastqc_trimmomatic"],
             "fastqc_trimmomatic": [False, "integrity_coverage",
                                    "true_coverage"],
