@@ -405,7 +405,8 @@ def main(sample_id, assembly, expected_species):
                       },
                      {'header': 'MLST ST',
                       'value': st,
-                      'table': 'typing'
+                      'table': 'typing',
+                      "columnBar": False
                       }
                  ]}
             ]

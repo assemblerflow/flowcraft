@@ -26,7 +26,8 @@ class Innuca(Recipe):
                             "spades " \
                             "process_spades " \
                             "pilon " \
-                            "mlst "
+                            "mlst " \
+                            "insert_size"
 
         # Recipe parameters and directives
         self.directives = {

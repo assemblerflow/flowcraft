@@ -28,6 +28,7 @@ position in the `nextflow run` command inside the .nextflow.log file.
 
 ### Minor/Other changes
 
+- Added `insert_size` to `innuca` recipe
 - `integrity_coverage` now checks the integrity of the compressed read files with the 
 appropriate software. 
 - `mlst` components now has it's own process template
