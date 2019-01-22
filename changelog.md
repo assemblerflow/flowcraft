@@ -4,33 +4,40 @@
 
 ### New features
 
+- Added support for the report system to:
+    - `maxbin2`
 - Added new `manifest.config` with the pipeline metadata
-
 
 ### New components
 
-- Added component `insert_size`.
+- `Kraken2`: Taxonomic identification on FastQ files
+- `insert_size`: calculates the inser size of a sample from mapping the reads
+back to an assembly
 
 ### Bug fixes
 
-- Fix bug in `momps`component related to added in the introduction of the clear input parameter
+- Fix bug in `momps`component related to added in the introduction of the clear 
+input parameter
 - Fixed bug with the `-ft` parameters not retrieving the dockerhub tags for 
 all the components.
+- Fixed bug in the `megahit` process where the fastg mode would break the process
 - Fix inspect and report mode to fetch the nextflow file independently of its 
 position in the `nextflow run` command inside the .nextflow.log file.
 - Fix parsing of .nextflow.log file when searching for `nextflow run` command.
-
+- Fixed bug between mash_sketch_fasta and mash_dist.
 
 ### Minor/Other changes
 
-- Added option to `dengue_typing` to retrieve closest reference sequence and link it 
-with a secondary channel into `mafft`
-- New version of DEN-IM recipe
 - `integrity_coverage` now checks the integrity of the compressed read files with the 
 appropriate software. 
 - `mlst` components now has it's own process template
 - `assembly_mapping` now verifies the percentage of mapped reads, issuing a quality 
 control warning when it falls bellow 95% 
+- Added option to `dengue_typing` to retrieve closest reference sequence and link it 
+with a secondary channel into `mafft`
+- New version of DEN-IM recipe
+- Now prints an ordered list of components
+- Moved taxonomy results from `results/annotation/` to `results/taxonomy/`
 
 
 ## 1.4.0

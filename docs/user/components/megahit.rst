@@ -27,6 +27,11 @@ Parameters
   from the maximum read length of each assembly. If 'default', megahit will
   use the default k-mer lengths.
 
+- ``fastg``: When true, it converts megahit intermediate contigs into fastg.
+  Default: False
+
+
+
 Published results
 -----------------
 

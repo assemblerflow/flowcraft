@@ -15,13 +15,13 @@ process mashSketchFasta_{{ pid }} {
 
     output:
     set sample_id, file(fasta) into  {{ output_channel }}
-    file("*.msh") into SIDE_mashSketchOutChannel_{{ pid }}
+    set sample_id, file("*.msh") into SIDE_mashSketchOutChannel_{{ pid }}
     {% with task_name="mashSketchFasta", sample_id="sample_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
     """
-    mash sketch -k ${kmer} -s ${sketch}  ${fasta}
+    mash sketch -i -k ${kmer} -s ${sketch} ${fasta}
     """
 
 }

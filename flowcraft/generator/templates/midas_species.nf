@@ -11,7 +11,7 @@ process midas_species_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir "results/annotation/midas/", pattern: "*.txt"
+    publishDir "results/taxonomy/midas/", pattern: "*.txt"
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}

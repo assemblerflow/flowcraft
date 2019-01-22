@@ -27,7 +27,7 @@ Parameters
 Published results
 -----------------
 
-- ``results/annotation/midas``: Stores the results of the screening
+- ``results/taxonomy/midas``: Stores the results of the screening
   for each sample.
 
 Published reports
