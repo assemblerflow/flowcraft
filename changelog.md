@@ -31,7 +31,7 @@ position in the `nextflow run` command inside the .nextflow.log file.
 - Added `insert_size` to `innuca` recipe
 - `integrity_coverage` now checks the integrity of the compressed read files with the 
 appropriate software. 
-- `mlst` components now has it's own process template
+- `mlst` component now has it's own process template
 - `assembly_mapping` now verifies the percentage of mapped reads, issuing a quality 
 control warning when it falls bellow 95% 
 - Added option to `dengue_typing` to retrieve closest reference sequence and link it 
