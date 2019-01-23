@@ -6,7 +6,7 @@ except ImportError:
 
 class Bowtie(Process):
     """
-    bowtie2 to align short paired-end sequencing reads to long reference sequences
+    bowtie2 process to align short paired-end sequencing reads to long reference sequences
 
         This process is set with:
 
