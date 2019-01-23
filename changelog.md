@@ -11,7 +11,7 @@
 ### New components
 
 - `Kraken2`: Taxonomic identification on FastQ files
-- `insert_size`: calculates the inser size of a sample from mapping the reads
+- `insert_size`: calculates the insert size of a sample from mapping the reads
 back to an assembly
 
 ### Bug fixes
