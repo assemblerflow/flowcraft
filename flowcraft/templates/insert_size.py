@@ -4,7 +4,7 @@
 Purpose
 -------
 
-This module is intended calculate de insert size on sam files
+This module is intended to calculate the insert size on sam files
 resulting from the mapping the read data back to the assembly.
 
 Expected input
