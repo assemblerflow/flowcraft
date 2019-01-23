@@ -120,7 +120,7 @@ class InsertSize(Process):
         This process is set with:
 
             - ``input_type``: fasta
-            - ``output_type``:
+            - ``output_type``: None
             - ``ptype``: mapping
 
         It contains one **secondary channel link end**:
