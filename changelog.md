@@ -16,8 +16,8 @@ back to an assembly
 
 ### Bug fixes
 
-- Fix bug in `momps`component related to added in the introduction of the clear 
-input parameter
+- Fix bug in `momps`component added in the introduction of the clear 
+input option
 - Fixed bug with the `-ft` parameters not retrieving the dockerhub tags for 
 all the components.
 - Fixed bug in the `megahit` process where the fastg mode would break the process
