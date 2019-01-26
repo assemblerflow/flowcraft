@@ -74,7 +74,8 @@ def get_species_scheme_map_version(mlst_folder):
     Since release v2.16.1, the file that maps the schema genus
     to the species name changed from "species_scheme_map" to
     "scheme_soecies_map.tab". This method determines which version
-    is in the container provided and returns it.
+    is in the container provided and returns it. If no file is found,
+    it terminates the code execution.
 
     Parameters
     ----------
@@ -88,21 +89,20 @@ def get_species_scheme_map_version(mlst_folder):
     species_scheme_map_version: int
         Version on the mlst scheme database
     """
-    species_scheme_map_version = 1
 
-    mlst_db_path = os.path.join(os.path.dirname(os.path.dirname(mlst_folder)), 'db', 'species_scheme_map.tab')
+    mlst_db_path_version1 = os.path.join(os.path.dirname(os.path.dirname(mlst_folder)), 'db', 'species_scheme_map.tab')
 
-    if not os.path.isfile(mlst_db_path):
-        mlst_db_path = os.path.join(os.path.dirname(os.path.dirname(mlst_folder)), 'db', 'scheme_species_map.tab')
+    mlst_db_path_version2 = os.path.join(os.path.dirname(os.path.dirname(mlst_folder)), 'db', 'scheme_species_map.tab')
 
-        if not os.path.isfile(mlst_db_path):
-            logger.error("Species_scheme_map not found.")
-            sys.exit(1)
+    if os.path.isfile(mlst_db_path_version1):
+        return mlst_db_path_version1, 1
 
-        else:
-            species_scheme_map_version = 2
+    elif os.path.isfile(mlst_db_path_version2):
+        return mlst_db_path_version2, 2
 
-    return mlst_db_path, species_scheme_map_version
+    else:
+        logger.error("Species_scheme_map not found.")
+        sys.exit(1)
 
 
 def set_species_scheme_map_variables(list_values, species_scheme_map_version):
@@ -127,6 +127,7 @@ def set_species_scheme_map_variables(list_values, species_scheme_map_version):
     Val_scheme: str
         scheme name in line
     """
+
     if species_scheme_map_version == 1:
         val_genus = list_values[0]
         val_species = list_values[1]
@@ -135,6 +136,7 @@ def set_species_scheme_map_variables(list_values, species_scheme_map_version):
         val_genus = list_values[1]
         val_species = list_values[2]
         val_scheme = list_values[0]
+
     return val_genus, val_species, val_scheme
 
 
@@ -164,22 +166,22 @@ def parse_species_scheme_map(species_splited, mlst_db_path, species_scheme_map_v
 
     with open(mlst_db_path, 'rtU') as reader:
         for line in reader:
-            line = line.splitlines()[0]
+            scheme_line = line.splitlines()[0]
 
-            if len(line) > 0:
+            if scheme_line and not scheme_line.startswith('#'):
+                scheme_line = scheme_line.lower().split('\\t')
+                scheme_line_data = [scheme_line[i].split(' ')[0] for i in range(0, len(scheme_line))]
+                val_genus, val_species, val_scheme = set_species_scheme_map_variables(scheme_line_data,
+                                                                                      species_scheme_map_version)
+                # checking if genus from expected species and scheme match
+                if val_genus == species_splited[0]:
 
-                if not line.startswith('#'):
-                    line = line.lower().split('\\t')
-                    line = [line[i].split(' ')[0] for i in range(0, len(line))]
-                    val_genus, val_species, val_scheme = set_species_scheme_map_variables(line, species_scheme_map_version)
+                    # if the scheme is not species specific (works for genus), the genus is set as the scheme name
+                    if val_species == '':
+                        genus_mlst_scheme = val_scheme
 
-                    if val_genus == species_splited[0]:
-
-                        if val_species == '':
-                            genus_mlst_scheme = val_scheme
-
-                        elif val_species == species_splited[1]:
-                            scheme = val_scheme
+                    elif val_species == species_splited[1]:
+                        scheme = val_scheme
 
         if scheme == 'unknown' and genus_mlst_scheme is not None:
             scheme = genus_mlst_scheme
@@ -204,39 +206,49 @@ def clean_novel_alleles(novel_alleles, scheme_mlst, profile):
     -------
     """
     unknown_genes = []
+
+    #get novel alleles
     for gene_allele in profile:
+        print(gene_allele)
         gene = gene_allele.split('(')[0]
         try:
             allele = gene_allele.split('(')[1].rstrip(')')
             if allele.startswith('~'):
                 unknown_genes.append(gene)
         except IndexError as e:
-            print('WARNING: {}'.format(e))
+            logger.warning("WARNING: Found unexpected formatting on mlst profile {}".format(e))
 
-    try:
-        novel_alleles_keep = {}
-        if len(unknown_genes) > 0:
+    novel_alleles_keep = {}
+
+    if unknown_genes:
+
+        try:
             reader = open(novel_alleles, mode='rt', newline=None)
+
             fasta_iter = (g for k, g in groupby(reader, lambda x: x.startswith('>')))
+
             for header in fasta_iter:
+
                 header = header.__next__()[1:].rstrip('\\r\\n')
                 seq = ''.join(s.rstrip('\\r\\n') for s in fasta_iter.__next__())
+
                 if header.startswith(scheme_mlst):
                     gene = header.split('.')[1].split('~')[0]
+
                     if gene in unknown_genes:
                         novel_alleles_keep[header] = seq
             reader.close()
 
-        os.remove(novel_alleles)
+            os.remove(novel_alleles)
 
-        if len(novel_alleles_keep) > 0:
-            with open(novel_alleles, 'wt') as writer:
-                for header, seq in novel_alleles_keep.items():
-                    writer.write('>{}\\n'.format(header))
-                    writer.write('\\n'.join(chunkstring(seq, 80)) + '\\n')
-    except FileNotFoundError as e:
-        logger.info("An unknown ST was found but no novel alleles fasta file was "
-                    "produced by mlst software: {}".format(e))
+            if novel_alleles_keep:
+                with open(novel_alleles, 'wt') as writer:
+                    for header, seq in novel_alleles_keep.items():
+                        writer.write('>{}\\n'.format(header))
+                        writer.write('\\n'.join(chunkstring(seq, 80)) + '\\n')
+        except FileNotFoundError as e:
+            logger.info("An unknown ST was found but no novel alleles fasta file was "
+                        "produced by mlst software: {}".format(e))
 
 
 def getScheme(species):
@@ -285,6 +297,36 @@ def getScheme(species):
     return scheme, species_genus, genus_mlst_scheme
 
 
+def parse_stdout(stdout):
+    """
+    Parses mlst stdout to retrieve the hit's mlst
+    scheme, st and profile
+
+    Parameters
+    ----------
+    stdout: str
+        mlst stdout
+
+    Returns
+    -------
+    scheme_mlst : str
+        mlst scheme name
+    st : str
+        mlst st for the sample
+    profile : list
+        list of strings containing the profile
+
+    """
+
+    mlst_data = stdout.splitlines()[0].split("\\t")
+
+    scheme_mlst = mlst_data[1].split("_")[0]
+    st = mlst_data[2]
+    profile = mlst_data[3:]
+
+    return scheme_mlst, st, profile
+
+
 @MainWrapper
 def main(sample_id, assembly, expected_species):
     """
@@ -303,11 +345,11 @@ def main(sample_id, assembly, expected_species):
 
     pass_qc = False
 
-    novel_alleles = '{}_mlst_novel_alleles.fasta'.format(sample_id)
+    novel_alleles = "{}_mlst_novel_alleles.fasta".format(sample_id)
 
     cli = [
-        'mlst',
-        '--novel',
+        "mlst",
+        "--novel",
         novel_alleles,
         assembly
     ]
@@ -333,63 +375,52 @@ def main(sample_id, assembly, expected_species):
     logger.info("Finished mlst with return code: {}".format(
         p.returncode))
 
-    with open(".status", "w") as fh:
-        if p.returncode != 0:
-            fh.write("error")
-            return
-        else:
-            fh.write("pass")
-
     if p.returncode == 0:
 
-        with open('{}.mlst.txt'.format(sample_id), 'wt') as writer:
+        with open("{}.mlst.txt".format(sample_id), "wt") as writer:
             writer.write(stdout)
 
-        # str
-        scheme_mlst = stdout.splitlines()[0].split('\\t')[1].split('_')[0]
-        # str
-        st = stdout.splitlines()[0].split('\\t')[2]
-        # list
-        profile = stdout.splitlines()[0].split('\\t')[3:]
+        scheme_mlst, st, profile = parse_stdout(stdout)
 
         # In case it's an unkown ST, cleans the novel alleles file.
-        if st == '-':
+        if st == "-":
             clean_novel_alleles(novel_alleles=novel_alleles, scheme_mlst=scheme_mlst, profile=profile)
         else:
             # in case mlst fails to create the novel alleles file
             if os.path.isfile(novel_alleles):
                 os.remove(novel_alleles)
 
-        if not expected_species == "PASS":
-
-            # returns the schema for the expected species, the genus for that species and the genus for the mlst schema
-            scheme, species_genus, mlst_scheme_genus = getScheme(expected_species)
-
-            if scheme_mlst.split('_', 1)[0] == scheme.split('_', 1)[0]:
-                pass_qc = True
-            else:
-                if scheme == 'unknown' and scheme_mlst != '-':
-                    pass_qc = True
-                    logger.warning("Found {scheme_mlst} scheme for a species with unknown"
-                                   " scheme".format(scheme_mlst=scheme_mlst))
-
-                elif scheme == 'unknown' and scheme_mlst == '-':
-                    pass_qc = True
-
-                # a special warning was requested for yersinia
-                elif species_genus == 'yersinia' and mlst_scheme_genus == 'yersinia':
-                    pass_qc = True
-                    logger.warning("Found a Yersinia scheme ({scheme_mlst}), but it is different from what it was"
-                                   " expected ({scheme})".format(scheme_mlst=scheme_mlst, scheme=scheme))
-                else:
-                    if mlst_scheme_genus is not None and scheme_mlst == scheme == mlst_scheme_genus:
-                        pass_qc = True
-                    else:
-                        logger.error("MLST scheme found ({scheme_mlst}) and provided ({scheme}) are not the"
-                                     " same".format(scheme_mlst=scheme_mlst, scheme=scheme))
-        else:
+        # if the expected_species is set to PASS, it bypasses species verification
+        if expected_species == "PASS":
             pass_qc = True
 
+        else:
+            # returns the schema for the expected species, the genus for that species and the genus for the mlst schema
+            expected_scheme, expected_species_genus, expected_mlst_scheme_genus = getScheme(expected_species)
+
+            if scheme_mlst.split('_', 1)[0] == expected_scheme.split("_", 1)[0]:
+                pass_qc = True
+
+            # If the scheme is not the same as the expected species,
+            else:
+                if expected_scheme == "unknown":
+                    pass_qc = True
+                    if scheme_mlst != "-":
+                        logger.warning("Found {} scheme for expected species".format(scheme_mlst))
+
+                # in case of yersinia, it passes QC if the genus match as there's a scheme just for the genus,
+                # and one for yersinia pseudotuberculosis
+                elif expected_species_genus == 'yersinia' and expected_mlst_scheme_genus == 'yersinia':
+                    pass_qc = True
+                    logger.warning("Found a Yersinia scheme ({}), but it is different from what it was"
+                                   " expected ({})".format(scheme_mlst, expected_scheme))
+                else:
+                    if expected_mlst_scheme_genus is not None and \
+                            scheme_mlst == expected_scheme == expected_mlst_scheme_genus:
+                        pass_qc = True
+                    else:
+                        logger.error("MLST scheme found ({}) and provided ({}) are not the same"
+                                     .format(scheme_mlst, expected_scheme))
 
         # writing .report.json
         report_dic = {
@@ -412,18 +443,19 @@ def main(sample_id, assembly, expected_species):
             ]
         }
 
-        with open(".report.json", "w") as report:
-            report.write(json.dumps(report_dic, separators=(",", ":")))
+        with open(".report.json", "w") as report_fh, \
+                open(".status", "w") as status_fh:
 
+            report_fh.write(json.dumps(report_dic, separators=(",", ":")))
+
+            if pass_qc:
+                status_fh.write("pass")
+            else:
+                status_fh.write("fail")
     else:
         logger.error("Sample {} did not run successfully".format(sample_id))
-
-    # writing .status
-    with open(".status", "w") as status:
-        if pass_qc:
-            status.write("pass")
-        else:
-            status.write("fail")
+        with open(".status", "w") as status_fh:
+            status_fh.write("error")
 
 
 if __name__ == '__main__':
