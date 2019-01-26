@@ -139,6 +139,8 @@ class DengueTyping(Process):
         self.input_type = "fasta"
         self.output_type = "fasta"
 
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
         self.link_start.extend(["_ref_seqTyping"])
 
         self.params = {
@@ -152,8 +154,8 @@ class DengueTyping(Process):
         self.directives = {"dengue_typing": {
             "cpus": 4,
             "memory": "'4GB'",
-            "container": "flowcraft/seq_typing",
-            "version": "2.0-1"
+            "container": "ummidoc/seq_typing",
+            "version": "dev"
         }}
 
         self.status_channels = [

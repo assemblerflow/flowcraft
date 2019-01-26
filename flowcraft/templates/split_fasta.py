@@ -77,7 +77,7 @@ def main(sample_id, assembly, min_size):
                 success += 1
 
     if success < 1:
-        with open(sample_id + "_fail.fasta", "w") as logfile:
+        with open(sample_id + ".fasta", "w") as logfile:
             logfile.write("fail")
 
 

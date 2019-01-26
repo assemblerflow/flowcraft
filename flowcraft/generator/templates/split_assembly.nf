@@ -14,11 +14,11 @@ process split_assembly_{{ pid }} {
     publishDir "results/assembly/split_assembly_{{ pid }}/${sample_id}/"
 
     input:
-    set sample_id, file(assembly), file(fastq) from {{ input_channel }}.join(_LAST_fastq_{{ pid }})
+    set sample_id, file(assembly) from {{ input_channel }}
     val min_contig_size from IN_min_contig_size_{{ pid }}
 
     output:
-    set file('*.fasta'), file(fastq) into splitCh_{{ pid }}
+    file('*.fasta') into splitCh_{{ pid }}
     {% with task_name="split_assembly" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -31,6 +31,12 @@ process split_assembly_{{ pid }} {
 
 {{ output_channel }} = Channel.create()
 
-splitCh_{{ pid }}.map{ it -> [it[0].toString().tokenize('/').last().tokenize('.')[0..-2].join('.'), it[0], it[1]]}.into({{ output_channel }})
+sub_channel = Channel.create()
+
+splitCh_{{ pid }}.flatMap().map{ it -> [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.'), it]}.into(sub_channel)
+
+sub_channel.into{ lala; {{ output_channel }} }
+
+lala.subscribe{ println it }
 
 {{ forks }}
