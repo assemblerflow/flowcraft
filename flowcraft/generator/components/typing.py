@@ -151,15 +151,23 @@ class DengueTyping(Process):
             }
         }
 
-        self.directives = {"dengue_typing": {
+        self.directives = {"dengue_typing_assembly": {
             "cpus": 4,
-            "memory": "'4GB'",
+            "memory": "'1GB'",
             "container": "ummidoc/seq_typing",
             "version": "dev"
-        }}
+        },
+            "dengue_typing_reads": {
+                "cpus": 4,
+                "memory": "{ 5.GB * task.attempt }",
+                "container": "ummidoc/seq_typing",
+                "version": "dev"
+            }
+        }
 
         self.status_channels = [
-            "dengue_typing"
+            "dengue_typing_assembly",
+            "dengue_typing_reads"
         ]
 
 

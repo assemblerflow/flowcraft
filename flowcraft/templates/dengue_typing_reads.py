@@ -4,7 +4,8 @@
 Purpose
 -------
 
-This module intends to split a multifasta file into seperate fasta files.
+This module intends to type DENV genome assembly with seqTyping
+(mapping mode)
 
 Expected input
 --------------
@@ -93,31 +94,6 @@ def getSequence(ref, fasta):
     return fasta_header
 
 
-def complete_ORF(assembly, min_size):
-    """Returns true if a sequence with a length equal or
-    greater than `min_size` is present.
-
-    Returns
-    -------
-    x : Bool
-
-
-    """
-
-    with open(assembly, "rU") as assembly_file:
-
-        lines= assembly_file.readlines()
-
-        for line in lines:
-
-            if line.startswith(">"):
-                pass
-            else:
-                if len(line) >= min_size:
-                    return True
-    return False
-
-
 def get_reference_header(file):
     with open(file, "r") as typing_report:
         lines = typing_report.readlines()
@@ -181,25 +157,14 @@ def main(sample_id, assembly, fastq_pair, reference):
 
     json_report = {}
 
-    getConsesus = True
-
     st_version = __get_version_seq_typing()
 
     cli = ["seq_typing.py",
-           "",
-           "--org",
-           "Dengue", "virus",
-           "-j",
-           "${task.cpus}"]
-
-    #check if complete ORF
-    if complete_ORF(assembly, 10000):
-        cli[1] = "assembly"
-        cli += ["-f", assembly, "-t", "nucl"]
-    else:
-        cli[1] = "reads"
-        cli += ["--doNotRemoveConsensus", "-f", fastq_pair[0], fastq_pair[1]]
-        getConsesus = True
+           "reads",
+           "--org", "Dengue", "virus",
+           "-j", "${task.cpus}",
+           "--doNotRemoveConsensus",
+           "-f", fastq_pair[0], fastq_pair[1]]
 
     logger.info("Runnig seq_typing subprocess with command: {}".format(cli))
 
@@ -228,31 +193,26 @@ def main(sample_id, assembly, fastq_pair, reference):
 
         logger.info("Type found: {}".format(typing_result))
 
-    else:
-        logger.error("Failed to run seq_typing for Dengue Virus.")
-        with open(".status", "w") as status:
-            status.write("fail")
-        sys.exit(1)
+        best_reference = get_reference_header("seq_typing.report_types.tab")
 
-    best_reference = get_reference_header("seq_typing.report_types.tab")
-
-    if getConsesus:
         if typing_result != "NT":
             logger.info("Getting consensus sequenceq")
             getConsesusSequence(best_reference,
                                 "rematch/1_GenotypesDENV_14-05-18.headers_renamed.fasta_0/sample.noMatter.fasta",
                                 sample_id)
+
+            # TODO
+            #confidence_score = getScore("seq_typing.report_types.tab")
+
         else:
             logger.error("Failed to obtain a close reference sequence in read mode. No consensus sequence is obtained.")
             pass
 
     else:
-        #pass the original assembly to the output channel
-        shutil.copy(assembly, os.path.join(os.getcwd(), "{}.fasta".format(sample_id)))
-
-        if typing_result != "NT":
-
-            confidence_score = getScore("seq_typing.report_types.tab")
+        logger.error("Failed to run seq_typing for Dengue Virus.")
+        with open(".status", "w") as status:
+            status.write("fail")
+        sys.exit(1)
 
     if reference == "true":
         reference_name = getSequence(best_reference,
@@ -293,7 +253,7 @@ def main(sample_id, assembly, fastq_pair, reference):
             open(".version", "w") as version:
         report.write(json.dumps(json_report, separators=(",", ":")))
         status.write("pass")
-        status.write(st_version)
+        version.write(st_version)
 
 
 if __name__ == '__main__':
