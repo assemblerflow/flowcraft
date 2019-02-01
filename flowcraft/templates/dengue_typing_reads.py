@@ -27,13 +27,12 @@ Generated output
 -  The closest reference fasta file path
 """
 
-__version__ = "0.0.1"
-__build__ = "23012019"
+__version__ = "0.0.2"
+__build__ = "01022019"
 __template__ = "dengue_typing-nf"
 
 import json
 import os
-import shutil
 import sys
 import subprocess
 from subprocess import PIPE
@@ -54,6 +53,7 @@ if __file__.endswith(".command.sh"):
     logger.debug("FASTQ_PAIR: {}".format(FASTQ_PAIR))
     logger.debug("REFERENCE: {}".format(REFERENCE))
 
+
 def __get_version_seq_typing():
 
     try:
@@ -67,6 +67,7 @@ def __get_version_seq_typing():
         version = "undefined"
 
     return version
+
 
 def replace_char(text):
     for ch in ['/', '`', '*', '{', '}', '[', ']', '(', ')', '#', '+', '-', '.', '!', '\$', ':', '|']:
@@ -206,7 +207,9 @@ def main(sample_id, assembly, fastq_pair, reference):
 
         else:
             logger.error("Failed to obtain a close reference sequence in read mode. No consensus sequence is obtained.")
-            pass
+            with open(".status", "w") as status:
+                status.write("fail")
+            sys.exit(1)
 
     else:
         logger.error("Failed to run seq_typing for Dengue Virus.")
@@ -216,7 +219,7 @@ def main(sample_id, assembly, fastq_pair, reference):
 
     if reference == "true":
         reference_name = getSequence(best_reference,
-                                     "/NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
+                                     "/NGStools/seq_typing/seqtyping/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
 
         json_report = {'tableRow': [{
             'sample': sample_id,

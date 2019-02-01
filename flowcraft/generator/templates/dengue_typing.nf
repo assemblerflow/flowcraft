@@ -1,14 +1,14 @@
 getRef_{{ pid }} = params.reference{{ param_id}} ? "true" : "false"
 checkpointReferenceGenome_{{ pid }} = Channel.value(getRef_{{ pid }})
 
-checkpointReferenceGenome_{{ pid }}.set{ reference_reads_{{ pid }} , reference_assembly_{{ pid }} }
+checkpointReferenceGenome_{{ pid }}.into{ reference_reads_{{ pid }} ; reference_assembly_{{ pid }} }
 
 midChan = Channel.create()
 
 {{ input_channel }}.join(_LAST_fastq_{{ pid }}, ).set{ midChan }
 
 
-class VerifyCompletness {
+class VerifyCompletnessTyping {
 
     public static boolean contigs(String filename, int threshold){
         BufferedReader reader = new BufferedReader(new FileReader(filename));
@@ -40,7 +40,7 @@ class VerifyCompletness {
 
 type_reads_{{ pid }} = Channel.create()
 type_assembly_{{ pid }} = Channel.create()
-midChan.choice(type_assembly_{{ pid }}, type_reads_{{ pid }}){a -> a[1].toString() == "null" ? false : VerifyCompletness.contigs(a[1].toString(), 10000) == true ? 0 : 1}
+midChan.choice(type_assembly_{{ pid }}, type_reads_{{ pid }}){a -> a[1].toString() == "null" ? false : VerifyCompletnessTyping.contigs(a[1].toString(), 10000) == true ? 0 : 1}
 
 
 process dengue_typing_assembly_{{ pid }} {
@@ -60,8 +60,8 @@ process dengue_typing_assembly_{{ pid }} {
     output:
     file "seq_typing*"
     set sample_id, file(assembly) into out_typing_assembly_{{ pid }}
-    file("*.fa") optional true into _ref_seqTyping_{{ pid }}
-    {% with task_name="dengue_typing" %}
+    file("*.fa") optional true into _ref_seqTyping_assembly_{{ pid }}
+    {% with task_name="dengue_typing_assembly" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
@@ -82,14 +82,14 @@ process dengue_typing_reads_{{ pid }} {
 
 
     input:
-    set sample_id, file(assembly), file(fastq_pair) from type_assembly_{{ pid }}
-    val reference from reference_reads{{ pid }}
+    set sample_id, file(assembly), file(fastq_pair) from type_reads_{{ pid }}
+    val reference from reference_reads_{{ pid }}
 
     output:
     file "seq_typing*"
     set sample_id, file("*_consensus.fasta") into out_typing_reads_{{ pid }}
-    file("*.fa") optional true into _ref_seqTyping_{{ pid }}
-    {% with task_name="dengue_typing" %}
+    file("*.fa") optional true into _ref_seqTyping_reads_{{ pid }}
+    {% with task_name="dengue_typing_reads" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
@@ -98,7 +98,9 @@ process dengue_typing_reads_{{ pid }} {
 
 }
 
-type_assembly_{{ pid }}.mix(type_reads_{{ pid }}).into{ {{ output_channel }} }
+out_typing_assembly_{{ pid }}.mix(out_typing_reads_{{ pid }}).into{ {{ output_channel }} }
+
+_ref_seqTyping_assembly_{{ pid }}.mix(_ref_seqTyping_reads_{{ pid }}).into{ _ref_seqTyping_{{ pid }} }
 
 {{ forks }}
 

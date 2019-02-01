@@ -31,12 +31,6 @@ process split_assembly_{{ pid }} {
 
 {{ output_channel }} = Channel.create()
 
-sub_channel = Channel.create()
-
-splitCh_{{ pid }}.flatMap().map{ it -> [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.'), it]}.into(sub_channel)
-
-sub_channel.into{ lala; {{ output_channel }} }
-
-lala.subscribe{ println it }
+splitCh_{{ pid }}.flatMap().map{ it -> [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.'), it]}.into({{ output_channel }})
 
 {{ forks }}

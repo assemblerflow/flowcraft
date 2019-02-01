@@ -154,13 +154,13 @@ class DengueTyping(Process):
         self.directives = {"dengue_typing_assembly": {
             "cpus": 4,
             "memory": "'1GB'",
-            "container": "ummidoc/seq_typing",
+            "container": "ummidock/seq_typing",
             "version": "dev"
         },
             "dengue_typing_reads": {
                 "cpus": 4,
                 "memory": "{ 5.GB * task.attempt }",
-                "container": "ummidoc/seq_typing",
+                "container": "ummidock/seq_typing",
                 "version": "dev"
             }
         }

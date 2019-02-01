@@ -191,7 +191,7 @@ def main(sample_id, assembly, fastq_pair, reference):
 
     if reference == "true":
         reference_name = getSequence(best_reference,
-                                     "/NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
+                                     "/NGStools/seq_typing/seqtyping/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
 
         json_report = {'tableRow': [{
             'sample': sample_id,
