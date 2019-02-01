@@ -55,6 +55,12 @@ if __file__.endswith(".command.sh"):
 
 
 def __get_version_seq_typing():
+    """
+    Gets Seq_typing software version
+    Returns
+    -------
+    version : str
+        Seqtyping version"""
 
     try:
         cli = ["seq_typing.py", "--version"]
@@ -70,12 +76,32 @@ def __get_version_seq_typing():
 
 
 def replace_char(text):
+    """
+    Cleans the string from problematic chars
+
+    Parameters
+    ----------
+    text : str
+        String to clean"""
+
     for ch in ['/', '`', '*', '{', '}', '[', ']', '(', ')', '#', '+', '-', '.', '!', '\$', ':', '|']:
         text = text.replace(ch, "_")
     return text
 
 
 def getSequence(ref, fasta):
+    """
+     Gets the fasta sequence from the Database with the header "ref"
+
+     Parameters
+     ----------
+     ref : str
+         Reference whose sequence needs to be fetched
+     fasta: str
+        Path to the multifasta"""
+
+    fasta_header = ""
+
     fh_fasta = open(fasta, "r")
     entry = (x[1] for x in groupby(fh_fasta, lambda line: line[0] == ">"))
 
@@ -90,23 +116,52 @@ def getSequence(ref, fasta):
 
             with open(filename + '.fa', "w") as output_file:
                 output_file.write(">" + fasta_header + "\\n" + seq.upper() + "\\n")
-
     fh_fasta.close()
+
     return fasta_header
 
 
 def get_reference_header(file):
+    """
+    Gets the header for the closest reference from the seqtyping report
+
+    Parameters
+    ----------
+    file: str
+     Path to the seqtyping report"""
+
     with open(file, "r") as typing_report:
         lines = typing_report.readlines()
     return lines[1].split('\\t')[3]
 
 
 def getType(file):
+    """
+    Gets the typing result from the seqtyping report
+
+    Parameters
+    ----------
+    file: str
+     Path to the seqtyping report"""
+
     with open(file, "r") as result:
         return result.readline().strip()
 
 
 def getConsesusSequence(best_reference, consensus, sample_id):
+    """
+    Gets the consensus sequence for the sample based
+    on the closest reference
+
+    Parameters
+    ----------
+    best_reference: str
+        Closest reference whose consensus is to be retrieved
+    consensus: str
+        Path to the consensus file produced by rematch
+    sample_id: str
+        sample id"""
+
     gb_ID = best_reference.split('|')[0].replace(":", "_")
     fh_consensus = open(consensus, "r")
 
@@ -119,26 +174,37 @@ def getConsesusSequence(best_reference, consensus, sample_id):
 
         if gb_ID in headerStr:
             with open(sample_id + '_consensus.fasta', "w") as output_file:
-                output_file.write(
-                    ">" + sample_id + "_consensus_" +
-                    best_reference.split("_")[0] + "\\n" + seq.upper() + "\\n")
+                output_file.write(">" + sample_id + "_consensus_" +
+                                  best_reference.split("_")[0] + "\\n" + seq.upper() + "\\n")
 
     fh_consensus.close()
 
 
 def getScore(file):
+    """
+    Method to write QC warnings based on the mapping statistics
+    (sequence covered and identity)
 
-    score = "fail"
+    Parameters
+    ----------
+    file: str
+     Path to the seqtyping report"""
 
     with open(file, "r") as typing_report:
         lines = typing_report.readlines()
 
-        sequence_covered = lines[1].split("\\t")[4]
-        sequence_identity = lines[1].split("\\t")[6]
+        sequence_covered = float(lines[1].split("\\t")[4])
+        sequence_identity = float(lines[1].split("\\t")[6])
 
-    #TODO - score
+        if sequence_covered < 70:
+            logger.fail("Sequence coverage below 70% on the best hit.")
+            with open(".fails", "w") as fails:
+                fails.write("Sequence coverage below 70% on the best hit.")
 
-    return score
+        elif 90 > sequence_covered < 70:
+            logger.warning("Sequence coverage lower than 90% on the best hit.")
+            with open(".warnings", "w") as fails:
+                fails.write("Sequence coverage below 70% on the best hit.")
 
 
 @MainWrapper
@@ -202,53 +268,53 @@ def main(sample_id, assembly, fastq_pair, reference):
                                 "rematch/1_GenotypesDENV_14-05-18.headers_renamed.fasta_0/sample.noMatter.fasta",
                                 sample_id)
 
-            # TODO
-            #confidence_score = getScore("seq_typing.report_types.tab")
+            # check confidence and emmit appropriate warnings
+            getScore("seq_typing.report_types.tab")
 
         else:
             logger.error("Failed to obtain a close reference sequence in read mode. No consensus sequence is obtained.")
             with open(".status", "w") as status:
                 status.write("fail")
-            sys.exit(1)
+            sys.exit(120)
+
+        if reference == "true":
+            reference_name = getSequence(best_reference,
+                                         "/NGStools/seq_typing/seqtyping/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
+
+            json_report = {'tableRow': [{
+                'sample': sample_id,
+                'data': [
+                    {'header': 'seqtyping',
+                     'value': typing_result,
+                     'table': 'typing'}
+                ]}],
+                'metadata': [
+                    {'sample': sample_id,
+                     'treeData': typing_result,
+                     'column': 'typing'},
+                    {'sample': reference_name,
+                     'treeData': typing_result,
+                     'column': 'typing'}]}
+
+        else:
+
+            json_report = {'tableRow': [{
+                'sample': sample_id,
+                'data': [
+                    {'header': 'seqtyping',
+                     'value': typing_result,
+                     'table': 'typing'}
+                ]}],
+                'metadata': [
+                    {'sample': sample_id,
+                     'treeData': typing_result,
+                     'column': 'typing'}]}
 
     else:
         logger.error("Failed to run seq_typing for Dengue Virus.")
         with open(".status", "w") as status:
             status.write("fail")
         sys.exit(1)
-
-    if reference == "true":
-        reference_name = getSequence(best_reference,
-                                     "/NGStools/seq_typing/seqtyping/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
-
-        json_report = {'tableRow': [{
-            'sample': sample_id,
-            'data': [
-                 {'header': 'seqtyping',
-                  'value': typing_result,
-                  'table': 'typing'}
-             ]}],
-            'metadata': [
-                {'sample': sample_id,
-                 'treeData': typing_result,
-                 'column': 'typing'},
-                {'sample': reference_name,
-                 'treeData': typing_result,
-                 'column': 'typing'}]}
-
-    else:
-
-        json_report = {'tableRow': [{
-            'sample': sample_id,
-            'data': [
-                {'header': 'seqtyping',
-                 'value': typing_result,
-                 'table': 'typing'}
-            ]}],
-            'metadata': [
-                {'sample': sample_id,
-                 'treeData': typing_result,
-                 'column': 'typing'}]}
 
     # Add information to dotfiles
     with open(".report.json", "w") as report, \

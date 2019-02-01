@@ -80,6 +80,7 @@ process dengue_typing_reads_{{ pid }} {
 
     publishDir "results/dengue_typing/${sample_id}/"
 
+    errorStrategy { task.exitStatus == 120 ? 'ignore' : 'retry' }
 
     input:
     set sample_id, file(assembly), file(fastq_pair) from type_reads_{{ pid }}
@@ -98,9 +99,9 @@ process dengue_typing_reads_{{ pid }} {
 
 }
 
-out_typing_assembly_{{ pid }}.mix(out_typing_reads_{{ pid }}).into{ {{ output_channel }} }
+out_typing_assembly_{{ pid }}.mix(out_typing_reads_{{ pid }}).set{ {{ output_channel }} }
 
-_ref_seqTyping_assembly_{{ pid }}.mix(_ref_seqTyping_reads_{{ pid }}).into{ _ref_seqTyping_{{ pid }} }
+_ref_seqTyping_assembly_{{ pid }}.mix(_ref_seqTyping_reads_{{ pid }}).set{ _ref_seqTyping_{{ pid }} }
 
 {{ forks }}
 
