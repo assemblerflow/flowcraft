@@ -3,11 +3,6 @@ checkpointReferenceGenome_{{ pid }} = Channel.value(getRef_{{ pid }})
 
 checkpointReferenceGenome_{{ pid }}.into{ reference_reads_{{ pid }} ; reference_assembly_{{ pid }} }
 
-midChan = Channel.create()
-
-{{ input_channel }}.join(_LAST_fastq_{{ pid }}, ).set{ midChan }
-
-
 class VerifyCompletnessTyping {
 
     public static boolean contigs(String filename, int threshold){
@@ -25,8 +20,9 @@ class VerifyCompletnessTyping {
 
         while ((line = reader.readLine()) != null) {
             if (line.startsWith('>')) {
-                splittedLine = line.split('_')
-                lineThreshold = splittedLine[3].toInteger()
+                lineThreshold = 0
+            } else {
+                lineThreshold += line.length()
                 if(lineThreshold >= threshold) {
                     return true;
                 }
@@ -40,8 +36,7 @@ class VerifyCompletnessTyping {
 
 type_reads_{{ pid }} = Channel.create()
 type_assembly_{{ pid }} = Channel.create()
-midChan.choice(type_assembly_{{ pid }}, type_reads_{{ pid }}){a -> a[1].toString() == "null" ? false : VerifyCompletnessTyping.contigs(a[1].toString(), 10000) == true ? 0 : 1}
-
+{{ input_channel }}.choice(type_assembly_{{ pid }}, type_reads_{{ pid }}){a -> a[1].toString() == "null" ? false : VerifyCompletnessTyping.contigs(a[1].toString(), 10000) == true ? 0 : 1}
 
 process dengue_typing_assembly_{{ pid }} {
 
@@ -54,7 +49,7 @@ process dengue_typing_assembly_{{ pid }} {
 
 
     input:
-    set sample_id, file(assembly), file(fastq_pair) from type_assembly_{{ pid }}
+    set sample_id, file(assembly) from type_assembly_{{ pid }}
     val reference from reference_assembly_{{ pid }}
 
     output:
@@ -83,12 +78,12 @@ process dengue_typing_reads_{{ pid }} {
     errorStrategy { task.exitStatus == 120 ? 'ignore' : 'retry' }
 
     input:
-    set sample_id, file(assembly), file(fastq_pair) from type_reads_{{ pid }}
+    set sample_id, file(assembly), file(fastq_pair) from type_reads_{{ pid }}.join(_LAST_fastq_{{ pid }})
     val reference from reference_reads_{{ pid }}
 
     output:
     file "seq_typing*"
-    set sample_id, file("*_consensus.fasta") into out_typing_reads_{{ pid }}
+    set sample_id, file("*consensus.fasta") into out_typing_reads_{{ pid }}
     file("*.fa") optional true into _ref_seqTyping_reads_{{ pid }}
     {% with task_name="dengue_typing_reads" %}
     {%- include "compiler_channels.txt" ignore missing -%}

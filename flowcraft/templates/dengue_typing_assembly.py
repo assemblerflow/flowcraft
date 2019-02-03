@@ -43,13 +43,11 @@ logger = get_logger(__file__)
 if __file__.endswith(".command.sh"):
     SAMPLE_ID = '$sample_id'
     ASSEMBLY = '$assembly'
-    FASTQ_PAIR = '$fastq_pair'.split()
     REFERENCE = '$reference'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))
     logger.debug("ASSEMBLY: {}".format(ASSEMBLY))
-    logger.debug("FASTQ_PAIR: {}".format(FASTQ_PAIR))
     logger.debug("REFERENCE: {}".format(REFERENCE))
 
 
@@ -173,7 +171,7 @@ def getScore(file):
                 fails.write("Sequence coverage below 70% on the best hit.")
 
 @MainWrapper
-def main(sample_id, assembly, fastq_pair, reference):
+def main(sample_id, assembly, reference):
     """Main executor of the dengue_typing template.
 
     Parameters
@@ -273,9 +271,6 @@ def main(sample_id, assembly, fastq_pair, reference):
             status.write("fail")
         sys.exit(1)
 
-    best_reference = get_reference_header("seq_typing.report_types.tab")
-
-
     # Add information to dotfiles
     with open(".report.json", "w") as report, \
             open(".status", "w") as status, \
@@ -287,4 +282,4 @@ def main(sample_id, assembly, fastq_pair, reference):
 
 if __name__ == '__main__':
 
-    main(SAMPLE_ID, ASSEMBLY, FASTQ_PAIR, REFERENCE)
+    main(SAMPLE_ID, ASSEMBLY, REFERENCE)

@@ -154,8 +154,8 @@ class DengueTyping(Process):
         self.directives = {"dengue_typing_assembly": {
             "cpus": 4,
             "memory": "'1GB'",
-            "container": "ummidock/seq_typing",
-            "version": "dev"
+            "container": "flowcraft/seq_typing",
+            "version": "2.0-1"
         },
             "dengue_typing_reads": {
                 "cpus": 4,

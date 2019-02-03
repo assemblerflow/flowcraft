@@ -6,6 +6,8 @@ Purpose
 
 This module intends to split a multifasta file into seperate fasta files.
 
+If no sequence is larger than min_contig_size, returns the original assembly.
+
 Expected input
 --------------
 
@@ -78,7 +80,11 @@ def main(sample_id, assembly, min_size):
 
     if success < 1:
         with open(sample_id + ".fasta", "w") as logfile:
-            logfile.write("fail")
+
+            for x in f_open.readlines():
+                logfile.write(x)
+
+    f_open.close()
 
 
     logger.info("{} sequences sucessfully splitted.".format(success))

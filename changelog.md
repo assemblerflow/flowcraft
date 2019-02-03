@@ -14,9 +14,9 @@ position in the `nextflow run` command inside the .nextflow.log file.
 
 ### Minor/Other changes
 
-- Added option to `dengue_typing` to retrive closest referece sequence and link it 
+- Added option to `dengue_typing` to retrieve closest reference sequence and link it 
 with a secondary channel into `mafft`
-- New version of DEN-IM recipe
+- New version of DEN-IM recipe: added check_coverage and redone the dengue_typing module
 
 
 ## 1.4.0
