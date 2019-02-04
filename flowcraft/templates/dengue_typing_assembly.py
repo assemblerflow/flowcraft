@@ -223,18 +223,11 @@ def main(sample_id, assembly, reference):
 
         logger.info("Type found: {}".format(typing_result))
 
-        if typing_result != "NT":
-            # write appropriate QC dot files based on blast statistics
-            getScore("seq_typing.report_types.tab")
-
-        else:
-            logger.info("No typing information was obtained.")
-
         if reference == "true":
             best_reference = get_reference_header("seq_typing.report_types.tab")
 
             reference_name = getSequence(best_reference,
-                                         "/NGStools/seq_typing/seqtyping/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
+                                         "/NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
 
             json_report = {'tableRow': [{
                 'sample': sample_id,
@@ -252,7 +245,6 @@ def main(sample_id, assembly, reference):
                      'column': 'typing'}]}
 
         else:
-
             json_report = {'tableRow': [{
                 'sample': sample_id,
                 'data': [
@@ -264,6 +256,13 @@ def main(sample_id, assembly, reference):
                     {'sample': sample_id,
                      'treeData': typing_result,
                      'column': 'typing'}]}
+
+        if typing_result != "NT":
+            # write appropriate QC dot files based on blast statistics
+            getScore("seq_typing.report_types.tab")
+
+        else:
+            logger.info("No typing information was obtained.")
 
     else:
         logger.error("Failed to run seq_typing for Dengue Virus.")
