@@ -43,10 +43,11 @@ logger = get_logger(__file__)
 
 if __file__.endswith(".command.sh"):
     NEWICK = '$newick'
-    LABELS = bool('$label')
+    LABELS = '$label'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("NEWICK: {}".format(NEWICK))
+    logger.debug("LABELS: {}".format(LABELS))
 
 
 
@@ -64,21 +65,17 @@ def main(newick, labels):
     logger.info("Starting newick file processing")
 
     #load tree and midpoint root
-
     tree = dendropy.Tree.get(file=open(newick, 'r'), schema="newick")
-
     tree.reroot_at_midpoint()
 
-    to_write_trees=tree.as_string("newick").strip().replace("[&R] ", '').replace(' ', '_').replace("'", "")
+    to_write_trees = tree.as_string("newick").strip().replace("[&R] ", '').replace(' ', '_').replace("'", "")
 
     #add labels to replace taxon names in phylocanvas
     labels_dict = {}
 
-    if labels:
+    if labels == 'true':
 
         original_labels = tree.update_taxon_namespace()
-
-        print(original_labels)
 
         for item in original_labels:
 
@@ -88,8 +85,8 @@ def main(newick, labels):
             if '|' in original_name:
                 new_name = original_name.split('|')[0]
             else:
-                #in case it's a reversed complement sequence
-                new_name = original_name.replace("_R_","").split('_')[0]
+                # in case it's a reversed complement sequence or a genebank reference
+                new_name = original_name.replace("_R_", "").replace("gb_", "gb:").split('_')[0]
 
             labels_dict[original_name] = new_name
 
