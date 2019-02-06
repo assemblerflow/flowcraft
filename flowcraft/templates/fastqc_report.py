@@ -446,13 +446,13 @@ def check_summary_health(summary_file, **kwargs):
 
     # Store the summary categories that cannot fail. If they fail, do not
     # proceed with this sample
-    fail_sensitive = kwargs.get("fail_sensitive", [
+    fail_if_fail = kwargs.get("fail_if_fail", [
         "Per base sequence quality",
         "Overrepresented sequences",
         "Sequence Length Distribution",
         "Per sequence GC content"
     ])
-    logger.debug("Fail sensitive categories: {}".format(fail_sensitive))
+    logger.debug("Must not fail categories: {}".format(fail_if_fail))
 
     # Store summary categories that must pass. If they do not, do not proceed
     # with that sample
@@ -462,15 +462,17 @@ def check_summary_health(summary_file, **kwargs):
     ])
     logger.debug("Must pass categories: {}".format(must_pass))
 
-    warning_fail_sensitive = kwargs.get("warning_fail_sensitive", [
+    warning_if_warning = kwargs.get("warning_if_warning", [
         "Per base sequence quality",
         "Overrepresented sequences",
 
     ])
+    logger.debug("Warninf categories: {}".format(warning_if_warning))
 
-    warning_must_pass = kwargs.get("warning_must_pass", [
+    warning_if_fail = kwargs.get("warning_if_fail", [
         "Per base sequence content"
     ])
+    logger.debug("Warning if fail categories: {}".format(warning_if_fail))
 
     # Get summary dictionary
     summary_info = get_summary(summary_file)
@@ -486,31 +488,29 @@ def check_summary_health(summary_file, **kwargs):
 
         logger.debug("Assessing category {} with result {}".format(cat, test))
 
-        # FAILURES
-        # Check for fail sensitive
-        if cat in fail_sensitive and test == "FAIL":
+        # Check for must not fail
+        if cat in fail_if_fail and test == "FAIL":
             health = False
-            failed.append("{}:{}".format(cat, test))
-            logger.error("Category {} failed a fail sensitive "
+            failed.append("{}: {}".format(cat, test))
+            logger.error("Category {} failed a must not fail "
                          "category".format(cat))
 
         # Check for must pass
         if cat in must_pass and test != "PASS":
             health = False
-            failed.append("{}:{}".format(cat, test))
+            failed.append("{}: {}".format(cat, test))
             logger.error("Category {} failed a must pass category".format(
                 cat))
 
         # WARNINGS
-        # Check for fail sensitive
-        if cat in warning_fail_sensitive and test == "FAIL":
-            warning.append("Failed category: {}".format(cat))
-            logger.warning("Category {} flagged at a fail sensitive "
+        if cat in warning_if_warning and test == "WARN":
+            warning.append("{}: {}".format(cat, test))
+            logger.warning("Category {} flagged at a warning "
                            "category".format(cat))
 
-        if cat in warning_must_pass and test != "PASS":
-            warning.append("Did not pass category: {}".format(cat))
-            logger.warning("Category {} flagged at a must pass "
+        if cat in warning_if_fail and test == "FAIL":
+            warning.append("{}: {}".format(cat, test))
+            logger.warning("Category {} flagged at warning if fail "
                            "category".format(cat))
 
     # Passed all tests
