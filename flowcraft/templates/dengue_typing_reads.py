@@ -190,6 +190,9 @@ def getScore(file):
     file: str
      Path to the seqtyping report"""
 
+    identity = 0
+    coverage = 0
+
     with open(file, "r") as typing_report:
         lines = typing_report.readlines()
 
@@ -205,6 +208,8 @@ def getScore(file):
             logger.warning("Sequence coverage lower than 90% on the best hit.")
             with open(".warnings", "w") as fails:
                 fails.write("Sequence coverage below 70% on the best hit.")
+
+        return sequence_identity, sequence_covered
 
 
 @MainWrapper
@@ -269,7 +274,7 @@ def main(sample_id, assembly, fastq_pair, reference):
                                 sample_id)
 
             # check confidence and emmit appropriate warnings
-            getScore("seq_typing.report_types.tab")
+            identity, coverage = ("seq_typing.report_types.tab")
 
         else:
             logger.error("Failed to obtain a close reference sequence in read mode. No consensus sequence is obtained.")
@@ -286,6 +291,12 @@ def main(sample_id, assembly, fastq_pair, reference):
                 'data': [
                     {'header': 'seqtyping',
                      'value': typing_result,
+                     'table': 'typing'},
+                    {'header': 'Identity',
+                     'value': identity,
+                     'table': 'typing'},
+                    {'header': 'Coverage',
+                     'value': coverage,
                      'table': 'typing'}
                 ]}],
                 'metadata': [
@@ -303,6 +314,12 @@ def main(sample_id, assembly, fastq_pair, reference):
                 'data': [
                     {'header': 'seqtyping',
                      'value': typing_result,
+                     'table': 'typing'},
+                    {'header': 'Identity',
+                     'value': identity,
+                     'table': 'typing'},
+                    {'header': 'Coverage',
+                     'value': coverage,
                      'table': 'typing'}
                 ]}],
                 'metadata': [

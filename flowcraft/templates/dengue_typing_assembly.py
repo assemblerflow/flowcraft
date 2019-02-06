@@ -170,6 +170,8 @@ def getScore(file):
             with open(".warnings", "w") as fails:
                 fails.write("Sequence coverage below 70% on the best hit.")
 
+        return sequence_identity, sequence_covered
+
 @MainWrapper
 def main(sample_id, assembly, reference):
     """Main executor of the dengue_typing template.
@@ -223,7 +225,19 @@ def main(sample_id, assembly, reference):
 
         logger.info("Type found: {}".format(typing_result))
 
+        # write appropriate QC dot files based on blast statistics
+        identity = 0
+        coverage = 0
+
+        if typing_result != "NT":
+            # write appropriate QC dot files based on blast statistics
+            identity, coverage = getScore("seq_typing.report_types.tab")
+
+        else:
+            logger.info("No typing information was obtained.")
+
         if reference == "true":
+
             best_reference = get_reference_header("seq_typing.report_types.tab")
 
             reference_name = getSequence(best_reference,
@@ -234,6 +248,12 @@ def main(sample_id, assembly, reference):
                 'data': [
                     {'header': 'seqtyping',
                      'value': typing_result,
+                     'table': 'typing'},
+                    {'header': 'Identity',
+                     'value': identity,
+                     'table': 'typing'},
+                    {'header': 'Coverage',
+                     'value': coverage,
                      'table': 'typing'}
                 ]}],
                 'metadata': [
@@ -250,19 +270,18 @@ def main(sample_id, assembly, reference):
                 'data': [
                     {'header': 'seqtyping',
                      'value': typing_result,
+                     'table': 'typing'},
+                    {'header': 'Identity',
+                     'value': identity,
+                     'table': 'typing'},
+                    {'header': 'Coverage',
+                     'value': coverage,
                      'table': 'typing'}
                 ]}],
                 'metadata': [
                     {'sample': sample_id,
                      'treeData': typing_result,
                      'column': 'typing'}]}
-
-        if typing_result != "NT":
-            # write appropriate QC dot files based on blast statistics
-            getScore("seq_typing.report_types.tab")
-
-        else:
-            logger.info("No typing information was obtained.")
 
     else:
         logger.error("Failed to run seq_typing for Dengue Virus.")
