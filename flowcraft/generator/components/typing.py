@@ -181,7 +181,7 @@ class Seqsero2Reads(Process):
         self.directives = {
             "seqsero2_reads": {
                 "cpus": 1,
-                "memory": "{ 1.GB * task.cpus * task.attempt }",
+                "memory": "{ 1.GB * task.attempt }",
                 "container": "ummidock/seqsero2",
                 "version": "alpha-test-1",
                 "cache": "false",
@@ -210,7 +210,7 @@ class Seqsero2Assembly(Process):
         self.directives = {
             "seqsero2_assembly": {
                 "cpus": 1,
-                "memory": "{ 1.GB * task.cpus * task.attempt }",
+                "memory": "{ 1.GB * task.attempt }",
                 "container": "ummidock/seqsero2",
                 "version": "alpha-test-1",
                 "cache": "false",
@@ -219,7 +219,7 @@ class Seqsero2Assembly(Process):
         }
 
 
-class StxSeqtypingReads(Process):
+class StxSeqtyping(Process):
     """ecoli_stx_subtyping.py for reads process template interface
 
     This process is set with:
@@ -238,24 +238,23 @@ class StxSeqtypingReads(Process):
 
         self.params = {
             "stx2covered": {
-                "default": 'null',
+                "default": '100',
                 "description": "Minimal percentage of sequence covered to consider "
-                               "extra stx2 subtypes (value between [0, 100]) (default: 100)."
+                               "extra stx2 subtypes (value between [0, 100])."
             },
             "stx2identity": {
-                "default": 'null',
+                "default": '99.5',
                 "description": "Minimal sequence identity to consider extra stx2 "
-                               "subtypes (value between [0, 100]) (default: 99.5)."
+                               "subtypes (value between [0, 100])."
             }
         }
 
         self.directives = {
-            "stx_seqtyping_reads": {
-                "cpus": 4,
+            "stx_seqtyping": {
+                "cpus": 2,
                 "memory": "{ 1.GB * task.cpus * task.attempt }",
                 "container": "ummidock/seq_typing",
                 "version": "2.2-01",
-                "cache": "false",
                 "scratch": "true"
             }
         }

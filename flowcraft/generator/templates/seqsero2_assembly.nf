@@ -4,7 +4,7 @@ process seqsero2_assembly_{{ pid }} {
 
     tag { sample_id }
     errorStrategy { task.exitStatus == 120 ? 'ignore' : 'ignore' }
-    publishDir path: "results/typing/seqsero2_assembly/${sample_id}/", mode: 'symlink', overwrite: true, pattern: 'Seq*.txt'
+    publishDir path: "results/typing/seqsero2/assembly/seqsero2_assembly_{{ pid }}/${sample_id}/", pattern: 'Seq*.txt'
 
     input:
     set sample_id, file(fasta) from {{ input_channel }}
@@ -50,5 +50,3 @@ process seqsero2_assembly_{{ pid }} {
     exit \$exit_code
     """
 }
-
-{{ forks }}

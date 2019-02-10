@@ -501,11 +501,11 @@ class Innuendo(InnuendoRecipe):
         # The description of the processes
         # [forkable, input_process, output_process]
         self.process_descriptions = {
-            "reads_download": [False, None, "integrity_coverage|seq_typing|patho_typing|seqsero2_reads|stx_seqtyping_reads"],
+            "reads_download": [False, None, "integrity_coverage|seq_typing|patho_typing|seqsero2_reads|stx_seqtyping"],
             "patho_typing": [True, None, None],
             "seq_typing": [True, None, None],
             "seqsero2_reads": [True, None, None],
-            "stx_seqtyping_reads": [True, None, None],
+            "stx_seqtyping": [True, None, None],
             "integrity_coverage": [True, None, "fastqc_trimmomatic"],
             "fastqc_trimmomatic": [False, "integrity_coverage",
                                    "true_coverage"],

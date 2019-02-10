@@ -21,7 +21,7 @@ Input/Output type
 Published results
 -----------------
 
-- ``results/typing/seqsero2_assembly``: Stores SeqSero2 results for each sample.
+- ``results/typing/seqsero2/assembly/seqsero2_assembly_ProcessID/``: Stores SeqSero2 results for each sample (for each seqsero2_assembly process).
 
 Published reports
 -----------------
@@ -32,7 +32,7 @@ Default directives
 ------------------
 
 - ``cpus``: 1
-- ``memory``: 1GB (dynamically increased with CPUs and on retry)
+- ``memory``: 1GB (dynamically increased on retry)
 - ``container``: ummidock/seqsero2
 - ``version``: alpha-test-1
 - ``cache``: false
