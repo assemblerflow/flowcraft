@@ -283,6 +283,7 @@ class Process:
             - memory
             - container
             - container tag/version
+            - scratch
 
         An example of directives for two process is as follows::
         
