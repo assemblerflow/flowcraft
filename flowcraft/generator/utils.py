@@ -32,7 +32,7 @@ def get_nextflow_filepath(log_file):
                                  ".nextflow.log empty?")
             try:
                 # Regex supports absolute paths and relative paths
-                pipeline_path = re.match(".*\s([/\w/]*\w*.nf).*", line) \
+                pipeline_path = re.match(".*\s(.*.nf).*", line) \
                     .group(1)
                 return pipeline_path
             except AttributeError:

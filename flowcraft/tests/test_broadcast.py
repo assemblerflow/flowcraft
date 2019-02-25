@@ -23,3 +23,9 @@ def test_path_in_log():
 
     assert filepath != ""
 
+def test_regex_in_log():
+    filepath = utils.get_nextflow_filepath(
+        os.path.join(os.getcwd(), "flowcraft/tests/broadcast_tests/log_with_command_regex.txt"))
+
+    assert filepath != ""
+
