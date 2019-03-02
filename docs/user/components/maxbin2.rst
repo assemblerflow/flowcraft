@@ -45,5 +45,11 @@ Default directives
 
 - ``container``: flowcraft/maxbin2
 - ``version``: 2.2.4-1
-- ``cpus``: 3
-- ``memory``: 5.GB * task.attempt
+- ``cpus``: 4
+- ``memory``: 8.GB (dynamically increased on retry)
+
+
+Template
+^^^^^^^^
+
+:mod:`assemblerflow.templates.maxbin2`

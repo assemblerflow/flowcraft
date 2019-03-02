@@ -25,6 +25,9 @@ def getSequence(ref, fasta):
             output_file = open(filename + '.fa', "w")
             output_file.write(">" + fasta_header + "\n" + seq.upper() + "\n")
             output_file.close()
+            header_file = open("header.txt", "w")
+            header_file.write(fasta_header)
+            header_file.close()
 
 def main():
 

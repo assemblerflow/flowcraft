@@ -135,6 +135,9 @@ Taxonomic Profiling
 - :doc:`components/kraken`: Performs taxonomic identification with kraken on FastQ files
   (minikrakenDB2017 as default database)
 
+- :doc:`components/kraken2`: Performs taxonomic identification with kraken2 on FastQ files
+  (minikraken2_v1_8GB as default database)
+
 - :doc:`components/midas_species`: Performs taxonomic identification on FastQ files at the
   species level with midas (requires database)
 

@@ -33,3 +33,7 @@ class RecipeError(Exception):
 
     # def __str__(self):
     #     return repr(self.value)
+
+class LogError(Exception):
+    def __init__(self, value):
+        self.value = "Log ERROR: {}".format(value)

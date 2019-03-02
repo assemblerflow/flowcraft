@@ -20,9 +20,11 @@ from collections import defaultdict, OrderedDict
 try:
     import generator.error_handling as eh
     from generator.process_details import colored_print
+    from generator.utils import get_nextflow_filepath
 except ImportError:
     import flowcraft.generator.error_handling as eh
     from flowcraft.generator.process_details import colored_print
+    from flowcraft.generator.utils import get_nextflow_filepath
 
 locale.setlocale(locale.LC_ALL, "")
 code = locale.getpreferredencoding()
@@ -479,7 +481,10 @@ class NextflowInspector:
 
         with open(self.log_file) as fh:
 
-            first_line = next(fh)
+            try:
+                first_line = next(fh)
+            except:
+                raise eh.InspectionError("Could not read .nextflow.log file. Is file empty?")
             time_str = " ".join(first_line.split()[:2])
             self.time_start = time_str
 
@@ -1528,10 +1533,8 @@ class NextflowInspector:
     def _get_run_hash(self):
         """Gets the hash of the nextflow file"""
 
-        # Get name of the pipeline from the log file
-        with open(self.log_file) as fh:
-            header = fh.readline()
-        pipeline_path = re.match(".*nextflow run ([^\s]+).*", header).group(1)
+        # Get name and path of the pipeline from the log file
+        pipeline_path = get_nextflow_filepath(self.log_file)
 
         # Get hash from the entire pipeline file
         pipeline_hash = hashlib.md5()

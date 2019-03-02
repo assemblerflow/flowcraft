@@ -1,0 +1,2 @@
+Log with command - different chars in path
+/usr/local/bin/nextflow run /mnt/innuendo_storage/users/bgoncalves/jobs/2-3/test.nf -profile incd -resume

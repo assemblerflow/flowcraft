@@ -14,7 +14,7 @@ determine the raw input type, and the parameter for providing input data.
 The input type information is provided in the documentation page of each
 component. For instance, if the first component is FastQC, which has an input
 type of ``FastQ``, the parameter for providing the raw input data will be
-``--fasta``. Here are the currently supported input types and their
+``--fastq``. Here are the currently supported input types and their
 respective parameters:
 
 - ``FastQ``: ``--fastq``

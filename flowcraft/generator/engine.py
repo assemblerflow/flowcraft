@@ -150,6 +150,12 @@ class NextflowGenerator:
         See :func:`NextflowGenerator._get_params_string`
         """
 
+        self.manifest = ""
+        """
+        str: Stores de manifest directives string for the nextflow pipeline.
+        See :func:`NextflowGenerator._get_manifest_string`
+        """
+
         self.user_config = ""
         """
         str: Stores the user configuration file placeholder. This is an
@@ -1228,6 +1234,24 @@ class NextflowGenerator:
 
         return help_list
 
+    def _get_manifest_string(self):
+        """Returns the nextflow manifest config string to include in the
+        config file from the information on the pipeline.
+
+        Returns
+        -------
+        str
+            Nextflow manifest configuration string
+        """
+
+        config_str = ""
+
+        config_str += '\n\tname = "{}"'.format(self.pipeline_name)
+        config_str += '\n\tmainScript = "{}"'.format(self.nf_file)
+
+        return config_str
+
+
     @staticmethod
     def _render_config(template, context):
 
@@ -1253,6 +1277,7 @@ class NextflowGenerator:
         resources = ""
         containers = ""
         params = ""
+        manifest = ""
 
         if self.merge_params:
             params += self._get_merged_params_string()
@@ -1272,6 +1297,8 @@ class NextflowGenerator:
             resources += self._get_resources_string(p.directives, p.pid)
             containers += self._get_container_string(p.directives, p.pid)
 
+        manifest = self._get_manifest_string()
+
         self.resources = self._render_config("resources.config", {
             "process_info": resources
         })
@@ -1280,6 +1307,9 @@ class NextflowGenerator:
         })
         self.params = self._render_config("params.config", {
             "params_info": params
+        })
+        self.manifest = self._render_config("manifest.config", {
+            "manifest_info": manifest
         })
         self.help = self._render_config("Helper.groovy", {
             "nf_file": basename(self.nf_file),
@@ -1396,6 +1426,10 @@ class NextflowGenerator:
         with open(join(project_root, "params.config"), "w") as fh:
             fh.write(self.params)
 
+        # Write manifest config
+        with open(join(project_root, "manifest.config"), "w") as fh:
+            fh.write(self.manifest)
+
         # Write user config if not present in the project directory
         if not exists(join(project_root, "user.config")):
             with open(join(project_root, "user.config"), "w") as fh:
@@ -1447,9 +1481,9 @@ class NextflowGenerator:
         the -t flag.
         """
 
-        # list to store the already parsed components (useful when forks are
+        # dict to store the already parsed components (useful when forks are
         # given to the pipeline string via -t flag
-        list_of_parsed = []
+        dict_of_parsed = {}
 
         # fetches terminal width and subtracts 3 because we always add a
         # new line character and we want a space at the beggining and at the end
@@ -1482,37 +1516,50 @@ class NextflowGenerator:
             template = p.template
             # if component has already been printed then skip and don't print
             # again
-            if template in list_of_parsed:
+            if template in dict_of_parsed:
                 continue
 
-            list_of_parsed.append(template)
+            # starts a list of  containers for the current process in
+            # dict_of_parsed, in which each containers will be added to this
+            # list once it gets parsed
+            dict_of_parsed[template] = {
+                "container": []
+            }
 
-            # fetch repo name from directives of the template. Since some
-            # components like integrity_coverage doesn't have a directives with
-            # container, thus if no directive there the script will skip this
-            # template
-            try:
-                repo = p.directives[template]["container"]
-                default_version = p.directives[template]["version"]
-            except KeyError:
-                continue
-            # make the request to docker hub
-            r = requests.get(
-                "https://hub.docker.com/v2/repositories/{}/tags/".format(
-                    repo
-                ))
-            # checks the status code of the request, if it is 200 then parses
-            # docker hub entry, otherwise retrieve no tags but alerts the user
-            if r.status_code != 404:
-                # parse response content to dict and fetch results key
-                r_content = json.loads(r.content)["results"]
-                for version in r_content:
-                    printed_version = (version["name"] + "*") \
-                        if version["name"] == default_version \
-                        else version["name"]
-                    tags_list.append([template, repo, printed_version])
-            else:
-                tags_list.append([template, repo, "No DockerHub tags"])
+            # fetch repo name from directives of each component.
+            for directives in p.directives.values():
+                try:
+                    repo = directives["container"]
+                    default_version = directives["version"]
+                except KeyError:
+                    # adds the default container if container key isn't present
+                    # this happens for instance in integrity_coverage
+                    repo = "flowcraft/flowcraft_base"
+                    default_version = "1.0.0-1"
+                # checks if repo_version already exists in list of the
+                # containers for the current component being queried
+                repo_version = repo + default_version
+                if repo_version not in dict_of_parsed[template]["container"]:
+                    # make the request to docker hub
+                    r = requests.get(
+                        "https://hub.docker.com/v2/repositories/{}/tags/"
+                        .format(repo)
+                    )
+                    # checks the status code of the request, if it is 200 then
+                    # parses docker hub entry, otherwise retrieve no tags but
+                    # alerts the user
+                    if r.status_code != 404:
+                        # parse response content to dict and fetch results key
+                        r_content = json.loads(r.content)["results"]
+                        for version in r_content:
+                            printed_version = (version["name"] + "*") \
+                                if version["name"] == default_version \
+                                else version["name"]
+                            tags_list.append([template, repo, printed_version])
+                    else:
+                        tags_list.append([template, repo, "No DockerHub tags"])
+
+                dict_of_parsed[template]["container"].append(repo_version)
 
         # iterate through each entry in tags_list and print the list of tags
         # for each component. Each entry (excluding the headers) contains
