@@ -2,6 +2,9 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+
+## 1.4.0
+
 ### New features
 
 - Added support for the report system to:
@@ -25,7 +28,7 @@ position in the `nextflow run` command inside the .nextflow.log file.
 
 ### Minor/Other changes
 
-- Added option to `dengue_typing` to retrive closest referece sequence and link it 
+- Added option to `dengue_typing` to retrieve closest reference sequence and link it 
 with a secondary channel into `mafft`
 - New version of DEN-IM recipe
 - Now prints an ordered list of components

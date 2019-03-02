@@ -37,4 +37,3 @@ def get_nextflow_filepath(log_file):
                 return pipeline_path
             except AttributeError:
                 continue
-
