@@ -3,7 +3,7 @@
 ## Changes in upcoming release (`dev` branch) 
 
 
-## 1.4.0
+## 1.4.1
 
 ### New features
 
