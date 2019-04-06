@@ -145,6 +145,11 @@ class DengueTyping(Process):
 
         self.params = {
             "reference": {
+                "default": "ref/DENV_TYPING_DB_V2.fasta",
+                "description":
+                    "Typing database."
+            },
+            "get_genome": {
                 "default": "true",
                 "description":
                     "Retrieves the sequence of the closest reference."
@@ -161,7 +166,7 @@ class DengueTyping(Process):
                 "cpus": 4,
                 "memory": "{ 5.GB * task.attempt }",
                 "container": "ummidock/seq_typing",
-                "version": "dev"
+                "version": "2.2-02"
             }
         }
 

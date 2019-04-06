@@ -31,6 +31,7 @@ __version__ = "0.0.2"
 __build__ = "01022019"
 __template__ = "dengue_typing-nf"
 
+import glob
 import json
 import os
 import sys
@@ -46,12 +47,14 @@ if __file__.endswith(".command.sh"):
     ASSEMBLY = '$assembly'
     FASTQ_PAIR = '$fastq_pair'.split()
     REFERENCE = '$reference'
+    RESULT = '$get_reference'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))
     logger.debug("ASSEMBLY: {}".format(ASSEMBLY))
     logger.debug("FASTQ_PAIR: {}".format(FASTQ_PAIR))
     logger.debug("REFERENCE: {}".format(REFERENCE))
+    logger.debug("RESULT: {}".format(RESULT))
 
 
 def __get_version_seq_typing():
@@ -175,7 +178,7 @@ def getConsesusSequence(best_reference, consensus, sample_id):
         if gb_ID in headerStr:
             with open(sample_id + '_consensus.fasta', "w") as output_file:
                 output_file.write(">" + sample_id + "_consensus_" +
-                                  best_reference.split("_")[0] + "\\n" + seq.upper() + "\\n")
+                                  replace_char(best_reference.split("_")[0]) + "\\n" + seq.upper() + "\\n")
 
     fh_consensus.close()
 
@@ -213,7 +216,7 @@ def getScore(file):
 
 
 @MainWrapper
-def main(sample_id, assembly, fastq_pair, reference):
+def main(sample_id, assembly, fastq_pair, reference, result):
     """Main executor of the dengue_typing template.
 
     Parameters
@@ -225,6 +228,8 @@ def main(sample_id, assembly, fastq_pair, reference):
     fastq_pair: list
         FastQ files
     reference: str
+        Reference multi-fasta to be mapped against
+    result: str
         String stating is the reference genome is to be recovered"""
 
     json_report = {}
@@ -233,8 +238,10 @@ def main(sample_id, assembly, fastq_pair, reference):
 
     cli = ["seq_typing.py",
            "reads",
-           "--org", "Dengue", "virus",
+           "-r", reference,
            "-j", "${task.cpus}",
+           "--debug",
+           '--bowtieAlgo="--very-fast"',
            "--doNotRemoveConsensus",
            "-f", fastq_pair[0], fastq_pair[1]]
 
@@ -270,11 +277,13 @@ def main(sample_id, assembly, fastq_pair, reference):
         if typing_result != "NT":
             logger.info("Getting consensus sequenceq")
             getConsesusSequence(best_reference,
-                                "rematch/1_GenotypesDENV_14-05-18.headers_renamed.fasta_0/sample.noMatter.fasta",
+                                glob.glob("rematch/*/sample.noMatter.fasta")[0],
                                 sample_id)
 
             # check confidence and emmit appropriate warnings
-            identity, coverage = ("seq_typing.report_types.tab")
+            identity, coverage = getScore("seq_typing.report_types.tab")
+
+            reference_name = getSequence(best_reference, os.path.join(os.getcwd(), reference))
 
         else:
             logger.error("Failed to obtain a close reference sequence in read mode. No consensus sequence is obtained.")
@@ -282,9 +291,7 @@ def main(sample_id, assembly, fastq_pair, reference):
                 status.write("fail")
             sys.exit(120)
 
-        if reference == "true":
-            reference_name = getSequence(best_reference,
-                                         "/NGStools/seq_typing/seqtyping/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
+        if result == "true":
 
             json_report = {'tableRow': [{
                 'sample': sample_id,
@@ -293,10 +300,13 @@ def main(sample_id, assembly, fastq_pair, reference):
                      'value': typing_result,
                      'table': 'typing'},
                     {'header': 'Identity',
-                     'value': identity,
+                     'value': round(identity, 2),
                      'table': 'typing'},
                     {'header': 'Coverage',
-                     'value': coverage,
+                     'value': round(coverage, 2),
+                     'table': 'typing'},
+                    {'header': 'Reference',
+                     'value': reference_name.replace("gb_", "gb:").split("_")[0],
                      'table': 'typing'}
                 ]}],
                 'metadata': [
@@ -316,10 +326,13 @@ def main(sample_id, assembly, fastq_pair, reference):
                      'value': typing_result,
                      'table': 'typing'},
                     {'header': 'Identity',
-                     'value': identity,
+                     'value': round(identity, 2),
                      'table': 'typing'},
                     {'header': 'Coverage',
-                     'value': coverage,
+                     'value': round(coverage, 2),
+                     'table': 'typing'},
+                    {'header': 'Reference',
+                     'value': reference_name.replace("gb_", "gb:").split("_")[1],
                      'table': 'typing'}
                 ]}],
                 'metadata': [
@@ -344,4 +357,4 @@ def main(sample_id, assembly, fastq_pair, reference):
 
 if __name__ == '__main__':
 
-    main(SAMPLE_ID, ASSEMBLY, FASTQ_PAIR, REFERENCE)
+    main(SAMPLE_ID, ASSEMBLY, FASTQ_PAIR, REFERENCE, RESULT)

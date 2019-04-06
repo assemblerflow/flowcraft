@@ -1,7 +1,13 @@
-getRef_{{ pid }} = params.reference{{ param_id}} ? "true" : "false"
-checkpointReferenceGenome_{{ pid }} = Channel.value(getRef_{{ pid }})
+// Check for the presence of absence of fasta reference
+if (params.reference{{ param_id }} == null) {
+    exit 1, "Dengue_typing: A reference fasta file must be provided."
+}
 
+getRef_{{ pid }} = params.get_genome{{ param_id }} ? "true" : "false"
+checkpointReferenceGenome_{{ pid }} = Channel.value(getRef_{{ pid }})
 checkpointReferenceGenome_{{ pid }}.into{ reference_reads_{{ pid }} ; reference_assembly_{{ pid }} }
+
+reference_{{ pid }} = Channel.fromPath(params.reference{{ param_id }})
 
 class VerifyCompletnessTyping {
 
@@ -49,8 +55,9 @@ process dengue_typing_assembly_{{ pid }} {
 
 
     input:
-    set sample_id, file(assembly) from type_assembly_{{ pid }}
-    val reference from reference_assembly_{{ pid }}
+    set sample_id, file(assembly), file(reference) from type_assembly_{{ pid }}
+    val get_reference from reference_assembly_{{ pid }}
+    each file(reference) from Channel.fromPath("${params.reference{{ param_id }}}")
 
     output:
     file "seq_typing*"
@@ -79,7 +86,8 @@ process dengue_typing_reads_{{ pid }} {
 
     input:
     set sample_id, file(assembly), file(fastq_pair) from type_reads_{{ pid }}.join(_LAST_fastq_{{ pid }})
-    val reference from reference_reads_{{ pid }}
+    val get_reference from reference_reads_{{ pid }}
+    each file(reference) from Channel.fromPath("${params.reference{{ param_id }}}")
 
     output:
     file "seq_typing*"

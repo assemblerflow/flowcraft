@@ -44,11 +44,13 @@ if __file__.endswith(".command.sh"):
     SAMPLE_ID = '$sample_id'
     ASSEMBLY = '$assembly'
     REFERENCE = '$reference'
+    RESULT = '$get_reference'
     logger.debug("Running {} with parameters:".format(
         os.path.basename(__file__)))
     logger.debug("SAMPLE_ID: {}".format(SAMPLE_ID))
     logger.debug("ASSEMBLY: {}".format(ASSEMBLY))
     logger.debug("REFERENCE: {}".format(REFERENCE))
+    logger.debug("RESULT: {}".format(RESULT))
 
 
 def __get_version_seq_typing():
@@ -173,7 +175,7 @@ def getScore(file):
         return sequence_identity, sequence_covered
 
 @MainWrapper
-def main(sample_id, assembly, reference):
+def main(sample_id, assembly, reference, result):
     """Main executor of the dengue_typing template.
 
     Parameters
@@ -184,7 +186,7 @@ def main(sample_id, assembly, reference):
         Assembly file.
     fastq_pair: list
         FastQ files
-    reference: str
+    result: str
         String stating is the reference genome is to be recovered"""
 
     json_report = {}
@@ -193,7 +195,7 @@ def main(sample_id, assembly, reference):
 
     cli = ["seq_typing.py",
            "assembly",
-           "--org", "Dengue", "virus",
+           "-b", os.path.join(os.getcwd(), reference),
            "-j", "${task.cpus}",
            "-f", assembly,
            "-t", "nucl"]
@@ -233,15 +235,14 @@ def main(sample_id, assembly, reference):
             # write appropriate QC dot files based on blast statistics
             identity, coverage = getScore("seq_typing.report_types.tab")
 
+            best_reference = get_reference_header("seq_typing.report_types.tab")
+
+            reference_name = getSequence(best_reference, os.path.join(os.getcwd(), reference))
+
         else:
             logger.info("No typing information was obtained.")
 
-        if reference == "true":
-
-            best_reference = get_reference_header("seq_typing.report_types.tab")
-
-            reference_name = getSequence(best_reference,
-                                         "/NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta")
+        if result == "true":
 
             json_report = {'tableRow': [{
                 'sample': sample_id,
@@ -250,10 +251,13 @@ def main(sample_id, assembly, reference):
                      'value': typing_result,
                      'table': 'typing'},
                     {'header': 'Identity',
-                     'value': identity,
+                     'value': round(identity,2),
                      'table': 'typing'},
                     {'header': 'Coverage',
-                     'value': coverage,
+                     'value': round(coverage,2),
+                     'table': 'typing'},
+                    {'header': 'Reference',
+                     'value': reference_name.replace("gb_", "gb:").split("_")[0],
                      'table': 'typing'}
                 ]}],
                 'metadata': [
@@ -272,10 +276,13 @@ def main(sample_id, assembly, reference):
                      'value': typing_result,
                      'table': 'typing'},
                     {'header': 'Identity',
-                     'value': identity,
+                     'value': round(identity),
                      'table': 'typing'},
                     {'header': 'Coverage',
-                     'value': coverage,
+                     'value': round(coverage),
+                     'table': 'typing'},
+                    {'header': 'Reference',
+                     'value': reference_name.replace("gb_", "gb:").split("_")[1],
                      'table': 'typing'}
                 ]}],
                 'metadata': [
@@ -300,4 +307,4 @@ def main(sample_id, assembly, reference):
 
 if __name__ == '__main__':
 
-    main(SAMPLE_ID, ASSEMBLY, REFERENCE)
+    main(SAMPLE_ID, ASSEMBLY, REFERENCE, RESULT)
