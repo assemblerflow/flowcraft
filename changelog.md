@@ -33,6 +33,7 @@ with a secondary channel into `mafft`
 - New version of DEN-IM recipe
 - Now prints an ordered list of components
 - Moved taxonomy results from `results/annotation/` to `results/taxonomy/`
+- New version of DEN-IM recipe: added check_coverage and redone the dengue_typing module
 
 
 ## 1.4.0

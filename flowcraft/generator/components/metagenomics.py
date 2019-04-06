@@ -414,12 +414,14 @@ class SplitAssembly(Process):
         self.input_type = "fasta"
         self.output_type = "fasta"
 
+
         self.params = {
             "size": {
                 "default": "null",
                 "description": "Minimum contig size"
             }
         }
+
 
         self.directives = {
             "split_assembly": {
