@@ -6,7 +6,7 @@
 
 -`Seroba`: Serotyping of *Streptococcus pneumoniae* sequencing data (FastQ)
 
-## 1.4.01
+## 1.4.1
 
 ### New features
 
