@@ -161,4 +161,31 @@ class DengueTyping(Process):
         ]
 
 
+class Seroba(Process):
+    """
+    Serotyping of Streptococcus pneumoniae sequencing data
+    """
 
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = None
+
+        self.params = {
+            "coverage": {
+                "default": "20",
+                "description":
+                    "Threshold for k-mer coverage of the reference sequence (default = 20)"
+            }
+        }
+
+        self.directives = {
+            "seroba": {
+                "cpus": 3,
+                "memory": "'4GB'",
+                "container": "sangerpathogens/seroba",
+                "version": "latest"
+            }
+        }

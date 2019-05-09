@@ -2,8 +2,11 @@
 
 ## Changes in upcoming release (`dev` branch) 
 
+### New components
 
-## 1.4.0
+-`Seroba`: Serotyping of *Streptococcus pneumoniae* sequencing data (FastQ)
+
+## 1.4.01
 
 ### New features
 
