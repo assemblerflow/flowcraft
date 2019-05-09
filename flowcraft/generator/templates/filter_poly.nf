@@ -40,7 +40,7 @@ process filter_poly_{{ pid }} {
 
     gzip ${sample_id}_filtered_*.fastq
 
-    rm *.fq *.fastq
+    #rm *.fq *.fastq
 
     if [ "$clear" = "true" ];
     then

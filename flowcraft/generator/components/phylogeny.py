@@ -34,6 +34,10 @@ class Raxml(Process):
             "bootstrap": {
                 "default": "500",
                 "description": "Specify the number of alternative runs on distinct starting trees"
+            },
+            "simpleLabel": {
+                "default": "true",
+                "description": "Simplify the labels in the newick tree (for interactive report only)"
             }
         }
 
