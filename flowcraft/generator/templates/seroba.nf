@@ -33,9 +33,10 @@ process seroba_{{ pid }} {
             # Add ST information to report JSON
             json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'serotype','value':'\$(cat pred.tsv | cut -f2)','table':'typing'}]}]}"
             echo \$json_str > .report.json
+            rm -r /tmp/results/
         #else
             #echo fail > .status
-            #rm -r /tmp/results/
+            rm -r /tmp/results/
         #fi
     } || {
         echo fail > .status
