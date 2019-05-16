@@ -26,16 +26,16 @@ process seroba_{{ pid }} {
         seroba runSerotyping --coverage ${coverage} /seroba/database/ ${fastq[0]} ${fastq[1]} /tmp/results/${sample_id}
 
         # Get the ST for the sample
-        #if [ -f "/tmp/results/${sample_id}/pred.tsv" ]
-        #then
+        if [ -f "/tmp/results/${sample_id}/pred.tsv" ]
+        then
             cp /tmp/results/${sample_id}/pred.tsv .
             sed -i -- 's|/tmp/results/||g' pred.tsv
             # Add ST information to report JSON
             json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'serotype','value':'\$(cat pred.tsv | cut -f2)','table':'typing'}]}]}"
             echo \$json_str > .report.json
             rm -r /tmp/results/
-        #else
-            #echo fail > .status
+        else
+            echo fail > .status
             rm -r /tmp/results/
         #fi
     } || {
