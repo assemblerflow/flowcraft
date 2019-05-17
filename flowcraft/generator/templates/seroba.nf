@@ -22,22 +22,24 @@ process seroba_{{ pid }} {
     {
         # create a directory in /tmp to store the results
         mkdir /tmp/results
+        #rename input files for seroba (avoid match error)
+        mv ${fastq[0]} ${sample_id}_1.fq.gz
+        mv ${fastq[1]} ${sample_id}_2.fq.gz
         # run seroba typing module
-        seroba runSerotyping --coverage ${coverage} /seroba/database/ ${fastq[0]} ${fastq[1]} /tmp/results/${sample_id}
+        seroba runSerotyping --coverage ${coverage} /seroba/database/ ${sample_id}_1.fq.gz ${sample_id}_2.fq.gz /tmp/results/${sample_id}
 
         # Get the ST for the sample
-        if [ -f "/tmp/results/${sample_id}/pred.tsv" ]
+        if [ -f "/tmp/results/${sample_id}/pred.tsv" ];
         then
             cp /tmp/results/${sample_id}/pred.tsv .
             sed -i -- 's|/tmp/results/||g' pred.tsv
             # Add ST information to report JSON
             json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'serotype','value':'\$(cat pred.tsv | cut -f2)','table':'typing'}]}]}"
             echo \$json_str > .report.json
-            rm -r /tmp/results/
         else
             echo fail > .status
             rm -r /tmp/results/
-        #fi
+        fi
     } || {
         echo fail > .status
         # Remove results directory
