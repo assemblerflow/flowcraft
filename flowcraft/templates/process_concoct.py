@@ -119,10 +119,16 @@ def main(sample_id, cluster_file, contig_file):
 
     bin_stats = merge_data(seqs, clusters)
 
+    report_list = [["Bin name", "Contig number", "Genome size", "GC content %"]]
+
     for key, value in sorted(bin_stats.items(), key=lambda x: x[0]):
         print("{} : {}".format(key, value))
+        report_list.append([value["Bin name"],
+                            str(value["Contig number"]),
+                            str(value["Genome size"]),
+                            str(value["GC content"])])
 
-    # this tsvData could be a single object since it only has one element
+    # this tsvData is a single object since it only has one element
     # this data type expects full tables in tsv format
     report_json = {
         "tsvData": [{
@@ -131,10 +137,9 @@ def main(sample_id, cluster_file, contig_file):
         }]
     }
 
-    # TODO - check webapp integration
     # web-app excepts a list with all the values in the table.
     #  To expand this to other processes other than MaxBin2, this line needs to be reworked
-    report_json["tsvData"][0]["data"]["CONCOCT"] = list(bin_stats.values())
+    report_json["tsvData"][0]["data"]["MaxBin2"] = report_list
 
     with open(".report.json", "w") as k:
         k.write(json.dumps(report_json))
@@ -142,4 +147,3 @@ def main(sample_id, cluster_file, contig_file):
 
 if __name__ == "__main__":
     main(SAMPLE_ID, CLUSTER, CONTIGS)
-    #main("SRR6361073", "/home/ines/test_concoct/work/be/2fac825d27f6ef3b0ff8680408ab61/concoct_output/clustering_gt1000.csv", "/home/ines/test_concoct/work/be/2fac825d27f6ef3b0ff8680408ab61/SRR6361073_split_contigs.fasta")
