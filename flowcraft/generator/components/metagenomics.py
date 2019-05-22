@@ -5,6 +5,74 @@ except ImportError:
     from flowcraft.generator.process import Process
 
 
+class Concoct(Process):
+    """
+    CONCOCT process template interface for the
+    taxonomic independent binning of metagenomic
+    assemblies.
+
+    This process is set with:
+        - ``input_type``: assembly
+        - ``output_type``: assembly
+        - ``ptype``: post_assembly
+
+        It contains one **secondary channel link end**:
+
+            - ``MAIN_fq`` (alias: ``_MAIN_assembly``): Receives the FastQ files
+            from the last process with ``fastq`` output type.
+    """
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta"
+        self.output_type = "fasta"
+
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
+        self.params = {
+            "clusters": {
+                "default": 400,
+                "description": "Maximum number of clusters for VGMM. Default: 400"
+            },
+            "lengthThreshold": {
+                "default": 1000,
+                "description": "Contigs shorter than this value will not be included. Default: 1000."
+            },
+            "readLength": {
+                "default": 100,
+                "description": "Specify read length for coverage."
+                               "Default: 0.9"
+            },
+            "iterations": {
+                "default": 500,
+                "description": "Number of iterations for the VBGMM. Default: 500"
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+            }
+        }
+
+        self.directives = {
+            "concoct": {
+                "container": "flowcraft/concoct",
+                "version": "1.0.0-1",
+                "cpus": 4,
+                "memory": "{ 5.GB * task.attempt }"
+            }
+        }
+
+        self.status_channels = [
+            "concoct",
+            "report_concoct"
+        ]
+
+
 class Kraken(Process):
     """kraken process template interface
 
@@ -40,6 +108,7 @@ class Kraken(Process):
         self.status_channels = [
             "kraken"
         ]
+
 
 class Kraken2(Process):
     """kraken2 process template interface
@@ -349,6 +418,7 @@ class RemoveHost(Process):
             "report_remove_host"
         ]
 
+
 class Metaprob(Process):
     """MetaProb to bin metagenomic reads interface
 
@@ -414,14 +484,12 @@ class SplitAssembly(Process):
         self.input_type = "fasta"
         self.output_type = "fasta"
 
-
         self.params = {
             "size": {
                 "default": "null",
                 "description": "Minimum contig size"
             }
         }
-
 
         self.directives = {
             "split_assembly": {
@@ -433,4 +501,3 @@ class SplitAssembly(Process):
         self.status_channels = [
             "split_assembly"
         ]
-

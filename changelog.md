@@ -4,7 +4,8 @@
 
 ### New components
 
--`Seroba`: Serotyping of *Streptococcus pneumoniae* sequencing data (FastQ)
+- `Seroba`: Serotyping of *Streptococcus pneumoniae* sequencing data (FastQ)
+- `Concoct`: Clustering metagenomic assembled comtigs with coverage and composition
 
 ## 1.4.1
 
