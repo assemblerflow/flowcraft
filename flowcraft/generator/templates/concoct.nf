@@ -24,10 +24,10 @@ process concoct_{{ pid }} {
     val clear from checkpointClear_{{ pid }}
 
     output:
-    set sample_id, file(assembly), file ('concoct_output/*.fa') into binCh_{{ pid }}
-    set sample_id, file("concoct_output/clustering_*.csv"), file("*_split_contigs.fasta") into intoReport_{{ pid }}
-    file("concoct_output/*")
-
+    set sample_id, file(assembly), file('concoct_output/*.fa') into binCh_{{ pid }}
+    set sample_id, file("concoct_output/clustering_merged.csv"), file(assembly) into intoReport_{{ pid }}
+    file("concoct_output/*.csv")
+    file(concoct_output/*.txt")
     {% with task_name="concoct" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -53,10 +53,13 @@ process concoct_{{ pid }} {
 
         # run CONCOCT
         concoct --coverage_file ${sample_id}_coverage_file.tab --composition_file ${sample_id}_split_contigs.fasta \
-        -b concoct_output/ -c ${maxClusters} -l ${length_threshold} -r ${read_length } -i ${iterations}
+        -b concoct_output/ -c ${maxClusters} -l ${length_threshold} -r ${read_length } -i ${iterations} -t ${task.cpus}
 
-        extract_fasta_bins.py --output_path concoct_output/ ${sample_id}_split_contigs.fasta \
-        concoct_output/clustering_*.csv
+        # Merge subcontig clustering into original contig clustering
+        merge_cutup_clustering.py concoct_output/clustering_*.csv > concoct_output/clustering_merged.csv
+
+        # Extract bins as individual FASTA
+        extract_fasta_bins.py --output_path concoct_output/ ${assembly} concoct_output/clustering_merged.csv
 
         echo pass > .status
 
@@ -84,7 +87,7 @@ process report_concoct_{{ pid }}{
     tag { sample_id }
 
     input:
-    set sample_id, file(cluster), file(contigs) from  intoReport_{{ pid }}
+    set sample_id, file(cluster), file(contigs) from intoReport_{{ pid }}
 
     output:
     {% with task_name="report_concoct" %}
