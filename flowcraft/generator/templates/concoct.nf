@@ -27,7 +27,7 @@ process concoct_{{ pid }} {
     set sample_id, file(assembly), file('concoct_output/*.fa') into binCh_{{ pid }}
     set sample_id, file("concoct_output/clustering_merged.csv"), file(assembly) into intoReport_{{ pid }}
     file("concoct_output/*.csv")
-    file(concoct_output/*.txt")
+    file("concoct_output/*.txt")
     {% with task_name="concoct" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}

@@ -83,6 +83,7 @@ def get_GC(sequence):
 
     return round(sum(1 for nucl in sequence if nucl in ['G', 'C'])/len(sequence)*100, 2)
 
+
 def merge_data(contigs, clusters):
     """
     Obtain genome size, cg content and number of contigs for concoct bins
