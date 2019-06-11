@@ -148,3 +148,36 @@ class Bwa(Process):
         self.status_channels = [
             "bwa",
         ]
+
+
+class markDuplicates(Process):
+    """Identifies duplicate reads.
+
+        This process is set with:
+
+            - ``input_type``: bam
+            - ``output_type``: bam
+            - ``ptype``: mapping
+
+        """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "bam"
+        self.output_type = "bam"
+
+        self.compiler["multiqc"] = ["markDupMultiQC"]
+
+        self.directives = {
+            "mark_duplicates": {
+                "container": "broadinstitute/gatk",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 4
+            }
+        }
+
+        self.status_channels = [
+            "mark_duplicates"
+        ]
