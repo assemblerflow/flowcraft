@@ -19,7 +19,7 @@ process bwa_{{ pid }} {
     {% endwith %}
 
     """
-    bwa mem -M -R '@RG\\tID:${sample_id}\\tSM:${sample_id}\\tPL:Illumina' $index $fastq_pair > ${sample_id}.sam
+    bwa mem -M -R '@RG\\tID:${sample_id}\\tSM:${sample_id}\\tPL:Illumina' -t $task.cpus $index $fastq_pair > ${sample_id}.sam
     samtools sort -o ${sample_id}.bam -O BAM ${sample_id}.sam
     samtools index ${sample_id}.bam
     """
