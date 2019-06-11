@@ -29,9 +29,15 @@ class Haplotypecaller(Process):
                 "container": "broadinstitute/gatk",
                 "memory": "{2.Gb*task.attempt}",
                 "cpus": 4,
+            },
+            "merge_vcfs": {
+                "container": "broadinstitute/gatk",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 4,
             }
         }
 
         self.status_channels = [
-            "haplotypecaller"
+            "haplotypecaller",
+            "merge_vcfs"
         ]
