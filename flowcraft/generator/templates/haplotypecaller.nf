@@ -9,8 +9,6 @@ process haplotypecaller_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    publishDir "results/variant_calling/haplotypecaller_{{ pid }}"
-
     tag "$interval"
 
     input:
