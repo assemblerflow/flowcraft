@@ -9,7 +9,7 @@ process base_recalibrator_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
 
-    publishDir "results/mapping/base_recalibrator_{{ pid }}"
+    tag { sample_id }
 
     input:
     set val(sample_id), file(bam), file(bai) from {{ input_channel }}
@@ -21,7 +21,7 @@ process base_recalibrator_{{ pid }} {
     each file(golden_indel_idx) from baseRecalibratorGoldenIndelIdx_{{pid}}
     
     output:
-    set sample_id, file("${sample_id}_recal_data.table") into baserecalibrator_table
+    set sample_id, file("${sample_id}_recal_data.table"), file(bam), file(bai) into baserecalibrator_table
     {% with task_name="base_recalibrator" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -41,6 +41,33 @@ process base_recalibrator_{{ pid }} {
       --known-sites \$golden_indel \
       -O ${sample_id}_recal_data.table \
       -R ${fasta}.fasta
+    """
+}
+
+
+process apply_bqsr_{{ pid }} {
+
+    {% include "post.txt" ignore missing %}
+
+    publishDir "results/mapping/apply_bqsr_{{ pid }}"
+
+    tag { sample_id }
+
+    input:
+    set sample_id, file(baserecalibrator_table), file(bam), file(bai) from baserecalibrator_table
+    
+    output:
+    set sample_id, file("${sample_id}_recalibrated.bam"), file("${sample_id}_recalibrated.bai") into {{ output_channel }}
+    {% with task_name="apply_bqsr" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    """
+    gatk ApplyBQSR \
+      -I $bam \
+      -bqsr $baserecalibrator_table \
+      -O ${sample_id}_recalibrated.bam \
+      --create-output-bam-index
     """
 }
 

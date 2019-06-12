@@ -199,7 +199,7 @@ class BaseRecalibrator(Process):
         super().__init__(**kwargs)
 
         self.input_type = "bam"
-        self.output_type = "txt"
+        self.output_type = "bam"
 
         self.params = {
             "reference": {
@@ -234,9 +234,15 @@ class BaseRecalibrator(Process):
                 "container": "broadinstitute/gatk",
                 "memory": "{5.Gb*task.attempt}",
                 "cpus": 4
+            },
+            "apply_bqsr": {
+                "container": "broadinstitute/gatk",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 4
             }
         }
 
         self.status_channels = [
-            "base_recalibrator"
+            "base_recalibrator",
+            "apply_bqsr"
         ]
