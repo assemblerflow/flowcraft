@@ -150,7 +150,7 @@ class Bwa(Process):
         ]
 
 
-class markDuplicates(Process):
+class MarkDuplicates(Process):
     """Identifies duplicate reads.
 
         This process is set with:
@@ -180,4 +180,63 @@ class markDuplicates(Process):
 
         self.status_channels = [
             "mark_duplicates"
+        ]
+
+
+class BaseRecalibrator(Process):
+    """Detects systematic errors in base quality scores
+
+        This process is set with:
+
+            - ``input_type``: bam
+            - ``output_type``: bam
+            - ``ptype``: mapping
+
+        """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "bam"
+        self.output_type = "txt"
+
+        self.params = {
+            "reference": {
+                "default": "null",
+                "description": "Specifies the name of the FASTA reference genome and index files to be provided "
+                               "to BaseRecalibrator."
+            },
+            "dbsnp": {
+                "default": "null",
+                "description": "Specifies the dbSNP VCF file to be provided "
+                               "to BaseRecalibrator."
+            },
+            "dbsnpIdx": {
+                "default": "null",
+                "description": "Specifies the dbSNP VCF index file to be provided "
+                               "to BaseRecalibrator."
+            },
+            "goldenIndel": {
+                "default": "null",
+                "description": "Specifies the Gold standard INDELs VCF file to be provided "
+                               "to BaseRecalibrator."
+            },
+            "goldenIndelIdx": {
+                "default": "null",
+                "description": "Specifies the Gold standard INDELs VCF index file to be provided "
+                               "to BaseRecalibrator."
+            }
+        }
+
+        self.directives = {
+            "base_recalibrator": {
+                "container": "broadinstitute/gatk",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 4
+            }
+        }
+
+        self.status_channels = [
+            "base_recalibrator"
         ]
