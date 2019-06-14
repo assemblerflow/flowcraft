@@ -5,6 +5,15 @@ except ImportError:
 
 
 class Haplotypecaller(Process):
+    """Call germline SNPs and indels via local re-assembly of haplotypes
+
+        This process is set with:
+
+            - ``input_type``: bam
+            - ``output_type``: vcf
+            - ``ptype``: varaint calling
+
+        """
 
     def __init__(self, **kwargs):
 
