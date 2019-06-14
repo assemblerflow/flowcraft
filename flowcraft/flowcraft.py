@@ -279,10 +279,6 @@ def copy_project(path):
     # Copy bin scripts
     copy_tree(join(repo_dir, "bin"), join(target_dir, "bin"))
 
-    # Copy default config file
-    shutil.copy(join(repo_dir, "nextflow.config"),
-                join(target_dir, "nextflow.config"))
-
     # Copy static profiles file
     shutil.copy(join(repo_dir, "profiles.config"),
                 join(target_dir, "profiles.config"))

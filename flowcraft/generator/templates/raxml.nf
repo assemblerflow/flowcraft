@@ -1,6 +1,7 @@
 IN_substitution_model_{{ pid }} = Channel.value(params.substitutionModel{{ param_id }})
 IN_seed_number_{{ pid }} = Channel.value(params.seedNumber{{ param_id }})
 IN_bootstrap_number_{{ pid }} = Channel.value(params.bootstrap{{ param_id }})
+IN_simple_label_{{ pid}} = Channel.value(params.simpleLabel{{ param_id }})
 
 process raxml_{{ pid }} {
 
@@ -42,6 +43,7 @@ process report_raxml_{{ pid }} {
 
     input:
     file(newick) from into_json_{{ pid }}
+    val label from IN_simple_label_{{ pid}}
 
     output:
     {% with task_name="report_raxml", sample_id="val('single')"  %}

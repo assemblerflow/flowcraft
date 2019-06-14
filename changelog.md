@@ -9,7 +9,15 @@
 - `BaseRecalibrator`: Detects systematic errors in base quality scores
 - `Haplotypecaller`: Call germline SNPs and indels via local re-assembly of haplotypes
 
-## 1.4.0
+- `Seroba`: Serotyping of *Streptococcus pneumoniae* sequencing data (FastQ)
+- `Concoct`: Clustering metagenomic assembled comtigs with coverage and composition
+- `MetaBAT2`: A robust statistical framework for reconstructing genomes from metagenomic data
+
+### Minor/Other changes
+
+- added manifest information to the `nextflow.config` file to allow for remote execution
+
+## 1.4.1
 
 ### New features
 

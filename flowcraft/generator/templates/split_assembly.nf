@@ -18,7 +18,7 @@ process split_assembly_{{ pid }} {
     val min_contig_size from IN_min_contig_size_{{ pid }}
 
     output:
-    file '*.fasta' into splitCh_{{ pid }} optional true
+    file('*.fasta') into splitCh_{{ pid }}
     {% with task_name="split_assembly" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -28,9 +28,9 @@ process split_assembly_{{ pid }} {
 
 
 }
+
 {{ output_channel }} = Channel.create()
 
-splitCh_{{ pid }}.flatMap().map{ it -> [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.'), it] }
-    .into({{ output_channel }})
+splitCh_{{ pid }}.flatMap().map{ it -> [it.toString().tokenize('/').last().tokenize('.')[0..-2].join('.'), it]}.into( {{ output_channel }} )
 
 {{ forks }}

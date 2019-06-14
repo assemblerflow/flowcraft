@@ -28,7 +28,7 @@ substitute key variables in the process, such as input/output channels.
 An example created as a ``my_process.nf`` file is as follows::
 
     some_channel_{{ pid }} = Channel.value(params.param1{{ param_id}})
-    other_channel_{{ pid }} = Chanel.fromPath(params.param2{{ param_id}})
+    other_channel_{{ pid }} = Channel.fromPath(params.param2{{ param_id}})
 
     process myProcess_{{ pid }} {
 
