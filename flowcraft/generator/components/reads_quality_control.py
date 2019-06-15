@@ -161,6 +161,25 @@ class Fastqc(Process):
         }}
 
 
+class Fastqc2(Process):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fastq"
+
+        self.directives = {"fastqc2": {
+            "cpus": 2,
+            "memory": "'4GB'",
+            "container": "flowcraft/fastqc",
+            "version": "0.11.7-1"
+        }}
+
+        self.status_channels = [
+            "fastqc2"
+        ]
+
+
 class Trimmomatic(Process):
     """Trimmomatic process template interface
 
