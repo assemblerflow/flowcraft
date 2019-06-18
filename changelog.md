@@ -1,6 +1,6 @@
 # Changelog
 
-## Changes in upcoming release (`dev` branch)
+## 1.4.2
 
 ### New components
 
