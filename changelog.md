@@ -1,8 +1,13 @@
 # Changelog
 
-## Changes in upcoming release (`dev` branch) 
+## Changes in upcoming release (`dev` branch)
 
 ### New components
+
+- `Bwa`: align short paired-end sequencing reads to long reference sequences
+- `MarkDuplicates`: Identifies duplicate reads
+- `BaseRecalibrator`: Detects systematic errors in base quality scores
+- `Haplotypecaller`: Call germline SNPs and indels via local re-assembly of haplotypes
 
 - `Seroba`: Serotyping of *Streptococcus pneumoniae* sequencing data (FastQ)
 - `Concoct`: Clustering metagenomic assembled comtigs with coverage and composition
