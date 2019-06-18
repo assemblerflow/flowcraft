@@ -1,61 +1,110 @@
-process dengue_typing_{{ pid }} {
+// Check for the presence of absence of fasta reference
+if (params.reference{{ param_id }} == null) {
+    exit 1, "Dengue_typing: A reference fasta file must be provided."
+}
+
+getRef_{{ pid }} = params.get_genome{{ param_id }} ? "true" : "false"
+checkpointReferenceGenome_{{ pid }} = Channel.value(getRef_{{ pid }})
+checkpointReferenceGenome_{{ pid }}.into{ reference_reads_{{ pid }} ; reference_assembly_{{ pid }} }
+
+reference_{{ pid }} = Channel.fromPath(params.reference{{ param_id }})
+
+class VerifyCompletnessTyping {
+
+    public static boolean contigs(String filename, int threshold){
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        boolean result = processContigs(reader, threshold);
+        reader.close()
+
+        return result;
+    }
+
+    private static boolean processContigs(BufferedReader reader, int threshold){
+        String line;
+        int lineThreshold = 0;
+        List splittedLine
+
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith('>')) {
+                lineThreshold = 0
+            } else {
+                lineThreshold += line.length()
+                if(lineThreshold >= threshold) {
+                    return true;
+                }
+             }
+        }
+
+        return false;
+    }
+}
+
+
+type_reads_{{ pid }} = Channel.create()
+type_assembly_{{ pid }} = Channel.create()
+{{ input_channel }}.choice(type_assembly_{{ pid }}, type_reads_{{ pid }}){a -> a[1].toString() == "null" ? false : VerifyCompletnessTyping.contigs(a[1].toString(), 10000) == true ? 0 : 1}
+
+process dengue_typing_assembly_{{ pid }} {
 
     // Send POST request to platform
     {% include "post.txt" ignore missing %}
 
     tag { sample_id }
-    errorStrategy "ignore"
+
     publishDir "results/dengue_typing/${sample_id}/"
 
+
     input:
-    set sample_id, file(assembly) from {{ input_channel }}
+    set sample_id, file(assembly), file(reference) from type_assembly_{{ pid }}
+    val get_reference from reference_assembly_{{ pid }}
+    each file(reference) from Channel.fromPath("${params.reference{{ param_id }}}")
 
     output:
     file "seq_typing*"
-    set sample_id, file(assembly) into {{ output_channel}}
-    file("*.fa") optional true into _ref_seqTyping_{{ pid }}
-    {% with task_name="dengue_typing" %}
+    set sample_id, file(assembly) into out_typing_assembly_{{ pid }}
+    file("*.fa") optional true into _ref_seqTyping_assembly_{{ pid }}
+    {% with task_name="dengue_typing_assembly" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
 
     script:
-    """
-    {
-        # Prevents read-only issues
-        mkdir rematch_temp
-        cp -r /NGStools/ReMatCh rematch_temp
-        export PATH="\$(pwd)/rematch_temp/ReMatCh:\$PATH"
-        seq_typing.py assembly --org Dengue Virus -f ${assembly} -o ./ -j $task.cpus -t nucl
-
-        if [ ${params.reference{{ param_id}} } == "true" ];
-        then
-            awk 'NR == 2 { print \$4 }' seq_typing.report_types.tab > reference
-            parse_fasta.py -t \$(cat reference)  -f /NGStools/seq_typing/reference_sequences/dengue_virus/1_GenotypesDENV_14-05-18.fasta
-            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'},{'sample':'\$(cat header.txt)','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
-        else
-            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'\$(cat seq_typing.report.txt)','table':'typing'}]}],'metadata':[{'sample':'${sample_id}','treeData':'\$(cat seq_typing.report.txt)','column':'typing'}]}"
-        fi
-
-
-        # Add information to dotfiles
-        echo \$json_str > .report.json
-        version_str="[{'program':'seq_typing.py','version':'0.1'}]"
-        echo \$version_str > .versions
-        rm -r rematch_temp
-        if [ -s seq_typing.report.txt ];
-        then
-            echo pass > .status
-        else
-            echo fail > .status
-        fi
-    } || {
-        echo fail > .status
-        json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'seqtyping','value':'NA','table':'typing'}]}]}"
-        echo \$json_str > .report.json
-    }
-    """
+    template "dengue_typing_assembly.py"
 
 }
+
+
+process dengue_typing_reads_{{ pid }} {
+
+// Send POST request to platform
+    {% include "post.txt" ignore missing %}
+
+    tag { sample_id }
+
+    publishDir "results/dengue_typing/${sample_id}/"
+
+    errorStrategy { task.exitStatus == 120 ? 'ignore' : 'retry' }
+
+    input:
+    set sample_id, file(assembly), file(fastq_pair) from type_reads_{{ pid }}.join(_LAST_fastq_{{ pid }})
+    val get_reference from reference_reads_{{ pid }}
+    each file(reference) from Channel.fromPath("${params.reference{{ param_id }}}")
+
+    output:
+    file "seq_typing*"
+    set sample_id, file("*consensus.fasta") into out_typing_reads_{{ pid }}
+    file("*.fa") optional true into _ref_seqTyping_reads_{{ pid }}
+    {% with task_name="dengue_typing_reads" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    template "dengue_typing_reads.py"
+
+}
+
+out_typing_assembly_{{ pid }}.mix(out_typing_reads_{{ pid }}).set{ {{ output_channel }} }
+
+_ref_seqTyping_assembly_{{ pid }}.mix(_ref_seqTyping_reads_{{ pid }}).set{ _ref_seqTyping_{{ pid }} }
 
 {{ forks }}
 

@@ -139,26 +139,68 @@ class DengueTyping(Process):
         self.input_type = "fasta"
         self.output_type = "fasta"
 
+        self.link_end.append({"link": "__fastq", "alias": "_LAST_fastq"})
+
         self.link_start.extend(["_ref_seqTyping"])
 
         self.params = {
             "reference": {
+                "default": "ref/DENV_TYPING_DB_V2.fasta",
+                "description":
+                    "Typing database."
+            },
+            "get_genome": {
                 "default": "true",
                 "description":
                     "Retrieves the sequence of the closest reference."
             }
         }
 
-        self.directives = {"dengue_typing": {
+        self.directives = {"dengue_typing_assembly": {
             "cpus": 4,
-            "memory": "'4GB'",
+            "memory": "'1GB'",
             "container": "flowcraft/seq_typing",
             "version": "2.0-1"
-        }}
+        },
+            "dengue_typing_reads": {
+                "cpus": 4,
+                "memory": "{ 5.GB * task.attempt }",
+                "container": "ummidock/seq_typing",
+                "version": "2.2-02"
+            }
+        }
 
         self.status_channels = [
-            "dengue_typing"
+            "dengue_typing_assembly",
+            "dengue_typing_reads"
         ]
 
 
+class Seroba(Process):
+    """
+    Serotyping of Streptococcus pneumoniae sequencing data
+    """
 
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = None
+
+        self.params = {
+            "coverage": {
+                "default": "20",
+                "description":
+                    "Threshold for k-mer coverage of the reference sequence (default = 20)"
+            }
+        }
+
+        self.directives = {
+            "seroba": {
+                "cpus": 3,
+                "memory": "'4GB'",
+                "container": "sangerpathogens/seroba",
+                "version": "latest"
+            }
+        }

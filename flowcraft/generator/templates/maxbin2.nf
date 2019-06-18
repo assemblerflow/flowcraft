@@ -12,7 +12,7 @@ process maxbin2_{{ pid }} {
 
     tag { sample_id }
 
-    publishDir "results/maxbin2_{{ pid }}/${sample_id}/"
+    publishDir "results/assembly/binning/maxbin2_{{ pid }}/${sample_id}/"
 
     input:
     set sample_id, file(assembly), file(fastq) from {{ input_channel }}.join(_LAST_fastq_{{ pid }})

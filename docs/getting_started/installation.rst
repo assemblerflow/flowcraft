@@ -63,7 +63,6 @@ setup.py::
 
     git clone https://github.com/assemblerflow/flowcraft.git
     cd flowcraft
-    git submodule update --init --recursive
     python3 setup.py install
 
 
