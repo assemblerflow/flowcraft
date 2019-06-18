@@ -16,6 +16,7 @@
 ### Minor/Other changes
 
 - added manifest information to the `nextflow.config` file to allow for remote execution
+- Added checks for the DAG's dot files in the compile_reports component
 
 ## 1.4.1
 
