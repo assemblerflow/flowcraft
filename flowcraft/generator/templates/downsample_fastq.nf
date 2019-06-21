@@ -17,7 +17,7 @@ process downsample_fastq_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { "${sample_id}" }
-    publishDir "results/downsample_fastq_{{ pid }}/", pattern: "_ss.*"
+    publishDir "results/downsample_fastq_{{ pid }}/", pattern: "*_ss.*"
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}

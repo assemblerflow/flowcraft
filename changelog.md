@@ -1,5 +1,12 @@
 # Changelog
 
+## Upcoming in `dev` 
+
+### Bug fixes
+
+- `downsample_fastq` now saves resulting fastq files in the appropriate results directory
+
+
 ## 1.4.2
 
 ### New components
