@@ -4,8 +4,14 @@
 
 ### Bug fixes
 
-- `downsample_fastq` now saves resulting fastq files in the appropriate results directory
+- Fix bug in `downsample_fastq` where the resulting output files was not being saved in the `results` directory
+- Fix bug in `downsample_fastq` where the output files were being saved as broken symlinks when there was no 
+down-sampling occurring 
 
+### Minor/Other changes
+
+- `treeDag.json` and `forktree.json` files are no longer hidden and are now stored in the 
+`resources` directory
 
 ## 1.4.2
 

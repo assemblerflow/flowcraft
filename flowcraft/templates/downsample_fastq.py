@@ -36,14 +36,15 @@ Code documentation
 
 """
 
-__version__ = "1.0.0"
-__build__ = "30072018"
+__version__ = "1.0.1"
+__build__ = "21062019"
 __template__ = "sample_fastq-nf"
 
 import os
 import re
 import json
 import subprocess
+import shutil
 
 from os.path import basename
 
@@ -156,8 +157,8 @@ def main(sample_id, fastq_pair, genome_size, depth, clear, seed):
                     os.remove(rp)
 
     else:
-        os.symlink(p1, "{}._ss.fq.gz".format(bn1))
-        os.symlink(p2, "{}._ss.fq.gz".format(bn2))
+        shutil.copy(p1, "{}._ss.fq.gz".format(bn1))
+        shutil.copy(p2, "{}._ss.fq.gz".format(bn2))
 
     # Record the original estimated coverage
     with open(".report.json", "w") as fh:
