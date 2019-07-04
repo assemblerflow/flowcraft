@@ -2,6 +2,10 @@
 
 ## Upcoming in `dev` 
 
+### New components
+
+- `rematch_mlst`: MLST from reads through consensus generation
+
 ### Bug fixes
 
 - Fix bug in `downsample_fastq` where the resulting output files was not being saved in the `results` directory

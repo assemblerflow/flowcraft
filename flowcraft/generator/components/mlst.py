@@ -180,3 +180,43 @@ class Metamlst(Process):
         }
 
 
+class RematchMlst(Process):
+    """Mlst mapping process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: fastq
+        - ``ptype``: typing (reads)
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fastq"
+
+        self.directives = {"rematch_mlst": {
+            "container": "ummidock/rematch",
+            "version": "3.3.0-1",
+            "memory": "{4.Gb*task.attempt}",
+            "cpus": 4
+        }}
+
+        self.params = {
+            "mlstSpecies": {
+                "default": "null",
+                "description":
+                    "Specify the expected species for MLST."
+            },
+            "doubleRun":{
+                "default": "false",
+                "description": "Run rematch in double run mode (improves consensus)"
+            }
+        }
+
+        self.status_channels = [
+            "rematch_mlst"
+        ]
