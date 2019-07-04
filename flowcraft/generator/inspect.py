@@ -1465,8 +1465,8 @@ class NextflowInspector:
         return pipeline_files
 
     def _dag_file_to_dict(self):
-        """Function that opens the dotfile named .treeDag.json in the current
-        working directory
+        """Function that opens the accessory file treeDag.json in the
+        resources directory and loads it's contents to a dictionary
 
         Returns
         -------
@@ -1475,11 +1475,11 @@ class NextflowInspector:
 
         """
         try:
-            dag_file = open(os.path.join(self.workdir, ".treeDag.json"))
+            dag_file = open(os.path.join(self.workdir, "resources", "treeDag.json"))
             dag_json = json.load(dag_file)
         except (FileNotFoundError, json.decoder.JSONDecodeError):
             logger.warning(colored_print(
-                "WARNING: dotfile named .treeDag.json not found or corrupted",
+                "WARNING: JSON file named treeDag.json not found or corrupted",
                 "red_bold"))
             dag_json = {}
 
