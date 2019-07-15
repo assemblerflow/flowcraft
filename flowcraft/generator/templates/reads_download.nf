@@ -21,7 +21,7 @@ process reads_download_{{ pid }} {
     each file(aspera_key) from IN_asperaKey_{{ pid }}
 
     output:
-    set val({ "$name" != "null" ? "$name" : "$accession_id" }), file("${accession_id}/*fq.gz") optional true into {{ output_channel }}
+    set val({ "$name" != "null" ? "$name" : "$accession_id" }), file("${accession_id}/*fq.gz") into {{ output_channel }}
     {% with task_name="reads_download", sample_id="accession_id" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
