@@ -40,8 +40,7 @@ if (params.hisat2_index{{ param_id }}) {
 process hisat2_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
-
-    publishDir "results/mapping/hisat2_{{ pid }}"
+    tag "$sample_id"
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
@@ -49,7 +48,7 @@ process hisat2_{{ pid }} {
     each file(index) from hisat2Index_{{pid}}
    
     output:
-    file("${sample_id}.sam") into {{ output_channel }} //hisat2Sam_{{pid}}
+    set sample_id, file("${sample_id}.sam") into  hisat2Sam_{{pid}}
     {% with task_name="hisat2" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -61,6 +60,28 @@ process hisat2_{{ pid }} {
     -1 ${fastq[0]} \
     -2 ${fastq[1]} \
     -S ${sample_id}.sam
+    """
+}
+
+process samtools_sort_{{ pid }} {
+
+    {% include "post.txt" ignore missing %}
+    publishDir "results/mapping/hisat2_{{ pid }}"
+    tag "$sample_id"
+
+    input:
+    set sample_id, file(sam) from hisat2Sam_{{pid}}
+   
+    output: 
+    set sample_id, file("${sample_id}.sorted.bam"), file("${sample_id}.sorted.bam.bai") into {{ output_channel }}
+    {% with task_name="samtools_sort" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    """
+    samtools view -Sb $sam > ${sample_id}.bam
+    samtools sort -T ${sample_id}.bam.tmp ${sample_id}.bam -o ${sample_id}.sorted.bam
+    samtools index ${sample_id}.sorted.bam
     """
 }
 

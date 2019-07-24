@@ -158,10 +158,17 @@ class Hisat2(Process):
                 "version": "latest",
                 "memory": "{5.Gb*task.attempt}",
                 "cpus": 4
+            },
+            "samtools_sort": {
+                "container": "lifebitai/samtools",
+                "version": "latest",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 4
             }
         }
 
         self.status_channels = [
             "make_hisat2_index",
-            "hisat2"
+            "hisat2",
+            "samtools_sort"
         ]
