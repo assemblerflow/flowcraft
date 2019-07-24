@@ -1,0 +1,67 @@
+if (params.reference{{ param_id }}) {
+    Channel
+        .fromPath(params.reference{{ param_id }})
+        .ifEmpty { exit 1, "FASTA annotation file not found: ${params.reference{{ param_id }}}" }
+        .set { hisat2Fasta_{{pid}} }
+} else if (params.hisat2_index{{ param_id }}) {
+    Channel
+        .fromPath(params.hisat2_index{{ param_id }})
+        .ifEmpty { exit 1, "Folder containing Hisat2 indexes for reference genome not found: ${params.hisat2_index{{ param_id }}}" }
+        .set { hisat2Index_{{pid}} }
+    hisat2IndexName_{{pid}} = Channel.value( "${params.hisat2_index_name{{ param_id }}}" )
+} else {
+    exit 1, "Please specify either `--fasta /path/to/file.fasta` OR `--hisat2_index /path/to/hisat2_index_folder` AND `--hisat2_index_name hisat2_index_folder/basename`"
+}
+
+if (params.hisat2_index{{ param_id }}) {
+  process make_hisat2_index_{{ pid }} {
+
+    {% include "post.txt" ignore missing %}
+    tag "$fasta"
+
+    input:
+    each file(fasta) from hisat2Fasta_{{pid}}
+   
+    output:
+    val "hisat2_index/${fasta.baseName}.hisat2_index" into hisat2IndexName_{{pid}}
+    file "hisat2_index" into hisat2Index_{{pid}}
+
+    {% with task_name="hisat2" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    """
+    mkdir hisat2_index
+    hisat2-build -p ${task.cpus} $fasta hisat2_index/${fasta.baseName}.hisat2_index
+    """
+  }
+}
+
+process hisat2_{{ pid }} {
+
+    {% include "post.txt" ignore missing %}
+
+    publishDir "results/mapping/hisat2_{{ pid }}"
+
+    input:
+    set sample_id, file(fastq_pair) from {{ input_channel }}
+    each index_name from hisat2IndexName_{{pid}}
+    each file(index) from hisat2Index_{{pid}}
+   
+    output:
+    file("${sample_id}.sam") into {{ output_channel }} //hisat2Sam_{{pid}}
+    {% with task_name="hisat2" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    """
+    hisat2 \
+    -p ${task.cpus} \
+    -x $index_name \
+    -1 ${fastq[0]} \
+    -2 ${fastq[1]} \
+    -S ${sample_id}.sam
+    """
+}
+
+{{ forks }}
