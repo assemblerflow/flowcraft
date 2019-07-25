@@ -4,10 +4,11 @@
 
 ### New components
 
-- `Bwa`: align short paired-end sequencing reads to long reference sequences
+- `Bwa`: Align short paired-end sequencing reads to long reference sequences
 - `MarkDuplicates`: Identifies duplicate reads
 - `BaseRecalibrator`: Detects systematic errors in base quality scores
 - `Haplotypecaller`: Call germline SNPs and indels via local re-assembly of haplotypes
+- `HiSAT2`: Alignment program for mapping next-generation sequencing reads to a reference genome
 
 - `Seroba`: Serotyping of *Streptococcus pneumoniae* sequencing data (FastQ)
 - `Concoct`: Clustering metagenomic assembled comtigs with coverage and composition
