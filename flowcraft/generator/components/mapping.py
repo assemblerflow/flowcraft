@@ -246,3 +246,63 @@ class BaseRecalibrator(Process):
             "base_recalibrator",
             "apply_bqsr"
         ]
+
+
+class Hisat2(Process):
+    """HISAT2 is a fast and sensitive alignment program for mapping next-generation sequencing reads (both DNA and RNA) to a population of human genomes (as well as to a single reference genome)
+        This process is set with:
+            - ``input_type``: fastq
+            - ``output_type``: bam
+            - ``ptype``: mapping
+        """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "bam"
+
+        self.params = {
+            "reference": {
+                "default": "null",
+                "description": "Specifies the reference genome to be provided "
+                               "to HISAT2."
+            },
+            "hisat2_index": {
+                "default": "null",
+                "description": "Specifies the reference indexes to be provided "
+                               "to HISAT2."
+            },
+            "hisat2_index_name": {
+                "default": "null",
+                "description": "Specifies the reference indexes folder & basename to be provided "
+                               "to HISAT2, eg hisat2_index_folder/basename."
+            }
+        }
+
+        self.directives = {
+            "make_hisat2_index": {
+                "container": "makaho/hisat2-zstd",
+                "version": "latest",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 1
+            },
+            "hisat2": {
+                "container": "makaho/hisat2-zstd",
+                "version": "latest",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 4
+            },
+            "samtools_sort": {
+                "container": "lifebitai/samtools",
+                "version": "latest",
+                "memory": "{5.Gb*task.attempt}",
+                "cpus": 4
+            }
+        }
+
+        self.status_channels = [
+            "hisat2",
+            "samtools_sort"
+        ]
