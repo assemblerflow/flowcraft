@@ -1,6 +1,6 @@
 if (params.reference{{ param_id }}) {
     Channel
-        .fromPath(params.reference{{ param_id }})
+        .fromPath("${params.reference{{ param_id }}}.fasta")
         .ifEmpty { exit 1, "FASTA annotation file not found: ${params.reference{{ param_id }}}" }
         .set { hisat2Fasta_{{pid}} }
 } else if (params.hisat2_index{{ param_id }}) {
@@ -10,7 +10,7 @@ if (params.reference{{ param_id }}) {
         .set { hisat2Index_{{pid}} }
     hisat2IndexName_{{pid}} = Channel.value( "${params.hisat2_index_name{{ param_id }}}" )
 } else {
-    exit 1, "Please specify either `--reference /path/to/file.fasta` OR `--hisat2_index /path/to/hisat2_index_folder` AND `--hisat2_index_name hisat2_index_folder/basename`"
+    exit 1, "Please specify either `--reference /path/to/file_basename` OR `--hisat2_index /path/to/hisat2_index_folder` AND `--hisat2_index_name hisat2_index_folder/basename`"
 }
 
 if (!params.hisat2_index{{ param_id }}) {
