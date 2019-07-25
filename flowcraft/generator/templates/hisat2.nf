@@ -10,10 +10,10 @@ if (params.reference{{ param_id }}) {
         .set { hisat2Index_{{pid}} }
     hisat2IndexName_{{pid}} = Channel.value( "${params.hisat2_index_name{{ param_id }}}" )
 } else {
-    exit 1, "Please specify either `--fasta /path/to/file.fasta` OR `--hisat2_index /path/to/hisat2_index_folder` AND `--hisat2_index_name hisat2_index_folder/basename`"
+    exit 1, "Please specify either `--reference /path/to/file.fasta` OR `--hisat2_index /path/to/hisat2_index_folder` AND `--hisat2_index_name hisat2_index_folder/basename`"
 }
 
-if (params.hisat2_index{{ param_id }}) {
+if (!params.hisat2_index{{ param_id }}) {
   process make_hisat2_index_{{ pid }} {
 
     {% include "post.txt" ignore missing %}
@@ -25,10 +25,6 @@ if (params.hisat2_index{{ param_id }}) {
     output:
     val "hisat2_index/${fasta.baseName}.hisat2_index" into hisat2IndexName_{{pid}}
     file "hisat2_index" into hisat2Index_{{pid}}
-
-    {% with task_name="hisat2" %}
-    {%- include "compiler_channels.txt" ignore missing -%}
-    {% endwith %}
 
     """
     mkdir hisat2_index
@@ -57,8 +53,8 @@ process hisat2_{{ pid }} {
     hisat2 \
     -p ${task.cpus} \
     -x $index_name \
-    -1 ${fastq[0]} \
-    -2 ${fastq[1]} \
+    -1 ${fastq_pair[0]} \
+    -2 ${fastq_pair[1]} \
     -S ${sample_id}.sam
     """
 }

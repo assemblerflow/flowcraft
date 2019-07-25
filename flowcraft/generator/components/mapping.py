@@ -168,7 +168,6 @@ class Hisat2(Process):
         }
 
         self.status_channels = [
-            "make_hisat2_index",
             "hisat2",
             "samtools_sort"
         ]
