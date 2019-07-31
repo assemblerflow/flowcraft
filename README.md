@@ -8,6 +8,7 @@
 [![Documentation Status](https://readthedocs.org/projects/flowcraft/badge/?version=latest)](http://flowcraft.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/flowcraft.svg)](https://badge.fury.io/py/flowcraft)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/flowcraft/badges/version.svg)](https://anaconda.org/bioconda/flowcraft)
+[![Gitter](https://badges.gitter.im/flowcraft-community/community.svg)](https://gitter.im/flowcraft-community/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 <p align="center">
   <img width="360" src="docs/resources/logo_large.png" alt="nextflow_logo"/>
