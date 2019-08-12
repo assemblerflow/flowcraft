@@ -2,7 +2,7 @@
 
 The contents of this repository are GPL-3.0 licensed with the following copyright
 
-(c) 2018, D N Silva, C I Mendes, T F Jesus, B Ribeiro-Gonçalves, M Ramirez, J A Carriço. 
+(c) 2019, D N Silva, C I Mendes, T F Jesus, B Ribeiro-Gonçalves, M Ramirez, J A Carriço. 
 
 
 FlowCraft development was partly funded by the following entities: 
