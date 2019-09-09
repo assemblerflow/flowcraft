@@ -106,7 +106,8 @@ class RetrieveMapped(Process):
         }
 
         self.status_channels = [
-            "retrieve_mapped"
+            "retrieve_mapped",
+            "renamePE"
         ]
 
 

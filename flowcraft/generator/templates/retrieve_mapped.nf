@@ -10,7 +10,7 @@ process retrieve_mapped_{{ pid }} {
     set sample_id, file(bam) from {{ input_channel }}
 
     output:
-    set sample_id , file("*.headersRenamed_*.fq.gz") into {{ output_channel }}
+    set sample_id , file("*_mapped_*.fq") into OUT_retrieve_mapped_{{ pid }}
     {% with task_name="retrieve_mapped" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -25,12 +25,26 @@ process retrieve_mapped_{{ pid }} {
 
     rm ${sample_id}_samtools.bam
 
-    renamePE_samtoolsFASTQ.py -1 ${sample_id}_mapped_1.fq -2 ${sample_id}_mapped_2.fq
-
-    gzip *.headersRenamed_*.fq
-
-    rm *.fq
     """
+}
+
+process renamePE_{{ pid }} {
+
+    tag { sample_id }
+    publishDir ''
+
+    input:
+    set sample_if, file(fastq_pair} from OUT_retrieve_mapped_{{ pid }}
+
+    output:
+    set sample_id , file("*.headersRenamed_*.fq.gz") into {{ output_channel }}
+    {% with task_name="renamePE" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    template "renamePE_samtoolsFASTQ.py"
+
 }
 
 {{ forks }}

@@ -17,7 +17,7 @@ process remove_host_{{ pid }} {
     val clear from checkpointClear_{{ pid }}
 
     output:
-    set sample_id , file("${sample_id}*.headersRenamed_*.fq.gz") into {{ output_channel }}
+    set sample_id , file("${sample_id}*.headersRenamed_*.fq.gz") into OUT_remove_host_{{ pid }}
     set sample_id, file("*_bowtie2.log") into into_json_{{ pid }}
     {% with task_name="remove_host" %}
     {%- include "compiler_channels.txt" ignore missing -%}
@@ -36,11 +36,6 @@ process remove_host_{{ pid }} {
 
         rm ${sample_id}_samtools.bam
 
-        renamePE_samtoolsFASTQ.py -1 ${sample_id}_unmapped_1.fq -2 ${sample_id}_unmapped_2.fq
-
-        gzip *.headersRenamed_*.fq
-        rm *.fq
-
         if [ "$clear" = "true" ];
         then
             work_regex=".*/work/.{2}/.{30}/.*"
@@ -57,6 +52,25 @@ process remove_host_{{ pid }} {
     """
 }
 
+
+process renamePE_{{ pid }} {
+
+    tag { sample_id }
+    publishDir ''
+
+    input:
+    set sample_if, file(fastq_pair} from OUT_remove_host_{{ pid }}
+
+    output:
+    set sample_id , file("*.headersRenamed_*.fq.gz") into {{ output_channel }}
+    {% with task_name="renamePE" %}
+    {%- include "compiler_channels.txt" ignore missing -%}
+    {% endwith %}
+
+    script:
+    template "renamePE_samtoolsFASTQ.py"
+
+}
 
 
 process report_remove_host_{{ pid }} {
