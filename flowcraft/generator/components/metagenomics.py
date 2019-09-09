@@ -475,6 +475,7 @@ class RemoveHost(Process):
 
         self.status_channels = [
             "remove_host",
+            "renamePE",
             "report_remove_host"
         ]
 
