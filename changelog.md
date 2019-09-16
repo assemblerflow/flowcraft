@@ -7,6 +7,8 @@
 - Fix bug in `downsample_fastq` where the resulting output files was not being saved in the `results` directory
 - Fix bug in `downsample_fastq` where the output files were being saved as broken symlinks when there was no 
 down-sampling occurring 
+- Moved `renamePE_samtoolsFASTQ.py` from `flowcraft/bin/` to the `flowcraft/templates` folder and updated it to 
+python3 - fix issue #219
 
 ### Minor/Other changes
 
