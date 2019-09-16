@@ -32,8 +32,10 @@ process renamePE_{{ pid }} {
     tag { sample_id }
     publishDir 'results/mapping/retrieve_mapped_{{ pid }}/'
 
+    {% include "post.txt" ignore missing %}
+
     input:
-    set sample_if, file(fastq_pair} from OUT_retrieve_mapped_{{ pid }}
+    set sample_id, file(fastq_pair) from OUT_retrieve_mapped_{{ pid }}
 
     output:
     set sample_id , file("*.headersRenamed_*.fq.gz") into {{ output_channel }}
