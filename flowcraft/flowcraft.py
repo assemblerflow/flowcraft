@@ -358,6 +358,11 @@ def build(args):
 
     logger.info(colored_print("Building your awesome pipeline..."))
 
+    # copy template to cwd, to allow for immediate execution
+    # this is executed before the build() method to avoid issues with the resources/ folder
+    if not args.pipeline_only:
+        copy_project(parsed_output_nf)
+
     if args.export_params:
         nfg.export_params()
         sys.exit(0)
@@ -370,10 +375,6 @@ def build(args):
     else:
         # building the actual pipeline nf file
         nfg.build()
-
-    # copy template to cwd, to allow for immediate execution
-    if not args.pipeline_only:
-        copy_project(parsed_output_nf)
 
     logger.info(colored_print("DONE!", "green_bold"))
 

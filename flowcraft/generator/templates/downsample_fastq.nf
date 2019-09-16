@@ -17,7 +17,8 @@ process downsample_fastq_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { "${sample_id}" }
-    publishDir "results/downsample_fastq_{{ pid }}/", pattern: "_ss.*"
+    
+    publishDir "results/downsample_fastq_{{ pid }}/", pattern: "*_ss_*.*"
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
@@ -27,7 +28,7 @@ process downsample_fastq_{{ pid }} {
     val clear from checkpointClear_{{ pid }}
 
     output:
-    set sample_id, file('*_ss.*') into {{ output_channel }}
+    set sample_id, file('*_ss_*.*') into {{ output_channel }}
     {% with task_name="downsample_fastq" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
