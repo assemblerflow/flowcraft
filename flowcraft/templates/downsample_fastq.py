@@ -134,7 +134,8 @@ def main(sample_id, fastq_pair, genome_size, depth, clear, seed):
         # print ("Writing R1.fq.gz")
         ps = subprocess.Popen(('seqtk', 'sample', parsed_seed, p1, str(ratio)),
                               stdout=subprocess.PIPE)
-        with open('{}_ss.fq.gz'.format(bn1), 'w') as outfile:
+        with open('{}_ss_{}.fq.gz'.format(bn1, str(target_depth)), 'w') as \
+                outfile:
             subprocess.Popen(('gzip', '--fast', '-c'),
                              stdin=ps.stdout, stdout=outfile )
         ps.wait()
@@ -142,7 +143,8 @@ def main(sample_id, fastq_pair, genome_size, depth, clear, seed):
         # print ("Writing R2.fq.gz")
         ps = subprocess.Popen(('seqtk', 'sample', parsed_seed, p2, str(ratio)),
                               stdout=subprocess.PIPE)
-        with open('{}_ss.fq.gz'.format(bn2), 'w') as outfile:
+        with open('{}_ss_{}.fq.gz'.format(bn2, str(target_depth)), 'w') as \
+                outfile:
             subprocess.Popen(('gzip', '--fast', '-c'),
                              stdin=ps.stdout, stdout=outfile)
         ps.wait()
@@ -157,8 +159,8 @@ def main(sample_id, fastq_pair, genome_size, depth, clear, seed):
                     os.remove(rp)
 
     else:
-        shutil.copy(p1, "{}._ss.fq.gz".format(bn1))
-        shutil.copy(p2, "{}._ss.fq.gz".format(bn2))
+        os.symlink(p1, "{}_ss_{}.fq.gz".format(bn1, str(target_depth)))
+        os.symlink(p2, "{}_ss_{}.fq.gz".format(bn2, str(target_depth)))
 
     # Record the original estimated coverage
     with open(".report.json", "w") as fh:
