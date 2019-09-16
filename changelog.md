@@ -10,6 +10,7 @@ down-sampling occurring
 - Moved `renamePE_samtoolsFASTQ.py` from `flowcraft/bin/` to the `flowcraft/templates` folder and updated it to 
 python3 - fix issue #219
 
+
 ### Minor/Other changes
 
 - `treeDag.json` and `forktree.json` files are no longer hidden and are now stored in the 
