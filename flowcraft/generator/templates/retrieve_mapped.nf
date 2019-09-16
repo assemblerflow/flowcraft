@@ -4,7 +4,6 @@ process retrieve_mapped_{{ pid }} {
     {% include "post.txt" ignore missing %}
 
     tag { sample_id }
-    publishDir 'results/mapping/retrieve_mapped_{{ pid }}/'
 
     input:
     set sample_id, file(bam) from {{ input_channel }}
@@ -31,7 +30,7 @@ process retrieve_mapped_{{ pid }} {
 process renamePE_{{ pid }} {
 
     tag { sample_id }
-    publishDir ''
+    publishDir 'results/mapping/retrieve_mapped_{{ pid }}/'
 
     input:
     set sample_if, file(fastq_pair} from OUT_retrieve_mapped_{{ pid }}

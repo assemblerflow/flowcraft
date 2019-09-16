@@ -55,11 +55,14 @@ process remove_host_{{ pid }} {
 
 process renamePE_{{ pid }} {
 
+    // Send POST request to platform
+    {% include "post.txt" ignore missing %}
+
     tag { sample_id }
-    publishDir ''
+    publishDir 'results/mapping/remove_host_{{ pid }}/'
 
     input:
-    set sample_if, file{fastq_pair} from OUT_remove_host_{{ pid }}
+    set sample_id, file(fastq_pair) from OUT_remove_host_{{ pid }}
 
     output:
     set sample_id , file("*.headersRenamed_*.fq.gz") into {{ output_channel }}

@@ -9,6 +9,8 @@ import gzip
 import zipfile
 from flowcraft_utils.flowcraft_base import get_logger, MainWrapper
 
+logger = get_logger(__file__)
+
 """
 Purpose
 -------
@@ -116,7 +118,7 @@ def formartFastqHeaders(sample_name, in_fastq_1, in_fastq_2):
 
     outfiles = [out_fastq_1, out_fastq_2]
 
-    with open(in_fastq_1, 'rtU') as reader_in_fastq_1, open(in_fastq_2, 'rtU') as reader_in_fastq_2:
+    with open(in_fastq_1, 'r') as reader_in_fastq_1, open(in_fastq_2, 'r') as reader_in_fastq_2:
         plus_line = True
         quality_line = True
         number_reads = 0
@@ -127,21 +129,21 @@ def formartFastqHeaders(sample_name, in_fastq_1, in_fastq_2):
 
                 if in_1.startswith('@') and plus_line and quality_line:
                     if in_1 != in_2:
-                      sys.exit('The PE fastq files are not aligned properly!')
-                    in_1 += '/1' + '\n'
-                    in_2 += '/2' + '\n'
+                        sys.exit('The PE fastq files are not aligned properly!')
+                    in_1 += '/1' + '\\n'
+                    in_2 += '/2' + '\\n'
                     writer_in_fastq_1.write(in_1)
                     writer_in_fastq_2.write(in_2)
                     plus_line = False
                     quality_line = False
                 elif in_1.startswith('+') and not plus_line:
-                    in_1 += '\n'
+                    in_1 += '\\n'
                     writer_in_fastq_1.write(in_1)
                     writer_in_fastq_2.write(in_1)
                     plus_line = True
                 elif plus_line and not quality_line:
-                    in_1 += '\n'
-                    in_2 += '\n'
+                    in_1 += '\\n'
+                    in_2 += '\\n'
                     writer_in_fastq_1.write(in_1)
                     writer_in_fastq_2.write(in_2)
                     writer_in_fastq_1.flush()
@@ -149,10 +151,14 @@ def formartFastqHeaders(sample_name, in_fastq_1, in_fastq_2):
                     number_reads += 1
                     quality_line = True
                 else:
-                    in_1 += '\n'
-                    in_2 += '\n'
+                    in_1 += '\\n'
+                    in_2 += '\\n'
                     writer_in_fastq_1.write(in_1)
                     writer_in_fastq_2.write(in_2)
+
+    writer_in_fastq_1.close()
+    writer_in_fastq_2.close()
+
     return number_reads, outfiles
 
 
@@ -164,26 +170,36 @@ def main(sample_id, fastq_files):
 
     for fastq in fastq_files:
 
-         logger.info("Processing file {}".format(fastq))
+        logger.info("Processing file {}".format(fastq))
 
-         logger.info("[{}] Guessing file compression".format(fastq))
-         ftype = guess_file_compression(fastq)
+        logger.info("[{}] Guessing file compression".format(fastq))
+        ftype = guess_file_compression(fastq)
 
         # This can guess the compression of gz, bz2 and zip. If it cannot
         # find the compression type, it tries to open a regular file.
         if ftype:
             logger.info("[{}] Found file compression: {}".format(fastq, ftype))
             file_objects.append(COPEN[ftype](fastq, "rt"))
+
         else:
             logger.info("[{}] File compression not found. Assuming an uncompressed file".format(fastq))
-            file_objects.append(open(fastq))
+            file_objects.append(fastq)
 
     logger.info('Renaming fastq headers')
     number_reads, outfiles = formartFastqHeaders(sample_id, file_objects[0], file_objects[1])
 
-    logger.info('{} read pairs were written in {} outfiles'.format(number_reads, outfiles))
+    logger.info('{} read pairs were written in {} and {}. Compressing...'.format(number_reads, outfiles[0], outfiles[1]))
 
-    os.remove(fastq_files)
+    # compress outfiles
+    for file in outfiles:
+        with open(file, 'rb') as f_in:
+            f_out = gzip.open(file + '.gz', 'wb')
+            f_out.writelines(f_in)
+            f_out.close()
+    logger.info('DONE')
+
+    os.remove(outfiles[0])
+    os.remove((outfiles[1]))
 
 
 if __name__ == "__main__":
