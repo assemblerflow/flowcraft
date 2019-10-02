@@ -48,6 +48,67 @@ class Bcalm(Process):
         }}
 
 
+
+class Minia(Process):
+    """Minia process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+    """
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.params = {
+            "spadesMinCoverage": {
+                "default": 2,
+                "description":
+                    "The minimum number of reads to consider an edge in the"
+                    " de Bruijn graph during the assembly"
+            },
+            "spadesMinKmerCoverage": {
+                "default": 2,
+                "description":
+                    "Minimum contigs K-mer coverage. After assembly only "
+                    "keep contigs with reported k-mer coverage equal or "
+                    "above this value"
+            },
+            "spadesKmers": {
+                "default": "'auto'",
+                "description":
+                    "If 'auto' the SPAdes k-mer lengths will be determined "
+                    "from the maximum read length of each assembly. If "
+                    "'default', SPAdes will use the default k-mer lengths. "
+            },
+            "clearInput": {
+                "default": "false",
+                "description":
+                    "Permanently removes temporary input files. This option "
+                    "is only useful to remove temporary files in large "
+                    "workflows and prevents nextflow's resume functionality. "
+                    "Use with caution."
+            },
+            "disableRR": {
+                "default": "false",
+                "description":
+                    "disables repeat resolution stage of assembling."
+            }
+        }
+
+        self.directives = {"minia": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "cimendes/minia",
+            "version": "3.2.1"
+        }}
+
+
 class Spades(Process):
     """Spades process template interface
 
@@ -288,4 +349,51 @@ class Unicycler(Process):
             "container": "quay.io/biocontainers/unicycler",
             "version": "0.4.7--py36hdbcaa40_0",
             "scratch": "true"
+        }}
+
+
+class VelvetOptimiser(Process):
+    """Velvetoptimiser process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+    """
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.params = {
+            "hashs": {
+                "default": 19,
+                "description": "The starting (lower) hash value. Default: 19"
+            },
+            "hashe": {
+                "default": 31,
+                "description": "The end (higher) hash value. Default: 31"
+            },
+            "step": {
+                "default": 2,
+                "description": "The step in hash search. Min 2, no odd numbers. Default: 2"
+            },
+            "optFuncKmer": {
+                "default": "'n50'",
+                "description": "The optimisation function used for k-mer choice. Default: n50"
+            },
+            "optFuncCov": {
+                "default": "'Lbp'",
+                "description": "The optimisation function used for cov_cutoff optimisation. Default: Lbp"
+            }
+        }
+
+        self.directives = {"velvet_optimiser": {
+            "cpus": 4,
+            "container": "cimendes/velvetoptimiser",
+            "version": "2.2.6-1",
+            "memory": "{ 5.GB * task.attempt }"
         }}

@@ -73,6 +73,54 @@ class Concoct(Process):
         ]
 
 
+class GATBMiniaPipeline(Process):
+    """
+    GATB-Minia_pipeline process template interface for the asssembly
+    of paired-end metagenomic sequencing data.
+
+    This process is set with:
+
+                - ``input_type``: fastq
+                - ``output_type``: fasta
+                - ``ptype``: assembly
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.params = {
+            "step": {
+                "default": 20,
+                "description": "Step size to control increments of k values. Default: 20"
+            },
+            "no_error_correction": {
+                "default": "false",
+                "description": "Skips error correction. Default: false"
+            },
+            "besst_iter": {
+                "default": 10000,
+                "description": "Number of iteration during Besst scaffolding. Default: 10000"
+            }
+        }
+
+        self.directives = {
+            "GATBMiniaPipeline": {
+                "container": "cimendes/gatb-minia-pipeline",
+                "version": "latest",
+                "cpus": 4,
+                "memory":  "{ 5.GB * task.attempt }"
+            }
+        }
+
+        self.status_channels = [
+            "GATBMiniaPipeline"
+        ]
+
+
 class Kraken(Process):
     """kraken process template interface
 
@@ -620,3 +668,53 @@ class Vamb(Process):
         self.status_channels = [
             "vamb"
         ]
+
+    class IDBA(Process):
+        """IDBA process template interface
+
+        This process is set with:
+
+            - ``input_type``: fastq
+            - ``output_type``: assembly
+            - ``ptype``: assembly
+
+        """
+
+        def __init__(self, **kwargs):
+
+            super().__init__(**kwargs)
+
+            self.input_type = "fastq"
+            self.output_type = "fasta"
+
+            self.directives = {"IDBA": {
+                "cpus": 4,
+                "container": "oneknightpy/idba",
+                "version": "latest",
+                "memory": "{ 5.GB * task.attempt }"
+            }}
+
+    class BBAP(Process):
+        """IDBA process template interface
+
+        This process is set with:
+
+            - ``input_type``: fastq
+            - ``output_type``: assembly
+            - ``ptype``: assembly
+
+        """
+
+        def __init__(self, **kwargs):
+
+            super().__init__(**kwargs)
+
+            self.input_type = "fastq"
+            self.output_type = "fasta"
+
+            self.directives = {"BBAP": {
+                "cpus": 4,
+                "container": "cimendes/bbap",
+                "version": "latest",
+                "memory": "{ 5.GB * task.attempt }"
+            }}
