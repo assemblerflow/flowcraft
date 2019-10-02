@@ -230,7 +230,7 @@ class Trimmomatic(Process):
             "cpus": 2,
             "memory": "{ 4.GB * task.attempt }",
             "container": "flowcraft/trimmomatic",
-            "version": "0.36-1"
+            "version": "0.39-1"
         }}
 
 
