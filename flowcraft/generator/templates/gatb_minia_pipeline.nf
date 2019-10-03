@@ -1,4 +1,4 @@
-IN_kmers_step_{{ pid }} = Channel.value(params.step{{ param_id }})
+IN_kmers_{{ pid }} = Channel.value(params.gatbkmer{{ param_id }})
 
 IN_besst_iter_{{ pid }} = Channel.value(params.besst_iter{{ param_id }})
 
@@ -15,7 +15,7 @@ process GATBMiniaPipeline_{{ pid }} {
 
     input:
     set sample_id, file(fastq_pair) from {{ input_channel }}
-    val kmer_step from IN_kmers_step_{{ pid }}
+    val kmer_list from IN_kmers_{{ pid }}
     val skip_error_correction from IN_error_correction_{{ pid }}
     val besst_iter from IN_besst_iter_{{ pid }}
 
@@ -28,8 +28,7 @@ process GATBMiniaPipeline_{{ pid }} {
     script:
     """
     {
-        gatb -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} -o ${sample_id}_GATBMiniaPipeline \
-            --step ${kmer_step} --nb-cores $task.cpus --besst_iter ${besst_iter}
+        gatb -1 ${fastq_pair[0]} -2 ${fastq_pair[1]} --kmer-sizes ${kmer_list} --max-memory $task.mem -o ${sample_id}_GATBMiniaPipeline
 
         if [ -f "${sample_id}_GATBMiniaPipeline.fasta" ]; then
             printf pass > .status

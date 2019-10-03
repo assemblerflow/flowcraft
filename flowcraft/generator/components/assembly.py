@@ -48,7 +48,6 @@ class Bcalm(Process):
         }}
 
 
-
 class Minia(Process):
     """Minia process template interface
 
@@ -66,38 +65,10 @@ class Minia(Process):
         self.output_type = "fasta"
 
         self.params = {
-            "spadesMinCoverage": {
-                "default": 2,
+            "miniaKmer": {
+                "default": 31,
                 "description":
-                    "The minimum number of reads to consider an edge in the"
-                    " de Bruijn graph during the assembly"
-            },
-            "spadesMinKmerCoverage": {
-                "default": 2,
-                "description":
-                    "Minimum contigs K-mer coverage. After assembly only "
-                    "keep contigs with reported k-mer coverage equal or "
-                    "above this value"
-            },
-            "spadesKmers": {
-                "default": "'auto'",
-                "description":
-                    "If 'auto' the SPAdes k-mer lengths will be determined "
-                    "from the maximum read length of each assembly. If "
-                    "'default', SPAdes will use the default k-mer lengths. "
-            },
-            "clearInput": {
-                "default": "false",
-                "description":
-                    "Permanently removes temporary input files. This option "
-                    "is only useful to remove temporary files in large "
-                    "workflows and prevents nextflow's resume functionality. "
-                    "Use with caution."
-            },
-            "disableRR": {
-                "default": "false",
-                "description":
-                    "disables repeat resolution stage of assembling."
+                    "Size of the k-mer. Default: 31"
             }
         }
 
@@ -396,4 +367,83 @@ class VelvetOptimiser(Process):
             "container": "cimendes/velvetoptimiser",
             "version": "2.2.6-1",
             "memory": "{ 5.GB * task.attempt }"
+        }}
+
+
+class pandaseq(Process):
+    """pandaseq process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+    """
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = "fasta"
+
+        self.params = {
+            "threshold": {
+                "default": 0.6,
+                "description":
+                    "The minimum probability that a sequence must have to assemble. Default: "
+            },
+            "kmers": {
+                "default": 2,
+                "description":
+                    "Sets the number of sequence locations for a particular k-mer. Default: 2. Maximum: 10"
+            },
+            "algorithm": {
+                "default": "'simple_bayesian'",
+                "description":
+                    "Set the algorithm used for assembly. Default: simple_bayesian."
+                    "Known algorithms are ea_util, flash, pear, rdp_mle, simple_bayesian, stitch, uparse"
+            }
+        }
+
+        self.directives = {"pandaseq": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "cimendes/pandaseq",
+            "version": "2.11-1"
+        }}
+
+
+class Velour(Process):
+    """ABySS process template interface
+
+    This process is set with:
+
+        - ``input_type``: fastq
+        - ``output_type``: assembly
+        - ``ptype``: assembly
+
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fasta_pe"
+        self.output_type = "fasta"
+
+        self.dependencies = ["fq2fa_paired"]
+
+        self.params = {
+            "velourKmer": {
+                "default": "31",
+                "description":
+                    "kmer size for assembly."
+            }
+        }
+
+        self.directives = {"velour": {
+            "cpus": 4,
+            "memory": "{ 5.GB * task.attempt }",
+            "container": "cimendes/velour",
+            "version": "latest"
         }}

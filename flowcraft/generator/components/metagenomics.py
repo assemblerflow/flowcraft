@@ -93,17 +93,13 @@ class GATBMiniaPipeline(Process):
         self.output_type = "fasta"
 
         self.params = {
-            "step": {
-                "default": 20,
-                "description": "Step size to control increments of k values. Default: 20"
+            "gatbkmer": {
+                "default": "'21, 61, 101, 141, 181'",
+                "description": "K values to use. Default: "
             },
             "no_error_correction": {
                 "default": "false",
                 "description": "Skips error correction. Default: false"
-            },
-            "besst_iter": {
-                "default": 10000,
-                "description": "Number of iteration during Besst scaffolding. Default: 10000"
             }
         }
 
@@ -684,8 +680,10 @@ class Vamb(Process):
 
             super().__init__(**kwargs)
 
-            self.input_type = "fastq"
+            self.input_type = "fasta_se"
             self.output_type = "fasta"
+
+            self.dependencies = ["fq2fa_single"]
 
             self.directives = {"IDBA": {
                 "cpus": 4,

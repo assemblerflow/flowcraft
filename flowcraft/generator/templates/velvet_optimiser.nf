@@ -1,5 +1,3 @@
-
-
 process velvet_optimiser_{{pid}} {
     {% include "post.txt" ignore missing %}
 
