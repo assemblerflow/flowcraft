@@ -12,7 +12,7 @@ process seroba_{{ pid }} {
     val coverage from Coverage_{{ pid }}
 
     output:
-    file("pred.tsv") into LOG_seroba_{{ pid }}
+    file("*_pred.tsv") into LOG_seroba_{{ pid }}
     {% with task_name="seroba" %}
     {%- include "compiler_channels.txt" ignore missing -%}
     {% endwith %}
@@ -31,10 +31,10 @@ process seroba_{{ pid }} {
         # Get the ST for the sample
         if [ -f "/tmp/results/${sample_id}/pred.tsv" ];
         then
-            cp /tmp/results/${sample_id}/pred.tsv .
-            sed -i -- 's|/tmp/results/||g' pred.tsv
+            cp /tmp/results/${sample_id}/pred.tsv ${sample_id}_pred.tsv
+            sed -i -- 's|/tmp/results/||g' ${sample_id}_pred.tsv
             # Add ST information to report JSON
-            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'serotype','value':'\$(cat pred.tsv | cut -f2)','table':'typing'}]}]}"
+            json_str="{'tableRow':[{'sample':'${sample_id}','data':[{'header':'serotype','value':'\$(cat ${sample_id}_pred.tsv | cut -f2)','table':'typing'}]}]}"
             echo \$json_str > .report.json
         else
             echo fail > .status
@@ -61,7 +61,7 @@ process compile_seroba_{{ pid }} {
 
     script:
     """
-    cat $res >> seroba_report.tsv
+    cat ${res} >> seroba_report.tsv
     """
 }
 
