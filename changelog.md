@@ -7,6 +7,7 @@
 - Fix bug in `downsample_fastq` where the resulting output files was not being saved in the `results` directory
 - Fix bug in `downsample_fastq` where the output files were being saved as broken symlinks when there was no 
 down-sampling occurring 
+- Fix bug in `seroba` where the use of the `/tmp` folder to store temporary files caused problems in some systems
 
 ### Minor/Other changes
 
