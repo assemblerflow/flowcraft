@@ -2,6 +2,10 @@
 
 ## Upcoming in `dev` 
 
+### New components
+
+- `PneumoCAT`: Serotyping of *Streptococcus pneumoniae* sequencing data (FastQ)
+
 ### Bug fixes
 
 - Fix bug in `downsample_fastq` where the resulting output files was not being saved in the `results` directory

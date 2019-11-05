@@ -204,3 +204,32 @@ class Seroba(Process):
                 "version": "latest"
             }
         }
+
+
+class Pneumocat(Process):
+    """
+    Serotyping of Streptococcus pneumoniae sequencing data
+    """
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**kwargs)
+
+        self.input_type = "fastq"
+        self.output_type = None
+
+        self.params = {
+        }
+
+        self.directives = {
+            "pneumocat": {
+                "cpus": 4,
+                "memory": "'4GB'",
+                "container": "cimendes/pneumocat",
+                "version": "latest"
+            }
+        }
+        self.status_channels = [
+            "pneumocat",
+            "report_pneumocat"
+        ]
