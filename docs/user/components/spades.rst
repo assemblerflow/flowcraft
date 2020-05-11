@@ -47,7 +47,7 @@ Default directives
 - ``cpus``: 4
 - ``memory``: 5GB (dynamically increased on retry)
 - ``container``: ummidock/spades
-- ``version``: 3.11.1-1
+- ``version``: 3.13.0-1
 - ``scratch``: true
 
 Advanced
