@@ -7,8 +7,6 @@ import logging
 import argparse
 import logging.config
 
-from distutils.dir_util import copy_tree
-
 from os.path import join, dirname
 
 try:
@@ -268,16 +266,16 @@ def copy_project(path):
     target_dir = dirname(path)
 
     # Copy templates
-    copy_tree(join(repo_dir, "templates"), join(target_dir, "templates"))
+    shutil.copytree(join(repo_dir, "templates"), join(target_dir, "templates"), dirs_exist_ok=True)
 
     # Copy Helper scripts
-    copy_tree(join(repo_dir, "lib"), join(target_dir, "lib"))
+    shutil.copytree(join(repo_dir, "lib"), join(target_dir, "lib"), dirs_exist_ok=True)
 
     # Copy resources dir
-    copy_tree(join(repo_dir, "resources"), join(target_dir, "resources"))
+    shutil.copytree(join(repo_dir, "resources"), join(target_dir, "resources"), dirs_exist_ok=True)
 
     # Copy bin scripts
-    copy_tree(join(repo_dir, "bin"), join(target_dir, "bin"))
+    shutil.copytree(join(repo_dir, "bin"), join(target_dir, "bin"), dirs_exist_ok=True)
 
     # Copy static profiles file
     shutil.copy(join(repo_dir, "profiles.config"),
